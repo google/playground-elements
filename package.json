@@ -1,5 +1,5 @@
 {
-  "name": "lit-code-editor-package",
+  "name": "@polymer/lit-code-editor-package",
   "private": true,
   "description": "Lit Element code editor monorepo!",
   "homepage": "https://github.com/PolymerLabs/lit-code-editor-package",
