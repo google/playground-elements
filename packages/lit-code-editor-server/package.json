@@ -20,5 +20,6 @@
   },
   "dependencies": {
     "express": "^4.16.4"
-  }
+  },
+  "license": "BSD-3-Clause"
 }

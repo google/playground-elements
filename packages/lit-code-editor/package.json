@@ -11,7 +11,7 @@
     "prepublishOnly": "npm run build"
   },
   "author": "",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "devDependencies": {
     "polyserve": "^0.27.15"
   },
