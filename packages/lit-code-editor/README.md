@@ -12,7 +12,7 @@ cd packages/lit-code-editor
 npm run dev
 ```
 
-If the `lit-code-editor-servier` is running, then open your browser to
+If the `lit-code-editor-server` is running, then open your browser to
 `http://localhost:8081`
 
 ### usage
