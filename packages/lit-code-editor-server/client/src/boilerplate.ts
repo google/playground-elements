@@ -1,5 +1,5 @@
 import { html, render } from 'lit-html';
-import { ProjectRecord } from 'lit-code-editor/lib/types';
+import { ProjectRecord } from 'lit-code-editor/src/types';
 
 export const generatePage = (data: ProjectRecord): string => {
   const content = html`

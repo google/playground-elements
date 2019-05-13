@@ -4,7 +4,7 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.client.json && rollup -c rollup.config.js",
+    "build": "tsc && tsc -p tsconfig.server.json && rollup -c rollup.config.js",
     "watch": "tsc --watch & tsc -p tsconfig.server.json --watch & rollup --watch -c rollup.config.js",
     "dev": "npm run watch & npm start",
     "start": "node server/lib/index.js",
@@ -19,7 +19,8 @@
     "rollup-plugin-node-resolve": "^4.2.3"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "lit-code-editor": "*"
   },
   "license": "BSD-3-Clause"
 }

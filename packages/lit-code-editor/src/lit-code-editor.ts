@@ -1,7 +1,7 @@
 import { LitElement, html, customElement, css, property } from "lit-element";
 import { ProjectRecord } from "./types";
-import { establishMessageChannelHandshake } from "lit-code-editor-server/client/lib/util"
-import { ProjectContent, MESSAGE_TYPES, Message } from "lit-code-editor-server/client/lib/types"
+import { establishMessageChannelHandshake } from "lit-code-editor-server/client/src/util"
+import { ProjectContent, MESSAGE_TYPES, Message } from "lit-code-editor-server/client/src/types"
 
 @customElement('lit-code-editor')
 class LitCodeEditor extends LitElement {

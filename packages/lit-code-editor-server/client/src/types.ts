@@ -1,5 +1,5 @@
 import {ProjectRecord} from 'lit-code-editor/src/types'
-import { FileRecord } from 'lit-code-editor/lib/types';
+import { FileRecord } from 'lit-code-editor/src/types';
 
 export interface Message {
   type: MESSAGE_TYPES;
