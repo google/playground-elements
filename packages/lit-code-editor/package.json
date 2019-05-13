@@ -1,0 +1,22 @@
+{
+  "name": "lit-code-editor",
+  "version": "0.0.1",
+  "description": "",
+  "module": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "serve": "polyserve --npm -H 0.0.0.0",
+    "dev": "npm run watch & npm run serve",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "polyserve": "^0.27.15"
+  },
+  "dependencies": {
+    "lit-element": "^2.1.0",
+    "lit-html": "^1.0.0"
+  }
+}

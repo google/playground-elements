@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig-base",
+  "compilerOptions": {
+    "outDir": "./server/lib",
+    "module": "commonjs",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "server/src/**/*.ts",
+    "server/test/**/*.ts",
+    "server/custom_typings/**/*.d.ts",
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig-base",
+  "compilerOptions": {
+    "outDir": "./client/lib",
+    "module": "esnext",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "client/src/**/*.ts",
+    "client/test/**/*.ts",
+    "client/custom_typings/**/*.d.ts",
+  ]
+}

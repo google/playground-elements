@@ -1,0 +1,24 @@
+{
+  "name": "lit-code-editor-package",
+  "private": true,
+  "description": "Lit Element code editor monorepo!",
+  "homepage": "https://github.com/PolymerLabs/lit-code-editor-package",
+  "repository": "https://github.com/PolymerLabs/lit-code-editor-package",
+  "bugs": "https://github.com/PolymerLabs/lit-code-editor-package/issues",
+  "license": "BSD-3-Clause",
+  "author": "The Polymer Project Authors",
+  "scripts": {
+    "bootstrap": "lerna bootstrap --ci",
+    "build": "lerna run build --stream",
+    "nuke": "rm -rf package-lock.json node_modules && npm install && lerna exec \"rm -f package-lock.json npm-shrinkwrap.json\" && lerna clean --yes && lerna bootstrap && lerna exec --stream -- \"test -f package-lock.json || npm install --package-lock-only\"",
+    "clean": "lerna clean --yes & rm -rf packages/*/lib & rm -rf packages/*/bundle & rm -rf packages/*/*/lib & rm -rf packages/*/*/bundle"
+  },
+  "devDependencies": {
+    "lerna": "^3.13.4",
+    "typescript": "^3.4.5"
+  },
+  "engines": {
+    "node": ">=9"
+  },
+  "dependencies": {}
+}

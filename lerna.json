@@ -1,0 +1,18 @@
+{
+  "packages": [
+    "packages/*"
+  ],
+  "version": "independent",
+  "command": {
+    "publish": {
+      "allowBranch": [
+        "master"
+      ],
+      "ignoreChanges": [
+        ".gitignore",
+        "README.md",
+        "tslint.json"
+      ]
+    }
+  }
+}
