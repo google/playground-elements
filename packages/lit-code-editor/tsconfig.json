@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./lib",
+    "outDir": "./src",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "declaration": true,

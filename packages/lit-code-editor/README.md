@@ -25,7 +25,7 @@ use element in HTML:
 <html>
   <head>
     <!-- or wherever your definition is for this element -->
-    <script type="module" src="node_modules/@polymer/lit-code-editor/lib/lit-code-editor.js"></script>
+    <script type="module" src="node_modules/@polymer/lit-code-editor/src/lit-code-editor.js"></script>
   </head>
   <body>
     <!-- or any other url to your running lit-code-editor-server instance -->

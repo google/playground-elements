@@ -11,6 +11,7 @@
         MESSAGE_TYPES["RESPONSES_READY"] = "RESPONSES_READY";
         MESSAGE_TYPES["AWAITING_CONTENT"] = "AWAITING_CONTENT";
     })(MESSAGE_TYPES || (MESSAGE_TYPES = {}));
+    //# sourceMappingURL=types.js.map
 
     const recieveMessageChannelHandshake = () => {
         return new Promise((res) => {
@@ -59,6 +60,7 @@
             }
         });
     };
+    //# sourceMappingURL=util.js.map
 
     const setUpServiceWorker = async () => {
         if ('serviceWorker' in navigator) {
@@ -174,5 +176,6 @@
         }
     };
     main();
+    //# sourceMappingURL=index.js.map
 
 }());

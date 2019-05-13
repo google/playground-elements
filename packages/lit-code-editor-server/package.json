@@ -7,7 +7,7 @@
     "build": "tsc && tsc -p tsconfig.server.json && rollup -c rollup.config.js",
     "watch": "tsc --watch & tsc -p tsconfig.server.json --watch & rollup --watch -c rollup.config.js",
     "dev": "npm run watch & npm start",
-    "start": "node server/lib/index.js",
+    "start": "node server/src/index.js",
     "prepublishOnly": "npm run build"
   },
   "author": "",

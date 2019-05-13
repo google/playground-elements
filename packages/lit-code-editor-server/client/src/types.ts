@@ -1,5 +1,4 @@
-import {ProjectRecord} from 'lit-code-editor/src/types'
-import { FileRecord } from 'lit-code-editor/src/types';
+import {ProjectRecord,FileRecord} from '@polymer/lit-code-editor/src/types.js'
 
 export interface Message {
   type: MESSAGE_TYPES;

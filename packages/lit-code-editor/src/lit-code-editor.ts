@@ -1,7 +1,7 @@
-import { LitElement, html, customElement, css, property } from "lit-element";
-import { ProjectRecord } from "./types";
-import { establishMessageChannelHandshake } from "lit-code-editor-server/client/src/util"
-import { ProjectContent, MESSAGE_TYPES, Message } from "lit-code-editor-server/client/src/types"
+import { LitElement, html, customElement, css, property } from 'lit-element';
+import { ProjectRecord } from './types';
+import { establishMessageChannelHandshake } from '@polymer/lit-code-editor-server/client/src/util.js'
+import { ProjectContent, MESSAGE_TYPES, Message } from '@polymer/lit-code-editor-server/client/src/types.js'
 
 @customElement('lit-code-editor')
 class LitCodeEditor extends LitElement {

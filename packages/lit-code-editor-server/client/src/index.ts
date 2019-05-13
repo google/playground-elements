@@ -1,5 +1,4 @@
-import { generatePage } from './boilerplate.js';
-import { ProjectRecord } from 'lit-code-editor/src/types';
+import { ProjectRecord } from '@polymer/lit-code-editor/src/types.js';
 import { recieveMessageChannelHandshake, establishMessageChannelHandshake } from './util.js';
 import { Message, MESSAGE_TYPES, ProjectContent, EntryPointResponse, AwaitingContent } from './types.js';
 

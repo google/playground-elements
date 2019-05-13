@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig-base",
   "compilerOptions": {
-    "outDir": "./client/lib",
+    "outDir": "./client/src",
     "module": "esnext",
     "moduleResolution": "node"
   },

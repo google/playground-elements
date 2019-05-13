@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig-base",
   "compilerOptions": {
-    "outDir": "./server/lib",
+    "outDir": "./server/src",
     "module": "commonjs",
     "moduleResolution": "node"
   },
