@@ -4,3 +4,4 @@ lerna-debug.log
 packages/**/src/*.js
 packages/**/src/*.js.map
 packages/**/src/*.d.ts
+packages/**/bundle

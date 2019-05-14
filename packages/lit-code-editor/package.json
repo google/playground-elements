@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "serve": "polyserve --npm -H 0.0.0.0",
+    "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
     "prepublishOnly": "npm run build"
   },

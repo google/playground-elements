@@ -47,6 +47,6 @@ export const establishMessageChannelHandshake = (messageTarget: ServiceWorker|Wi
     } else {
       throw new Error('targetOrigin must be defined for message targets of type Window');
     }
-    
+
   });
 };

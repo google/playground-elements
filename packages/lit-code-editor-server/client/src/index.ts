@@ -1,27 +1,34 @@
-import { ProjectRecord } from '@polymer/lit-code-editor/src/types.js';
 import { recieveMessageChannelHandshake, establishMessageChannelHandshake } from './util.js';
-import { Message, MESSAGE_TYPES, ProjectContent, EntryPointResponse, AwaitingContent } from './types.js';
+import { Message, MESSAGE_TYPES, AwaitingContent } from './types.js';
 
 const setUpServiceWorker = async (): Promise<ServiceWorker|null> => {
   if ('serviceWorker' in navigator) {
     try {
-      console.log('registering sw...');
+      // try to unregister any conrolling SWs that may have not been unregistered
+      if(navigator.serviceWorker.controller) {
+        const swRegistrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of swRegistrations) {
+          await registration.unregister();
+        }
+      }
       const registration = await navigator.serviceWorker.register('/editor-sw.js');
-      console.log('sw registered', registration);
 
       window.addEventListener('unload', async () => {
         await registration.unregister();
       });
-
-      console.log('waiting for sw active...');
 
       const isInstalling = new Promise<ServiceWorker|null>((res) => {
         registration.addEventListener('updatefound', () => {
           res(registration.installing);
         });
       });
-      const serviceWorker = await isInstalling;
-      console.log('sw installing!', serviceWorker);
+
+      // safari is fast for some reason?
+      let serviceWorker = registration.active;
+      if (!serviceWorker) {
+        serviceWorker = await isInstalling;
+      }
+
       return serviceWorker;
 
     } catch (e) {
@@ -33,62 +40,21 @@ const setUpServiceWorker = async (): Promise<ServiceWorker|null> => {
   }
 }
 
-const eventCaught = (target: EventTarget, eventType: string): Promise<Event> => {
-  return new Promise((res) => {
-    const onEvent = (e: Event) => {
-      target.removeEventListener(eventType, onEvent);
-      res(e);
-    }
-
-    target.addEventListener(eventType, onEvent);
-  });
-}
-
-const onSwResponsesReady = (parentMessage: ProjectRecord, swPort:MessagePort) => {
+const onSwResponsesReady = () => {
   return async (e: MessageEvent) => {
     if (e.data.type === MESSAGE_TYPES.RESPONSES_READY) {
-      console.log('sw done populating map!');
-      console.log('generating page...');
-      // const page = generatePage(parentMessage);
-      // const iframe = document.querySelector('#content') as HTMLIFrameElement;
-      console.log('setting iframe contents...', navigator.serviceWorker.controller);
-      // debugger;
       const iframe = document.createElement('iframe');
-      iframe.src = '/modules';
-      // iframe.srcdoc = page;
+      iframe.src = '/modules/index.html';
       document.body.appendChild(iframe);
-      // document.write(page);
-      await eventCaught(iframe, 'load');
-      if (iframe.contentWindow) {
-        console.log('handshaking...')
-        const iframePort
-            = await establishMessageChannelHandshake(iframe.contentWindow!, '*');
-        console.log('listening for request from display')
-        iframePort.addEventListener('message', (e) => {
-          const data = e.data;
-          if (data.type === MESSAGE_TYPES.ENTRYPOINT_REQUEST) {
-            const epResponse:EntryPointResponse = {
-              type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE,
-              message: parentMessage.entrypoint
-            }
-            console.log('sending entrypoint')
-            iframePort.postMessage(epResponse);
-          }
-        })
-      }
     }
   }
 }
 
-const onParentContentMessage = (swPort: MessagePort, sw:ServiceWorker) => {
+const onParentContentMessage = (swPort: MessagePort) => {
   return (e: MessageEvent) => {
-    console.log('content message received!');
     const data:Message = e.data;
     if (data.type === MESSAGE_TYPES.PROJECT_CONTENT) {
-      const contentMessage = data as ProjectContent;
-      const message = contentMessage.message;
-      console.log('waiting for sw to finish populating response map...');
-      swPort.addEventListener('message', onSwResponsesReady(message, swPort));
+      swPort.addEventListener('message', onSwResponsesReady());
 
       // TODO (emarquez): Implement babel transforms here
       swPort.postMessage(data);
@@ -115,11 +81,8 @@ const main = async () => {
       return;
     }
 
-    console.log('awaiting port from SW...')
     const swPort = await establishMessageChannelHandshake(sw, '');
-    console.log('SW port established!');
-    console.log('listening to for content messages...')
-    parentPort.addEventListener('message', onParentContentMessage(swPort, sw));
+    parentPort.addEventListener('message', onParentContentMessage(swPort));
     const awaitingContentMessage:AwaitingContent = {
       type: MESSAGE_TYPES.AWAITING_CONTENT
     }

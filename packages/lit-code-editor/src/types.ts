@@ -3,8 +3,3 @@ export interface FileRecord {
   extension: 'js'|'ts'|'html';
   content: string;
 }
-
-export interface ProjectRecord {
-  entrypoint: FileRecord;
-  files: FileRecord[];
-}

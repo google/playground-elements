@@ -9,8 +9,8 @@ export default {
   },
   plugins: [
     resolve(),
-    // minfy({
-    //   comments: false
-    // })
+    minfy({
+      comments: false
+    })
   ]
 }
