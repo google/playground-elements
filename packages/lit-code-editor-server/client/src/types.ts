@@ -6,22 +6,11 @@ export interface Message {
 }
 
 export enum MESSAGE_TYPES {
-  ENTRYPOINT_REQUEST = "ENTRYPOINT_REQUEST",
-  ENTRYPOINT_RESPONSE = "ENTRYPOINT_RESPONSE",
   ESTABLISH_HANDSHAKE = "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED = "HANDSHAKE_RECEIVED",
   PROJECT_CONTENT = "PROJECT_CONTENT",
   RESPONSES_READY = "RESPONSES_READY",
   AWAITING_CONTENT = "AWAITING_CONTENT",
-}
-
-export interface EntryPointRequest extends Message {
-  type: MESSAGE_TYPES.ENTRYPOINT_REQUEST;
-}
-
-export interface EntryPointResponse extends Message {
-  type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE;
-  message: FileRecord;
 }
 
 export interface EstablishHandshake extends Message {
