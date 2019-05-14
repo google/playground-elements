@@ -1,4 +1,4 @@
-import { ProjectRecord } from '@polymer/lit-code-editor/src/types.js';
+import { FileRecord } from '@polymer/lit-code-editor/src/types.js';
 import { recieveMessageChannelHandshake, establishMessageChannelHandshake } from './util.js';
 import { Message, MESSAGE_TYPES, ProjectContent, EntryPointResponse, AwaitingContent } from './types.js';
 
@@ -44,7 +44,7 @@ const eventCaught = (target: EventTarget, eventType: string): Promise<Event> => 
   });
 }
 
-const onSwResponsesReady = (parentMessage: ProjectRecord, swPort:MessagePort) => {
+const onSwResponsesReady = (parentMessage: FileRecord[], swPort:MessagePort) => {
   return async (e: MessageEvent) => {
     if (e.data.type === MESSAGE_TYPES.RESPONSES_READY) {
       console.log('sw done populating map!');
@@ -54,28 +54,28 @@ const onSwResponsesReady = (parentMessage: ProjectRecord, swPort:MessagePort) =>
       console.log('setting iframe contents...', navigator.serviceWorker.controller);
       // debugger;
       const iframe = document.createElement('iframe');
-      iframe.src = '/modules';
+      iframe.src = '/modules/index.html';
       // iframe.srcdoc = page;
       document.body.appendChild(iframe);
       // document.write(page);
-      await eventCaught(iframe, 'load');
-      if (iframe.contentWindow) {
-        console.log('handshaking...')
-        const iframePort
-            = await establishMessageChannelHandshake(iframe.contentWindow!, '*');
-        console.log('listening for request from display')
-        iframePort.addEventListener('message', (e) => {
-          const data = e.data;
-          if (data.type === MESSAGE_TYPES.ENTRYPOINT_REQUEST) {
-            const epResponse:EntryPointResponse = {
-              type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE,
-              message: parentMessage.entrypoint
-            }
-            console.log('sending entrypoint')
-            iframePort.postMessage(epResponse);
-          }
-        })
-      }
+      // await eventCaught(iframe, 'load');
+      // if (iframe.contentWindow) {
+      //   console.log('handshaking...')
+      //   const iframePort
+      //       = await establishMessageChannelHandshake(iframe.contentWindow!, '*');
+      //   console.log('listening for request from display')
+      //   iframePort.addEventListener('message', (e) => {
+      //     const data = e.data;
+      //     if (data.type === MESSAGE_TYPES.ENTRYPOINT_REQUEST) {
+      //       const epResponse:EntryPointResponse = {
+      //         type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE,
+      //         message: parentMessage.entrypoint
+      //       }
+      //       console.log('sending entrypoint')
+      //       iframePort.postMessage(epResponse);
+      //     }
+      //   })
+      // }
     }
   }
 }

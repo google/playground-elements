@@ -90,15 +90,6 @@
             return null;
         }
     };
-    const eventCaught = (target, eventType) => {
-        return new Promise((res) => {
-            const onEvent = (e) => {
-                target.removeEventListener(eventType, onEvent);
-                res(e);
-            };
-            target.addEventListener(eventType, onEvent);
-        });
-    };
     const onSwResponsesReady = (parentMessage, swPort) => {
         return async (e) => {
             if (e.data.type === MESSAGE_TYPES.RESPONSES_READY) {
@@ -109,27 +100,28 @@
                 console.log('setting iframe contents...', navigator.serviceWorker.controller);
                 // debugger;
                 const iframe = document.createElement('iframe');
-                iframe.src = '/modules';
+                iframe.src = '/modules/index.html';
                 // iframe.srcdoc = page;
                 document.body.appendChild(iframe);
                 // document.write(page);
-                await eventCaught(iframe, 'load');
-                if (iframe.contentWindow) {
-                    console.log('handshaking...');
-                    const iframePort = await establishMessageChannelHandshake(iframe.contentWindow, '*');
-                    console.log('listening for request from display');
-                    iframePort.addEventListener('message', (e) => {
-                        const data = e.data;
-                        if (data.type === MESSAGE_TYPES.ENTRYPOINT_REQUEST) {
-                            const epResponse = {
-                                type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE,
-                                message: parentMessage.entrypoint
-                            };
-                            console.log('sending entrypoint');
-                            iframePort.postMessage(epResponse);
-                        }
-                    });
-                }
+                // await eventCaught(iframe, 'load');
+                // if (iframe.contentWindow) {
+                //   console.log('handshaking...')
+                //   const iframePort
+                //       = await establishMessageChannelHandshake(iframe.contentWindow!, '*');
+                //   console.log('listening for request from display')
+                //   iframePort.addEventListener('message', (e) => {
+                //     const data = e.data;
+                //     if (data.type === MESSAGE_TYPES.ENTRYPOINT_REQUEST) {
+                //       const epResponse:EntryPointResponse = {
+                //         type: MESSAGE_TYPES.ENTRYPOINT_RESPONSE,
+                //         message: parentMessage.entrypoint
+                //       }
+                //       console.log('sending entrypoint')
+                //       iframePort.postMessage(epResponse);
+                //     }
+                //   })
+                // }
             }
         };
     };

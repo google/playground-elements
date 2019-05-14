@@ -1,4 +1,4 @@
-import {ProjectRecord,FileRecord} from '@polymer/lit-code-editor/src/types.js'
+import {FileRecord} from '@polymer/lit-code-editor/src/types.js'
 
 export interface Message {
   type: MESSAGE_TYPES;
@@ -34,7 +34,7 @@ export interface HandshakeRecieved extends Message {
 
 export interface ProjectContent extends Message {
   type: MESSAGE_TYPES.PROJECT_CONTENT,
-  message: ProjectRecord
+  message: FileRecord[]
 }
 
 export interface ResponsesReady extends Message {

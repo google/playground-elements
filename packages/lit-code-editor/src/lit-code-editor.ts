@@ -1,5 +1,5 @@
 import { LitElement, html, customElement, css, property } from 'lit-element';
-import { ProjectRecord } from './types';
+import { FileRecord } from './types';
 import { establishMessageChannelHandshake } from '@polymer/lit-code-editor-server/client/src/util.js'
 import { ProjectContent, MESSAGE_TYPES, Message } from '@polymer/lit-code-editor-server/client/src/types.js'
 
@@ -20,25 +20,30 @@ class LitCodeEditor extends LitElement {
 
   private async sendContentToFrame(framePort: MessagePort) {
     console.log('fetching content...');
-    const myElementContents = `import { LitElement, html } from 'https://unpkg.com/lit-element?module';
-    let MyElement = class MyElement extends LitElement {
-        render() {
-            return html \`
-          <div>This is from my-element</div>
-        \`;
-        }
-    };
-    console.log('this is running!')
-    customElements.define('my-element', MyElement);`
-    console.log('content fetched!', myElementContents);
-    const content: ProjectRecord = {
-      entrypoint: {
+    const file1 = await fetch('../templates/index.html');
+    const file1Cont = await file1.text();
+    const file2 = await fetch('../templates/my-element.js');
+    const file2Cont = await file2.text();
+    const file3 = await fetch('../templates/my-second-element.js');
+    const file3Cont = await file3.text();
+    console.log('content fetched!', file1Cont);
+    const content: FileRecord[] = [
+      {
+        name: 'index',
+        extension: 'html',
+        content: file1Cont
+      },
+      {
         name: 'my-element',
         extension: 'js',
-        content: myElementContents
+        content: file2Cont
       },
-      files: []
-    }
+      {
+        name: 'my-second-element',
+        extension: 'js',
+        content: file3Cont
+      },
+    ]
 
     const contentMessage: ProjectContent = {
       type: MESSAGE_TYPES.PROJECT_CONTENT,
