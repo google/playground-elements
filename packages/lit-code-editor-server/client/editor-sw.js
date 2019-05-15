@@ -9,6 +9,10 @@ const MESSAGE_TYPES = {
 
 const recieveMessageChannelHandshake = () => {
   return new Promise((res) => {
+    /**
+     *
+     * @param {MessageEvent} e
+     */
     const onMessage = (e) => {
       const data = e.data;
       if (data.type === MESSAGE_TYPES.ESTABLISH_HANDSHAKE) {
@@ -103,10 +107,6 @@ const onNetworkContentMessage = (networkPort) => {
 
 const main = async () => {
   const networkPort = await recieveMessageChannelHandshake();
-
-  if (!networkPort) {
-    console.error('NETWORK PORT COULD NOT BE ESTABLISHED')
-  }
 
   networkPort.addEventListener('message', onNetworkContentMessage(networkPort));
 }

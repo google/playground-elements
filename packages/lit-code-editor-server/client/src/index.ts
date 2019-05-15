@@ -54,8 +54,6 @@ const onParentContentMessage = (swPort: MessagePort) => {
   return (e: MessageEvent) => {
     const data:Message = e.data;
     if (data.type === MESSAGE_TYPES.PROJECT_CONTENT) {
-      swPort.addEventListener('message', onSwResponsesReady());
-
       // TODO (emarquez): Implement babel transforms here
       swPort.postMessage(data);
     }
@@ -83,6 +81,7 @@ const main = async () => {
 
     const swPort = await establishMessageChannelHandshake(sw, '');
     parentPort.addEventListener('message', onParentContentMessage(swPort));
+    swPort.addEventListener('message', onSwResponsesReady());
     const awaitingContentMessage:AwaitingContent = {
       type: MESSAGE_TYPES.AWAITING_CONTENT
     }
