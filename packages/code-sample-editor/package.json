@@ -1,5 +1,5 @@
 {
-  "name": "@polymer/lit-code-editor",
+  "name": "@polymer/code-sample-editor",
   "version": "0.0.1",
   "description": "",
   "module": "lib/index.js",
@@ -18,6 +18,6 @@
   "dependencies": {
     "lit-element": "^2.1.0",
     "lit-html": "^1.0.0",
-    "@polymer/lit-code-editor-server": "*"
+    "@polymer/code-sample-editor-server": "*"
   }
 }

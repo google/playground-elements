@@ -1,12 +1,12 @@
 import { LitElement, html, customElement, css, property, TemplateResult } from 'lit-element';
 import { until } from 'lit-html/directives/until';
 import { FileRecord, ProjectManifest, AcceptableExtensions } from './types';
-import { establishMessageChannelHandshake } from '@polymer/lit-code-editor-server/client/src/util.js'
-import { ProjectContent, MESSAGE_TYPES, Message } from '@polymer/lit-code-editor-server/client/src/types.js'
+import { establishMessageChannelHandshake } from '@polymer/code-sample-editor-server/client/src/util.js'
+import { ProjectContent, MESSAGE_TYPES, Message } from '@polymer/code-sample-editor-server/client/src/types.js'
 import { EMPTY_INDEX, ACCEPTABLE_EXTENSIONS } from './constants';
-import "./lit-code-editor-area";
+import "./code-sample-editor-layout";
 
-@customElement('lit-code-editor')
+@customElement('code-sample-editor')
 class LitCodeEditor extends LitElement {
   @property({attribute: 'server-origin', type: String})
   serverOrigin = '';
@@ -25,7 +25,7 @@ class LitCodeEditor extends LitElement {
         height: 100%;
       }
 
-      lit-code-editor-area {
+      code-sample-editor-layout {
         width: 50%;
       }
 
@@ -161,7 +161,7 @@ class LitCodeEditor extends LitElement {
 
   render() {
     if (!this.serverOrigin) {
-      console.error('serverOrigin must be defined on lit-code-editor');
+      console.error('serverOrigin must be defined on code-sample-editor');
       return html``;
     }
 
@@ -172,9 +172,9 @@ class LitCodeEditor extends LitElement {
 
     return html`
       <div id="wrapper">
-        <lit-code-editor-area>
+        <code-sample-editor-layout>
           ${until(this.generateEditorDom(this.projectFetched))}
-        </lit-code-editor-area>
+        </code-sample-editor-layout>
         <iframe
             id="displayFrame"
             src=${this.serverOrigin}

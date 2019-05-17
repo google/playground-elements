@@ -1,6 +1,6 @@
 import { LitElement, customElement, html, css } from 'lit-element';
 
-@customElement('lit-code-editor-area')
+@customElement('code-sample-editor-layout')
 class LitCodeEditorArea extends LitElement {
   static get styles() {
     return css`
