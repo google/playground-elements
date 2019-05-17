@@ -1,10 +1,10 @@
 {
-  "name": "@polymer/lit-code-editor-package",
+  "name": "@polymer/code-sample-editor-package",
   "private": true,
-  "description": "Lit Element code editor monorepo!",
-  "homepage": "https://github.com/PolymerLabs/lit-code-editor-package",
-  "repository": "https://github.com/PolymerLabs/lit-code-editor-package",
-  "bugs": "https://github.com/PolymerLabs/lit-code-editor-package/issues",
+  "description": "Code editor monorepo!",
+  "homepage": "https://github.com/PolymerLabs/code-sample-editor-package",
+  "repository": "https://github.com/PolymerLabs/code-sample-editor-package",
+  "bugs": "https://github.com/PolymerLabs/code-sample-editor-package/issues",
   "license": "BSD-3-Clause",
   "author": "The Polymer Project Authors",
   "scripts": {

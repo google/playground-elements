@@ -1,5 +1,5 @@
 {
-  "name": "@polymer/lit-code-editor-server",
+  "name": "@polymer/code-sample-editor-server",
   "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "express": "^4.16.4",
-    "@polymer/lit-code-editor": "*"
+    "@polymer/code-sample-editor": "*"
   },
   "license": "BSD-3-Clause"
 }
