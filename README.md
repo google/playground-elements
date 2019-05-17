@@ -1,4 +1,4 @@
-# lit-code-editor-package
+# code-sample-editor-package
 code editor monorepo for server and element
 
 ## Getting Started
