@@ -1,8 +1,8 @@
 import { LitElement, html, customElement, css, property, TemplateResult } from 'lit-element';
 import { until } from 'lit-html/directives/until';
-import { FileRecord, ProjectManifest, AcceptableExtensions } from './types';
+import { FileRecord, ProjectManifest, AcceptableExtensions, CodeEditorTextarea } from './types';
 import { establishMessageChannelHandshake } from '@polymer/code-sample-editor-server/client/src/util.js'
-import { ProjectContent, MESSAGE_TYPES, Message } from '@polymer/code-sample-editor-server/client/src/types.js'
+import { ProjectContent, MESSAGE_TYPES, Message, ContentsChanged } from '@polymer/code-sample-editor-server/client/src/types.js'
 import { EMPTY_INDEX, ACCEPTABLE_EXTENSIONS } from './constants';
 import "./code-sample-editor-layout";
 
@@ -16,6 +16,10 @@ class LitCodeEditor extends LitElement {
 
   private lastProjectPath: string|null = null;
   private projectFetched: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
+  private resolveFramePort: ((value: MessagePort) => void) | null = null;
+  private framePortEstablished: Promise<MessagePort> = new Promise((res) => {
+    this.resolveFramePort = res;
+  });
 
   static get styles() {
     return css`
@@ -47,18 +51,22 @@ class LitCodeEditor extends LitElement {
     framePort.postMessage(contentMessage);
   }
 
-  private frameReady(frame: MessagePort): Promise<void> {
-    return new Promise((res) => {
-      const onMessage = (e: MessageEvent) => {
-        const data:Message = e.data;
-        if (data.type === MESSAGE_TYPES.AWAITING_CONTENT) {
-          frame.removeEventListener('message', onMessage)
-          res();
-        }
-      }
+  private onAwaitingContent = (port: MessagePort) => {
+    this.sendContentToFrame(port);
+  }
 
-      frame.addEventListener('message', onMessage);
-    });
+  private onMessage = (port: MessagePort) => {
+    return async (e: MessageEvent) => {
+      const messageType = e.data.type as MESSAGE_TYPES;
+      switch (messageType) {
+        case MESSAGE_TYPES.AWAITING_CONTENT:
+          this.onAwaitingContent(port);
+          break;
+        default:
+          console.error(`unknown message type ${messageType}`);
+          break;
+      }
+    }
   }
 
   async onIframeLoad() {
@@ -68,8 +76,8 @@ class LitCodeEditor extends LitElement {
     }
 
     const framePort = await establishMessageChannelHandshake(displayFrame.contentWindow, this.serverOrigin);
-    await this.frameReady(framePort);
-    this.sendContentToFrame(framePort);
+    this.resolveFramePort!(framePort);
+    framePort.addEventListener('message', this.onMessage(framePort));
   }
 
   private fetchProject = async (projectPath: string): Promise<FileRecord[]> => {
@@ -152,11 +160,34 @@ class LitCodeEditor extends LitElement {
     const tabs: TemplateResult[] = fileRecords.map(fileRecord => {
       return html`
         <span slot="tab">${fileRecord.name}.${fileRecord.extension}</span>
-        <textarea slot="editor" .value=${fileRecord.content}></textarea>
+        <textarea
+            slot="editor"
+            .value=${fileRecord.content}
+            .name=${fileRecord.name}
+            .extension=${fileRecord.extension}>
+        </textarea>
       `;
     });
 
     return tabs;
+  }
+
+  private onSave = async (e: Event) => {
+    const textareas = this.shadowRoot!.querySelectorAll('textarea') as NodeListOf<CodeEditorTextarea>;
+    const fileRecords: FileRecord[] = Array.from(textareas).map(e => {
+      const name = e.name;
+      const extension = e.extension;
+      const content = e.value;
+      return {name, extension, content};
+    });
+
+    this.projectFetched = Promise.resolve(fileRecords);
+
+    const port = await this.framePortEstablished;
+    const contentsChangedMessage: ContentsChanged = {
+      type: MESSAGE_TYPES.CONTENTS_CHANGED
+    }
+    port.postMessage(contentsChangedMessage);
   }
 
   render() {
@@ -172,7 +203,7 @@ class LitCodeEditor extends LitElement {
 
     return html`
       <div id="wrapper">
-        <code-sample-editor-layout>
+        <code-sample-editor-layout @save=${this.onSave}>
           ${until(this.generateEditorDom(this.projectFetched))}
         </code-sample-editor-layout>
         <iframe

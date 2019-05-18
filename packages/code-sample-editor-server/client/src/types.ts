@@ -11,6 +11,8 @@ export enum MESSAGE_TYPES {
   PROJECT_CONTENT = "PROJECT_CONTENT",
   RESPONSES_READY = "RESPONSES_READY",
   AWAITING_CONTENT = "AWAITING_CONTENT",
+  CONTENTS_CHANGED = "CONTENTS_CHANGED",
+  RESPONSES_CLEARED = "RESPONSES_CLEARED",
 }
 
 export interface EstablishHandshake extends Message {
@@ -32,4 +34,8 @@ export interface ResponsesReady extends Message {
 
 export interface AwaitingContent extends Message {
   type: MESSAGE_TYPES.AWAITING_CONTENT,
+}
+
+export interface ContentsChanged extends Message {
+  type: MESSAGE_TYPES.CONTENTS_CHANGED,
 }

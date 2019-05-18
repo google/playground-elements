@@ -18,6 +18,14 @@ class LitCodeEditorArea extends LitElement {
   private onTabSlotChange(e: Event) {
     console.log((e.target as HTMLSlotElement).assignedElements());
   }
+
+  private onSubmit(e: Event) {
+    this.dispatchEvent(new CustomEvent('save', {
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   render() {
     return html`
       <div id="tabs">
@@ -27,6 +35,7 @@ class LitCodeEditorArea extends LitElement {
       <div id="editAreas">
         <slot name="editor"></slot>
       </div>
+      <button @click=${this.onSubmit}>Save</button>
     `;
   }
 }
