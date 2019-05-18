@@ -4,7 +4,9 @@ const MESSAGE_TYPES = {
   ESTABLISH_HANDSHAKE: "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED: "HANDSHAKE_RECEIVED",
   PROJECT_CONTENT: "PROJECT_CONTENT",
-  RESPONSES_READY: "RESPONSES_READY"
+  RESPONSES_READY: "RESPONSES_READY",
+  CONTENTS_CHANGED: "CONTENTS_CHANGED",
+  RESPONSES_CLEARED: "RESPONSES_CLEARED",
 }
 
 const recieveMessageChannelHandshake = () => {
@@ -35,7 +37,7 @@ const recieveMessageChannelHandshake = () => {
 }
 
 /**@type {Map<string, Response>} */
-const fileResponseMap = new Map();
+let fileResponseMap = new Map();
 
 self.addEventListener('fetch', (e) => {
   if (!e.request || !e.request.url) {
@@ -58,49 +60,80 @@ self.addEventListener('fetch', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(clients.claim());
 });
+
 /**
- * @param {MessagePort} networkPort
+ *
+ * @param {MessagePort} port
+ * @param {import('./src/types.js').ProjectContent} data
  */
-const onNetworkContentMessage = (networkPort) => {
+const onProjectContent = (port, data) => {
+  const fileRecords = data.message;
+  for (const fileRecord of fileRecords) {
+    let contentType = '';
+
+    switch (fileRecord.extension) {
+      case 'html':
+        contentType = 'text/html';
+        break;
+      case 'js':
+        contentType = 'application/javascript';
+        break;
+      default:
+        continue;
+    }
+
+    /** @type {ResponseInit} */
+    let responseInit = {
+      headers: { 'Content-Type': contentType}
+    };
+
+    fileResponseMap.set(
+        `${fileRecord.name}.${fileRecord.extension}`,
+        new Response(fileRecord.content, responseInit));
+  }
+
+  /** @type {import('./src/types.js').ResponsesReady} */
+  const responsesReady = {
+    type: MESSAGE_TYPES.RESPONSES_READY
+  }
+
+  port.postMessage(responsesReady);
+}
+
+/**
+ *
+ * @param {MesssagePort} port
+ */
+const onContentsChanged = (port) => {
+  fileResponseMap = new Map();
+  const responsesCleared = {
+    type: MESSAGE_TYPES.RESPONSES_CLEARED,
+  }
+  port.postMessage(responsesCleared);
+}
+
+/**
+ * @param {MessagePort} commPort
+ */
+const onCommMessage = (commPort) => {
   /**
    * @param {MessageEvent}
    */
   return async (e) => {
-    /** @type {import('./src/types.js').ProjectContent} */
+    /** @type {import('./src/types.js').Message} */
     const data = e.data;
-    if (data.type === MESSAGE_TYPES.PROJECT_CONTENT) {
-      const fileRecords = data.message;
+    const messageType = data.type;
 
-      for (const fileRecord of fileRecords) {
-        let contentType = '';
-
-        switch (fileRecord.extension) {
-          case 'html':
-            contentType = 'text/html';
-            break;
-          case 'js':
-            contentType = 'application/javascript';
-            break;
-          default:
-            continue;
-        }
-
-        /** @type {ResponseInit} */
-        let responseInit = {
-          headers: { 'Content-Type': contentType}
-        };
-
-        fileResponseMap.set(
-            `${fileRecord.name}.${fileRecord.extension}`,
-            new Response(fileRecord.content, responseInit));
-      }
-
-      /** @type {import('./src/types.js').ResponsesReady} */
-      const responsesReady = {
-        type: MESSAGE_TYPES.RESPONSES_READY
-      }
-
-      networkPort.postMessage(responsesReady);
+    switch (messageType) {
+      case MESSAGE_TYPES.PROJECT_CONTENT:
+        onProjectContent(commPort, data);
+        break;
+      case MESSAGE_TYPES.CONTENTS_CHANGED:
+        onContentsChanged(commPort);
+        break;
+      default:
+        console.error(`unknown message type ${messageType}`);
+        break;
     }
   }
 }
@@ -108,7 +141,7 @@ const onNetworkContentMessage = (networkPort) => {
 const main = async () => {
   const networkPort = await recieveMessageChannelHandshake();
 
-  networkPort.addEventListener('message', onNetworkContentMessage(networkPort));
+  networkPort.addEventListener('message', onCommMessage(networkPort));
 }
 
 main();

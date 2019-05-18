@@ -40,22 +40,71 @@ const setUpServiceWorker = async (): Promise<ServiceWorker|null> => {
   }
 }
 
-const onSwResponsesReady = () => {
+const onResponsesReady = () => {
+  const documentIframe = document.querySelector('iframe');
+  if (documentIframe) {
+    documentIframe.contentWindow!.location.reload();
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.src = '/modules/index.html';
+    document.body.appendChild(iframe);
+  }
+}
+
+const onResponsesCleared = (port: MessagePort) => {
+  const awaitingContentMessage: AwaitingContent = {
+    type: MESSAGE_TYPES.AWAITING_CONTENT,
+  };
+
+  port.postMessage(awaitingContentMessage);
+}
+
+const onSwMessage = (documentPort: MessagePort) => {
   return async (e: MessageEvent) => {
+    const data = e.data as Message;
+    const messageType = data.type;
+
+    switch (messageType) {
+      case MESSAGE_TYPES.RESPONSES_READY:
+        onResponsesReady();
+        break;
+      case MESSAGE_TYPES.RESPONSES_CLEARED:
+        onResponsesCleared(documentPort);
+        break;
+      default:
+          console.error(`unknown message type ${messageType}`);
+        break;
+    }
     if (e.data.type === MESSAGE_TYPES.RESPONSES_READY) {
-      const iframe = document.createElement('iframe');
-      iframe.src = '/modules/index.html';
-      document.body.appendChild(iframe);
+
     }
   }
 }
 
-const onParentContentMessage = (swPort: MessagePort) => {
+const onProjectContent = (port: MessagePort, data: Message) => {
+  // TODO (emarquez): Implement babel transforms here
+  port.postMessage(data);
+}
+
+const onContentsChanged = (port: MessagePort, data: Message) => {
+  port.postMessage(data);
+}
+
+const onDocumentMessage = (swPort: MessagePort) => {
   return (e: MessageEvent) => {
     const data:Message = e.data;
-    if (data.type === MESSAGE_TYPES.PROJECT_CONTENT) {
-      // TODO (emarquez): Implement babel transforms here
-      swPort.postMessage(data);
+    const messageType = data.type;
+
+    switch (messageType) {
+      case MESSAGE_TYPES.PROJECT_CONTENT:
+        onProjectContent(swPort, data);
+        break;
+      case MESSAGE_TYPES.CONTENTS_CHANGED:
+        onContentsChanged(swPort, data);
+        break;
+      default:
+        console.error(`unknown message type ${messageType}`)
+        break;
     }
   }
 };
@@ -64,28 +113,29 @@ const main = async () => {
   if (parent === window) {
     console.error('this is not in an iframe');
   } else {
-    const parentPortPromise = recieveMessageChannelHandshake();
+    const documentPortPromise = recieveMessageChannelHandshake();
     const swPromise = setUpServiceWorker();
-    const [parentPort, sw] = await Promise.all([parentPortPromise, swPromise]);
+    const [documentPort, sw] =
+        await Promise.all([documentPortPromise, swPromise]);
     if (!sw) {
       console.error('There was an error setting up the serviceworker');
     }
 
-    if (!parentPort) {
+    if (!documentPort) {
       console.error('there was an error setting up a message channel with your domain');
     }
 
-    if (!parentPort || !sw) {
+    if (!documentPort || !sw) {
       return;
     }
 
     const swPort = await establishMessageChannelHandshake(sw, '');
-    parentPort.addEventListener('message', onParentContentMessage(swPort));
-    swPort.addEventListener('message', onSwResponsesReady());
+    documentPort.addEventListener('message', onDocumentMessage(swPort));
+    swPort.addEventListener('message', onSwMessage(documentPort));
     const awaitingContentMessage:AwaitingContent = {
-      type: MESSAGE_TYPES.AWAITING_CONTENT
+      type: MESSAGE_TYPES.AWAITING_CONTENT,
     }
-    parentPort.postMessage(awaitingContentMessage);
+    documentPort.postMessage(awaitingContentMessage);
   }
 };
 
