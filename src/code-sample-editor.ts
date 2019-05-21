@@ -8,9 +8,6 @@ import './code-sample-editor-layout';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
-  @property({attribute: 'server-origin', type: String})
-  serverOrigin = '';
-
   @property({attribute: 'project-path', type: String})
   projectPath: string|null = null;
 
@@ -245,11 +242,6 @@ export class CodeSampleEditor extends LitElement {
   }
 
   render() {
-    if (!this.serverOrigin) {
-      console.error('serverOrigin must be defined on code-sample-editor');
-      return html``;
-    }
-
     if (this.projectPath && this.lastProjectPath !== this.projectPath) {
       this.lastProjectPath = this.projectPath;
       this.projectContentsReady = this.fetchProject(this.projectPath);
