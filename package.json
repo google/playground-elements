@@ -1,24 +1,22 @@
 {
-  "name": "@polymer/code-sample-editor-package",
-  "private": true,
-  "description": "Code editor monorepo!",
-  "homepage": "https://github.com/PolymerLabs/code-sample-editor-package",
-  "repository": "https://github.com/PolymerLabs/code-sample-editor-package",
-  "bugs": "https://github.com/PolymerLabs/code-sample-editor-package/issues",
-  "license": "BSD-3-Clause",
-  "author": "The Polymer Project Authors",
+  "name": "@polymer/code-sample-editor",
+  "version": "0.0.1",
+  "description": "",
+  "module": "lib/index.js",
   "scripts": {
-    "bootstrap": "lerna bootstrap --ci",
-    "build": "lerna run build --stream",
-    "nuke": "rm -rf package-lock.json node_modules && npm install && lerna exec \"rm -f package-lock.json npm-shrinkwrap.json\" && lerna clean --yes && lerna bootstrap && lerna exec --stream -- \"test -f package-lock.json || npm install --package-lock-only\"",
-    "clean": "rm -rf node_modules & rm -rf packages/*/node_modules & rm -rf packages/*/src/*.js* & rm -rf packages/*/src/*.d.ts & rm -rf packages/*/bundle & rm -rf packages/*/*/src/*.js* & rm -rf packages/*/*/src/*.d.ts & rm -rf packages/*/*/bundle"
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "serve": "polyserve --npm -H 0.0.0.0 --compile never",
+    "dev": "npm run watch & npm run serve",
+    "prepublishOnly": "npm run build"
   },
+  "author": "",
+  "license": "BSD-3-Clause",
   "devDependencies": {
-    "lerna": "^3.13.4",
-    "typescript": "^3.4.5"
+    "polyserve": "^0.27.15"
   },
-  "engines": {
-    "node": ">=9"
-  },
-  "dependencies": {}
+  "dependencies": {
+    "lit-element": "^2.1.0",
+    "lit-html": "^1.0.0"
+  }
 }

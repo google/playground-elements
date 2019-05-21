@@ -1,7 +1,5 @@
 /packages/*/node_modules
 /node_modules
-lerna-debug.log
-packages/**/src/*.js
-packages/**/src/*.js.map
-packages/**/src/*.d.ts
-packages/**/bundle
+src/*.js
+src/*.js.map
+src/*.d.ts
