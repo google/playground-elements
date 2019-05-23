@@ -34,12 +34,12 @@ const recieveMessageChannelHandshake = () => {
   });
 }
 
-/**@type {Map<string, Response>} */
+/**@type {Map<string, {content: string, init: ResponseInit}}>} */
 let fileResponseMap = new Map();
 
 const endWithSlash = (str) => {
-  const endWithSlash = str[str.length - 1] === '/';
-  return endWithSlash ? str : `${str}/`
+  const endsWithSlash = str[str.length - 1] === '/';
+  return endsWithSlash ? str : `${str}/`
 }
 
 self.addEventListener('fetch', (e) => {
@@ -52,7 +52,9 @@ self.addEventListener('fetch', (e) => {
   if (href.startsWith(scope)) {
     const path = href.substring(scope.length);
     if (fileResponseMap.has(path)) {
-      e.respondWith(fileResponseMap.get(path));
+      const responseRecord = fileResponseMap.get(path);
+      const response = new Response(responseRecord.content, responseRecord.init);
+      e.respondWith(response);
     }
   }
 
@@ -74,10 +76,10 @@ const onProjectContent = (port, data) => {
 
     switch (fileRecord.extension) {
       case 'html':
-        contentType = 'text/html';
+        contentType = 'text/html; charset=UTF-8';
         break;
       case 'js':
-        contentType = 'application/javascript';
+        contentType = 'application/javascript; charset=UTF-8';
         break;
       default:
         continue;
@@ -85,12 +87,17 @@ const onProjectContent = (port, data) => {
 
     /** @type {ResponseInit} */
     let responseInit = {
-      headers: { 'Content-Type': contentType}
+      headers: {
+        'Content-Type': contentType
+      }
     };
 
     fileResponseMap.set(
         `${fileRecord.name}.${fileRecord.extension}`,
-        new Response(fileRecord.content, responseInit));
+        {
+          content: fileRecord.content,
+          init: responseInit
+        });
   }
 
   /** @type {import('./src/types.js.js').ResponsesReady} */
@@ -120,7 +127,7 @@ const onCommMessage = (commPort) => {
   /**
    * @param {MessageEvent}
    */
-  return async (e) => {
+  return (e) => {
     /** @type {import('./src/types.js.js').Message} */
     const data = e.data;
     const messageType = data.type;
