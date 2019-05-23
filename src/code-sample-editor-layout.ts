@@ -16,7 +16,7 @@ export class CodeSampleEditorLayout extends LitElement {
   }
 
   private onTabSlotChange(e: Event) {
-    console.log((e.target as HTMLSlotElement).assignedElements());
+    // console.log((e.target as HTMLSlotElement).assignedElements());
   }
 
   private onSubmit(e: Event) {
