@@ -1,5 +1,4 @@
 'use strict';
-
 const MESSAGE_TYPES = {
   ESTABLISH_HANDSHAKE: "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED: "HANDSHAKE_RECEIVED",
@@ -31,30 +30,34 @@ const recieveMessageChannelHandshake = () => {
         }
       }
     };
-
     self.addEventListener('message', onMessage);
   });
 }
 
-/**@type {Map<string, Response>} */
+/**@type {Map<string, {content: string, init: ResponseInit}}>} */
 let fileResponseMap = new Map();
+
+const endWithSlash = (str) => {
+  const endsWithSlash = str[str.length - 1] === '/';
+  return endsWithSlash ? str : `${str}/`
+}
 
 self.addEventListener('fetch', (e) => {
   if (!e.request || !e.request.url) {
     return;
   }
   const url = new URL(e.request.url);
-
-  const pathParts = url.pathname.split('/');
-  pathParts.shift();
-  pathParts.shift();
-  const path = pathParts.join('/');
-
-  if (url.origin === location.origin
-      && url.pathname.startsWith('/modules/')
-      && fileResponseMap.has(path)) {
-    e.respondWith(fileResponseMap.get(path));
+  const href = url.href;
+  const scope = endWithSlash(self.registration.scope);
+  if (href.startsWith(scope)) {
+    const path = href.substring(scope.length);
+    if (fileResponseMap.has(path)) {
+      const responseRecord = fileResponseMap.get(path);
+      const response = new Response(responseRecord.content, responseRecord.init);
+      e.respondWith(response);
+    }
   }
+
 });
 
 self.addEventListener('activate', (e) => {
@@ -64,7 +67,7 @@ self.addEventListener('activate', (e) => {
 /**
  *
  * @param {MessagePort} port
- * @param {import('./src/types.js').ProjectContent} data
+ * @param {import('./src/types.js.js').ProjectContent} data
  */
 const onProjectContent = (port, data) => {
   const fileRecords = data.message;
@@ -73,10 +76,10 @@ const onProjectContent = (port, data) => {
 
     switch (fileRecord.extension) {
       case 'html':
-        contentType = 'text/html';
+        contentType = 'text/html; charset=UTF-8';
         break;
       case 'js':
-        contentType = 'application/javascript';
+        contentType = 'application/javascript; charset=UTF-8';
         break;
       default:
         continue;
@@ -84,15 +87,20 @@ const onProjectContent = (port, data) => {
 
     /** @type {ResponseInit} */
     let responseInit = {
-      headers: { 'Content-Type': contentType}
+      headers: {
+        'Content-Type': contentType
+      }
     };
 
     fileResponseMap.set(
         `${fileRecord.name}.${fileRecord.extension}`,
-        new Response(fileRecord.content, responseInit));
+        {
+          content: fileRecord.content,
+          init: responseInit
+        });
   }
 
-  /** @type {import('./src/types.js').ResponsesReady} */
+  /** @type {import('./src/types.js.js').ResponsesReady} */
   const responsesReady = {
     type: MESSAGE_TYPES.RESPONSES_READY
   }
@@ -119,8 +127,8 @@ const onCommMessage = (commPort) => {
   /**
    * @param {MessageEvent}
    */
-  return async (e) => {
-    /** @type {import('./src/types.js').Message} */
+  return (e) => {
+    /** @type {import('./src/types.js.js').Message} */
     const data = e.data;
     const messageType = data.type;
 

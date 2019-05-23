@@ -1,7 +1,7 @@
 import { LitElement, customElement, html, css } from 'lit-element';
 
 @customElement('code-sample-editor-layout')
-class LitCodeEditorArea extends LitElement {
+export class CodeSampleEditorLayout extends LitElement {
   static get styles() {
     return css`
       #tabs, #editAreas {
@@ -16,7 +16,7 @@ class LitCodeEditorArea extends LitElement {
   }
 
   private onTabSlotChange(e: Event) {
-    console.log((e.target as HTMLSlotElement).assignedElements());
+    // console.log((e.target as HTMLSlotElement).assignedElements());
   }
 
   private onSubmit(e: Event) {
