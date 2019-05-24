@@ -37,7 +37,6 @@ self.addEventListener('fetch', (e) => {
   if (!e.request || !e.request.url) {
     return;
   }
-  console.log(fileResponseMap);
   const url = new URL(e.request.url);
   const href = url.href;
   const scope = endWithSlash(self.registration.scope);
