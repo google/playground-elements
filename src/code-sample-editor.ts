@@ -1,8 +1,8 @@
 import { LitElement, html, customElement, css, property, TemplateResult, query, queryAll } from 'lit-element';
 import { until } from 'lit-html/directives/until';
-import { FileRecord, ProjectManifest, AcceptableExtensions, CodeEditorTextarea, Message, MESSAGE_TYPES, ProjectContent, ContentsChanged } from './types';
+import { FileRecord, ProjectManifest, AcceptableExtensions, CodeEditorTextarea, Message, MESSAGE_TYPES, ProjectContent, ClearContents } from './types';
 import { EMPTY_INDEX, ACCEPTABLE_EXTENSIONS } from './constants';
-import { setUpServiceWorker, establishMessageChannelHandshake, endWithSlash } from './util';
+import { setUpServiceWorker, establishMessageChannelHandshake, endWithSlash, generateUniqueSessionId, clearSession } from './util';
 
 import './code-sample-editor-layout';
 
@@ -32,10 +32,21 @@ export class CodeSampleEditor extends LitElement {
       return Promise.resolve(null);
     }
   });
+  private sessionId: string = generateUniqueSessionId();
 
   constructor() {
     super();
     this.main();
+  }
+
+  async disconnectedCallback() {
+    super.disconnectedCallback();
+    const swPort = await this.swPortEstablished;
+    if (swPort) {
+      swPort.removeEventListener('message', this.onSwMessage);
+    }
+
+    clearSession(this.sessionId, await this.swPortEstablished);
   }
 
   private async main() {
@@ -196,8 +207,9 @@ export class CodeSampleEditor extends LitElement {
       return;
     }
 
-    const contentsChangedMessage: ContentsChanged = {
-      type: MESSAGE_TYPES.CONTENTS_CHANGED
+    const contentsChangedMessage: ClearContents = {
+      type: MESSAGE_TYPES.CLEAR_CONTENTS,
+      message: this.sessionId,
     }
     port.postMessage(contentsChangedMessage);
   }
@@ -213,7 +225,10 @@ export class CodeSampleEditor extends LitElement {
 
     const contentMessage: ProjectContent = {
       type: MESSAGE_TYPES.PROJECT_CONTENT,
-      message: content,
+      message: {
+        records: content,
+        sesionId: this.sessionId,
+      }
     }
     port.postMessage(contentMessage);
   }
@@ -229,7 +244,8 @@ export class CodeSampleEditor extends LitElement {
 
       const swScope = endWithSlash(registration.scope);
       return html`
-        <iframe id="editorIframe" src="${swScope}index.html"></iframe>
+        <iframe id="editorIframe" src="${swScope}${this.sessionId}/index.html">
+        </iframe>
       `;
     }
   }

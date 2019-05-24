@@ -1,4 +1,37 @@
-import { Message, MESSAGE_TYPES, EstablishHandshake } from "./types.js";
+import { Message, MESSAGE_TYPES, EstablishHandshake, ClearContents } from "./types.js";
+
+const generateRandomString = (): string => {
+  const arr = new Uint32Array(1);
+  const val = crypto.getRandomValues(arr)[0];
+  return val.toString(32);
+}
+
+export const clearSession = (sessionId: string, swPort: MessagePort|null) => {
+  if (window.__CodeEditorSessions) {
+    window.__CodeEditorSessions.delete(sessionId);
+  }
+
+  if (swPort) {
+    const message: ClearContents = {
+      type: MESSAGE_TYPES.CLEAR_CONTENTS,
+      message: sessionId
+    }
+    swPort.postMessage
+  }
+}
+
+export const generateUniqueSessionId = ():string => {
+  window.__CodeEditorSessions = window.__CodeEditorSessions || new Set();
+
+  let sessionId = generateRandomString();
+  while (window.__CodeEditorSessions.has(sessionId)) {
+    sessionId = generateRandomString();
+  }
+
+  window.__CodeEditorSessions.add(sessionId);
+
+  return sessionId;
+};
 
 export const establishMessageChannelHandshake = (messageTarget: ServiceWorker):Promise<MessagePort> => {
   return new Promise((res) => {
@@ -21,22 +54,21 @@ export const establishMessageChannelHandshake = (messageTarget: ServiceWorker):P
   });
 };
 
+const getSwDir = () => {
+  const currentFilepath = import.meta.url;
+  const currentFilepathParts = currentFilepath.split('/');
+  currentFilepathParts.pop();
+  currentFilepathParts.pop();
+  return currentFilepathParts.join('/')
+};
+
 export const setUpServiceWorker = async (): Promise<[ServiceWorker|null,ServiceWorkerRegistration|null]> => {
   if ('serviceWorker' in navigator) {
     try {
-      // try to unregister any conrolling SWs that may have not been unregistered
-      if(navigator.serviceWorker.controller) {
-        const swRegistrations = await navigator.serviceWorker.getRegistrations();
-        for (let registration of swRegistrations) {
-          await registration.unregister();
-        }
-      }
-
-      const registration = await navigator.serviceWorker.register('../modules/sw.js');
-
-      window.addEventListener('unload', async () => {
-        await registration.unregister();
-      });
+      const swFileDir = getSwDir();
+      const registration = await navigator.serviceWorker.register(
+        `${swFileDir}/sw.js`,
+        {scope: `${swFileDir}/modules/`});
 
       const isInstalling = new Promise<ServiceWorker|null>((res) => {
         registration.addEventListener('updatefound', () => {
@@ -49,6 +81,21 @@ export const setUpServiceWorker = async (): Promise<[ServiceWorker|null,ServiceW
       if (!serviceWorker) {
         serviceWorker = await isInstalling;
       }
+
+      window.addEventListener('unload', async () => {
+        const sessions = window.__CodeEditorSessions || new Set();
+
+        for (let sessionId of sessions) {
+          const message: ClearContents = {
+            type: MESSAGE_TYPES.CLEAR_CONTENTS,
+            message: sessionId,
+          }
+
+          if (serviceWorker) {
+            serviceWorker.postMessage(message);
+          }
+        }
+      });
 
       return [serviceWorker, registration];
 
