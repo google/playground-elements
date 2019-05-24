@@ -47,25 +47,6 @@ export class CodeSampleEditor extends LitElement {
     port.addEventListener('message', this.onSwMessage);
   }
 
-  static get styles() {
-    return css`
-      #wrapper {
-        display: flex;
-        width: 100%;
-        height: 100%;
-      }
-
-      code-sample-editor-layout {
-        width: 50%;
-      }
-
-      iframe {
-        height: 100%;
-        width: 50%;
-      }
-    `;
-  }
-
   private onResponsesReady() {
     if (this.editorFrame) {
       this.editorFrame.contentWindow!.location.reload();
@@ -172,16 +153,28 @@ export class CodeSampleEditor extends LitElement {
 
   private generateEditorDom = async (projectFetched: Promise<FileRecord[]>): Promise<TemplateResult[]> => {
     const fileRecords = await projectFetched;
+    let firstEditor = true;
     const tabs: TemplateResult[] = fileRecords.map(fileRecord => {
-      return html`
-        <span slot="tab">${fileRecord.name}.${fileRecord.extension}</span>
+      const classIdentifier = `link-${fileRecord.name}${fileRecord.extension}`;
+      const tResult = html`
+        <span
+            slot="tab"
+            class=${classIdentifier}
+            ?selected=${firstEditor}>
+          ${fileRecord.name}.${fileRecord.extension}
+        </span>
         <textarea
             slot="editor"
+            class=${classIdentifier}
+            ?selected=${firstEditor}
             .value=${fileRecord.content}
             .name=${fileRecord.name}
             .extension=${fileRecord.extension}>
         </textarea>
       `;
+
+      firstEditor = false;
+      return tResult;
     });
 
     return tabs;
@@ -239,6 +232,30 @@ export class CodeSampleEditor extends LitElement {
         <iframe id="editorIframe" src="${swScope}index.html"></iframe>
       `;
     }
+  }
+
+  static get styles() {
+    return css`
+      :host {
+        display: block;
+        height: 350px;
+      }
+
+      #wrapper {
+        display: flex;
+        width: 100%;
+        height: 100%;
+      }
+
+      code-sample-editor-layout {
+        width: 50%;
+      }
+
+      iframe {
+        height: 100%;
+        width: 50%;
+      }
+    `;
   }
 
   render() {
