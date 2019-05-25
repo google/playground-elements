@@ -1,23 +1,23 @@
-'use strict';
+import {MESSAGE_TYPES as MESSAGE_TYPES_, Message, ClearContents, ProjectContent, ResponsesCleared} from './src/types';
+
+const swScope = self as ServiceWorkerGlobalScope;
+
 const MESSAGE_TYPES = {
   ESTABLISH_HANDSHAKE: "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED: "HANDSHAKE_RECEIVED",
   PROJECT_CONTENT: "PROJECT_CONTENT",
   RESPONSES_READY: "RESPONSES_READY",
+  AWAITING_CONTENT: "AWAITING_CONTENT",
   RESPONSES_CLEARED: "RESPONSES_CLEARED",
   CLEAR_CONTENTS: "CLEAR_CONTENTS",
-}
+} as unknown as typeof MESSAGE_TYPES_;
 
-/**
- *
- * @param {MessageEvent} e
- */
-const recieveMessageChannelHandshake = (e) => {
+const recieveMessageChannelHandshake = (e: MessageEvent) => {
   const ports = e.ports;
   if (ports && ports[0]) {
     const port = ports[0];
     port.start();
-    const handshakeReceivedMessage = {
+    const handshakeReceivedMessage: Message = {
       type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
     }
     port.addEventListener('message', onCommMessage(port));
@@ -25,25 +25,32 @@ const recieveMessageChannelHandshake = (e) => {
   }
 }
 
-/**@type {Map<string, Map<string, {content: string, init: ResponseInit}>>} */
-let fileResponseMap = new Map();
+interface ResponseParams {
+  content: string,
+  init: ResponseInit
+}
 
-const endWithSlash = (str) => {
+let fileResponseMap = new Map<string, Map<string, ResponseParams>>();
+
+const endWithSlash = (str:string) => {
   const endsWithSlash = str[str.length - 1] === '/';
   return endsWithSlash ? str : `${str}/`
 }
 
-self.addEventListener('fetch', (e) => {
-  if (!e.request || !e.request.url) {
+const onFetch = (e: FetchEvent) => {
+  if (!e.request || !e.request.url || !e.respondWith) {
     return;
   }
   const url = new URL(e.request.url);
   const href = url.href;
-  const scope = endWithSlash(self.registration.scope);
+  const scope = endWithSlash(swScope.registration.scope);
   if (href.startsWith(scope)) {
     const fullPath = href.substring(scope.length);
     const fullPathParts = fullPath.split('/');
     const sessionId = fullPathParts.shift();
+    if (!sessionId) {
+      return;
+    }
     const path = fullPathParts.join('/');
 
     const sessionMap = fileResponseMap.get(sessionId);
@@ -55,22 +62,22 @@ self.addEventListener('fetch', (e) => {
     }
   }
 
-});
+};
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(clients.claim());
-});
+self.addEventListener('fetch', onFetch);
 
-/**
- *
- * @param {MessagePort} port
- * @param {import('./src/types.js').ProjectContent} data
- */
-const onProjectContent = (port, data) => {
+const onActivate = (e: ActivateEvent) => {
+  if (!e.waitUntil) {
+    return;
+  }
+  e.waitUntil(swScope.clients.claim());
+};
+self.addEventListener('activate', onActivate);
+
+const onProjectContent = (port: MessagePort, data: ProjectContent) => {
   const fileRecords = data.message.records;
   const sessionId = data.message.sesionId;
-  /** @type {Map<string, {content: string, init: ResponseInit}>} */
-  const fileMap = new Map();
+  const fileMap = new Map<string, ResponseParams>();
   fileResponseMap.set(sessionId, fileMap);
 
   for (const fileRecord of fileRecords) {
@@ -87,86 +94,67 @@ const onProjectContent = (port, data) => {
         continue;
     }
 
-    /** @type {ResponseInit} */
-    let responseInit = {
+    let responseInit: ResponseInit = {
       headers: {
         'Content-Type': contentType
       }
     };
 
-    fileMap.set(
-        `${fileRecord.name}.${fileRecord.extension}`,
-        {
-          content: fileRecord.content,
-          init: responseInit
-        });
+    const filename = `${fileRecord.name}.${fileRecord.extension}`;
+    const responseParams: ResponseParams = {
+      content: fileRecord.content,
+      init: responseInit
+    };
+
+    fileMap.set(filename, responseParams)
   }
 
-  /** @type {import('./src/types.js').ResponsesReady} */
-  const responsesReady = {
-    type: MESSAGE_TYPES.RESPONSES_READY
+  const responsesReady: Message = {
+    type: MESSAGE_TYPES.RESPONSES_READY,
   }
 
   port.postMessage(responsesReady);
 }
 
-/**
- *
- * @param {import('./src/types.js').ClearContents} data
- * @param {MesssagePort=} port
- */
-const clearContents = (data, port) => {
+const clearContents = (data: ClearContents, port?: MessagePort) => {
   const sessionId = data.message;
   fileResponseMap.delete(sessionId);
   if (port) {
-    const responsesCleared = {
+    const responsesCleared: Message = {
       type: MESSAGE_TYPES.RESPONSES_CLEARED,
     }
     port.postMessage(responsesCleared);
   }
 }
 
-/**
- * @param {MessagePort} commPort
- */
-const onCommMessage = (commPort) => {
-  /**
-   * @param {MessageEvent}
-   */
-  return (e) => {
-    /** @type {import('./src/types.js').Message} */
-    const data = e.data;
-    const messageType = data.type;
+const onCommMessage = (commPort: MessagePort) => {
+  return (e: MessageEvent) => {
+    const data: Message = e.data;
 
-    switch (messageType) {
+    switch (data.type) {
       case MESSAGE_TYPES.PROJECT_CONTENT:
         onProjectContent(commPort, data);
         break;
       case MESSAGE_TYPES.CLEAR_CONTENTS:
-        clearContents(data, commPort);
+        clearContents(data as ClearContents, commPort);
         break;
       default:
-        console.error(`unknown message type ${messageType}`);
+        console.error(`unknown message type ${data.type}`);
         break;
     }
   }
 }
 
-/**
- *
- * @param {MessageEvent} e
- */
-const onMessage = (e) => {
-  /** @type {import('./src/types.js').Message} */
-  const data = e.data;
-  const type = data.type;
+const onMessage = (e: MessageEvent) => {
+  const data: Message = e.data;
 
-  switch (type) {
+  switch (data.type) {
     case MESSAGE_TYPES.ESTABLISH_HANDSHAKE:
       recieveMessageChannelHandshake(e);
       break;
     case MESSAGE_TYPES.CLEAR_CONTENTS:
       clearContents(data);
+      data.message
       break;
     default:
       break;
