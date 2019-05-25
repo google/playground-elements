@@ -5,6 +5,24 @@ declare global {
   interface ImportMeta {
     url: string
   }
+
+  interface FetchEvent extends Event {
+    request?: Request;
+    respondWith?: (response: Response | Promise<Response>) => void;
+  }
+
+  interface ActivateEvent extends Event {
+    waitUntil?: (waitable?: Promise<any>) => void;
+  }
+
+  interface Clients {
+    claim: () => Promise<void>
+  }
+
+  interface ServiceWorkerGlobalScope extends Window {
+    registration: ServiceWorkerRegistration,
+    clients: Clients,
+  }
 }
 
 
@@ -29,9 +47,10 @@ export interface ProjectManifest {
     [filename: string]: FileOptions
   }
 }
-export interface Message {
-  type: MESSAGE_TYPES;
-  message?: any|never;
+
+interface ProjectContentMessage {
+  records: FileRecord[],
+  sesionId: string,
 }
 
 export enum MESSAGE_TYPES {
@@ -44,15 +63,26 @@ export enum MESSAGE_TYPES {
   CLEAR_CONTENTS = "CLEAR_CONTENTS",
 }
 
-export interface EstablishHandshake extends Message {
+export type Message =
+  EstablishHandshake |
+  HandshakeRecieved |
+  ProjectContent |
+  ResponsesReady |
+  AwaitingContent |
+  ClearContents |
+  ResponsesCleared;
+
+
+
+export interface EstablishHandshake {
   type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE;
 }
 
-export interface HandshakeRecieved extends Message {
+export interface HandshakeRecieved {
   type: MESSAGE_TYPES.HANDSHAKE_RECEIVED;
 }
 
-export interface ProjectContent extends Message {
+export interface ProjectContent {
   type: MESSAGE_TYPES.PROJECT_CONTENT,
   message: {
     records: FileRecord[],
@@ -60,15 +90,19 @@ export interface ProjectContent extends Message {
   }
 }
 
-export interface ResponsesReady extends Message {
+export interface ResponsesReady {
   type: MESSAGE_TYPES.RESPONSES_READY,
 }
 
-export interface AwaitingContent extends Message {
+export interface AwaitingContent {
   type: MESSAGE_TYPES.AWAITING_CONTENT,
 }
 
-export interface ClearContents extends Message {
+export interface ClearContents {
   type: MESSAGE_TYPES.CLEAR_CONTENTS,
   message: string
+}
+
+export interface ResponsesCleared {
+  type: MESSAGE_TYPES.RESPONSES_CLEARED,
 }

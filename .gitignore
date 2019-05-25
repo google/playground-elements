@@ -3,3 +3,5 @@
 src/*.js
 src/*.js.map
 src/*.d.ts
+sw.js*
+sw.d.ts

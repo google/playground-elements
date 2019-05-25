@@ -71,10 +71,9 @@ export class CodeSampleEditor extends LitElement {
   }
 
   private onSwMessage = async (e: MessageEvent) => {
-    const data = e.data as Message;
-    const messageType = data.type;
+    const data: Message = e.data;
 
-    switch (messageType) {
+    switch (data.type) {
       case MESSAGE_TYPES.RESPONSES_READY:
         this.onResponsesReady();
         break;
@@ -82,7 +81,7 @@ export class CodeSampleEditor extends LitElement {
         this.onResponsesCleared();
         break;
       default:
-          console.error(`unknown message type ${messageType}`);
+          console.error(`unknown message type ${data.type}`);
         break;
     }
   }
@@ -143,7 +142,7 @@ export class CodeSampleEditor extends LitElement {
       return;
     }
 
-    const contentsChangedMessage: ClearContents = {
+    const contentsChangedMessage: Message = {
       type: MESSAGE_TYPES.CLEAR_CONTENTS,
       message: this.sessionId,
     }
@@ -164,7 +163,7 @@ export class CodeSampleEditor extends LitElement {
     const content: FileRecord[] = await this.projectContentsReady;
     // TODO (emarquez): Implement babel transforms here
 
-    const contentMessage: ProjectContent = {
+    const contentMessage: Message = {
       type: MESSAGE_TYPES.PROJECT_CONTENT,
       message: {
         records: content,

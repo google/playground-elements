@@ -1,4 +1,4 @@
-import { Message, MESSAGE_TYPES, EstablishHandshake, ClearContents, FileRecord, ProjectManifest, AcceptableExtensions } from "./types.js";
+import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types.js";
 import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants.js";
 
 const generateRandomString = (): string => {
@@ -13,7 +13,7 @@ export const clearSession = (sessionId: string, swPort: MessagePort|null) => {
   }
 
   if (swPort) {
-    const message: ClearContents = {
+    const message: Message = {
       type: MESSAGE_TYPES.CLEAR_CONTENTS,
       message: sessionId
     }
@@ -37,7 +37,7 @@ export const generateUniqueSessionId = ():string => {
 export const establishMessageChannelHandshake = (messageTarget: ServiceWorker):Promise<MessagePort> => {
   return new Promise((res) => {
     const mc = new MessageChannel();
-    const establishHandshakeMessage:EstablishHandshake = {
+    const establishHandshakeMessage: Message = {
       type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE
     };
 
@@ -87,7 +87,7 @@ export const setUpServiceWorker = async (): Promise<[ServiceWorker|null,ServiceW
         const sessions = window.__CodeEditorSessions || new Set();
 
         for (let sessionId of sessions) {
-          const message: ClearContents = {
+          const message: Message = {
             type: MESSAGE_TYPES.CLEAR_CONTENTS,
             message: sessionId,
           }
