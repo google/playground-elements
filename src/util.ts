@@ -63,13 +63,14 @@ const getSwDir = () => {
   return currentFilepathParts.join('/')
 };
 
-export const setUpServiceWorker = async (): Promise<[ServiceWorker|null,ServiceWorkerRegistration|null]> => {
+export const setUpServiceWorker = async (sandboxScope: string): Promise<[ServiceWorker|null,ServiceWorkerRegistration|null]> => {
   if ('serviceWorker' in navigator) {
     try {
       const swFileDir = getSwDir();
+      const sScopeSlash = endWithSlash(sandboxScope);
       const registration = await navigator.serviceWorker.register(
         `${swFileDir}/sw.js`,
-        {scope: `${swFileDir}/modules/`});
+        {scope: `${swFileDir}/${sScopeSlash}`});
 
       const isInstalling = new Promise<ServiceWorker|null>((res) => {
         registration.addEventListener('updatefound', () => {

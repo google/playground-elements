@@ -12,31 +12,63 @@ export class CodeSampleEditor extends LitElement {
   projectPath: string|null = null;
 
   @property({type: Boolean})
-  shouldRenderFrame = false;
+  private shouldRenderFrame = false;
 
   @query('#editorIframe')
   editorFrame?: HTMLIFrameElement;
+
+  @property({attribute: 'sandbox-scope', type: String})
+  sandboxScope = 'modules';
 
   @queryAll('code-sample-editor-layout textarea')
   editorTextareas!: NodeListOf<CodeEditorTextarea>;
 
   private lastProjectPath: string|null = null;
+  private lastSandboxScope: string|null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
-  private swSetup = setUpServiceWorker();
-  private swPortEstablished:Promise<null|MessagePort> = this.swSetup
-      .then((response) => {
-    const sw = response[0];
-    if (sw) {
-      return establishMessageChannelHandshake(sw);
-    } else {
-      return Promise.resolve(null);
-    }
-  });
+  private swSetup:Promise<[ServiceWorker | null, ServiceWorkerRegistration | null]> =
+      Promise.resolve([null, null])
+  private swPortEstablished:Promise<null|MessagePort> = Promise.resolve(null);
   private sessionId: string = generateUniqueSessionId();
 
-  constructor() {
-    super();
-    this.main();
+  private setUpServiceWorker = ():boolean => {
+    if (this.lastSandboxScope !== this.sandboxScope) {
+      this.lastSandboxScope = this.sandboxScope;
+      // remove previous event listener
+      this.swPortEstablished.then(port => {
+        if (!port) {
+          return;
+        }
+
+        port.removeEventListener('message', this.onSwMessage);
+        clearSession(this.sessionId, port);
+      });
+
+      this.swSetup = setUpServiceWorker(this.sandboxScope);
+
+
+      this.swPortEstablished = this.swSetup
+          .then((response) => {
+        const sw = response[0];
+        if (sw) {
+          return establishMessageChannelHandshake(sw);
+        } else {
+          return Promise.resolve(null);
+        }
+      }).then(port => {
+        if (!port) {
+          return port;
+        }
+        port.addEventListener('message', this.onSwMessage);
+        return port;
+      })
+
+      this.shouldRenderFrame = false;
+
+      return true;
+    }
+
+    return false;
   }
 
   async disconnectedCallback() {
@@ -47,15 +79,6 @@ export class CodeSampleEditor extends LitElement {
     }
 
     clearSession(this.sessionId, await this.swPortEstablished);
-  }
-
-  private async main() {
-    const port = await this.swPortEstablished;
-    if (!port) {
-      return;
-    }
-
-    port.addEventListener('message', this.onSwMessage);
   }
 
   private onResponsesReady() {
@@ -177,9 +200,7 @@ export class CodeSampleEditor extends LitElement {
     const rawFileName: string|undefined = e.detail;
     const oldFileRecords = this.getFileRecordsFromClient();
     const newFileRecords = addFileRecordFromName(rawFileName, oldFileRecords);
-    console.log(newFileRecords);
     if (newFileRecords) {
-      console.log(newFileRecords);
       await this.saveFiles(newFileRecords);
       this.requestUpdate();
     }
@@ -227,9 +248,15 @@ export class CodeSampleEditor extends LitElement {
   }
 
   render() {
-    if (this.projectPath && this.lastProjectPath !== this.projectPath) {
+    const isNewSW = this.setUpServiceWorker();
+    const isNewProject = this.projectPath && this.lastProjectPath !== this.projectPath;
+
+    if (isNewProject) {
       this.lastProjectPath = this.projectPath;
-      this.projectContentsReady = this.fetchProject(this.projectPath);
+      this.projectContentsReady = this.fetchProject(this.projectPath!);
+    }
+
+    if (isNewSW || isNewProject) {
       this.sendContentsToSw();
     }
 
