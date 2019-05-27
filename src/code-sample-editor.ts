@@ -11,18 +11,17 @@ export class CodeSampleEditor extends LitElement {
   @property({attribute: 'project-path', type: String})
   projectPath: string|null = null;
 
-  @property({type: Boolean})
-  private shouldRenderFrame = false;
+  @property({attribute: 'sandbox-scope', type: String})
+  sandboxScope = 'modules';
 
   @query('#editorIframe')
   editorFrame?: HTMLIFrameElement;
 
-  @property({attribute: 'sandbox-scope', type: String})
-  sandboxScope = 'modules';
 
   @queryAll('code-sample-editor-layout textarea')
   editorTextareas!: NodeListOf<CodeEditorTextarea>;
 
+  private shouldRenderFrame = false;
   private lastProjectPath: string|null = null;
   private lastSandboxScope: string|null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
@@ -86,6 +85,7 @@ export class CodeSampleEditor extends LitElement {
       this.editorFrame.contentWindow!.location.reload();
     } else {
       this.shouldRenderFrame = true;
+      this.requestUpdate();
     }
   }
 
