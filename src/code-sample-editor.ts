@@ -30,7 +30,7 @@ export class CodeSampleEditor extends LitElement {
   private swPortEstablished:Promise<null|MessagePort> = Promise.resolve(null);
   private sessionId: string = generateUniqueSessionId();
 
-  private setUpServiceWorker = ():boolean => {
+  private connectToServiceWorker = ():boolean => {
     if (this.lastSandboxScope !== this.sandboxScope) {
       this.lastSandboxScope = this.sandboxScope;
       // remove previous event listener
@@ -248,7 +248,7 @@ export class CodeSampleEditor extends LitElement {
   }
 
   render() {
-    const isNewSW = this.setUpServiceWorker();
+    const isNewSW = this.connectToServiceWorker();
     const isNewProject = this.projectPath && this.lastProjectPath !== this.projectPath;
 
     if (isNewProject) {
