@@ -66,14 +66,6 @@ const onFetch = (e: FetchEvent) => {
 
 self.addEventListener('fetch', onFetch);
 
-const onActivate = (e: ActivateEvent) => {
-  if (!e.waitUntil) {
-    return;
-  }
-  e.waitUntil(swScope.clients.claim());
-};
-self.addEventListener('activate', onActivate);
-
 const onProjectContent = (port: MessagePort, data: ProjectContent) => {
   const fileRecords = data.message.records;
   const sessionId = data.message.sesionId;
