@@ -9,7 +9,7 @@ import './code-sample-editor-layout';
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
   @property({attribute: 'project-path', type: String})
-  projectPath: string|null = null;
+  projectPath?: string;
 
   @property({attribute: 'sandbox-scope', type: String})
   sandboxScope = 'modules';
@@ -22,7 +22,7 @@ export class CodeSampleEditor extends LitElement {
   editorTextareas!: NodeListOf<CodeEditorTextarea>;
 
   private shouldRenderFrame = false;
-  private lastProjectPath: string|null = null;
+  private lastProjectPath?: string;
   private lastSandboxScope: string|null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
   private swSetup:Promise<[ServiceWorker | null, ServiceWorkerRegistration | null]> =
