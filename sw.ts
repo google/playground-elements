@@ -146,7 +146,6 @@ const onMessage = (e: MessageEvent) => {
       break;
     case MESSAGE_TYPES.CLEAR_CONTENTS:
       clearContents(data);
-      data.message
       break;
     default:
       break;

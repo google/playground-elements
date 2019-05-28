@@ -45,7 +45,6 @@ export class CodeSampleEditor extends LitElement {
 
       this.swSetup = setUpServiceWorker(this.sandboxScope);
 
-
       this.swPortEstablished = this.swSetup
           .then((response) => {
         const sw = response[0];
