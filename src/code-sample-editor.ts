@@ -172,7 +172,7 @@ export class CodeSampleEditor extends LitElement {
     port.postMessage(contentsChangedMessage);
   }
 
-  private onSave = (e: Event) => {
+  private onSave (e: Event) {
     const fileRecords = this.getFileRecordsFromClient();
     this.saveFiles(fileRecords);
   }
@@ -196,7 +196,7 @@ export class CodeSampleEditor extends LitElement {
     port.postMessage(contentMessage);
   }
 
-  private onCreateFile = async (e: CustomEvent) => {
+  private async onCreateFile (e: CustomEvent) {
     const rawFileName: string|undefined = e.detail;
     const oldFileRecords = this.getFileRecordsFromClient();
     const newFileRecords = addFileRecordFromName(rawFileName, oldFileRecords);
