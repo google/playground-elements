@@ -1,10 +1,12 @@
 import { LitElement, html, customElement, css, property, TemplateResult, query, queryAll } from 'lit-element';
 import { until } from 'lit-html/directives/until';
-import { FileRecord, CodeEditorTextarea, Message, MESSAGE_TYPES, ProjectContent, ClearContents, AcceptableExtensions } from './types';
-import { EMPTY_INDEX, ACCEPTABLE_EXTENSIONS } from './constants';
-import { setUpServiceWorker, establishMessageChannelHandshake, endWithSlash, generateUniqueSessionId, clearSession, fetchProject, addFileRecordFromName } from './util';
+import { FileRecord, CodeEditorTextarea } from './types';
+import { EMPTY_INDEX } from './constants';
+import { endWithSlash, generateUniqueSessionId, fetchProject, addFileRecordFromName, setUpServiceWorker } from './util';
+import * as Comlink from 'comlink';
 
 import './code-sample-editor-layout';
+import { SwControllerInterfaceAPI } from '../sw';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
@@ -25,44 +27,24 @@ export class CodeSampleEditor extends LitElement {
   private lastProjectPath?: string;
   private lastSandboxScope: string|null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
-  private swSetup:Promise<[ServiceWorker | null, ServiceWorkerRegistration | null]> =
-      Promise.resolve([null, null])
-  private swPortEstablished:Promise<null|MessagePort> = Promise.resolve(null);
+  private remoteSw:Promise<null|Comlink.Remote<SwControllerInterfaceAPI>> = Promise.resolve(null);
   private sessionId: string = generateUniqueSessionId();
 
   private connectToServiceWorker = ():boolean => {
     if (this.lastSandboxScope !== this.sandboxScope) {
       this.lastSandboxScope = this.sandboxScope;
-      // remove previous event listener
-      this.swPortEstablished.then(port => {
-        if (!port) {
-          return;
+
+      this.remoteSw = this.remoteSw.then(sw => {
+        if (sw) {
+          return sw.clearContents(this.sessionId);
         }
 
-        port.removeEventListener('message', this.onSwMessage);
-        clearSession(this.sessionId, port);
+        return;
+      }).then(async _ => {
+        return await setUpServiceWorker(this.sessionId);
       });
 
-      this.swSetup = setUpServiceWorker(this.sandboxScope);
-
-      this.swPortEstablished = this.swSetup
-          .then((response) => {
-        const sw = response[0];
-        if (sw) {
-          return establishMessageChannelHandshake(sw);
-        } else {
-          return Promise.resolve(null);
-        }
-      }).then(port => {
-        if (!port) {
-          return port;
-        }
-        port.addEventListener('message', this.onSwMessage);
-        return port;
-      })
-
       this.shouldRenderFrame = false;
-
       return true;
     }
 
@@ -71,12 +53,10 @@ export class CodeSampleEditor extends LitElement {
 
   async disconnectedCallback() {
     super.disconnectedCallback();
-    const swPort = await this.swPortEstablished;
-    if (swPort) {
-      swPort.removeEventListener('message', this.onSwMessage);
+    const sw = await this.remoteSw;
+    if (sw) {
+      sw.clearContents(this.sessionId);
     }
-
-    clearSession(this.sessionId, await this.swPortEstablished);
   }
 
   private onResponsesReady() {
@@ -85,26 +65,6 @@ export class CodeSampleEditor extends LitElement {
     } else {
       this.shouldRenderFrame = true;
       this.requestUpdate();
-    }
-  }
-
-  private async onResponsesCleared() {
-    this.sendContentsToSw();
-  }
-
-  private onSwMessage = async (e: MessageEvent) => {
-    const data: Message = e.data;
-
-    switch (data.type) {
-      case MESSAGE_TYPES.RESPONSES_READY:
-        this.onResponsesReady();
-        break;
-      case MESSAGE_TYPES.RESPONSES_CLEARED:
-        this.onResponsesCleared();
-        break;
-      default:
-          console.error(`unknown message type ${data.type}`);
-        break;
     }
   }
 
@@ -159,16 +119,13 @@ export class CodeSampleEditor extends LitElement {
   private async saveFiles (fileRecords: FileRecord[]) {
     this.projectContentsReady = Promise.resolve(fileRecords);
 
-    const port = await this.swPortEstablished;
-    if (!port) {
+    const sw = await this.remoteSw;
+    if (!sw) {
       return;
     }
 
-    const contentsChangedMessage: Message = {
-      type: MESSAGE_TYPES.CLEAR_CONTENTS,
-      message: this.sessionId,
-    }
-    port.postMessage(contentsChangedMessage);
+    await sw.clearContents(this.sessionId);
+    this.sendContentsToSw();
   }
 
   private onSave (e: Event) {
@@ -177,22 +134,16 @@ export class CodeSampleEditor extends LitElement {
   }
 
   private async sendContentsToSw() {
-    const port = await this.swPortEstablished;
-    if (!port) {
+    const sw = await this.remoteSw;
+    if (!sw) {
       return;
     }
 
     const content: FileRecord[] = await this.projectContentsReady;
     // TODO (emarquez): Implement babel transforms here
 
-    const contentMessage: Message = {
-      type: MESSAGE_TYPES.PROJECT_CONTENT,
-      message: {
-        records: content,
-        sesionId: this.sessionId,
-      }
-    }
-    port.postMessage(contentMessage);
+    await sw.setProjectContent(content, this.sessionId)
+    this.onResponsesReady();
   }
 
   private async onCreateFile (e: CustomEvent) {
@@ -209,12 +160,12 @@ export class CodeSampleEditor extends LitElement {
     if (!this.shouldRenderFrame) {
       return html``;
     } else {
-      const [sw, registration] = await this.swSetup;
-      if (!sw || !registration) {
+      const sw = await this.remoteSw;
+      if (!sw) {
         return html``;
       }
 
-      const swScope = endWithSlash(registration.scope);
+      const swScope = endWithSlash(await sw.scope);
       return html`
         <iframe id="editorIframe" src="${swScope}${this.sessionId}/index.html">
         </iframe>

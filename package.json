@@ -8,7 +8,8 @@
     "watch": "tsc --watch",
     "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postinstall": "cp node_modules/comlink/dist/umd/comlink.js libs/comlink.js"
   },
   "author": "",
   "license": "BSD-3-Clause",
@@ -16,6 +17,7 @@
     "polyserve": "^0.27.15"
   },
   "dependencies": {
+    "comlink": "^4.0.1",
     "lit-element": "^2.1.0",
     "lit-html": "^1.0.0"
   }

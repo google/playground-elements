@@ -1,15 +1,14 @@
-import {MESSAGE_TYPES as MESSAGE_TYPES_, Message, ClearContents, ProjectContent, ResponsesCleared} from './src/types';
+import { MESSAGE_TYPES as MESSAGE_TYPES_, Message, FileRecord } from './src/types';
+import * as CL from 'comlink';
+
+importScripts('./libs/comlink.js');
 
 const swScope = self as ServiceWorkerGlobalScope;
+const Comlink = (swScope as any).Comlink as typeof CL;
 
 const MESSAGE_TYPES = {
   ESTABLISH_HANDSHAKE: "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED: "HANDSHAKE_RECEIVED",
-  PROJECT_CONTENT: "PROJECT_CONTENT",
-  RESPONSES_READY: "RESPONSES_READY",
-  AWAITING_CONTENT: "AWAITING_CONTENT",
-  RESPONSES_CLEARED: "RESPONSES_CLEARED",
-  CLEAR_CONTENTS: "CLEAR_CONTENTS",
 } as unknown as typeof MESSAGE_TYPES_;
 
 const recieveMessageChannelHandshake = (e: MessageEvent) => {
@@ -20,7 +19,7 @@ const recieveMessageChannelHandshake = (e: MessageEvent) => {
     const handshakeReceivedMessage: Message = {
       type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
     }
-    port.addEventListener('message', onCommMessage(port));
+    Comlink.expose(SwController, port);
     port.postMessage(handshakeReceivedMessage);
   }
 }
@@ -66,74 +65,56 @@ const onFetch = (e: FetchEvent) => {
 
 self.addEventListener('fetch', onFetch);
 
-const onProjectContent = (port: MessagePort, data: ProjectContent) => {
-  const fileRecords = data.message.records;
-  const sessionId = data.message.sesionId;
-  const fileMap = new Map<string, ResponseParams>();
-  fileResponseMap.set(sessionId, fileMap);
+export type SwControllerInterfaceAPI = typeof SwControllerInterface;
 
-  for (const fileRecord of fileRecords) {
-    let contentType = '';
+export declare class SwControllerInterface {
+  static setProjectContent(fileRecords: FileRecord[], sessionId: string): void;
+  static clearContents(sessionId: string): void;
+  static readonly scope: string;
+};
 
-    switch (fileRecord.extension) {
-      case 'html':
-        contentType = 'text/html; charset=UTF-8';
-        break;
-      case 'js':
-        contentType = 'application/javascript; charset=UTF-8';
-        break;
-      default:
-        continue;
-    }
+class SwController implements SwControllerInterface {
+  static setProjectContent(fileRecords: FileRecord[], sessionId: string) {
+    const fileMap = new Map<string, ResponseParams>();
+    fileResponseMap.set(sessionId, fileMap);
 
-    let responseInit: ResponseInit = {
-      headers: {
-        'Content-Type': contentType
+    for (const fileRecord of fileRecords) {
+      let contentType = '';
+
+      switch (fileRecord.extension) {
+        case 'html':
+          contentType = 'text/html; charset=UTF-8';
+          break;
+        case 'js':
+          contentType = 'application/javascript; charset=UTF-8';
+          break;
+        default:
+          continue;
       }
-    };
 
-    const filename = `${fileRecord.name}.${fileRecord.extension}`;
-    const responseParams: ResponseParams = {
-      content: fileRecord.content,
-      init: responseInit
-    };
+      let responseInit: ResponseInit = {
+        headers: {
+          'Content-Type': contentType
+        }
+      };
 
-    fileMap.set(filename, responseParams)
-  }
+      const filename = `${fileRecord.name}.${fileRecord.extension}`;
+      const responseParams: ResponseParams = {
+        content: fileRecord.content,
+        init: responseInit
+      };
 
-  const responsesReady: Message = {
-    type: MESSAGE_TYPES.RESPONSES_READY,
-  }
-
-  port.postMessage(responsesReady);
-}
-
-const clearContents = (data: ClearContents, port?: MessagePort) => {
-  const sessionId = data.message;
-  fileResponseMap.delete(sessionId);
-  if (port) {
-    const responsesCleared: Message = {
-      type: MESSAGE_TYPES.RESPONSES_CLEARED,
+      fileMap.set(filename, responseParams)
     }
-    port.postMessage(responsesCleared);
   }
-}
 
-const onCommMessage = (commPort: MessagePort) => {
-  return (e: MessageEvent) => {
-    const data: Message = e.data;
+  static clearContents (sessionId: string) {
+    console.log('clearing contents')
+    fileResponseMap.delete(sessionId);
+  }
 
-    switch (data.type) {
-      case MESSAGE_TYPES.PROJECT_CONTENT:
-        onProjectContent(commPort, data);
-        break;
-      case MESSAGE_TYPES.CLEAR_CONTENTS:
-        clearContents(data as ClearContents, commPort);
-        break;
-      default:
-        console.error(`unknown message type ${data.type}`);
-        break;
-    }
+  static get scope(): string {
+    return swScope.registration.scope;
   }
 }
 
@@ -143,11 +124,6 @@ const onMessage = (e: MessageEvent) => {
   switch (data.type) {
     case MESSAGE_TYPES.ESTABLISH_HANDSHAKE:
       recieveMessageChannelHandshake(e);
-      break;
-    case MESSAGE_TYPES.CLEAR_CONTENTS:
-      clearContents(data);
-      break;
-    default:
       break;
   }
 }
