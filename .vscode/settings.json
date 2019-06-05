@@ -1,7 +1,5 @@
 {
   "files.exclude": {
     "**/bundle": true,
-    "sw.d.ts": true,
-    "sw.js*": true,
   }
 }

@@ -1,7 +1,7 @@
-import { MESSAGE_TYPES as MESSAGE_TYPES_, Message, FileRecord } from './src/types';
+import { MESSAGE_TYPES as MESSAGE_TYPES_, Message, FileRecord } from './lib/types';
 import * as CL from 'comlink';
 
-importScripts('./libs/comlink.js');
+importScripts('./lib/comlink.js');
 
 const swScope = self as ServiceWorkerGlobalScope;
 const Comlink = (swScope as any).Comlink as typeof CL;

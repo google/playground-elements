@@ -20,7 +20,6 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "custom_typings/**/*.d.ts",
-    "sw.ts"
   ],
   "exclude": [
     "test/fixtures/**/*.*",

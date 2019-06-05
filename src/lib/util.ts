@@ -1,5 +1,5 @@
-import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types.js";
-import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants.js";
+import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types";
+import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants";
 import { Remote, wrap } from 'comlink';
 import { SwControllerInterfaceAPI } from "../sw";
 

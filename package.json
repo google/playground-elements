@@ -4,12 +4,13 @@
   "description": "",
   "module": "lib/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run bootstrap && tsc",
     "watch": "tsc --watch",
     "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
     "prepublishOnly": "npm run build",
-    "postinstall": "cp node_modules/comlink/dist/umd/comlink.js libs/comlink.js"
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "cp node_modules/comlink/dist/umd/comlink.js lib/comlink.js"
   },
   "author": "",
   "license": "BSD-3-Clause",

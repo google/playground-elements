@@ -1,8 +1,8 @@
 /packages/*/node_modules
 /node_modules
-src/*.js
-src/*.js.map
-src/*.d.ts
+/src/*.js
+/src/*.js.map
+/src/*.d.ts
 sw.js*
 sw.d.ts
-libs/
+/lib/
