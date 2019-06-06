@@ -6,7 +6,7 @@ import { endWithSlash, generateUniqueSessionId, fetchProject, addFileRecordFromN
 import * as Comlink from 'comlink';
 
 import './code-sample-editor-layout';
-import { SwControllerInterfaceAPI } from '../sw';
+import { SwControllerAPI } from '../sw';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
@@ -27,7 +27,7 @@ export class CodeSampleEditor extends LitElement {
   private lastProjectPath?: string;
   private lastSandboxScope: string|null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([EMPTY_INDEX]);
-  private remoteSw:Promise<null|Comlink.Remote<SwControllerInterfaceAPI>> = Promise.resolve(null);
+  private remoteSw:Promise<null|Comlink.Remote<SwControllerAPI>> = Promise.resolve(null);
   private sessionId: string = generateUniqueSessionId();
 
   private connectToServiceWorker = ():boolean => {

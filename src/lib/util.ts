@@ -1,7 +1,7 @@
 import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types";
 import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants";
 import { Remote, wrap } from 'comlink';
-import { SwControllerInterfaceAPI } from "../sw";
+import { SwControllerAPI } from "../sw";
 
 const generateRandomString = (): string => {
   const arr = new Uint32Array(1);
@@ -51,7 +51,7 @@ const getSwDir = () => {
   return currentFilepathParts.join('/')
 };
 
-export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<SwControllerInterfaceAPI>|null> => {
+export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<SwControllerAPI>|null> => {
   if ('serviceWorker' in navigator) {
     try {
       const swFileDir = getSwDir();
@@ -77,7 +77,7 @@ export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<S
       }
 
       const port = await establishMessageChannelHandshake(serviceWorker)
-      const linkedSw = wrap<SwControllerInterfaceAPI>(port);
+      const linkedSw = wrap<SwControllerAPI>(port);
 
       window.addEventListener('unload', async () => {
         const sessions = window.__CodeEditorSessions || new Set();

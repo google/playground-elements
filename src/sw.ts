@@ -65,7 +65,7 @@ const onFetch = (e: FetchEvent) => {
 
 self.addEventListener('fetch', onFetch);
 
-export type SwControllerInterfaceAPI = typeof SwControllerInterface;
+export type SwControllerAPI = typeof SwControllerInterface;
 
 export declare class SwControllerInterface {
   static setProjectContent(fileRecords: FileRecord[], sessionId: string): void;
