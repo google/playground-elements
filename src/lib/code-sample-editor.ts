@@ -41,7 +41,7 @@ export class CodeSampleEditor extends LitElement {
 
         return;
       }).then(async _ => {
-        return await setUpServiceWorker(this.sessionId);
+        return await setUpServiceWorker(this.sandboxScope);
       });
 
       this.shouldRenderFrame = false;
