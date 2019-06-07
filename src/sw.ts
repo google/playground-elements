@@ -109,7 +109,6 @@ class SwController implements SwControllerInterface {
   }
 
   static clearContents (sessionId: string) {
-    console.log('clearing contents')
     fileResponseMap.delete(sessionId);
   }
 
