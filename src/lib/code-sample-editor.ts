@@ -34,15 +34,9 @@ export class CodeSampleEditor extends LitElement {
     if (this.lastSandboxScope !== this.sandboxScope) {
       this.lastSandboxScope = this.sandboxScope;
 
-      this.remoteSw = this.remoteSw.then(sw => {
-        if (sw) {
-          return sw.clearContents(this.sessionId);
-        }
-
-        return;
-      }).then(async _ => {
-        return await setUpServiceWorker(this.sandboxScope);
-      });
+      this.remoteSw = this.remoteSw
+          .then(async sw => sw && await sw.clearContents(this.sessionId))
+          .then(async (_: any) => await setUpServiceWorker(this.sandboxScope));
 
       this.shouldRenderFrame = false;
       return true;

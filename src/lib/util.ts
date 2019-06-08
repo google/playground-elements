@@ -98,10 +98,7 @@ export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<S
   }
 }
 
-export const endWithSlash = (str: string) => {
-  const endWithSlash = str[str.length - 1] === '/';
-  return endWithSlash ? str : `${str}/`
-}
+export const endWithSlash = (str: string) => str.replace(/\/?$/, '/');
 
 export const fetchProject = async (projectPath: string): Promise<FileRecord[]> => {
   try {

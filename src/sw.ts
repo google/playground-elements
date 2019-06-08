@@ -1,4 +1,5 @@
 import { MESSAGE_TYPES, Message, FileRecord } from './lib/types';
+import { endWithSlash } from './lib/util';
 import * as Comlink from 'comlink';
 
 const swScope = self as ServiceWorkerGlobalScope;
@@ -22,11 +23,6 @@ interface ResponseParams {
 }
 
 let fileResponseMap = new Map<string, Map<string, ResponseParams>>();
-
-const endWithSlash = (str:string) => {
-  const endsWithSlash = str[str.length - 1] === '/';
-  return endsWithSlash ? str : `${str}/`
-}
 
 const onFetch = (e: FetchEvent) => {
   if (!e.request || !e.request.url || !e.respondWith) {
