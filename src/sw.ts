@@ -1,15 +1,7 @@
-import { MESSAGE_TYPES as MESSAGE_TYPES_, Message, FileRecord } from './lib/types';
-import * as CL from 'comlink';
-
-importScripts('./lib/comlink.js');
+import { MESSAGE_TYPES, Message, FileRecord } from './lib/types';
+import * as Comlink from 'comlink';
 
 const swScope = self as ServiceWorkerGlobalScope;
-const Comlink = (swScope as any).Comlink as typeof CL;
-
-const MESSAGE_TYPES = {
-  ESTABLISH_HANDSHAKE: "ESTABLISH_HANDSHAKE",
-  HANDSHAKE_RECEIVED: "HANDSHAKE_RECEIVED",
-} as unknown as typeof MESSAGE_TYPES_;
 
 const recieveMessageChannelHandshake = (e: MessageEvent) => {
   const ports = e.ports;
@@ -63,17 +55,11 @@ const onFetch = (e: FetchEvent) => {
 
 };
 
-self.addEventListener('fetch', onFetch);
+self.addEventListener('fetch', (onFetch as EventListenerOrEventListenerObject));
 
-export type SwControllerAPI = typeof SwControllerInterface;
+export type SwControllerAPI = typeof SwController;
 
-export declare class SwControllerInterface {
-  static setProjectContent(fileRecords: FileRecord[], sessionId: string): void;
-  static clearContents(sessionId: string): void;
-  static readonly scope: string;
-};
-
-class SwController implements SwControllerInterface {
+export class SwController {
   static setProjectContent(fileRecords: FileRecord[], sessionId: string) {
     const fileMap = new Map<string, ResponseParams>();
     fileResponseMap.set(sessionId, fileMap);

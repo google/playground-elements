@@ -4,8 +4,8 @@
   "description": "",
   "module": "lib/index.js",
   "scripts": {
-    "build": "npm run bootstrap && tsc",
-    "watch": "tsc --watch",
+    "build": "tsc && rollup -c rollup.config.js",
+    "watch": "tsc-watch --onSuccess \"rollup -c rollup.config.js\"",
     "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
     "prepublishOnly": "npm run build",
@@ -15,7 +15,11 @@
   "author": "",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "polyserve": "^0.27.15"
+    "polyserve": "^0.27.15",
+    "rollup": "^1.14.4",
+    "rollup-plugin-node-resolve": "^5.0.1",
+    "tsc-watch": "^2.2.1",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
     "comlink": "^4.0.1",
