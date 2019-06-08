@@ -9,14 +9,27 @@ declare global {
   interface FetchEvent extends Event {
     readonly request?: Request;
     respondWith?: (response: Response | Promise<Response>) => void;
+    readonly clientId: string;
   }
 
   interface ActivateEvent extends Event {
     waitUntil?: (waitable?: Promise<any>) => void;
   }
 
+  type clientType = "window" | "worker" | "sharedworker";
+
+  interface Client {
+    postMessage(message: any, transfer?: Transferable[]): void;
+    postMessage(message: any, options?: {transfer?: any[];}): void;
+    readonly id: string;
+    readonly type: clientType;
+    readonly url: string;
+    readonly navigate: (url: string) => void;
+  }
+
   interface Clients {
-    claim: () => Promise<void>
+    claim: () => Promise<void>;
+    get: (id: string) => Promise<Client|undefined>
   }
 
   interface ServiceWorkerGlobalScope extends Window {
