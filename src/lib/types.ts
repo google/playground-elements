@@ -7,16 +7,29 @@ declare global {
   }
 
   interface FetchEvent extends Event {
-    request?: Request;
+    readonly request?: Request;
     respondWith?: (response: Response | Promise<Response>) => void;
+    readonly clientId: string;
   }
 
   interface ActivateEvent extends Event {
     waitUntil?: (waitable?: Promise<any>) => void;
   }
 
+  type clientType = "window" | "worker" | "sharedworker";
+
+  interface Client {
+    postMessage(message: any, transfer?: Transferable[]): void;
+    postMessage(message: any, options?: {transfer?: any[];}): void;
+    readonly id: string;
+    readonly type: clientType;
+    readonly url: string;
+    readonly navigate: (url: string) => void;
+  }
+
   interface Clients {
-    claim: () => Promise<void>
+    claim: () => Promise<void>;
+    get: (id: string) => Promise<Client|undefined>
   }
 
   interface ServiceWorkerGlobalScope extends Window {
@@ -48,31 +61,12 @@ export interface ProjectManifest {
   }
 }
 
-interface ProjectContentMessage {
-  records: FileRecord[],
-  sesionId: string,
-}
-
 export enum MESSAGE_TYPES {
   ESTABLISH_HANDSHAKE = "ESTABLISH_HANDSHAKE",
   HANDSHAKE_RECEIVED = "HANDSHAKE_RECEIVED",
-  PROJECT_CONTENT = "PROJECT_CONTENT",
-  RESPONSES_READY = "RESPONSES_READY",
-  AWAITING_CONTENT = "AWAITING_CONTENT",
-  RESPONSES_CLEARED = "RESPONSES_CLEARED",
-  CLEAR_CONTENTS = "CLEAR_CONTENTS",
 }
 
-export type Message =
-  EstablishHandshake |
-  HandshakeRecieved |
-  ProjectContent |
-  ResponsesReady |
-  AwaitingContent |
-  ClearContents |
-  ResponsesCleared;
-
-
+export type Message = EstablishHandshake | HandshakeRecieved;
 
 export interface EstablishHandshake {
   type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE;
@@ -80,29 +74,4 @@ export interface EstablishHandshake {
 
 export interface HandshakeRecieved {
   type: MESSAGE_TYPES.HANDSHAKE_RECEIVED;
-}
-
-export interface ProjectContent {
-  type: MESSAGE_TYPES.PROJECT_CONTENT,
-  message: {
-    records: FileRecord[],
-    sesionId: string,
-  }
-}
-
-export interface ResponsesReady {
-  type: MESSAGE_TYPES.RESPONSES_READY,
-}
-
-export interface AwaitingContent {
-  type: MESSAGE_TYPES.AWAITING_CONTENT,
-}
-
-export interface ClearContents {
-  type: MESSAGE_TYPES.CLEAR_CONTENTS,
-  message: string
-}
-
-export interface ResponsesCleared {
-  type: MESSAGE_TYPES.RESPONSES_CLEARED,
 }

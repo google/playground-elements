@@ -1,24 +1,12 @@
-import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types.js";
-import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants.js";
+import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types";
+import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants";
+import { Remote, wrap } from 'comlink';
+import { SwControllerAPI } from "../sw";
 
 const generateRandomString = (): string => {
   const arr = new Uint32Array(1);
   const val = crypto.getRandomValues(arr)[0];
   return val.toString(32);
-}
-
-export const clearSession = (sessionId: string, swPort: MessagePort|null) => {
-  if (window.__CodeEditorSessions) {
-    window.__CodeEditorSessions.delete(sessionId);
-  }
-
-  if (swPort) {
-    const message: Message = {
-      type: MESSAGE_TYPES.CLEAR_CONTENTS,
-      message: sessionId
-    }
-    swPort.postMessage(message)
-  }
 }
 
 export const generateUniqueSessionId = ():string => {
@@ -34,7 +22,7 @@ export const generateUniqueSessionId = ():string => {
   return sessionId;
 };
 
-export const establishMessageChannelHandshake = (messageTarget: ServiceWorker):Promise<MessagePort> => {
+const establishMessageChannelHandshake = (messageTarget: ServiceWorker):Promise<MessagePort> => {
   return new Promise((res) => {
     const mc = new MessageChannel();
     const establishHandshakeMessage: Message = {
@@ -63,7 +51,7 @@ const getSwDir = () => {
   return currentFilepathParts.join('/')
 };
 
-export const setUpServiceWorker = async (sandboxScope: string): Promise<[ServiceWorker|null,ServiceWorkerRegistration|null]> => {
+export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<SwControllerAPI>|null> => {
   if ('serviceWorker' in navigator) {
     try {
       const swFileDir = getSwDir();
@@ -84,36 +72,33 @@ export const setUpServiceWorker = async (sandboxScope: string): Promise<[Service
         serviceWorker = await isInstalling;
       }
 
+      if (!serviceWorker) {
+        return null;
+      }
+
+      const port = await establishMessageChannelHandshake(serviceWorker)
+      const linkedSw = wrap<SwControllerAPI>(port);
+
       window.addEventListener('unload', async () => {
         const sessions = window.__CodeEditorSessions || new Set();
 
         for (let sessionId of sessions) {
-          const message: Message = {
-            type: MESSAGE_TYPES.CLEAR_CONTENTS,
-            message: sessionId,
-          }
-
-          if (serviceWorker) {
-            serviceWorker.postMessage(message);
-          }
+          linkedSw.clearContents(sessionId);
         }
       });
 
-      return [serviceWorker, registration];
+      return linkedSw;
 
     } catch (e) {
       console.error(e)
-      return [null, null];
+      return null;
     }
   } else {
-    return [null, null];
+    return null;
   }
 }
 
-export const endWithSlash = (str: string) => {
-  const endWithSlash = str[str.length - 1] === '/';
-  return endWithSlash ? str : `${str}/`
-}
+export const endWithSlash = (str: string) => str.replace(/\/?$/, '/');
 
 export const fetchProject = async (projectPath: string): Promise<FileRecord[]> => {
   try {

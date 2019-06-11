@@ -4,18 +4,25 @@
   "description": "",
   "module": "lib/index.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "tsc && rollup -c rollup.config.js",
+    "watch": "tsc-watch --onSuccess \"rollup -c rollup.config.js\"",
     "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "cp node_modules/comlink/dist/umd/comlink.js lib/comlink.js"
   },
   "author": "",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "polyserve": "^0.27.15"
+    "polyserve": "^0.27.15",
+    "rollup": "^1.14.4",
+    "rollup-plugin-node-resolve": "^5.0.1",
+    "tsc-watch": "^2.2.1",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
+    "comlink": "^4.0.1",
     "lit-element": "^2.1.0",
     "lit-html": "^1.0.0"
   }
