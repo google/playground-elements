@@ -1,3 +1,5 @@
+import { MESSAGE_TYPES } from './constants';
+
 declare global {
   interface Window {
     __CodeEditorSessions?: Set<string>;
@@ -29,7 +31,11 @@ declare global {
 
   interface Clients {
     claim: () => Promise<void>;
-    get: (id: string) => Promise<Client|undefined>
+    get: (id: string) => Promise<Client|undefined>;
+    matchAll(options?: {
+      includeUntrontrolled?: boolean,
+      type?: 'window'|'worker'|'sharedworker'|'all'
+    }): Promise<Client[]>;
   }
 
   interface ServiceWorkerGlobalScope extends Window {
@@ -38,6 +44,12 @@ declare global {
   }
 }
 
+export type ServiceWorkerRecord = {sw: ServiceWorker, scope: string};
+export abstract class ClientServerAPI {
+  static async getResponseInitFromFilename(path: string): Promise<{payload: string, init: ResponseInit}> {
+    return {payload: '', init: { status: 404 }}
+  };
+}
 
 export type AcceptableExtensions = 'js'|'ts'|'html';
 
@@ -59,11 +71,6 @@ export interface ProjectManifest {
   files?: {
     [filename: string]: FileOptions
   }
-}
-
-export enum MESSAGE_TYPES {
-  ESTABLISH_HANDSHAKE = "ESTABLISH_HANDSHAKE",
-  HANDSHAKE_RECEIVED = "HANDSHAKE_RECEIVED",
 }
 
 export type Message = EstablishHandshake | HandshakeRecieved;

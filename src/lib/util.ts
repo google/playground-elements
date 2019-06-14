@@ -1,7 +1,5 @@
-import { Message, MESSAGE_TYPES, FileRecord, ProjectManifest, AcceptableExtensions } from "./types";
-import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from "./constants";
-import { Remote, wrap } from 'comlink';
-import { SwControllerAPI } from "../sw";
+import { FileRecord, ProjectManifest, AcceptableExtensions } from "./types";
+import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX, IFRAME_MODES } from "./constants";
 
 const generateRandomString = (): string => {
   const arr = new Uint32Array(1);
@@ -22,27 +20,6 @@ export const generateUniqueSessionId = ():string => {
   return sessionId;
 };
 
-const establishMessageChannelHandshake = (messageTarget: ServiceWorker):Promise<MessagePort> => {
-  return new Promise((res) => {
-    const mc = new MessageChannel();
-    const establishHandshakeMessage: Message = {
-      type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE
-    };
-
-    const onMcResponse = (e: MessageEvent) => {
-      const data: Message = e.data;
-      if (data.type === MESSAGE_TYPES.HANDSHAKE_RECEIVED) {
-        mc.port1.removeEventListener('message', onMcResponse);
-        res(mc.port1);
-      }
-    }
-
-    mc.port1.addEventListener('message', onMcResponse);
-    mc.port1.start();
-    messageTarget.postMessage(establishHandshakeMessage, [mc.port2]);
-  });
-};
-
 const getSwDir = () => {
   const currentFilepath = import.meta.url;
   const currentFilepathParts = currentFilepath.split('/');
@@ -51,7 +28,7 @@ const getSwDir = () => {
   return currentFilepathParts.join('/')
 };
 
-export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<SwControllerAPI>|null> => {
+export const setUpServiceWorker = async (sandboxScope: string): Promise<{sw: ServiceWorker, scope:string}|null> => {
   if ('serviceWorker' in navigator) {
     try {
       const swFileDir = getSwDir();
@@ -76,18 +53,10 @@ export const setUpServiceWorker = async (sandboxScope: string): Promise<Remote<S
         return null;
       }
 
-      const port = await establishMessageChannelHandshake(serviceWorker)
-      const linkedSw = wrap<SwControllerAPI>(port);
-
-      window.addEventListener('unload', async () => {
-        const sessions = window.__CodeEditorSessions || new Set();
-
-        for (let sessionId of sessions) {
-          linkedSw.clearContents(sessionId);
-        }
-      });
-
-      return linkedSw;
+      return {
+        sw: serviceWorker,
+        scope: registration.scope,
+      }
 
     } catch (e) {
       console.error(e)
@@ -230,4 +199,57 @@ export const addFileRecordFromName = (
     console.error(`File ${rawFileName} already exists in project.`)
     return null;
   }
+}
+
+export const fetchFileText = async (path: string): Promise<string> => {
+  const res = await fetch(path);
+  return await res.text();
+}
+
+export const responseInitFromExtension = (extension: string): ResponseInit => {
+  const init: ResponseInit = {};
+  switch (extension) {
+    case 'html':
+      init.headers = [['Content-Type', 'text/html; charset=UTF-8']];
+      init.status = 200;
+      break;
+    case 'js':
+      init.headers = [['Content-Type','application/javascript; charset=UTF-8']];
+      init.status = 200;
+      break;
+    default:
+      init.status = 400;
+      break;
+  }
+
+  return init;
+}
+
+export const setIframeContents = async (
+    iframeWin: Window,
+    contentFileLocation: string,
+    contentTransformer?: (fileContents: string) => string) => {
+  let controllerIndexText = await fetchFileText(contentFileLocation);
+  if (contentTransformer) {
+    controllerIndexText = contentTransformer(controllerIndexText);
+  }
+  iframeWin.document.write(controllerIndexText);
+}
+
+export const reloadIframeInIframe = (iframe?: HTMLIFrameElement) => {
+  if (iframe) {
+    const contentDoc = iframe.contentDocument;
+    if (contentDoc) {
+      const internalIframe = contentDoc.querySelector('iframe');
+      if (internalIframe) {
+        const internalIframeWin = internalIframe.contentWindow;
+        if (internalIframeWin) {
+          internalIframeWin.location.reload();
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }

@@ -1,28 +1,35 @@
-import { MESSAGE_TYPES, Message, FileRecord } from './lib/types';
 import { endWithSlash } from './lib/util';
-import * as Comlink from 'comlink';
+import { wrap } from 'comlink';
+import { endpointFromClient } from './lib/comlink-utils';
+import { ClientServerAPI } from './lib/types';
+import { IFRAME_MODES } from './lib/constants';
 
 const swScope = self as ServiceWorkerGlobalScope;
 
-const recieveMessageChannelHandshake = (e: MessageEvent) => {
-  const ports = e.ports;
-  if (ports && ports[0]) {
-    const port = ports[0];
-    port.start();
-    const handshakeReceivedMessage: Message = {
-      type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
+const getResponseFromClient = async (clientFilter: string, path: string): Promise<Response> => {
+  const clients = await swScope.clients.matchAll({
+    includeUntrontrolled: true,
+    type: 'window',
+  });
+  const matchedClient = clients.reduce((agg: Client|null, curr) => {
+    if (agg) {
+      return agg;
     }
-    Comlink.expose(SwController, port);
-    port.postMessage(handshakeReceivedMessage);
+
+    const url = curr.url;
+    return url.includes(clientFilter) ? curr : null;
+  }, null);
+
+
+  if (!matchedClient) {
+    return new Response('',{status: 404});
   }
-}
 
-interface ResponseParams {
-  content: string,
-  init: ResponseInit
+  const clientEp = await endpointFromClient(matchedClient);
+  const remote = wrap<typeof ClientServerAPI>(clientEp);
+  const resInit = await remote.getResponseInitFromFilename(path);
+  return new Response(resInit.payload, resInit.init);
 }
-
-let fileResponseMap = new Map<string, Map<string, ResponseParams>>();
 
 const onFetch = (e: FetchEvent) => {
   if (!e.request || !e.request.url || !e.respondWith) {
@@ -31,82 +38,33 @@ const onFetch = (e: FetchEvent) => {
   const url = new URL(e.request.url);
   const href = url.href;
   const scope = endWithSlash(swScope.registration.scope);
+
   if (href.startsWith(scope)) {
-    const fullPath = href.substring(scope.length);
-    const fullPathParts = fullPath.split('/');
-    const sessionId = fullPathParts.shift();
+    // pathspec: ${scope}/${sessionId}/${IFRAME_MODES}/(dir/)*${filename}.${extension}
+    const fullPathSansScope = href.substring(scope.length);
+    // ${sessionId}/${IFRAME_MODES}/(dir/)*${filename}.${extension}
+    const fullPathSansScopeParts = fullPathSansScope.split('/');
+    const sessionId = fullPathSansScopeParts.shift();
+    // ${IFRAME_MODES}/(dir/)*${filename}.${extension}
+    const iframeMode = fullPathSansScopeParts.shift();
+    // (dir/)*${filename}.${extension}
+    const path = fullPathSansScopeParts.join('/');
+
     if (!sessionId) {
       return;
     }
-    const path = fullPathParts.join('/');
 
-    const sessionMap = fileResponseMap.get(sessionId);
-    const responseRecord = sessionMap ? sessionMap.get(path) : null;
-
-    if (responseRecord) {
-      const response = new Response(responseRecord.content, responseRecord.init);
-      e.respondWith(response);
+    switch (iframeMode) {
+      case IFRAME_MODES.MODULE_CONTROLLER:
+        if (path.includes('index.html')) {
+          e.respondWith(new Response(''))
+        }
+        break;
+      case IFRAME_MODES.MODULES:
+        e.respondWith(getResponseFromClient(`/${sessionId}/${IFRAME_MODES.MODULE_CONTROLLER}`, path));
+        break;
     }
   }
-
 };
 
 self.addEventListener('fetch', (onFetch as EventListenerOrEventListenerObject));
-
-export type SwControllerAPI = typeof SwController;
-
-export class SwController {
-  static setProjectContent(fileRecords: FileRecord[], sessionId: string) {
-    const fileMap = new Map<string, ResponseParams>();
-    fileResponseMap.set(sessionId, fileMap);
-
-    for (const fileRecord of fileRecords) {
-      let contentType = '';
-
-      switch (fileRecord.extension) {
-        case 'html':
-          contentType = 'text/html; charset=UTF-8';
-          break;
-        case 'js':
-          contentType = 'application/javascript; charset=UTF-8';
-          break;
-        default:
-          continue;
-      }
-
-      let responseInit: ResponseInit = {
-        headers: {
-          'Content-Type': contentType
-        }
-      };
-
-      const filename = `${fileRecord.name}.${fileRecord.extension}`;
-      const responseParams: ResponseParams = {
-        content: fileRecord.content,
-        init: responseInit
-      };
-
-      fileMap.set(filename, responseParams)
-    }
-  }
-
-  static clearContents (sessionId: string) {
-    fileResponseMap.delete(sessionId);
-  }
-
-  static get scope(): string {
-    return swScope.registration.scope;
-  }
-}
-
-const onMessage = (e: MessageEvent) => {
-  const data: Message = e.data;
-
-  switch (data.type) {
-    case MESSAGE_TYPES.ESTABLISH_HANDSHAKE:
-      recieveMessageChannelHandshake(e);
-      break;
-  }
-}
-
-self.addEventListener('message', onMessage);
