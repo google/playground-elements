@@ -3,7 +3,7 @@ import { Message, EstablishHandshake } from './types';
 import { MESSAGE_TYPES } from './constants';
 
 export const endpointFromClient = (client: Client): Promise<Endpoint> => {
-  return new Promise((res) => {
+  return new Promise(res => {
     const mc = new MessageChannel();
     const establishHandshakeMessage: EstablishHandshake = {
       type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE
@@ -15,13 +15,13 @@ export const endpointFromClient = (client: Client): Promise<Endpoint> => {
         mc.port1.removeEventListener('message', onMcResponse);
         res(mc.port1);
       }
-    }
+    };
 
     mc.port1.addEventListener('message', onMcResponse);
     mc.port1.start();
     client.postMessage(establishHandshakeMessage, [mc.port2]);
   });
-}
+};
 
 export const exposeOnSwIframeWindow = (obj: any, iframeWindow: Window) => {
   const onMessage = (e: MessageEvent) => {
@@ -30,12 +30,15 @@ export const exposeOnSwIframeWindow = (obj: any, iframeWindow: Window) => {
       const port = ports[0];
       port.start();
       const handshakeReceivedMessage: Message = {
-        type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
-      }
+        type: MESSAGE_TYPES.HANDSHAKE_RECEIVED
+      };
       expose(obj, port);
       port.postMessage(handshakeReceivedMessage);
     }
-  }
+  };
 
-  iframeWindow.navigator.serviceWorker.addEventListener('message', onMessage as any);
-}
+  iframeWindow.navigator.serviceWorker.addEventListener(
+    'message',
+    onMessage as any
+  );
+};

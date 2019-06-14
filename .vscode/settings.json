@@ -1,5 +1,7 @@
 {
   "files.exclude": {
-    "**/bundle": true,
-  }
+    "**/bundle": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

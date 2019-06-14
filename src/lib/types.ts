@@ -5,7 +5,7 @@ declare global {
     __CodeEditorSessions?: Set<string>;
   }
   interface ImportMeta {
-    url: string
+    url: string;
   }
 
   interface FetchEvent extends Event {
@@ -18,11 +18,11 @@ declare global {
     waitUntil?: (waitable?: Promise<any>) => void;
   }
 
-  type clientType = "window" | "worker" | "sharedworker";
+  type clientType = 'window' | 'worker' | 'sharedworker';
 
   interface Client {
     postMessage(message: any, transfer?: Transferable[]): void;
-    postMessage(message: any, options?: {transfer?: any[];}): void;
+    postMessage(message: any, options?: { transfer?: any[] }): void;
     readonly id: string;
     readonly type: clientType;
     readonly url: string;
@@ -31,46 +31,48 @@ declare global {
 
   interface Clients {
     claim: () => Promise<void>;
-    get: (id: string) => Promise<Client|undefined>;
+    get: (id: string) => Promise<Client | undefined>;
     matchAll(options?: {
-      includeUntrontrolled?: boolean,
-      type?: 'window'|'worker'|'sharedworker'|'all'
+      includeUntrontrolled?: boolean;
+      type?: 'window' | 'worker' | 'sharedworker' | 'all';
     }): Promise<Client[]>;
   }
 
   interface ServiceWorkerGlobalScope extends Window {
-    registration: ServiceWorkerRegistration,
-    clients: Clients,
+    registration: ServiceWorkerRegistration;
+    clients: Clients;
   }
 }
 
-export type ServiceWorkerRecord = {sw: ServiceWorker, scope: string};
+export type ServiceWorkerRecord = { sw: ServiceWorker; scope: string };
 export abstract class ClientServerAPI {
-  static async getResponseInitFromFilename(path: string): Promise<{payload: string, init: ResponseInit}> {
-    return {payload: '', init: { status: 404 }}
-  };
+  static async getResponseInitFromFilename(
+    path: string
+  ): Promise<{ payload: string; init: ResponseInit }> {
+    return { payload: '', init: { status: 404 } };
+  }
 }
 
-export type AcceptableExtensions = 'js'|'ts'|'html';
+export type AcceptableExtensions = 'js' | 'ts' | 'html';
 
 export interface CodeEditorTextarea extends HTMLTextAreaElement {
-  extension: 'js'|'ts'|'html';
+  extension: 'js' | 'ts' | 'html';
   name: string;
 }
 export interface FileRecord {
   name: string;
   extension: AcceptableExtensions;
   content: string;
-  isTemplate?: boolean
+  isTemplate?: boolean;
 }
 
 export interface FileOptions {
-  isTemplate?: boolean
+  isTemplate?: boolean;
 }
 export interface ProjectManifest {
   files?: {
-    [filename: string]: FileOptions
-  }
+    [filename: string]: FileOptions;
+  };
 }
 
 export type Message = EstablishHandshake | HandshakeRecieved;

@@ -6,12 +6,15 @@ import { IFRAME_MODES } from './lib/constants';
 
 const swScope = self as ServiceWorkerGlobalScope;
 
-const getResponseFromClient = async (clientFilter: string, path: string): Promise<Response> => {
+const getResponseFromClient = async (
+  clientFilter: string,
+  path: string
+): Promise<Response> => {
   const clients = await swScope.clients.matchAll({
     includeUntrontrolled: true,
-    type: 'window',
+    type: 'window'
   });
-  const matchedClient = clients.reduce((agg: Client|null, curr) => {
+  const matchedClient = clients.reduce((agg: Client | null, curr) => {
     if (agg) {
       return agg;
     }
@@ -20,16 +23,15 @@ const getResponseFromClient = async (clientFilter: string, path: string): Promis
     return url.includes(clientFilter) ? curr : null;
   }, null);
 
-
   if (!matchedClient) {
-    return new Response('',{status: 404});
+    return new Response('', { status: 404 });
   }
 
   const clientEp = await endpointFromClient(matchedClient);
   const remote = wrap<typeof ClientServerAPI>(clientEp);
   const resInit = await remote.getResponseInitFromFilename(path);
   return new Response(resInit.payload, resInit.init);
-}
+};
 
 const onFetch = (e: FetchEvent) => {
   if (!e.request || !e.request.url || !e.respondWith) {
@@ -57,14 +59,19 @@ const onFetch = (e: FetchEvent) => {
     switch (iframeMode) {
       case IFRAME_MODES.MODULE_CONTROLLER:
         if (path.includes('index.html')) {
-          e.respondWith(new Response(''))
+          e.respondWith(new Response(''));
         }
         break;
       case IFRAME_MODES.MODULES:
-        e.respondWith(getResponseFromClient(`/${sessionId}/${IFRAME_MODES.MODULE_CONTROLLER}`, path));
+        e.respondWith(
+          getResponseFromClient(
+            `/${sessionId}/${IFRAME_MODES.MODULE_CONTROLLER}`,
+            path
+          )
+        );
         break;
     }
   }
 };
 
-self.addEventListener('fetch', (onFetch as EventListenerOrEventListenerObject));
+self.addEventListener('fetch', onFetch as EventListenerOrEventListenerObject);

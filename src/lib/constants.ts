@@ -1,19 +1,19 @@
-import { FileRecord } from "./types";
+import { FileRecord } from './types';
 
 export const EMPTY_INDEX: FileRecord = {
   name: 'index',
   extension: 'html',
-  content: '',
-}
+  content: ''
+};
 
-export const ACCEPTABLE_EXTENSIONS = ['js', 'ts', 'html']
+export const ACCEPTABLE_EXTENSIONS = ['js', 'ts', 'html'];
 
 export enum MESSAGE_TYPES {
-  ESTABLISH_HANDSHAKE = "ESTABLISH_HANDSHAKE",
-  HANDSHAKE_RECEIVED = "HANDSHAKE_RECEIVED"
+  ESTABLISH_HANDSHAKE = 'ESTABLISH_HANDSHAKE',
+  HANDSHAKE_RECEIVED = 'HANDSHAKE_RECEIVED'
 }
 
 export enum IFRAME_MODES {
-  MODULES = "MODULES",
-  MODULE_CONTROLLER = "MODULE_CONTROLLER",
+  MODULES = 'MODULES',
+  MODULE_CONTROLLER = 'MODULE_CONTROLLER'
 }
