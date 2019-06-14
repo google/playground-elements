@@ -242,7 +242,7 @@ export const responseInitFromExtension = (extension: string): ResponseInit => {
   return init;
 };
 
-export const setIframeContents = async (
+export const setIframeContentsFromFile = async (
   iframeWin: Window,
   contentFileLocation: string,
   contentTransformer?: (fileContents: string) => string

@@ -25,7 +25,7 @@ import {
   generateUniqueSessionId,
   reloadIframeInIframe,
   responseInitFromExtension,
-  setIframeContents,
+  setIframeContentsFromFile,
   setUpServiceWorker
 } from './util';
 
@@ -159,7 +159,7 @@ export class CodeSampleEditor extends LitElement {
         `${scope}${this.sessionId}/${IFRAME_MODES.MODULES}/index.html`
       );
     };
-    setIframeContents(
+    setIframeContentsFromFile(
       iframeWin,
       `${import.meta.url}/../../controller/index.html`,
       contentTransformer
