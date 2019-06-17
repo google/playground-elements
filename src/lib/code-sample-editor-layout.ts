@@ -1,4 +1,11 @@
-import { LitElement, customElement, html, css, property, query } from 'lit-element';
+import {
+  LitElement,
+  customElement,
+  html,
+  css,
+  property,
+  query
+} from 'lit-element';
 import { TemplateResult } from 'lit-html';
 
 @customElement('code-sample-editor-layout')
@@ -11,7 +18,8 @@ export class CodeSampleEditorLayout extends LitElement {
         height: 100%;
       }
 
-      #tabs, #editAreas {
+      #tabs,
+      #editAreas {
         display: flex;
       }
 
@@ -19,49 +27,53 @@ export class CodeSampleEditorLayout extends LitElement {
         flex-grow: 1;
       }
 
-      #tabs ::slotted([slot="tab"]) {
+      #tabs ::slotted([slot='tab']) {
         padding: 0 6px 0 6px;
         border: solid black 1px;
       }
 
-      #tabs ::slotted([slot="tab"][selected]) {
+      #tabs ::slotted([slot='tab'][selected]) {
         background-color: black;
         color: white;
       }
 
-      #tabs ::slotted([slot="tab"]:hover) {
+      #tabs ::slotted([slot='tab']:hover) {
         cursor: pointer;
       }
 
-      #editAreas ::slotted([slot="editor"]) {
+      #editAreas ::slotted([slot='editor']) {
         width: 100%;
       }
 
-      #editAreas ::slotted([slot="editor"]:not([selected])) {
+      #editAreas ::slotted([slot='editor']:not([selected])) {
         display: none;
       }
     `;
   }
 
-  @property({type: Boolean})
+  @property({ type: Boolean })
   addFilePrompt = false;
 
   @query('#filenameInput')
   filenameInput?: HTMLInputElement;
 
   private onSubmit(e: Event) {
-    this.dispatchEvent(new CustomEvent('save', {
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(
+      new CustomEvent('save', {
+        bubbles: true,
+        composed: true
+      })
+    );
   }
 
   private onCreateFileClick(e: Event) {
-    this.dispatchEvent(new CustomEvent('create-file', {
-      bubbles: true,
-      composed: true,
-      detail: this.filenameInput!.value
-    }));
+    this.dispatchEvent(
+      new CustomEvent('create-file', {
+        bubbles: true,
+        composed: true,
+        detail: this.filenameInput!.value
+      })
+    );
 
     this.addFilePrompt = false;
   }
@@ -74,7 +86,7 @@ export class CodeSampleEditorLayout extends LitElement {
     const eventPath = e.composedPath() as (EventTarget | HTMLElement)[];
     let slottedTarget: HTMLElement | null = null;
     for (let target of eventPath) {
-      if (!('getAttribute' in target )) {
+      if (!('getAttribute' in target)) {
         continue;
       }
 
@@ -91,13 +103,17 @@ export class CodeSampleEditorLayout extends LitElement {
         currentlySelectedTab.removeAttribute('selected');
       }
 
-      const currentlySelectedTextarea = this.querySelector('[slot="editor"][selected]');
+      const currentlySelectedTextarea = this.querySelector(
+        '[slot="editor"][selected]'
+      );
       if (currentlySelectedTextarea) {
         currentlySelectedTextarea.removeAttribute('selected');
       }
 
       slottedTarget.toggleAttribute('selected', true);
-      const classNames = Array.from(slottedTarget.classList).filter(cl => cl.startsWith('link-'));
+      const classNames = Array.from(slottedTarget.classList).filter(cl =>
+        cl.startsWith('link-')
+      );
       if (classNames.length) {
         const className = classNames[0];
         const textarea = this.querySelector(`.${className}[slot="editor"]`);
@@ -113,8 +129,9 @@ export class CodeSampleEditorLayout extends LitElement {
     if (this.addFilePrompt) {
       return html`
         <input
-            id="filenameInput"
-            placeholder="file name e.g. my-element-3.js">
+          id="filenameInput"
+          placeholder="file name e.g. my-element-3.js"
+        />
         <button @click=${this.onCreateFileClick}>Create File</button>
       `;
     } else {

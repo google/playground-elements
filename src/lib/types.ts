@@ -1,9 +1,13 @@
+import { Remote } from 'comlink';
+import { SwControllerAPI } from '../sw';
+import { MESSAGE_TYPES } from './constants';
+
 declare global {
   interface Window {
     __CodeEditorSessions?: Set<string>;
   }
   interface ImportMeta {
-    url: string
+    url: string;
   }
 
   interface FetchEvent extends Event {
@@ -16,11 +20,11 @@ declare global {
     waitUntil?: (waitable?: Promise<any>) => void;
   }
 
-  type clientType = "window" | "worker" | "sharedworker";
+  type clientType = 'window' | 'worker' | 'sharedworker';
 
   interface Client {
     postMessage(message: any, transfer?: Transferable[]): void;
-    postMessage(message: any, options?: {transfer?: any[];}): void;
+    postMessage(message: any, options?: { transfer?: any[] }): void;
     readonly id: string;
     readonly type: clientType;
     readonly url: string;
@@ -29,41 +33,40 @@ declare global {
 
   interface Clients {
     claim: () => Promise<void>;
-    get: (id: string) => Promise<Client|undefined>
+    get: (id: string) => Promise<Client | undefined>;
+    matchAll(options?: {
+      includeUntrontrolled?: boolean;
+      type?: 'window' | 'worker' | 'sharedworker' | 'all';
+    }): Promise<Client[]>;
   }
 
   interface ServiceWorkerGlobalScope extends Window {
-    registration: ServiceWorkerRegistration,
-    clients: Clients,
+    registration: ServiceWorkerRegistration;
+    clients: Clients;
   }
 }
 
+export type RemoteSw = Promise<null | Remote<SwControllerAPI>>;
+export type AcceptableExtensions = 'js' | 'ts' | 'html';
 
-export type AcceptableExtensions = 'js'|'ts'|'html';
-
-export interface CodeEditorTextarea extends HTMLTextAreaElement {
-  extension: 'js'|'ts'|'html';
+export interface CodeSampleEditorTextarea extends HTMLTextAreaElement {
+  extension: 'js' | 'ts' | 'html';
   name: string;
 }
 export interface FileRecord {
   name: string;
   extension: AcceptableExtensions;
   content: string;
-  isTemplate?: boolean
+  isTemplate?: boolean;
 }
 
 export interface FileOptions {
-  isTemplate?: boolean
+  isTemplate?: boolean;
 }
 export interface ProjectManifest {
   files?: {
-    [filename: string]: FileOptions
-  }
-}
-
-export enum MESSAGE_TYPES {
-  ESTABLISH_HANDSHAKE = "ESTABLISH_HANDSHAKE",
-  HANDSHAKE_RECEIVED = "HANDSHAKE_RECEIVED",
+    [filename: string]: FileOptions;
+  };
 }
 
 export type Message = EstablishHandshake | HandshakeRecieved;

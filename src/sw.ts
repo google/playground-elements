@@ -1,6 +1,7 @@
-import { MESSAGE_TYPES, Message, FileRecord } from './lib/types';
+import { Message, FileRecord } from './lib/types';
 import { endWithSlash } from './lib/util';
-import * as Comlink from 'comlink';
+import { expose } from 'comlink';
+import { MESSAGE_TYPES } from './lib/constants';
 
 const swScope = self as ServiceWorkerGlobalScope;
 
@@ -10,16 +11,16 @@ const recieveMessageChannelHandshake = (e: MessageEvent) => {
     const port = ports[0];
     port.start();
     const handshakeReceivedMessage: Message = {
-      type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
-    }
-    Comlink.expose(SwController, port);
+      type: MESSAGE_TYPES.HANDSHAKE_RECEIVED
+    };
+    expose(SwController, port);
     port.postMessage(handshakeReceivedMessage);
   }
-}
+};
 
 interface ResponseParams {
-  content: string,
-  init: ResponseInit
+  content: string;
+  init: ResponseInit;
 }
 
 let fileResponseMap = new Map<string, Map<string, ResponseParams>>();
@@ -44,14 +45,16 @@ const onFetch = (e: FetchEvent) => {
     const responseRecord = sessionMap ? sessionMap.get(path) : null;
 
     if (responseRecord) {
-      const response = new Response(responseRecord.content, responseRecord.init);
+      const response = new Response(
+        responseRecord.content,
+        responseRecord.init
+      );
       e.respondWith(response);
     }
   }
-
 };
 
-self.addEventListener('fetch', (onFetch as EventListenerOrEventListenerObject));
+self.addEventListener('fetch', onFetch as EventListenerOrEventListenerObject);
 
 export type SwControllerAPI = typeof SwController;
 
@@ -86,11 +89,11 @@ export class SwController {
         init: responseInit
       };
 
-      fileMap.set(filename, responseParams)
+      fileMap.set(filename, responseParams);
     }
   }
 
-  static clearContents (sessionId: string) {
+  static clearContents(sessionId: string) {
     fileResponseMap.delete(sessionId);
   }
 
@@ -107,6 +110,6 @@ const onMessage = (e: MessageEvent) => {
       recieveMessageChannelHandshake(e);
       break;
   }
-}
+};
 
 self.addEventListener('message', onMessage);
