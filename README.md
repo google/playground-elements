@@ -171,16 +171,13 @@ project layout:
 }
 ```
 
+<!-- prettier-ignore-start -->
 ```html
 <!-- index.html -->
 <html>
   <head>
     <script type="module">
-      {
-        {
-          headScript;
-        }
-      }
+      {{headScript}}
     </script>
   </head>
   <body>
@@ -188,6 +185,7 @@ project layout:
   </body>
 </html>
 ```
+<!-- prettier-ignore-end -->
 
 ```html
 <!-- document.html -->
