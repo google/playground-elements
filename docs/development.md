@@ -115,6 +115,8 @@ tries to ignore fetch requests from different domains or scopes e.g. unpkg).
 
 ### monaco
 
+[link](https://github.com/PolymerLabs/code-sample-editor/tree/monaco)
+
 [Monaco](https://github.com/microsoft/monaco-editor) is the main editor of
 Visual Studio Code by Microsoft. Unfortunately, Monaco is not written to be ES
 Module compatible and would require some global instantiation or Rollup build
@@ -163,37 +165,151 @@ it lives in an iframe because monaco-editor does not support shadow DOM.
   - ServiceWorkers are an issue
   - Files loaded from within the monaco iframe srcdoc are not analyzable
   - Currently not bundler-friendly
+- Needs rebasing
 
 ### codemirror
 
-[Codemirror](https://codemirror.net/) is one of the web's
+[link](https://github.com/PolymerLabs/code-sample-editor/tree/codemirror)
+
+[CodeMirror](https://codemirror.net/) is one of the web's most-popular online
+text editors. This branch implements an editor that uses
+[CodeMirror 6](https://github.com/codemirror/codemirror.next) which is largely a
+rewrite of the traditional CodeMirror codebase. See their reasoning
+[here](https://codemirror.net/6/).
+
+CodeMirror 6 is still under development.
 
 #### Implementation
 
+This branch has replaces the textareas with
+[`code-sample-editor-editor`](https://github.com/PolymerLabs/code-sample-editor/blob/codemirror/src/code-sample-editor-editor.ts)
+custom elements. These elements simply insert CodeMirror 6 since it is module
+and shadow DOM compatible and provide a common interface.
+
+The styles are inserted as a `link[rel='stylesheet']` in the shadow root of the
+element. There also had to be some undocumented changes to get CodeMirror 6's
+dependencies to compile. See
+[codemirror/codemirror.next#103](https://github.com/codemirror/codemirror.next/issues/103)
+and [codemirror/codemirror.next#16](https://github.com/codemirror/codemirror.next/issues/16).
+
 #### Findings
 
+- Some of the deps have commonjs exports
+- CodeMirror 6 is very much in alpha
+  - Maintainer claims the entire structure is subject to change
+  - Next gen syntax highlighting API has not yet been established
+- Implementation after fixing deps is pretty straightforward
+- Missing plugin environment necessary to implement code completion and TS
+  analysis
+
 #### TODO
+
+- Cleanup a bit of code
+- Automate dep fixes
+- Figure out how to highlight HTML and TS
+- Figure out how to add tooltips / code completion
+- Figure out tagged template literal syntax highlighting
+- Lazily load the code
+- Rebase
 
 ### codemirror5
 
+[link](https://github.com/PolymerLabs/code-sample-editor/tree/codemirror5)
+
+[CodeMirror](https://codemirror.net/) is one of the web's most-popular online
+text editors. This branch implements an editor that uses
+[CodeMirror 5](https://github.com/codemirror/CodeMirror), the stable build of
+CodeMirror.
+
 #### Implementation
+
+This branch has replaces the textareas with
+[`code-sample-editor-editor`](https://github.com/PolymerLabs/code-sample-editor/blob/codemirror5/src/code-sample-editor-editor.ts)
+custom elements. CodeMirror 5 is written in native ES modules, but is intended
+to be available on the window, so I import it and
+[make it available](https://github.com/PolymerLabs/code-sample-editor/blob/codemirror5/src/code-sample-editor-editor.ts#L5).
+This is a fairly simple implementation where we must also make the styles
+abailable on the shadow root. We then expose a familiar textarea-like API.
 
 #### Findings
 
+- Has a lot of puiblic support
+- Used by Google's Cider
+- Has plugin ecosystem
+- Notoriously clunky architecture and a pain to extend
+- No working tagged template literal highlighting implementation
+  - Will require a language extension
+  - [Issue on GH](https://github.com/codemirror/CodeMirror/issues/3026) was
+    closed a while ago with no official fix intended
+- Surprisingly simple implementation for an older library
+- Fast to boot & smaller bundle than monaco
+- Autocompletion / intellisense will be a hassle to implement
+
 #### TODO
+
+- Rebase
+- Implement tooltips
+- Implement autocompletion
+- Implement intellisense
+- Code cleanup
+- Figure out tagged template literal highlighting
 
 ### stateless-sw
 
+[link](https://github.com/PolymerLabs/code-sample-editor/tree/stateless-sw)
+
+After meeting with Eric Simons from StackBlitz, we discussed the concept of
+having a ServiceWorker that would serve user-generated files. He had a repo and
+concept running called `localservice` (no longer available online) that was a
+stateless SW that would ask the client for a request upon `fetch` event. We
+decided not to use `localservice` since it relied on an external server as it
+served a slightly different use case, I looked into implementing a similar
+architecture.
+
 #### Implementation
+
+The document
+[creates an iframe](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/lib/code-sample-editor.ts#L181)
+that wraps the sandbox that we will call the "sandbox controller" with the URL
+`https://domain.tld/${swScope}/${sessionId}/MODULE_CONTROLLER/index.html` in
+which the SW would respond with an empty html response. The client then
+[exposes](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/lib/code-sample-editor.ts#L154)
+the [request API](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/lib/code-sample-editor.ts#L33)
+on the window of that iframe via Comlink. Then, the document layer
+[`document.write`s](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/lib/code-sample-editor.ts#L162)
+the sanbox iframe inside the sandbox controller at
+`https://domain.tld/${swScope}/${sessionId}/MODULES/index.html`.
+
+When the SW sees `fetch` events from the sandbox, it
+[filters through its connected clients](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/sw.ts#L17)
+until it finds the controller with the matching `sessionId`. It needs to find
+the controller because, the actual sandbox will not be a client if it is
+requesting the `index.html`. Then, the SW will use Comlink to
+[get the `Response` initialization parameters](https://github.com/PolymerLabs/code-sample-editor/blob/stateless-sw/src/sw.ts#L32)
+from the client and serve the constructed response to the client.
 
 #### Findings
 
+- More waiting and message-passing between the client and SW at load time
+  - Slightly noticable performance slowdown
+- More control for the client
+- Possibly over-engineered for the use case
+- Fewer SW memory leak issues
+  - Don't have to track when the user disconnects
+- Added complexity to the sandbox by adding a controller
+
 #### TODO
+
+- Needs rebase
 
 ### typescript
 
-#### Implementation
+[link](https://github.com/PolymerLabs/code-sample-editor/tree/typescript)
 
-#### Findings
-
-#### TODO
+An attempt to support Typescript files in the editor. This branch is still a
+complete mess and a total work in progress. It currently attempts to crawl the
+imports and exports of a given bare module specifier and fetch all the TS
+declaration files. All of these must be fetched first as the typescript compiler
+requires them in a synchronous manner and all fetches are asynchronous (and
+should stay that way in our case). The branch has been left off at just trying
+to get the typescript compiler to run in the browser.
