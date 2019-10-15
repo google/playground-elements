@@ -9,7 +9,7 @@
     "serve": "polyserve --npm -H 0.0.0.0 --compile never",
     "dev": "npm run watch & npm run serve",
     "prepublishOnly": "npm run build",
-    "postinstall": "npm run bootstrap",
+    "postinstall": "npm run build && npm run bootstrap",
     "bootstrap": "cp node_modules/comlink/dist/umd/comlink.js lib/comlink.js"
   },
   "author": "",
