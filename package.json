@@ -26,6 +26,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
+    "@codemirror/next": "^0.8.0",
     "@material/mwc-button": "^0.14.1",
     "@material/mwc-icon-button": "^0.14.1",
     "@material/mwc-tab": "^0.14.1",
