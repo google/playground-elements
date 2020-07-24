@@ -20,6 +20,7 @@ import {
   property,
   query,
   PropertyValues,
+  internalProperty,
 } from 'lit-element';
 import { wrap, Remote, proxy } from 'comlink';
 import '@material/mwc-tab-bar';
@@ -166,9 +167,10 @@ export class CodeSampleEditor extends LitElement {
    * A unique identifier for this instance so the service worker can keep an
    * independent cache of files for it.
    */
-  private _sessionId: string = generateUniqueSessionId();
+  private readonly _sessionId: string = generateUniqueSessionId();
 
-  private _files: SampleFile[] = [];
+  @internalProperty()
+  private _files?: SampleFile[];
 
   // TODO: make a public property/method to select a file
   @property({ attribute: false })
@@ -177,10 +179,23 @@ export class CodeSampleEditor extends LitElement {
   private get _currentFile() {
     return this._currentFileIndex === undefined
       ? undefined
-      : this._files[this._currentFileIndex];
+      : this._files?.[this._currentFileIndex];
   }
 
+  @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
+
+  private get _previewSrc() {
+    // Make sure that we've connected to the Service Worker and loaded the
+    // project files before generating the preview URL. This ensures that there
+    // are files to load when the iframe navigates to the URL.
+    if (this._serviceWorkerAPI === undefined || this._files === undefined) {
+      return undefined;
+    }
+    // TODO (justinfagnani): lookup URL to show from project config
+    const indexUrl = new URL(`./${this._sessionId}/index.html`, this._scopeUrl);
+    return indexUrl.href;
+  }
 
   update(changedProperties: PropertyValues) {
     if (changedProperties.has('sandboxScope')) {
@@ -194,15 +209,13 @@ export class CodeSampleEditor extends LitElement {
   }
 
   render() {
-    // TODO: lookup form config
-    const indexUrl = new URL(`./${this._sessionId}/index.html`, this._scopeUrl);
     return html`
       <div id="editor">
         <mwc-tab-bar
           .activeIndex=${this._currentFileIndex || 0}
           @MDCTabBar:activated=${this._tabActivated}
         >
-          ${this._files.map((file) => {
+          ${this._files?.map((file) => {
       const label = file.name.substring(file.name.lastIndexOf('/') + 1);
       return html`<mwc-tab label=${label}></mwc-tab>`;
     })}
@@ -211,12 +224,12 @@ export class CodeSampleEditor extends LitElement {
         : nothing}
         </mwc-tab-bar>
         <textarea
-          .value=${this._currentFile && this._currentFile.content || ''}
+          .value=${(this._currentFile && this._currentFile.content) || ''}
           @change=${this._onEdit}
         ></textarea>
       </div>
       <code-sample-editor-preview
-        src="${indexUrl.href}"
+        .src="${this._previewSrc}"
         location="index.html"
         @reload=${this._onSave}
       >
@@ -256,7 +269,6 @@ export class CodeSampleEditor extends LitElement {
     );
     // TODO (justinfagnani): compile project here
     this._currentFileIndex = 0;
-    this.requestUpdate();
     // TODO(justinfagnani): whyyyy?
     await this._tabBar.updateComplete;
     this._tabBar.activeIndex = -1;
@@ -312,7 +324,7 @@ export class CodeSampleEditor extends LitElement {
                 name: string
               ): Promise<SampleFile | undefined> => {
                 // TODO (justinfagnani): compile files here
-                return this._files.find((f) => f.name === name);
+                return this._files?.find((f) => f.name === name);
               },
             }),
             this._sessionId

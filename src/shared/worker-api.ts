@@ -40,5 +40,5 @@ export interface FileOptions {
 }
 
 export interface ProjectManifest {
-  files?: { [filename: string]: FileOptions };
+  files?: {[filename: string]: FileOptions};
 }

@@ -20,10 +20,17 @@ import {
   property,
   query,
 } from 'lit-element';
-import { ifDefined } from 'lit-html/directives/if-defined.js';
+import {ifDefined} from 'lit-html/directives/if-defined.js';
 import '@material/mwc-icon-button';
 import '@material/mwc-textfield';
 
+/**
+ * An HTML preview component consisting of a wrapper around an iframe, and
+ * a simple toolbar with a reload button and a label showing the currently
+ * displayed HTML file.
+ *
+ * @fires reload - Fired when the user clicks the reload button
+ */
 @customElement('code-sample-editor-preview')
 export class CodeSampleEditorPreviewElement extends LitElement {
   static styles = css`
@@ -59,10 +66,7 @@ export class CodeSampleEditorPreviewElement extends LitElement {
     #location {
       height: 24px;
       line-height: 18px;
-      /* border-radius: 4px; */
       padding: 4px;
-      /* border: solid 1px #ccc;
-      outline: none; */
       font-family: var(
         --mdc-typography-button-font-family,
         var(--mdc-typography-font-family, Roboto, sans-serif)
@@ -76,9 +80,15 @@ export class CodeSampleEditorPreviewElement extends LitElement {
     }
   `;
 
+  /**
+   * The URL of the document to load.
+   */
   @property()
-  src?: string;
+  src: string | undefined;
 
+  /**
+   * The string to display in the location bar.
+   */
   @property()
   location?: string;
 
@@ -86,6 +96,7 @@ export class CodeSampleEditorPreviewElement extends LitElement {
   private _iframe!: HTMLIFrameElement;
 
   render() {
+    console.log('preview src', this.src);
     return html`
       <div id="toolbar">
         <mwc-icon-button
@@ -99,8 +110,9 @@ export class CodeSampleEditorPreviewElement extends LitElement {
   }
 
   reload() {
-    if (this._iframe.contentWindow) {
-      this._iframe.contentWindow.location.reload();
+    const iframe = this._iframe;
+    if (iframe.contentWindow) {
+      iframe.contentWindow.location.reload();
     }
   }
 

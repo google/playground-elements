@@ -18,53 +18,61 @@ import {
   ServiceWorkerAPI,
   FileAPI,
 } from '../shared/worker-api.js';
-import { endWithSlash } from '../shared/util.js';
-import { expose } from 'comlink';
+import {endWithSlash} from '../shared/util.js';
+import {expose} from 'comlink';
 
 declare var self: ServiceWorkerGlobalScope;
+
+type SessionID = string;
 
 /**
  * API exposed to the UI thread via Comlink. The static methods on this class
  * become instance methods on SwControllerAPI.
  */
 const workerAPI: ServiceWorkerAPI = {
-  setFileAPI(fileAPI: FileAPI, sessionID: string) {
+  setFileAPI(fileAPI: FileAPI, sessionID: SessionID) {
+    console.log(`Setting FileAPI for session ${sessionID}`);
     fileAPIs.set(sessionID, fileAPI);
   },
 };
 
-const fileAPIs = new Map<string, FileAPI>();
-const getFile = async (e: FetchEvent, path: string, sessionId: string) => {
+/**
+ * A collection of FileAPI objects registered by <code-sample-editor> instances,
+ * keyed by session ID.
+ */
+const fileAPIs = new Map<SessionID, FileAPI>();
+const getFile = async (e: FetchEvent, path: string, sessionId: SessionID) => {
   const fileAPI = fileAPIs.get(sessionId);
   if (fileAPI) {
     const file = await fileAPI.getFile(path);
     if (file) {
       const headers = file.contentType
-        ? { 'Content-Type': file.contentType }
+        ? {'Content-Type': file.contentType}
         : undefined;
-      return new Response(file.content, { headers });
+      return new Response(file.content, {headers});
     }
+  } else {
+    console.warn(`No FileAPI for session ${sessionId}`);
   }
   return fetch(e.request);
 };
 
 const onFetch = (e: FetchEvent) => {
-  const url = new URL(e.request.url);
-  const href = url.href;
+  const url = e.request.url;
   const scope = endWithSlash(self.registration.scope);
-  if (href.startsWith(scope)) {
-    const fullPath = href.substring(scope.length);
-    const fullPathParts = fullPath.split('/');
-    const sessionId = fullPathParts.shift();
+  if (url.startsWith(scope)) {
+    const fullPath = url.substring(scope.length);
+    const slashIndex = fullPath.indexOf('/');
+    const sessionId = fullPath.slice(0, slashIndex);
+    const path = fullPath.slice(slashIndex + 1);
     if (!sessionId) {
       return;
     }
-    const path = fullPathParts.join('/');
     e.respondWith(getFile(e, path, sessionId));
   }
 };
 
-const onInstall = (_e: Event) => {
+const onInstall = () => {
   // Force this service worker to become the active service worker, in case
   // it's an updated worker and waiting.
   self.skipWaiting();
