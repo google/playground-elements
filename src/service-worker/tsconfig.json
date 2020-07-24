@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../../service-worker",
+    "rootDir": ".",
+    "lib": [
+      "ES2017",
+      "WebWorker"
+    ],
+    "skipLibCheck": true
+  },
+  "include": [
+    "*.ts",
+  ],
+  "exclude": [],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}

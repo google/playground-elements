@@ -1,11 +1,13 @@
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 
-export default {
-  input: 'sw.js',
-  output: {
-    file: 'sw.js',
-    format: 'iife',
-    name: 'CMESW'
-  },
-  plugins: [resolve()],
-}
+export default [
+  {
+    input: 'service-worker/service-worker.js',
+    output: {
+      file: 'service-worker.js',
+      format: 'iife',
+      exports: 'none',
+    },
+    plugins: [resolve()],
+  }
+]

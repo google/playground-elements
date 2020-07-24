@@ -1,7 +1,7 @@
-import { Message, FileRecord } from './lib/types';
-import { endWithSlash } from './lib/util';
+import { Message, FileRecord } from '../shared/types.js';
+import { endWithSlash } from '../shared/util.js';
 import { expose } from 'comlink';
-import { MESSAGE_TYPES } from './lib/constants';
+import { MESSAGE_TYPES } from '../shared/constants.js';
 
 const swScope = self as unknown as ServiceWorkerGlobalScope;
 
@@ -56,9 +56,7 @@ const onFetch = (e: FetchEvent) => {
 
 self.addEventListener('fetch', onFetch as EventListenerOrEventListenerObject);
 
-export type SwControllerAPI = typeof SwController;
-
-export class SwController {
+class SwController {
   static setProjectContent(fileRecords: FileRecord[], sessionId: string) {
     const fileMap = new Map<string, ResponseParams>();
     fileResponseMap.set(sessionId, fileMap);

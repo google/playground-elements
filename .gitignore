@@ -1,5 +1,6 @@
 /packages/*/node_modules
 /node_modules
-sw.js*
-sw.d.ts
 /lib/
+/service-worker/
+/shared/
+service-worker.js

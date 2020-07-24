@@ -8,27 +8,30 @@ import {
   query,
   queryAll,
 } from 'lit-element';
-import {until} from 'lit-html/directives/until';
-import {FileRecord, CodeSampleEditorTextarea, RemoteSw} from './types';
-import {EMPTY_INDEX} from './constants';
+import { until } from 'lit-html/directives/until.js';
+import { FileRecord, RemoteSw } from '../shared/types.js';
+import { EMPTY_INDEX } from '../shared/constants.js';
 import {
   endWithSlash,
-  generateUniqueSessionId,
   fetchProject,
   addFileRecordFromName,
+  clearSwContentsAndSave,
+} from '../shared/util.js';
+import {
+  generateUniqueSessionId,
   getFileRecordsFromTextareas,
   reloadIframe,
   connectToServiceWorker,
-  clearSwContentsAndSave,
-} from './util';
-import './code-sample-editor-layout';
+  CodeSampleEditorTextarea,
+} from './util.js';
+import './code-sample-editor-layout.js';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
-  @property({attribute: 'project-path', type: String})
+  @property({ attribute: 'project-path', type: String })
   projectPath?: string;
 
-  @property({attribute: 'sandbox-scope', type: String})
+  @property({ attribute: 'sandbox-scope', type: String })
   sandboxScope = 'modules';
 
   @query('#editorIframe')
@@ -37,7 +40,6 @@ export class CodeSampleEditor extends LitElement {
   @queryAll('code-sample-editor-layout textarea')
   editorTextareas!: NodeListOf<CodeSampleEditorTextarea>;
 
-  private shouldRenderFrame = false;
   private lastProjectPath?: string;
   private lastSandboxScope: string | null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([
@@ -164,7 +166,6 @@ export class CodeSampleEditor extends LitElement {
         this.sessionId,
         this.sandboxScope
       );
-      this.shouldRenderFrame = false;
     }
 
     const isNewProject =

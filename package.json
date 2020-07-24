@@ -7,9 +7,9 @@
   "main": "lib/code-sample-editor.js",
   "scripts": {
     "build": "npm run build:lib && npm run build:worker",
-    "build:lib": "tsc",
+    "build:lib": "tsc --build",
     "build:worker": "rollup -c rollup.config.js",
-    "watch": "tsc-watch --onSuccess \"rollup -c rollup.config.js\"",
+    "watch": "tsc-watch --build --onSuccess \"rollup -c rollup.config.js\"",
     "serve": "es-dev-server --node-resolve",
     "dev": "npm run watch & npm run serve",
     "format": "prettier src/**/*.ts --write",

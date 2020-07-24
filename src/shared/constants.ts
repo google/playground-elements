@@ -1,4 +1,4 @@
-import {FileRecord} from './types';
+import { FileRecord } from './types.js';
 
 export const EMPTY_INDEX: FileRecord = {
   name: 'index',

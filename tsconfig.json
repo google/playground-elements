@@ -1,28 +1,45 @@
 {
   "compilerOptions": {
-    "outDir": ".",
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "incremental": true,
+    "target": "esnext",
     "module": "esNext",
-    "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "pretty": true,
+    "lib": [
+      "ES2017",
+      "DOM"
+    ],
+    "declaration": true,
+    "declarationMap": true,
     "sourceMap": false,
+    "outDir": ".",
+    "rootDir": "src",
     "strict": true,
-    "target": "esNext",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true
   },
   "include": [
     "src/**/*.ts",
-    "test/**/*.ts",
-    "custom_typings/**/*.d.ts",
+    "src/lib/worker-api.ts",
+    "src/shared/util.ts"
   ],
   "exclude": [
-    "test/fixtures/**/*.*",
-    "node_modules/**/*"
+    "src/service-worker",
+    "src/shared",
+    "src/typescript-worker"
+  ],
+  "references": [
+    {
+      "path": "src/service-worker"
+    },
+    {
+      "path": "src/shared"
+    }
   ]
 }
