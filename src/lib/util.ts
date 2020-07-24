@@ -69,7 +69,7 @@ export const setUpServiceWorker = async (sandboxScope: string): RemoteSw => {
       const swFileDir = getSwDir();
       const sScopeSlash = endWithSlash(sandboxScope);
       const registration = await navigator.serviceWorker.register(
-        `${swFileDir}/sw.js`,
+        `${swFileDir}/service-worker.js`,
         {scope: `${swFileDir}/${sScopeSlash}`}
       );
 
