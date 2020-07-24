@@ -6,11 +6,11 @@ import {
   property,
   TemplateResult,
   query,
-  queryAll
+  queryAll,
 } from 'lit-element';
-import { until } from 'lit-html/directives/until';
-import { FileRecord, CodeSampleEditorTextarea, RemoteSw } from './types';
-import { EMPTY_INDEX } from './constants';
+import {until} from 'lit-html/directives/until';
+import {FileRecord, CodeSampleEditorTextarea, RemoteSw} from './types';
+import {EMPTY_INDEX} from './constants';
 import {
   endWithSlash,
   generateUniqueSessionId,
@@ -19,16 +19,16 @@ import {
   getFileRecordsFromTextareas,
   reloadIframe,
   connectToServiceWorker,
-  clearSwContentsAndSave
+  clearSwContentsAndSave,
 } from './util';
 import './code-sample-editor-layout';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
-  @property({ attribute: 'project-path', type: String })
+  @property({attribute: 'project-path', type: String})
   projectPath?: string;
 
-  @property({ attribute: 'sandbox-scope', type: String })
+  @property({attribute: 'sandbox-scope', type: String})
   sandboxScope = 'modules';
 
   @query('#editorIframe')
@@ -41,7 +41,7 @@ export class CodeSampleEditor extends LitElement {
   private lastProjectPath?: string;
   private lastSandboxScope: string | null = null;
   private projectContentsReady: Promise<FileRecord[]> = Promise.resolve([
-    EMPTY_INDEX
+    EMPTY_INDEX,
   ]);
   private remoteSw: RemoteSw = Promise.resolve(null);
   private sessionId: string = generateUniqueSessionId();
@@ -61,7 +61,7 @@ export class CodeSampleEditor extends LitElement {
     let firstEditor = true;
     let index = 0;
 
-    const tabs: TemplateResult[] = fileRecords.map(fileRecord => {
+    const tabs: TemplateResult[] = fileRecords.map((fileRecord) => {
       const tResult = html`
         <span
           slot="tab"

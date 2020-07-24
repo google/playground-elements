@@ -1,6 +1,6 @@
-import { Remote } from 'comlink';
-import { SwControllerAPI } from '../sw';
-import { MESSAGE_TYPES } from './constants';
+import {Remote} from 'comlink';
+import {SwControllerAPI} from '../sw';
+import {MESSAGE_TYPES} from './constants';
 
 declare global {
   interface Window {
@@ -24,7 +24,7 @@ declare global {
 
   interface Client {
     postMessage(message: any, transfer?: Transferable[]): void;
-    postMessage(message: any, options?: { transfer?: any[] }): void;
+    postMessage(message: any, options?: {transfer?: any[]}): void;
     readonly id: string;
     readonly type: clientType;
     readonly url: string;

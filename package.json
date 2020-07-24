@@ -12,12 +12,14 @@
     "watch": "tsc-watch --onSuccess \"rollup -c rollup.config.js\"",
     "serve": "es-dev-server --node-resolve",
     "dev": "npm run watch & npm run serve",
+    "format": "prettier src/**/*.ts --write",
     "prepublishOnly": "npm run build"
   },
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "devDependencies": {
     "es-dev-server": "^1.56.1",
+    "prettier": "^2.0.5",
     "rollup": "^2.21.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "tsc-watch": "^4.2.3",

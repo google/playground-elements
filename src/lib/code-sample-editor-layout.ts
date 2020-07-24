@@ -4,9 +4,9 @@ import {
   html,
   css,
   property,
-  query
+  query,
 } from 'lit-element';
-import { TemplateResult } from 'lit-html';
+import {TemplateResult} from 'lit-html';
 
 @customElement('code-sample-editor-layout')
 export class CodeSampleEditorLayout extends LitElement {
@@ -51,7 +51,7 @@ export class CodeSampleEditorLayout extends LitElement {
     `;
   }
 
-  @property({ type: Boolean })
+  @property({type: Boolean})
   addFilePrompt = false;
 
   @query('#filenameInput')
@@ -61,7 +61,7 @@ export class CodeSampleEditorLayout extends LitElement {
     this.dispatchEvent(
       new CustomEvent('save', {
         bubbles: true,
-        composed: true
+        composed: true,
       })
     );
   }
@@ -71,7 +71,7 @@ export class CodeSampleEditorLayout extends LitElement {
       new CustomEvent('create-file', {
         bubbles: true,
         composed: true,
-        detail: this.filenameInput!.value
+        detail: this.filenameInput!.value,
       })
     );
 
@@ -111,7 +111,7 @@ export class CodeSampleEditorLayout extends LitElement {
       }
 
       slottedTarget.toggleAttribute('selected', true);
-      const classNames = Array.from(slottedTarget.classList).filter(cl =>
+      const classNames = Array.from(slottedTarget.classList).filter((cl) =>
         cl.startsWith('link-')
       );
       if (classNames.length) {
@@ -135,9 +135,7 @@ export class CodeSampleEditorLayout extends LitElement {
         <button @click=${this.onCreateFileClick}>Create File</button>
       `;
     } else {
-      return html`
-        <button @click=${this.onAddFileClick}>Add File</button>
-      `;
+      return html` <button @click=${this.onAddFileClick}>Add File</button> `;
     }
   }
 
