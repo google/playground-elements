@@ -18,7 +18,6 @@ import {
   ServiceWorkerAPI,
   FileAPI,
 } from '../shared/worker-api.js';
-import {endWithSlash} from '../shared/util.js';
 import {expose} from 'comlink';
 
 declare var self: ServiceWorkerGlobalScope;
@@ -31,7 +30,6 @@ type SessionID = string;
  */
 const workerAPI: ServiceWorkerAPI = {
   setFileAPI(fileAPI: FileAPI, sessionID: SessionID) {
-    console.log(`Setting FileAPI for session ${sessionID}`);
     fileAPIs.set(sessionID, fileAPI);
   },
 };
@@ -59,17 +57,31 @@ const getFile = async (e: FetchEvent, path: string, sessionId: SessionID) => {
 
 const onFetch = (e: FetchEvent) => {
   const url = e.request.url;
-  const scope = endWithSlash(self.registration.scope);
-  if (url.startsWith(scope)) {
-    const fullPath = url.substring(scope.length);
-    const slashIndex = fullPath.indexOf('/');
-    const sessionId = fullPath.slice(0, slashIndex);
-    const path = fullPath.slice(slashIndex + 1);
-    if (!sessionId) {
-      return;
+  if (url.startsWith(self.registration.scope)) {
+    const {filePath, sessionId} = parseScopedUrl(url);
+    if (sessionId !== undefined) {
+      e.respondWith(getFile(e, filePath!, sessionId));
     }
-    e.respondWith(getFile(e, path, sessionId));
   }
+};
+
+const parseScopedUrl = (url: string) => {
+  const scope = self.registration.scope;
+  // URLs in scope will be of the form: {scope}{sessionId}/{filePath}
+  // scope is always a full URL prefix, including a trailing slash
+  const sessionAndPath = url.substring(scope.length);
+  const slashIndex = sessionAndPath.indexOf('/');
+  let sessionId, filePath: string | undefined;
+  if (slashIndex === -1) {
+    console.warn(`Invalid sample file URL: ${url}`);
+  } else {
+    sessionId = sessionAndPath.slice(0, slashIndex);
+    filePath = sessionAndPath.slice(slashIndex + 1);
+  }
+  return {
+    sessionId,
+    filePath,
+  };
 };
 
 const onInstall = () => {

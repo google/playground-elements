@@ -22,9 +22,9 @@ import {
   PropertyValues,
   internalProperty,
 } from 'lit-element';
-import { wrap, Remote, proxy } from 'comlink';
+import {wrap, Remote, proxy} from 'comlink';
 import '@material/mwc-tab-bar';
-import { TabBar } from '@material/mwc-tab-bar';
+import {TabBar} from '@material/mwc-tab-bar';
 import '@material/mwc-tab';
 import '@material/mwc-button';
 import '@material/mwc-icon-button';
@@ -36,10 +36,10 @@ import {
   ESTABLISH_HANDSHAKE,
   HANDSHAKE_RECEIVED,
 } from '../shared/worker-api.js';
-import { getRandomString } from '../shared/util.js';
-import { CodeSampleEditorPreviewElement } from './code-sample-editor-preview.js';
+import {getRandomString, endWithSlash} from '../shared/util.js';
+import {CodeSampleEditorPreviewElement} from './code-sample-editor-preview.js';
 import './code-sample-editor-preview.js';
-import { nothing } from 'lit-html';
+import {nothing} from 'lit-html';
 
 declare global {
   interface ImportMeta {
@@ -138,20 +138,20 @@ export class CodeSampleEditor extends LitElement {
   /**
    * A document-relative path to a project configuration file.
    */
-  @property({ attribute: 'project-src' })
+  @property({attribute: 'project-src'})
   projectSrc?: string;
 
   /**
    * The service worker scope to register on
    */
   // TODO: generate this?
-  @property({ attribute: 'sandbox-scope' })
+  @property({attribute: 'sandbox-scope'})
   sandboxScope = 'code-sample-editor-projects';
 
   // computed from this.sandboxScope
   _scopeUrl!: string;
 
-  @property({ type: Boolean })
+  @property({type: Boolean})
   enableAddFile = false;
 
   @query('code-sample-editor-preview')
@@ -173,7 +173,7 @@ export class CodeSampleEditor extends LitElement {
   private _files?: SampleFile[];
 
   // TODO: make a public property/method to select a file
-  @property({ attribute: false })
+  @property({attribute: false})
   private _currentFileIndex?: number;
 
   private get _currentFile() {
@@ -199,7 +199,11 @@ export class CodeSampleEditor extends LitElement {
 
   update(changedProperties: PropertyValues) {
     if (changedProperties.has('sandboxScope')) {
-      this._scopeUrl = new URL(`./${this.sandboxScope}/`, import.meta.url).href;
+      // Ensure scope is relative to this module and always ends in a slash
+      this._scopeUrl = new URL(
+        './' + endWithSlash(this.sandboxScope),
+        import.meta.url
+      ).href;
       this._startWorkders();
     }
     if (changedProperties.has('projectSrc')) {
@@ -216,12 +220,12 @@ export class CodeSampleEditor extends LitElement {
           @MDCTabBar:activated=${this._tabActivated}
         >
           ${this._files?.map((file) => {
-      const label = file.name.substring(file.name.lastIndexOf('/') + 1);
-      return html`<mwc-tab label=${label}></mwc-tab>`;
-    })}
+            const label = file.name.substring(file.name.lastIndexOf('/') + 1);
+            return html`<mwc-tab label=${label}></mwc-tab>`;
+          })}
           ${this.enableAddFile
-        ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
-        : nothing}
+            ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
+            : nothing}
         </mwc-tab-bar>
         <textarea
           .value=${(this._currentFile && this._currentFile.content) || ''}
@@ -229,7 +233,7 @@ export class CodeSampleEditor extends LitElement {
         ></textarea>
       </div>
       <code-sample-editor-preview
-        .src="${this._previewSrc}"
+        .src=${this._previewSrc}
         location="index.html"
         @reload=${this._onSave}
       >
@@ -237,7 +241,7 @@ export class CodeSampleEditor extends LitElement {
     `;
   }
 
-  private _tabActivated(e: CustomEvent<{ index: number }>) {
+  private _tabActivated(e: CustomEvent<{index: number}>) {
     this._currentFileIndex = e.detail.index;
   }
 
@@ -291,7 +295,7 @@ export class CodeSampleEditor extends LitElement {
 
     const registration = await navigator.serviceWorker.register(
       serviceWorkerScriptUrl.href,
-      { scope: this._scopeUrl }
+      {scope: this._scopeUrl}
     );
 
     registration.addEventListener('updatefound', () => {
@@ -312,7 +316,7 @@ export class CodeSampleEditor extends LitElement {
 
   private async _connectServiceWorker(worker: ServiceWorker) {
     return new Promise((resolve) => {
-      const { port1, port2 } = new MessageChannel();
+      const {port1, port2} = new MessageChannel();
 
       const onMessage = (e: MessageEvent) => {
         if (e.data.initComlink === HANDSHAKE_RECEIVED) {

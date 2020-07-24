@@ -96,7 +96,6 @@ export class CodeSampleEditorPreviewElement extends LitElement {
   private _iframe!: HTMLIFrameElement;
 
   render() {
-    console.log('preview src', this.src);
     return html`
       <div id="toolbar">
         <mwc-icon-button
@@ -111,9 +110,7 @@ export class CodeSampleEditorPreviewElement extends LitElement {
 
   reload() {
     const iframe = this._iframe;
-    if (iframe.contentWindow) {
-      iframe.contentWindow.location.reload();
-    }
+    iframe.contentWindow?.location.reload();
   }
 
   private _onReloadClick() {
