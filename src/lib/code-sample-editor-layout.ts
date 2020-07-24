@@ -57,7 +57,7 @@ export class CodeSampleEditorLayout extends LitElement {
   @query('#filenameInput')
   filenameInput?: HTMLInputElement;
 
-  private onSubmit(e: Event) {
+  private onSubmit(_e: Event) {
     this.dispatchEvent(
       new CustomEvent('save', {
         bubbles: true,
@@ -66,7 +66,7 @@ export class CodeSampleEditorLayout extends LitElement {
     );
   }
 
-  private onCreateFileClick(e: Event) {
+  private onCreateFileClick(_e: Event) {
     this.dispatchEvent(
       new CustomEvent('create-file', {
         bubbles: true,
@@ -78,7 +78,7 @@ export class CodeSampleEditorLayout extends LitElement {
     this.addFilePrompt = false;
   }
 
-  private onAddFileClick(e: Event) {
+  private onAddFileClick(_e: Event) {
     this.addFilePrompt = true;
   }
 
