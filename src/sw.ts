@@ -3,7 +3,7 @@ import { endWithSlash } from './lib/util';
 import { expose } from 'comlink';
 import { MESSAGE_TYPES } from './lib/constants';
 
-const swScope = self as ServiceWorkerGlobalScope;
+const swScope = self as unknown as ServiceWorkerGlobalScope;
 
 const recieveMessageChannelHandshake = (e: MessageEvent) => {
   const ports = e.ports;

@@ -4,11 +4,11 @@ import {
   ProjectManifest,
   AcceptableExtensions,
   RemoteSw,
-  CodeSampleEditorTextarea
+  CodeSampleEditorTextarea,
 } from './types';
-import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX, MESSAGE_TYPES } from './constants';
-import { wrap } from 'comlink';
-import { SwControllerAPI } from '../sw';
+import {ACCEPTABLE_EXTENSIONS, EMPTY_INDEX, MESSAGE_TYPES} from './constants';
+import {wrap} from 'comlink';
+import {SwControllerAPI} from '../sw';
 
 const generateRandomString = (): string => {
   const arr = new Uint32Array(1);
@@ -32,10 +32,10 @@ export const generateUniqueSessionId = (): string => {
 const establishMessageChannelHandshake = (
   messageTarget: ServiceWorker
 ): Promise<MessagePort> => {
-  return new Promise(res => {
+  return new Promise((res) => {
     const mc = new MessageChannel();
     const establishHandshakeMessage: Message = {
-      type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE
+      type: MESSAGE_TYPES.ESTABLISH_HANDSHAKE,
     };
 
     const onMcResponse = (e: MessageEvent) => {
@@ -67,10 +67,10 @@ export const setUpServiceWorker = async (sandboxScope: string): RemoteSw => {
       const sScopeSlash = endWithSlash(sandboxScope);
       const registration = await navigator.serviceWorker.register(
         `${swFileDir}/sw.js`,
-        { scope: `${swFileDir}/${sScopeSlash}` }
+        {scope: `${swFileDir}/${sScopeSlash}`}
       );
 
-      const isInstalling = new Promise<ServiceWorker | null>(res => {
+      const isInstalling = new Promise<ServiceWorker | null>((res) => {
         registration.addEventListener('updatefound', () => {
           res(registration.installing);
         });
@@ -131,9 +131,9 @@ export const fetchProject = async (
         if (name && extensionRaw) {
           if (extensionRaw && ACCEPTABLE_EXTENSIONS.includes(extensionRaw)) {
             const extension = extensionRaw as AcceptableExtensions;
-            fileMetadata.push({ name, extension });
+            fileMetadata.push({name, extension});
             const fileFetched = fetch(`${projectDir}${name}.${extension}`).then(
-              response => {
+              (response) => {
                 if (response.status === 404) {
                   throw new Error(
                     `Could not find file ` + `${projectDir}${name}.${extension}`
@@ -172,7 +172,7 @@ export const fetchProject = async (
         const fileRecord: FileRecord = {
           name: metadata.name,
           extension: metadata.extension,
-          content: fileContent
+          content: fileContent,
         };
 
         fileRecords.push(fileRecord);
@@ -242,7 +242,7 @@ export const addFileRecordFromName = (
     const newFr: FileRecord = {
       content: '',
       extension: newFileExtension,
-      name: newFileName
+      name: newFileName,
     };
 
     fileRecords.push(newFr);
@@ -260,7 +260,7 @@ export const connectToServiceWorker = (
   scope: string
 ): RemoteSw => {
   return previousRemoteSw
-    .then(async sw => sw && (await sw.clearContents(sessionId)))
+    .then(async (sw) => sw && (await sw.clearContents(sessionId)))
     .then(async (_: any) => await setUpServiceWorker(scope));
 };
 
@@ -273,11 +273,11 @@ export const reloadIframe = (iframe: HTMLIFrameElement) => {
 export const getFileRecordsFromTextareas = (
   textareas: NodeListOf<CodeSampleEditorTextarea>
 ) => {
-  const fileRecords: FileRecord[] = Array.from(textareas).map(e => {
+  const fileRecords: FileRecord[] = Array.from(textareas).map((e) => {
     const name = e.name;
     const extension = e.extension;
     const content = e.value;
-    return { name, extension, content };
+    return {name, extension, content};
   });
 
   return fileRecords;
