@@ -1,5 +1,5 @@
-import { Remote } from 'comlink';
-import { MESSAGE_TYPES } from './constants.js';
+import {Remote} from 'comlink';
+import {MESSAGE_TYPES} from './constants.js';
 
 declare global {
   interface Window {

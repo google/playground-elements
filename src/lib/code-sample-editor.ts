@@ -8,9 +8,9 @@ import {
   query,
   queryAll,
 } from 'lit-element';
-import { until } from 'lit-html/directives/until.js';
-import { FileRecord, RemoteSw } from '../shared/types.js';
-import { EMPTY_INDEX } from '../shared/constants.js';
+import {until} from 'lit-html/directives/until.js';
+import {FileRecord, RemoteSw} from '../shared/types.js';
+import {EMPTY_INDEX} from '../shared/constants.js';
 import {
   endWithSlash,
   fetchProject,
@@ -28,10 +28,10 @@ import './code-sample-editor-layout.js';
 
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
-  @property({ attribute: 'project-path', type: String })
+  @property({attribute: 'project-path', type: String})
   projectPath?: string;
 
-  @property({ attribute: 'sandbox-scope', type: String })
+  @property({attribute: 'sandbox-scope', type: String})
   sandboxScope = 'modules';
 
   @query('#editorIframe')

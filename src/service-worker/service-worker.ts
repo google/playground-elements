@@ -1,9 +1,9 @@
-import { Message, FileRecord } from '../shared/types.js';
-import { endWithSlash } from '../shared/util.js';
-import { expose } from 'comlink';
-import { MESSAGE_TYPES } from '../shared/constants.js';
+import {Message, FileRecord} from '../shared/types.js';
+import {endWithSlash} from '../shared/util.js';
+import {expose} from 'comlink';
+import {MESSAGE_TYPES} from '../shared/constants.js';
 
-const swScope = self as unknown as ServiceWorkerGlobalScope;
+const swScope = (self as unknown) as ServiceWorkerGlobalScope;
 
 const recieveMessageChannelHandshake = (e: MessageEvent) => {
   const ports = e.ports;
@@ -11,7 +11,7 @@ const recieveMessageChannelHandshake = (e: MessageEvent) => {
     const port = ports[0];
     port.start();
     const handshakeReceivedMessage: Message = {
-      type: MESSAGE_TYPES.HANDSHAKE_RECEIVED
+      type: MESSAGE_TYPES.HANDSHAKE_RECEIVED,
     };
     expose(SwController, port);
     port.postMessage(handshakeReceivedMessage);
@@ -77,14 +77,14 @@ class SwController {
 
       let responseInit: ResponseInit = {
         headers: {
-          'Content-Type': contentType
-        }
+          'Content-Type': contentType,
+        },
       };
 
       const filename = `${fileRecord.name}.${fileRecord.extension}`;
       const responseParams: ResponseParams = {
         content: fileRecord.content,
-        init: responseInit
+        init: responseInit,
       };
 
       fileMap.set(filename, responseParams);

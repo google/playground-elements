@@ -6,7 +6,7 @@ import {
   property,
   query,
 } from 'lit-element';
-import { TemplateResult } from 'lit-html';
+import {TemplateResult} from 'lit-html';
 
 @customElement('code-sample-editor-layout')
 export class CodeSampleEditorLayout extends LitElement {
@@ -51,7 +51,7 @@ export class CodeSampleEditorLayout extends LitElement {
     `;
   }
 
-  @property({ type: Boolean })
+  @property({type: Boolean})
   addFilePrompt = false;
 
   @query('#filenameInput')

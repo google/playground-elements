@@ -4,9 +4,9 @@ import {
   RemoteSw,
   SwControllerAPI,
 } from '../shared/types.js';
-import { MESSAGE_TYPES } from '../shared/constants.js';
-import { wrap } from 'comlink';
-import { endWithSlash } from '../shared/util.js';
+import {MESSAGE_TYPES} from '../shared/constants.js';
+import {wrap} from 'comlink';
+import {endWithSlash} from '../shared/util.js';
 
 export interface CodeSampleEditorTextarea extends HTMLTextAreaElement {
   extension: 'js' | 'ts' | 'html';
@@ -70,7 +70,7 @@ export const setUpServiceWorker = async (sandboxScope: string): RemoteSw => {
       const sScopeSlash = endWithSlash(sandboxScope);
       const registration = await navigator.serviceWorker.register(
         `${swFileDir}/sw.js`,
-        { scope: `${swFileDir}/${sScopeSlash}` }
+        {scope: `${swFileDir}/${sScopeSlash}`}
       );
 
       const isInstalling = new Promise<ServiceWorker | null>((res) => {
@@ -133,7 +133,7 @@ export const getFileRecordsFromTextareas = (
     const name = e.name;
     const extension = e.extension;
     const content = e.value;
-    return { name, extension, content };
+    return {name, extension, content};
   });
 
   return fileRecords;

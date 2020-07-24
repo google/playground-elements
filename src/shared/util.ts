@@ -4,7 +4,7 @@ import {
   AcceptableExtensions,
   RemoteSw,
 } from './types.js';
-import { ACCEPTABLE_EXTENSIONS, EMPTY_INDEX } from './constants.js';
+import {ACCEPTABLE_EXTENSIONS, EMPTY_INDEX} from './constants.js';
 
 export const endWithSlash = (str: string) => str.replace(/\/?$/, '/');
 
@@ -30,7 +30,7 @@ export const fetchProject = async (
         if (name && extensionRaw) {
           if (extensionRaw && ACCEPTABLE_EXTENSIONS.includes(extensionRaw)) {
             const extension = extensionRaw as AcceptableExtensions;
-            fileMetadata.push({ name, extension });
+            fileMetadata.push({name, extension});
             const fileFetched = fetch(`${projectDir}${name}.${extension}`).then(
               (response) => {
                 if (response.status === 404) {
@@ -45,14 +45,14 @@ export const fetchProject = async (
           } else {
             console.error(
               `Unsupported file extension ${extensionRaw} in ` +
-              `file ${filename} in ${manifestPath}`
+                `file ${filename} in ${manifestPath}`
             );
             continue;
           }
         } else {
           console.error(
             `could not parse file name or file extension from ` +
-            `${filename} in ${manifestPath}`
+              `${filename} in ${manifestPath}`
           );
           continue;
         }
@@ -111,7 +111,7 @@ export const addFileRecordFromName = (
   if (!ACCEPTABLE_EXTENSIONS.includes(rawFileExtension)) {
     console.error(
       `Unsupported file extension ${rawFileExtension} for ` +
-      `file ${rawFileName}.`
+        `file ${rawFileName}.`
     );
     return null;
   }
