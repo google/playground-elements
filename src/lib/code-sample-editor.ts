@@ -151,6 +151,10 @@ export class CodeSampleEditor extends LitElement {
   // computed from this.sandboxScope
   _scopeUrl!: string;
 
+  /**
+   * Whether to show the "Add File" button on the UI that allows
+   * users to add a new blank file to the project.
+   */
   @property({type: Boolean})
   enableAddFile = false;
 
@@ -204,7 +208,7 @@ export class CodeSampleEditor extends LitElement {
         './' + endWithSlash(this.sandboxScope),
         import.meta.url
       ).href;
-      this._startWorkders();
+      this._startWorkers();
     }
     if (changedProperties.has('projectSrc')) {
       this._fetchProject();
@@ -279,7 +283,7 @@ export class CodeSampleEditor extends LitElement {
     this._tabBar.activeIndex = 0;
   }
 
-  private async _startWorkders() {
+  private async _startWorkers() {
     await Promise.all([
       // TODO (justinfagnani): this._startTypeScriptWorker(),
       this._installServiceWorker(),
