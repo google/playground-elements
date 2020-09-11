@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../../typescript-worker",
+    "rootDir": ".",
+    "lib": [
+      "ES2017",
+      "WebWorker"
+    ],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+  },
+  "include": [
+    "*.ts",
+  ],
+  "exclude": [],
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
+}

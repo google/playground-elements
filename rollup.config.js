@@ -1,4 +1,5 @@
 import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 export default [
   {
@@ -9,5 +10,18 @@ export default [
       exports: 'none',
     },
     plugins: [resolve()],
+  }, {
+    input: 'typescript-worker/typescript-worker.js',
+    output: {
+      file: 'typescript-worker.js',
+      format: 'iife',
+      exports: 'none',
+    },
+    plugins: [
+      commonjs({
+        ignore: (id) => true,
+      }),
+      resolve(),
+    ],
   }
 ]

@@ -82,7 +82,7 @@ export class CodeMirrorEditorElement extends LitElement {
    * extension.
    */
   @property()
-  type: 'js' | 'html' | 'css' | undefined;
+  type: 'js' | 'ts' | 'html' | 'css' | undefined;
 
   render() {
     return html`${this._editorView?.dom}`;

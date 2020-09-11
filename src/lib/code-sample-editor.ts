@@ -35,6 +35,7 @@ import {
   ProjectManifest,
   ESTABLISH_HANDSHAKE,
   HANDSHAKE_RECEIVED,
+  TypeScriptWorkerAPI,
 } from '../shared/worker-api.js';
 import {getRandomString, endWithSlash} from '../shared/util.js';
 import {CodeSampleEditorPreviewElement} from './code-sample-editor-preview.js';
@@ -63,6 +64,10 @@ const generateUniqueSessionId = (): string => {
 
 const serviceWorkerScriptUrl = new URL(
   '../../service-worker.js',
+  import.meta.url
+);
+const typescriptWorkerScriptUrl = new URL(
+  '../../typescript-worker.js',
   import.meta.url
 );
 
@@ -190,6 +195,11 @@ export class CodeSampleEditor extends LitElement {
 
   @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
+  private _typescriptWorkerAPI?: Remote<TypeScriptWorkerAPI>;
+  private _compiledFilesPromise = Promise.resolve<
+    Map<string, string> | undefined
+  >(undefined);
+  private _compiledFiles?: Map<string, string>;
 
   private get _previewSrc() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -278,7 +288,7 @@ export class CodeSampleEditor extends LitElement {
         };
       })
     );
-    // TODO (justinfagnani): compile project here
+    this._compileProject();
     this._currentFileIndex = 0;
     // TODO(justinfagnani): whyyyy?
     await this._tabBar.updateComplete;
@@ -288,9 +298,18 @@ export class CodeSampleEditor extends LitElement {
 
   private async _startWorkers() {
     await Promise.all([
-      // TODO (justinfagnani): this._startTypeScriptWorker(),
+      this._startTypeScriptWorker(),
       this._installServiceWorker(),
     ]);
+  }
+
+  private async _startTypeScriptWorker() {
+    if (this._typescriptWorkerAPI === undefined) {
+      const worker = new Worker(typescriptWorkerScriptUrl);
+      this._typescriptWorkerAPI = wrap<TypeScriptWorkerAPI>(worker);
+    } else {
+      console.debug('typescript-worker already started');
+    }
   }
 
   private async _installServiceWorker() {
@@ -331,12 +350,7 @@ export class CodeSampleEditor extends LitElement {
           this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port1);
           this._serviceWorkerAPI.setFileAPI(
             proxy({
-              getFile: async (
-                name: string
-              ): Promise<SampleFile | undefined> => {
-                // TODO (justinfagnani): compile files here
-                return this._files?.find((f) => f.name === name);
-              },
+              getFile: (name: string) => this._getFile(name),
             }),
             this._sessionId
           );
@@ -357,16 +371,42 @@ export class CodeSampleEditor extends LitElement {
     });
   }
 
+  private async _getFile(name: string): Promise<SampleFile | undefined> {
+    await this._compiledFilesPromise;
+    const compiledUrl = new URL(name, window.origin).href;
+    const compiledContent = this._compiledFiles?.get(compiledUrl);
+    if (compiledContent !== undefined) {
+      return {
+        name,
+        content: compiledContent,
+        contentType: 'application/javascript',
+      };
+    } else {
+      return this._files?.find((f) => f.name === name);
+    }
+  }
+
   private _onEdit() {
     const value = this._editor.value;
     if (this._currentFile) {
       this._currentFile.content = value!;
-      // TODO (justinfagnani): send change to worker
+      // TODO: send to worker?
     }
   }
 
+  private async _compileProject() {
+    if (this._files === undefined) {
+      return;
+    }
+    this._compiledFilesPromise = (this._typescriptWorkerAPI!.compileProject(
+      this._files
+    ) as any) as Promise<Map<string, string>>;
+    this._compiledFiles = undefined;
+    this._compiledFiles = await this._compiledFilesPromise;
+  }
+
   private async _onSave() {
-    // TODO (justinfagnani): await this._compileProject();
+    await this._compileProject();
     this._preview.reload();
   }
 }
@@ -381,6 +421,9 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
     mimeType = mimeType.substring(0, encodingSepIndex);
   }
   switch (mimeType) {
+    // TypeScript
+    case 'video/mp2t':
+      return 'ts';
     case 'text/javascript':
     case 'application/javascript':
       return 'js';
