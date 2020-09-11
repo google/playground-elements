@@ -38,6 +38,8 @@ import {
 } from '../shared/worker-api.js';
 import {getRandomString, endWithSlash} from '../shared/util.js';
 import {CodeSampleEditorPreviewElement} from './code-sample-editor-preview.js';
+import './codemirror-editor.js';
+import {CodeMirrorEditorElement} from './codemirror-editor.js';
 import './code-sample-editor-preview.js';
 import {nothing} from 'lit-html';
 
@@ -125,7 +127,7 @@ export class CodeSampleEditor extends LitElement {
       flex: 0;
     }
 
-    #editor > textarea {
+    #editor > codemirror-editor {
       flex: 1;
     }
 
@@ -164,8 +166,8 @@ export class CodeSampleEditor extends LitElement {
   @query('mwc-tab-bar')
   private _tabBar!: TabBar;
 
-  @query('textarea')
-  private _editor!: HTMLTextAreaElement;
+  @query('codemirror-editor')
+  private _editor!: CodeMirrorEditorElement;
 
   /**
    * A unique identifier for this instance so the service worker can keep an
@@ -231,10 +233,11 @@ export class CodeSampleEditor extends LitElement {
             ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
             : nothing}
         </mwc-tab-bar>
-        <textarea
-          .value=${(this._currentFile && this._currentFile.content) || ''}
+        <codemirror-editor
+          .value=${this._currentFile?.content ?? ''}
           @change=${this._onEdit}
-        ></textarea>
+          .type=${mimeTypeToTypeEnum(this._currentFile?.contentType)}
+        ></codemirror-editor>
       </div>
       <code-sample-editor-preview
         .src=${this._previewSrc}
@@ -367,3 +370,24 @@ export class CodeSampleEditor extends LitElement {
     this._preview.reload();
   }
 }
+
+const mimeTypeToTypeEnum = (mimeType?: string) => {
+  // TODO: infer type based on extension too
+  if (mimeType === undefined) {
+    return;
+  }
+  const encodingSepIndex = mimeType.indexOf(';');
+  if (encodingSepIndex !== -1) {
+    mimeType = mimeType.substring(0, encodingSepIndex);
+  }
+  switch (mimeType) {
+    case 'text/javascript':
+    case 'application/javascript':
+      return 'js';
+    case 'text/html':
+      return 'html';
+    case 'text/css':
+      return 'css';
+  }
+  return undefined;
+};
