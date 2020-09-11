@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
+ * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
  * This code may only be used under the BSD style license found at
  * http://polymer.github.io/LICENSE.txt
  * The complete set of authors may be found at
@@ -135,7 +135,6 @@ const loadFiles = (
 ): Promise<Map<string, FileRecord>> => {
   return new Promise(async (resolve, _reject) => {
     const fileRecords = new Map<string, FileRecord>();
-    let pendingFileCount = 0;
 
     // Prime the file map with the sample files so they're marked as already
     // loaded.
@@ -170,6 +169,8 @@ const loadFiles = (
       }
     }
 
+    let pendingFileCount = 0;
+
     // For each file, fetch its imports
     for (const file of files) {
       if (file.name.endsWith('.ts')) {
@@ -193,54 +194,9 @@ const loadFiles = (
               status: 'pending',
             });
 
-            // Async task to load the imported file
+            // Load a file, but don't block
             (async () => {
-              const response = await fetch(url);
-
-              if (type === 'bare') {
-                // Fetch any types. Doesn't yet look in package.json
-                const resolvedUrl = new URL(response.url);
-                if (resolvedUrl.pathname.endsWith('.js')) {
-                  const typesUrl = new URL(resolvedUrl.href);
-                  typesUrl.pathname = changeExtension(
-                    resolvedUrl.pathname,
-                    'd.ts'
-                  );
-                  const typesResponse = await fetch(resolvedUrl.href);
-                  if (typesResponse.ok) {
-                    // TODO: store both .js and .d.ts content?
-                    // TODO: store original file and types in same file record?
-                    // Redirects .js -> .d.ts
-                    fileRecords.set(url, {
-                      status: 'redirected',
-                      redirectedUrl: typesUrl.href,
-                    });
-                    fileRecords.set(typesUrl.href, {
-                      status: 'resolved',
-                      content: await typesResponse.text(),
-                    });
-                  } else {
-                    fileRecords.set(url, {
-                      status: 'resolved',
-                      content: await response.text(),
-                    });
-                  }
-                } else {
-                  // Dunno what type of file this would be? A CSS import?
-                  fileRecords.set(url, {
-                    status: 'resolved',
-                    content: await response.text(),
-                  });
-                }
-              } else {
-                // Presumably this isn't an import of a sample file, because
-                // it would have been pre-loaded in the file map
-                fileRecords.set(url, {
-                  status: 'resolved',
-                  content: await response.text(),
-                });
-              }
-
+              await loadFile(url, type, fileRecords);
               pendingFileCount--;
               if (pendingFileCount === 0) {
                 resolve(fileRecords);
@@ -254,6 +210,56 @@ const loadFiles = (
       resolve(fileRecords);
     }
   });
+};
+
+// Async task to load the imported file
+const loadFile = async (
+  url: string,
+  type: ResolvedSpecifier['type'],
+  fileRecords: Map<string, FileRecord>
+) => {
+  const response = await fetch(url);
+
+  if (type === 'bare') {
+    // Fetch any types. Doesn't yet look in package.json
+    const resolvedUrl = new URL(response.url);
+    if (resolvedUrl.pathname.endsWith('.js')) {
+      const typesUrl = new URL(resolvedUrl.href);
+      typesUrl.pathname = changeExtension(resolvedUrl.pathname, 'd.ts');
+      const typesResponse = await fetch(resolvedUrl.href);
+      if (typesResponse.ok) {
+        // TODO: store both .js and .d.ts content?
+        // TODO: store original file and types in same file record?
+        // Redirects .js -> .d.ts
+        fileRecords.set(url, {
+          status: 'redirected',
+          redirectedUrl: typesUrl.href,
+        });
+        fileRecords.set(typesUrl.href, {
+          status: 'resolved',
+          content: await typesResponse.text(),
+        });
+      } else {
+        fileRecords.set(url, {
+          status: 'resolved',
+          content: await response.text(),
+        });
+      }
+    } else {
+      // Dunno what type of file this would be? A CSS import?
+      fileRecords.set(url, {
+        status: 'resolved',
+        content: await response.text(),
+      });
+    }
+  } else {
+    // Presumably this isn't an import of a sample file, because
+    // it would have been pre-loaded in the file map
+    fileRecords.set(url, {
+      status: 'resolved',
+      content: await response.text(),
+    });
+  }
 };
 
 const changeExtension = (path: string, ext: string) => {
@@ -297,9 +303,9 @@ const resolveSpecifier = (
 };
 
 class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
-  compilerOptions: ts.CompilerOptions;
-  packageRoot: string;
-  files: Map<string, FileRecord>;
+  readonly compilerOptions: ts.CompilerOptions;
+  readonly packageRoot: string;
+  readonly files: Map<string, FileRecord>;
 
   constructor(
     files: Map<string, FileRecord>,
