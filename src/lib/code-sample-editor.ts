@@ -94,6 +94,24 @@ const typescriptWorkerScriptUrl = new URL(
  *   }
  * }
  * ```
+ *
+ * Files can also be given as <script> tag children of <code-sample-editor>.
+ * The type attribute must start with "sample/" and then the type of the file,
+ * one of: "js", "ts", "html", or "css". The <script> must also have a
+ * "filename" attribute.
+ *
+ * Example inline files:
+ * ```html
+ * <code-sample-editor>
+ *   <script type="sample/html" filename="index.html">
+ *     <script type="module" src="index.js">&lt;script>
+ *     <h1>Hello World</h1>
+ *   </script>
+ *   <script type="sample/js" filename="index.js">
+ *     document.body.append('<h2>Hello from JS</h2>');
+ *   </script>
+ * </code-sample-editor>
+ * ```
  */
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
@@ -139,6 +157,10 @@ export class CodeSampleEditor extends LitElement {
     code-sample-editor-preview {
       flex: 0 0 50%;
       height: 100%;
+    }
+
+    slot {
+      display: none;
     }
   `;
 
@@ -201,6 +223,9 @@ export class CodeSampleEditor extends LitElement {
   >(undefined);
   private _compiledFiles?: Map<string, string>;
 
+  @query('slot')
+  private _slot!: HTMLSlotElement;
+
   private get _previewSrc() {
     // Make sure that we've connected to the Service Worker and loaded the
     // project files before generating the preview URL. This ensures that there
@@ -230,6 +255,7 @@ export class CodeSampleEditor extends LitElement {
 
   render() {
     return html`
+      <slot @slotchange=${this._slotChange}></slot>
       <div id="editor">
         <mwc-tab-bar
           .activeIndex=${this._currentFileIndex || 0}
@@ -256,6 +282,29 @@ export class CodeSampleEditor extends LitElement {
       >
       </code-sample-editor-preview>
     `;
+  }
+
+  private _slotChange(_e: Event) {
+    const elements = this._slot.assignedElements({flatten: true});
+    const sampleScripts = elements.filter((e) =>
+      e.matches('script[type^=sample][filename]')
+    );
+    // TODO (justinfagnani): detect both inline samples and a manifest
+    // and give an warning.
+    this._files = sampleScripts.map((s) => {
+      const typeAttr = s.getAttribute('type');
+      const fileType = typeAttr!.substring('sample/'.length);
+      const name = s.getAttribute('filename')!;
+      // TODO (justinfagnani): better entity unescaping
+      const content = s.textContent!.trim().replace('&lt;', '<');
+      const contentType = typeEnumToMimeType(fileType);
+      return {
+        name,
+        content,
+        contentType,
+      };
+    });
+    this._compileProject();
   }
 
   private _tabActivated(e: CustomEvent<{index: number}>) {
@@ -421,7 +470,9 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
     mimeType = mimeType.substring(0, encodingSepIndex);
   }
   switch (mimeType) {
-    // TypeScript
+    // TypeScript: this is the mime-type returned by servers
+    // .ts files aren't usually served to browsers, so they don't yet
+    // have their own mime-type.
     case 'video/mp2t':
       return 'ts';
     case 'text/javascript':
@@ -431,6 +482,25 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
       return 'html';
     case 'text/css':
       return 'css';
+  }
+  return undefined;
+};
+
+const typeEnumToMimeType = (type?: string) => {
+  // TODO: infer type based on extension too
+  if (type === undefined) {
+    return;
+  }
+  switch (type) {
+    // TypeScript
+    case 'ts':
+      return 'video/mp2t';
+    case 'js':
+      return 'application/javascript; charset=utf-8';
+    case 'html':
+      return 'text/html; charset=utf-8';
+    case 'css':
+      return 'text/css; charset=utf-8';
   }
   return undefined;
 };
