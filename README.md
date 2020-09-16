@@ -90,6 +90,70 @@ Or define your project in a JSON manifest:
 }
 ```
 
+### Templating & File Replacements
+
+the JSON manifest supports a simple templating system where you must define an
+insertion point (that is simply fed into `string.replace`) as well as a file
+that will be inserted into that template. Templates will not be displayed to the
+user for editing. For example:
+
+`project.json`:
+
+```json
+{
+  "files": {
+    "index.html": {
+      "replacements": {
+        "<!-- dom body -->": "index-dom.html",
+        "<!-- dom head -->": "index-head.html"
+      }
+    },
+    "my-element.js": {}
+  }
+}
+```
+
+Here we define 2 insertion points in `index.html` that will get applied
+sequentially: `<!-- dom body -->` and `<!-- dom head -->` which will be replaced
+with the contents of `index-dom.html` and `index-head.html` respectively.
+
+`index.html`:
+
+```html
+<html>
+  <head>
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2.4.4/webcomponents-loader.js"></script>
+    <!-- dom head -->
+  </head>
+  <body>
+    <div>Here are the contents:</div>
+    <!-- dom body -->
+  </body>
+</html>
+```
+
+`index-head.html`:
+
+```html
+<script type="module" src="./my-element.js"></script>
+```
+
+`index-dom.html`:
+
+```html
+<my-element myNumber="5">
+  <div>Element is not upgraded</div>
+</my-element>
+```
+
+The code sample editor will show a tab for each `index-head.html` and
+`index-dom.html` but hide `index.html` as it is considered a template since
+it has `replacements` defined.
+
+_NB: Replacements apply `string.replace` sequentially to the same string, so
+multiple replacements in the same template may cause unintended behavior if the
+insertion point string is inserted by the user's code._
+
 ## Getting Started
 
 Install with npm:
@@ -100,7 +164,7 @@ npm i code-sample-editor
 Load the component definition:
 ```html
 <script
-  type="module" 
+  type="module"
   src="/node_modules/code-sample-editor/lib/code-sample-editor.js">
 </script>
 ```
