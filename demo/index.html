@@ -1,92 +1,106 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
-  <script src="https://unpkg.com/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-  <script type="module" src="../lib/code-sample-editor.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    code-sample-editor {
-      margin-bottom: 48px;
-    }
-  </style>
-</head>
-
-<body>
-  <h2>Inline Sample Files</h2>
-  <p>
-    This editor has no configuration file, just <code>&lt;script></code> tags
-    with type attributes with a "sample/" prefix.
-  </p>
-  <code-sample-editor>
-    <script type="sample/html" filename="index.html">
-<!doctype html>
-<html>
   <head>
-    <script type="module" src="./my-element.js">&lt;/script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module" src="../lib/code-sample-editor.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      code-sample-editor {
+        margin-bottom: 48px;
+      }
+    </style>
   </head>
+
   <body>
-    <div>Here are the contents:</div>
-    <my-element myNumber="5">
-      <div>Element is not upgraded</div>
-    </my-element>
+    <h2>Inline Sample Files</h2>
+    <p>
+      This editor has no configuration file, just <code>&lt;script></code> tags
+      with type attributes with a "sample/" prefix.
+    </p>
+    <code-sample-editor>
+      <script type="sample/html" filename="index.html">
+        <!doctype html>
+        <html>
+          <head>
+            <script type="module" src="./my-element.js">&lt;/script>
+          </head>
+          <body>
+            <div>Here are the contents:</div>
+            <my-element myNumber="5">
+              <div>Element is not upgraded</div>
+            </my-element>
+          </body>
+        </html>
+      </script>
+      <script type="sample/ts" filename="my-element.ts">
+        import { LitElement, html, property, customElement } from 'lit-element';
+        import './my-second-element.js';
+
+        @customElement('my-element')
+        export class MyElement extends LitElement {
+          @property({ type: Number })
+          myNumber?: number;
+
+          render() {
+            return html`
+              <div>Here is ${this.myNumber}</div>
+              <div>And here is my second element:</div>
+              <my-second-element></my-second-element>
+            `;
+          }
+        }
+      </script>
+      <script type="sample/ts" filename="my-second-element.ts">
+        import { LitElement, html, customElement } from 'lit-element';
+
+        @customElement('my-second-element')
+        export class MySecondElement extends LitElement {
+          render() {
+            return html`
+              <div>This is inside the shadow dom of my-second-element</div>
+            `;
+          }
+        }
+      </script>
+    </code-sample-editor>
+
+    <h2>TypeScript</h2>
+    <p>
+      Note that imports to other TypeScript files use the .js extension like you
+      would with tsc.
+    </p>
+    <code-sample-editor
+      project-src="./typescript/project.json"
+    ></code-sample-editor>
+
+    <h2>Basic Project</h2>
+    <p>
+      An index.html and two local .js file, importing an npm package with bare
+      module specifiers.
+    </p>
+    <code-sample-editor
+      project-src="./project-1/project.json"
+    ></code-sample-editor>
+
+    <h2>MWC Demo</h2>
+    <p>A demo for <code>&lt;mwc-button></code>.</p>
+    <code-sample-editor
+      project-src="./mwc-button/project.json"
+    ></code-sample-editor>
+
+    <h2>Replacements</h2>
+    <p>
+      An index.html with two replacement files for the head and the body as well
+      as two js files where there is a replacement for the render method.
+    </p>
+    <code-sample-editor
+      project-src="./replacements/project.json"
+    ></code-sample-editor>
   </body>
-</html>      
-    </script>
-    <script type="sample/ts" filename="my-element.ts">
-import { LitElement, html, property, customElement } from 'lit-element';
-import './my-second-element.js';
-
-@customElement('my-element')
-export class MyElement extends LitElement {
-  @property({ type: Number })
-  myNumber?: number;
-
-  render() {
-    return html`
-      <div>Here is ${this.myNumber}</div>
-      <div>And here is my second element:</div>
-      <my-second-element></my-second-element>
-    `;
-  }
-}      
-    </script>
-    <script type="sample/ts" filename="my-second-element.ts">
-import { LitElement, html, customElement } from 'lit-element';
-
-@customElement('my-second-element')
-export class MySecondElement extends LitElement {
-  render() {
-    return html`
-      <div>This is inside the shadow dom of my-second-element</div>
-    `;
-  }
-}
-    </script>
-  </code-sample-editor>
-
-  <h2>TypeScript</h2>
-  <p>
-    Note that imports to other TypeScript files use the .js extension like
-    you would with tsc.
-  </p>
-  <code-sample-editor project-src="./typescript/project.json"></code-sample-editor>
-
-  <h2>Basic Project</h2>
-  <p>
-    An index.html and two local .js file, importing an npm package with bare
-    module specifiers.
-  </p>
-  <code-sample-editor project-src="./project-1/project.json"></code-sample-editor>
-
-  <h2>MWC Demo</h2>
-  <p>
-    A demo for <code>&lt;mwc-button></code>.
-  </p>
-  <code-sample-editor project-src="./mwc-button/project.json"></code-sample-editor>
-</body>
-
 </html>

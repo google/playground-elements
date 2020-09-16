@@ -1,0 +1,16 @@
+{
+  "files": {
+    "index.html": {
+      "replacements": {
+        "<!-- dom body -->": "index-dom.html",
+        "<!-- dom head -->": "index-head.html"
+      }
+    },
+    "my-element.js": {},
+    "my-second-element.js": {
+      "replacements": {
+        "/* second element render */": "second-element-render.js"
+      }
+    }
+  }
+}
