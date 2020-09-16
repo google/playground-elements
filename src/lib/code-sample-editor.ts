@@ -43,6 +43,7 @@ import './codemirror-editor.js';
 import {CodeMirrorEditorElement} from './codemirror-editor.js';
 import './code-sample-editor-preview.js';
 import {nothing} from 'lit-html';
+import {CodeSampleEditorProject, FileNode} from './project-parser.js';
 
 declare global {
   interface ImportMeta {
@@ -203,7 +204,9 @@ export class CodeSampleEditor extends LitElement {
   private readonly _sessionId: string = generateUniqueSessionId();
 
   @internalProperty()
-  private _files?: SampleFile[];
+  private _files?: FileNode[];
+
+  private _project?: CodeSampleEditorProject;
 
   // TODO: make a public property/method to select a file
   @property({attribute: false})
@@ -289,21 +292,26 @@ export class CodeSampleEditor extends LitElement {
     const sampleScripts = elements.filter((e) =>
       e.matches('script[type^=sample][filename]')
     );
+
+    if (!sampleScripts.length) {
+      return;
+    }
+
+    this._project = new CodeSampleEditorProject();
     // TODO (justinfagnani): detect both inline samples and a manifest
     // and give an warning.
-    this._files = sampleScripts.map((s) => {
+    sampleScripts.forEach((s) => {
       const typeAttr = s.getAttribute('type');
       const fileType = typeAttr!.substring('sample/'.length);
       const name = s.getAttribute('filename')!;
       // TODO (justinfagnani): better entity unescaping
       const content = s.textContent!.trim().replace('&lt;', '<');
       const contentType = typeEnumToMimeType(fileType);
-      return {
-        name,
-        content,
-        contentType,
-      };
+
+      this._project?.addFile(name, content, contentType);
     });
+
+    this._files = this._project.editableNodes;
     this._compileProject();
   }
 
@@ -319,24 +327,10 @@ export class CodeSampleEditor extends LitElement {
     const manifestFetched = await fetch(this.projectSrc);
     const manifest = (await manifestFetched.json()) as ProjectManifest;
 
-    const filenames = Object.keys(manifest.files || []);
-    this._files = await Promise.all(
-      filenames.map(async (filename) => {
-        const fileUrl = new URL(filename, projectUrl);
-        const response = await fetch(fileUrl.href);
-        if (response.status === 404) {
-          throw new Error(`Could not find file ${filename}`);
-        }
+    this._project = new CodeSampleEditorProject(manifest, projectUrl);
 
-        // Remember the mime type so that the service worker can set it
-        const contentType = response.headers.get('Content-Type') || undefined;
-        return {
-          name: filename,
-          content: await response.text(),
-          contentType,
-        };
-      })
-    );
+    await this._project.ready;
+    this._files = this._project.editableNodes;
     this._compileProject();
     this._currentFileIndex = 0;
     // TODO(justinfagnani): whyyyy?
@@ -431,7 +425,7 @@ export class CodeSampleEditor extends LitElement {
         contentType: 'application/javascript',
       };
     } else {
-      return this._files?.find((f) => f.name === name);
+      return this._project?.getFile(name);
     }
   }
 
@@ -444,11 +438,11 @@ export class CodeSampleEditor extends LitElement {
   }
 
   private async _compileProject() {
-    if (this._files === undefined) {
+    if (this._project === undefined) {
       return;
     }
     this._compiledFilesPromise = (this._typescriptWorkerAPI!.compileProject(
-      this._files
+      this._project.serialize()
     ) as any) as Promise<Map<string, string>>;
     this._compiledFiles = undefined;
     this._compiledFiles = await this._compiledFilesPromise;

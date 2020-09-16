@@ -34,9 +34,9 @@ export interface SampleFile {
 }
 
 export interface FileOptions {
-  // This is reserved to indicate if a file is a template, ie it shouldn't be
-  // loaded itself, but copied to create new files. It's currently unused.
-  isTemplate?: boolean;
+  replacements?: {
+    [insertionPointName: string]: string;
+  };
 }
 
 export interface ProjectManifest {
