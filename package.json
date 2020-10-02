@@ -30,11 +30,11 @@
   },
   "dependencies": {
     "@codemirror/next": "^0.12.0",
-    "@material/mwc-button": "^0.19.0-canary.615d861d.0",
-    "@material/mwc-icon-button": "^0.19.0-canary.615d861d.0",
-    "@material/mwc-tab": "^0.19.0-canary.615d861d.0",
-    "@material/mwc-tab-bar": "^0.19.0-canary.615d861d.0",
-    "@material/mwc-textfield": "^0.19.0-canary.615d861d.0",
+    "@material/mwc-button": "=0.19.0-canary.615d861d.0",
+    "@material/mwc-icon-button": "=0.19.0-canary.615d861d.0",
+    "@material/mwc-tab": "=0.19.0-canary.615d861d.0",
+    "@material/mwc-tab-bar": "=0.19.0-canary.615d861d.0",
+    "@material/mwc-textfield": "=0.19.0-canary.615d861d.0",
     "comlink": "^4.3.0",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1"
