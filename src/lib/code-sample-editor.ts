@@ -50,6 +50,20 @@ declare global {
   }
 }
 
+// Hack to workaround Safari crashing and reloading the entire browser tab
+// whenever an <mwc-tab> is clicked to switch files, because of a bug relating
+// to delegatesFocus and shadow roots.
+//
+// https://bugs.webkit.org/show_bug.cgi?id=215732
+// https://github.com/material-components/material-components-web-components/issues/1720
+import {Tab} from '@material/mwc-tab';
+((Tab.prototype as unknown) as {
+  createRenderRoot: Tab['createRenderRoot'];
+  attachShadow: Tab['attachShadow'];
+}).createRenderRoot = function () {
+  return this.attachShadow({mode: 'open', delegatesFocus: false});
+};
+
 // Each <code-sample-editor> has a unique session ID used to scope requests
 // from the preview iframes.
 const sessions = new Set<string>();
