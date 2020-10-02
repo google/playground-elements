@@ -67,6 +67,8 @@ export class CodeMirrorEditorElement extends LitElement {
   // that we can set this value internally without triggering an update.
   private _value?: string;
 
+  private _capturedCodeMirrorStyles: HTMLStyleElement[] = [];
+
   get value() {
     return this._value;
   }
@@ -85,7 +87,10 @@ export class CodeMirrorEditorElement extends LitElement {
   type: 'js' | 'ts' | 'html' | 'css' | undefined;
 
   render() {
-    return html`${this._editorView?.dom}`;
+    return html`
+      ${this._capturedCodeMirrorStyles}
+      ${this._editorView?.dom}
+    `;
   }
 
   update(changedProperties: PropertyValues) {
@@ -127,6 +132,12 @@ export class CodeMirrorEditorElement extends LitElement {
       }),
       root: this.shadowRoot!,
     });
+    // EditorView writes a <style> directly into the given root on construction
+    // (unless adopted stylesheets are available in which case it uses that).
+    // But then lit renders and blows it away. So, we'll just snatch any new
+    // styles beefore this can happen, and then have lit put them back again.
+    this._capturedCodeMirrorStyles = Array.from(
+      this.shadowRoot!.querySelectorAll('style'));
     this._editorView = view;
     this.requestUpdate();
   }
