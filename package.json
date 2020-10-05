@@ -6,11 +6,10 @@
   "module": "lib/code-sample-editor.js",
   "main": "lib/code-sample-editor.js",
   "scripts": {
-    "build": "npm run build:lib && npm run build:sw && npm run bundle",
+    "build": "npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",
-    "build:sw": "tsc --build src/service-worker",
     "bundle": "rollup -c rollup.config.js",
-    "watch": "npm run build:lib -- --watch & npm run build:sw -- --watch & rollup -c rollup.config.js -w",
+    "watch": "npm run build:lib -- --watch & rollup -c rollup.config.js -w",
     "serve": "es-dev-server --node-resolve --event-stream=false",
     "dev": "npm run watch & npm run serve -- --open=demo/",
     "format": "prettier src/**/*.ts --write",
