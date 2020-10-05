@@ -39,7 +39,9 @@ const makeBareSpecifierTransformVisitor = (
       const {type, url} = resolveSpecifier(specifier, self.origin);
       if (type === 'bare') {
         const newNode = ts.getMutableClone(node);
-        newNode.moduleSpecifier = ts.createStringLiteral(url + '?module');
+        (newNode as {
+          moduleSpecifier: ts.ImportDeclaration['moduleSpecifier'];
+        }).moduleSpecifier = ts.createStringLiteral(url + '?module');
         return newNode;
       }
     }
