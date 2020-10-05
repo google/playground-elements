@@ -1,16 +1,15 @@
 {
   "name": "code-sample-editor",
-  "version": "0.1.0-pre.1",
+  "version": "0.1.0-pre.3",
   "description": "A multi-file code editor component with live preview",
   "type": "module",
   "module": "lib/code-sample-editor.js",
   "main": "lib/code-sample-editor.js",
   "scripts": {
-    "build": "npm run build:lib && npm run build:sw && npm run bundle",
+    "build": "npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",
-    "build:sw": "tsc --build src/service-worker",
     "bundle": "rollup -c rollup.config.js",
-    "watch": "npm run build:lib -- --watch & npm run build:sw -- --watch & rollup -c rollup.config.js -w",
+    "watch": "npm run build:lib -- --watch & rollup -c rollup.config.js -w",
     "serve": "es-dev-server --node-resolve --event-stream=false",
     "dev": "npm run watch & npm run serve -- --open=demo/",
     "format": "prettier src/**/*.ts --write",
@@ -19,14 +18,14 @@
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
     "es-dev-server": "^1.57.4",
     "prettier": "^2.0.5",
     "rollup": "^2.21.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "tsc-watch": "^4.2.3",
-    "typescript": "^3.9.7"
+    "typescript": "^4.0.3"
   },
   "dependencies": {
     "@codemirror/next": "^0.12.0",
