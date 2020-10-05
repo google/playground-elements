@@ -19,8 +19,8 @@
   "author": "The Polymer Authors",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
     "es-dev-server": "^1.57.4",
     "prettier": "^2.0.5",
     "rollup": "^2.21.0",
