@@ -21,7 +21,12 @@ import {
   PropertyValues,
   internalProperty,
 } from 'lit-element';
-import {EditorView, keymap, highlightSpecialChars} from '@codemirror/next/view';
+import {
+  EditorView,
+  keymap,
+  highlightSpecialChars,
+  drawSelection,
+} from '@codemirror/next/view';
 import {EditorState, Transaction} from '@codemirror/next/state';
 import {history, historyKeymap} from '@codemirror/next/history';
 import {defaultKeymap} from '@codemirror/next/commands';
@@ -110,6 +115,8 @@ export class CodeMirrorEditorElement extends LitElement {
           lineNumbers(),
           highlightSpecialChars(),
           history(),
+          drawSelection(),
+          EditorState.allowMultipleSelections.of(true),
           ...this._getLanguagePlugins(),
           defaultHighlighter,
           closeBrackets(),
