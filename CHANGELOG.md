@@ -17,11 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Added
+- Add syntax highlighting for TypeScript files.
+
 ## [0.1.0-pre.3] - 2020-10-05
 
 ### Fixed
-- Fixed missing CodeMirror styles on Firefox and Safari.
-- Fixed Safari crashes in `<mwc-tab>` code.
+- Fix missing CodeMirror styles on Firefox and Safari.
+- Fix Safari crashes in `<mwc-tab>` code.
 
 ## [0.1.0-pre.2] - 2020-09-12
 

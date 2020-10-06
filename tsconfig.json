@@ -3,7 +3,7 @@
     "composite": true,
     "incremental": true,
     "target": "esnext",
-    "module": "esNext",
+    "module": "esnext",
     "lib": [
       "ES2017",
       "DOM"
