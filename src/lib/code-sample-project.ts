@@ -16,18 +16,12 @@ import {
   LitElement,
   html,
   customElement,
-  css,
   property,
   query,
   PropertyValues,
   internalProperty,
 } from 'lit-element';
 import {wrap, Remote, proxy} from 'comlink';
-import '@material/mwc-tab-bar';
-import {TabBar} from '@material/mwc-tab-bar';
-import '@material/mwc-tab';
-import '@material/mwc-button';
-import '@material/mwc-icon-button';
 
 import {
   SampleFile,
@@ -38,11 +32,10 @@ import {
   TypeScriptWorkerAPI,
 } from '../shared/worker-api.js';
 import {getRandomString, endWithSlash} from '../shared/util.js';
-import {CodeSampleEditorPreviewElement} from './code-sample-preview.js';
-import './codemirror-editor.js';
-import {CodeMirrorEditorElement} from './codemirror-editor.js';
+import {CodeSamplePreviewElement} from './code-sample-preview.js';
+import './code-sample-editor.js';
+import {CodeSampleEditor} from './code-sample-editor.js';
 import './code-sample-preview.js';
-import {nothing} from 'lit-html';
 
 declare global {
   interface ImportMeta {
@@ -50,21 +43,7 @@ declare global {
   }
 }
 
-// Hack to workaround Safari crashing and reloading the entire browser tab
-// whenever an <mwc-tab> is clicked to switch files, because of a bug relating
-// to delegatesFocus and shadow roots.
-//
-// https://bugs.webkit.org/show_bug.cgi?id=215732
-// https://github.com/material-components/material-components-web-components/issues/1720
-import {Tab} from '@material/mwc-tab';
-((Tab.prototype as unknown) as {
-  createRenderRoot: Tab['createRenderRoot'];
-  attachShadow: Tab['attachShadow'];
-}).createRenderRoot = function () {
-  return this.attachShadow({mode: 'open', delegatesFocus: false});
-};
-
-// Each <code-sample-editor> has a unique session ID used to scope requests
+// Each <code-sample-project> has a unique session ID used to scope requests
 // from the preview iframes.
 const sessions = new Set<string>();
 const generateUniqueSessionId = (): string => {
@@ -86,98 +65,10 @@ const typescriptWorkerScriptUrl = new URL(
 );
 
 /**
- * A multi-file code editor component with live preview that works without a
- * server.
- *
- * <code-sample-editor> loads a project configuration file and the set of source
- * files it describes from the network. The source files can be edited locally.
- * To serve the locally edited files to the live preview, <code-sample-editor>
- * registers a service worker to serve files to the preview from the main UI
- * thread directly, without a network roundtrip.
- *
- * The project manifest is a JSON file with a "files" property. "files" is an
- * object with properties for each file. The key is the filename, relative to
- * the project manifest.
- *
- * Eample project manifest:
- * ```json
- * {
- *   "files": {
- *     "./index.html": {},
- *     "./my-element.js": {},
- *   }
- * }
- * ```
- *
- * Files can also be given as <script> tag children of <code-sample-editor>.
- * The type attribute must start with "sample/" and then the type of the file,
- * one of: "js", "ts", "html", or "css". The <script> must also have a
- * "filename" attribute.
- *
- * Example inline files:
- * ```html
- * <code-sample-editor>
- *   <script type="sample/html" filename="index.html">
- *     <script type="module" src="index.js">&lt;script>
- *     <h1>Hello World</h1>
- *   </script>
- *   <script type="sample/js" filename="index.js">
- *     document.body.append('<h2>Hello from JS</h2>');
- *   </script>
- * </code-sample-editor>
- * ```
+ * Coordinates code-sample editors and previews.
  */
-@customElement('code-sample-editor')
-export class CodeSampleEditor extends LitElement {
-  static styles = css`
-    :host {
-      display: flex;
-      height: 350px;
-      border: solid 1px #ddd;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    #editor {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 50%;
-      border-right: solid 1px #ddd;
-    }
-
-    #editor > mwc-tab-bar {
-      --mdc-tab-height: 35px;
-      --mdc-typography-button-text-transform: none;
-      --mdc-typography-button-font-weight: normal;
-      --mdc-typography-button-font-size: 0.75rem;
-      --mdc-typography-button-letter-spacing: normal;
-      --mdc-icon-button-size: 36px;
-      --mdc-icon-size: 18px;
-      color: #444;
-      border-bottom: 1px solid #ddd;
-      flex: 0 0 36px;
-    }
-
-    #editor mwc-tab {
-      flex: 0;
-    }
-
-    #editor > codemirror-editor {
-      flex: 1;
-    }
-
-    code-sample-editor-preview {
-      flex: 0 0 50%;
-      height: 100%;
-    }
-
-    slot {
-      display: none;
-    }
-  `;
-
+@customElement('code-sample-project')
+export class CodeSampleProjectElement extends LitElement {
   /**
    * A document-relative path to a project configuration file.
    */
@@ -189,26 +80,10 @@ export class CodeSampleEditor extends LitElement {
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'code-sample-editor-projects';
+  sandboxScope = 'code-sample-projects';
 
   // computed from this.sandboxScope
   _scopeUrl!: string;
-
-  /**
-   * Whether to show the "Add File" button on the UI that allows
-   * users to add a new blank file to the project.
-   */
-  @property({type: Boolean})
-  enableAddFile = false;
-
-  @query('code-sample-editor-preview')
-  private _preview!: CodeSampleEditorPreviewElement;
-
-  @query('mwc-tab-bar')
-  private _tabBar!: TabBar;
-
-  @query('codemirror-editor')
-  private _editor!: CodeMirrorEditorElement;
 
   /**
    * A unique identifier for this instance so the service worker can keep an
@@ -218,16 +93,6 @@ export class CodeSampleEditor extends LitElement {
 
   @internalProperty()
   private _files?: SampleFile[];
-
-  // TODO: make a public property/method to select a file
-  @property({attribute: false})
-  private _currentFileIndex?: number;
-
-  private get _currentFile() {
-    return this._currentFileIndex === undefined
-      ? undefined
-      : this._files?.[this._currentFileIndex];
-  }
 
   @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
@@ -239,6 +104,12 @@ export class CodeSampleEditor extends LitElement {
 
   @query('slot')
   private _slot!: HTMLSlotElement;
+
+  /** The editors that have registered themselves with this project. */
+  private _editors = new Set<CodeSampleEditor>();
+
+  /** The previews that have registered themselves with this project. */
+  private _previews = new Set<CodeSamplePreviewElement>();
 
   private get _previewSrc() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -264,38 +135,22 @@ export class CodeSampleEditor extends LitElement {
     if (changedProperties.has('projectSrc')) {
       this._fetchProject();
     }
+    if (changedProperties.has('_files')) {
+      for (const editor of this._editors) {
+        editor.files = this._files;
+      }
+    }
+    if (changedProperties.has('_serviceWorkerAPI')) {
+      const previewSrc = this._previewSrc;
+      for (const preview of this._previews) {
+        preview.src = previewSrc;
+      }
+    }
     super.update(changedProperties);
   }
 
   render() {
-    return html`
-      <slot @slotchange=${this._slotChange}></slot>
-      <div id="editor">
-        <mwc-tab-bar
-          .activeIndex=${this._currentFileIndex || 0}
-          @MDCTabBar:activated=${this._tabActivated}
-        >
-          ${this._files?.map((file) => {
-            const label = file.name.substring(file.name.lastIndexOf('/') + 1);
-            return html`<mwc-tab label=${label}></mwc-tab>`;
-          })}
-          ${this.enableAddFile
-            ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
-            : nothing}
-        </mwc-tab-bar>
-        <codemirror-editor
-          .value=${this._currentFile?.content ?? ''}
-          @change=${this._onEdit}
-          .type=${mimeTypeToTypeEnum(this._currentFile?.contentType)}
-        ></codemirror-editor>
-      </div>
-      <code-sample-editor-preview
-        .src=${this._previewSrc}
-        location="index.html"
-        @reload=${this._onSave}
-      >
-      </code-sample-editor-preview>
-    `;
+    return html`<slot @slotchange=${this._slotChange}></slot>`;
   }
 
   private _slotChange(_e: Event) {
@@ -321,8 +176,22 @@ export class CodeSampleEditor extends LitElement {
     this._compileProject();
   }
 
-  private _tabActivated(e: CustomEvent<{index: number}>) {
-    this._currentFileIndex = e.detail.index;
+  _registerEditor(editor: CodeSampleEditor) {
+    editor.files = this._files;
+    this._editors.add(editor);
+  }
+
+  _unregisterEditor(editor: CodeSampleEditor) {
+    this._editors.delete(editor);
+  }
+
+  _registerPreview(preview: CodeSamplePreviewElement) {
+    preview.src = this._previewSrc;
+    this._previews.add(preview);
+  }
+
+  _unregisterPreview(preview: CodeSamplePreviewElement) {
+    this._previews.delete(preview);
   }
 
   private async _fetchProject() {
@@ -352,11 +221,6 @@ export class CodeSampleEditor extends LitElement {
       })
     );
     this._compileProject();
-    this._currentFileIndex = 0;
-    // TODO(justinfagnani): whyyyy?
-    await this._tabBar.updateComplete;
-    this._tabBar.activeIndex = -1;
-    this._tabBar.activeIndex = 0;
   }
 
   private async _startWorkers() {
@@ -378,7 +242,7 @@ export class CodeSampleEditor extends LitElement {
   private async _installServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       // TODO: show this in the UI
-      console.warn('ServiceWorker support required for <code-sample-editor>');
+      console.warn('ServiceWorker support required for <code-sample>');
       return;
     }
 
@@ -449,14 +313,6 @@ export class CodeSampleEditor extends LitElement {
     }
   }
 
-  private _onEdit() {
-    const value = this._editor.value;
-    if (this._currentFile) {
-      this._currentFile.content = value!;
-      // TODO: send to worker?
-    }
-  }
-
   private async _compileProject() {
     if (this._files === undefined) {
       return;
@@ -468,37 +324,13 @@ export class CodeSampleEditor extends LitElement {
     this._compiledFiles = await this._compiledFilesPromise;
   }
 
-  private async _onSave() {
+  async save() {
     await this._compileProject();
-    this._preview.reload();
+    for (const preview of this._previews) {
+      preview.reload();
+    }
   }
 }
-
-const mimeTypeToTypeEnum = (mimeType?: string) => {
-  // TODO: infer type based on extension too
-  if (mimeType === undefined) {
-    return;
-  }
-  const encodingSepIndex = mimeType.indexOf(';');
-  if (encodingSepIndex !== -1) {
-    mimeType = mimeType.substring(0, encodingSepIndex);
-  }
-  switch (mimeType) {
-    // TypeScript: this is the mime-type returned by servers
-    // .ts files aren't usually served to browsers, so they don't yet
-    // have their own mime-type.
-    case 'video/mp2t':
-      return 'ts';
-    case 'text/javascript':
-    case 'application/javascript':
-      return 'js';
-    case 'text/html':
-      return 'html';
-    case 'text/css':
-      return 'css';
-  }
-  return undefined;
-};
 
 const typeEnumToMimeType = (type?: string) => {
   // TODO: infer type based on extension too
@@ -518,3 +350,9 @@ const typeEnumToMimeType = (type?: string) => {
   }
   return undefined;
 };
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'code-sample-project': CodeSampleProjectElement;
+  }
+}

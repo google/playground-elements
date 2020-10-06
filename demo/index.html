@@ -9,7 +9,7 @@
     body {
       font-family: Arial, sans-serif;
     }
-    code-sample-editor {
+    code-sample {
       margin-bottom: 48px;
     }
   </style>
@@ -21,7 +21,7 @@
     This editor has no configuration file, just <code>&lt;script></code> tags
     with type attributes with a "sample/" prefix.
   </p>
-  <code-sample-editor>
+  <code-sample>
     <script type="sample/html" filename="index.html">
 <!doctype html>
 <html>
@@ -66,27 +66,27 @@ export class MySecondElement extends LitElement {
   }
 }
     </script>
-  </code-sample-editor>
+  </code-sample>
 
   <h2>TypeScript</h2>
   <p>
     Note that imports to other TypeScript files use the .js extension like
     you would with tsc.
   </p>
-  <code-sample-editor project-src="/demo/typescript/project.json"></code-sample-editor>
+  <code-sample project-src="/demo/typescript/project.json"></code-sample>
 
   <h2>Basic Project</h2>
   <p>
     An index.html and two local .js file, importing an npm package with bare
     module specifiers.
   </p>
-  <code-sample-editor project-src="/demo/project-1/project.json"></code-sample-editor>
+  <code-sample project-src="/demo/project-1/project.json"></code-sample>
 
   <h2>MWC Demo</h2>
   <p>
     A demo for <code>&lt;mwc-button></code>.
   </p>
-  <code-sample-editor project-src="/demo/mwc-button/project.json"></code-sample-editor>
+  <code-sample project-src="/demo/mwc-button/project.json"></code-sample>
 </body>
 
 </html>
