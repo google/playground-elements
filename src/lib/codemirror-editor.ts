@@ -25,7 +25,7 @@ import {
   EditorView,
   keymap,
   highlightSpecialChars,
-  multipleSelections,
+  drawSelection,
 } from '@codemirror/next/view';
 import {EditorState, Transaction} from '@codemirror/next/state';
 import {history, historyKeymap} from '@codemirror/next/history';
@@ -115,7 +115,8 @@ export class CodeMirrorEditorElement extends LitElement {
           lineNumbers(),
           highlightSpecialChars(),
           history(),
-          multipleSelections(),
+          drawSelection(),
+          EditorState.allowMultipleSelections.of(true),
           ...this._getLanguagePlugins(),
           defaultHighlighter,
           closeBrackets(),
@@ -142,6 +143,8 @@ export class CodeMirrorEditorElement extends LitElement {
 
   private _getLanguagePlugins() {
     switch (this.type) {
+      case 'ts':
+        return [javascriptLang({typescript: true})];
       case 'js':
         return [javascriptLang()];
       case 'html':

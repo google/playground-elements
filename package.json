@@ -28,7 +28,7 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "@codemirror/next": "^0.12.0",
+    "@codemirror/next": "^0.13.0",
     "@material/mwc-button": "=0.19.0-canary.615d861d.0",
     "@material/mwc-icon-button": "=0.19.0-canary.615d861d.0",
     "@material/mwc-tab": "=0.19.0-canary.615d861d.0",
