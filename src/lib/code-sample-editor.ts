@@ -96,6 +96,13 @@ export class CodeSampleEditor extends LitElement {
   @property({type: Boolean, attribute: 'no-file-picker'})
   noFilePicker = false;
 
+  /**
+   * If true, don't display the left-hand-side gutter with line numbers. Default
+   * false (visible).
+   */
+  @property({type: Boolean, attribute: 'no-line-numbers'})
+  noLineNumbers = false;
+
   @internalProperty()
   private _currentFileIndex?: number;
 
@@ -168,6 +175,7 @@ export class CodeSampleEditor extends LitElement {
         .type=${this._currentFile
           ? mimeTypeToTypeEnum(this._currentFile.contentType)
           : undefined}
+        .noLineNumbers=${this.noLineNumbers}
         @change=${this._onEdit}
       >
       </codemirror-editor>

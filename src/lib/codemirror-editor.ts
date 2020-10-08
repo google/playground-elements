@@ -86,6 +86,13 @@ export class CodeMirrorEditorElement extends LitElement {
   @property()
   type: 'js' | 'ts' | 'html' | 'css' | undefined;
 
+  /**
+   * If true, don't display the left-hand-side gutter with line numbers. Default
+   * false (visible).
+   */
+  @property({type: Boolean, attribute: 'no-line-numbers'})
+  noLineNumbers = false;
+
   render() {
     return html` ${this._editorView?.dom} ${this._capturedCodeMirrorStyles} `;
   }
@@ -100,6 +107,10 @@ export class CodeMirrorEditorElement extends LitElement {
   private _createView() {
     // This is called every time the value property is set externally, so that
     // we set up a fresh document with new state.
+    const optionalPlugins = [];
+    if (!this.noLineNumbers) {
+      optionalPlugins.push(lineNumbers());
+    }
     const view = new EditorView({
       dispatch: (t: Transaction) => {
         view.update([t]);
@@ -112,7 +123,6 @@ export class CodeMirrorEditorElement extends LitElement {
       state: EditorState.create({
         doc: this.value,
         extensions: [
-          lineNumbers(),
           highlightSpecialChars(),
           history(),
           drawSelection(),
@@ -126,6 +136,7 @@ export class CodeMirrorEditorElement extends LitElement {
             ...historyKeymap,
             ...commentKeymap,
           ]),
+          ...optionalPlugins,
         ],
       }),
       root: this.shadowRoot!,
