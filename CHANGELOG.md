@@ -62,6 +62,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Add syntax highlighting for TypeScript files.
 
+### Fixed
+
+- Fix absent CSS syntax highlighting.
+
 ## [0.1.0-pre.3] - 2020-10-05
 
 ### Fixed

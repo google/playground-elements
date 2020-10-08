@@ -6,3 +6,4 @@
 /typescript-worker/
 service-worker.js
 typescript-worker.js
+/test/

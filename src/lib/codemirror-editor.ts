@@ -150,7 +150,7 @@ export class CodeMirrorEditorElement extends LitElement {
       case 'html':
         return [htmlLang()];
       case 'css':
-        [cssLang()];
+        return [cssLang()];
     }
     return [];
   }

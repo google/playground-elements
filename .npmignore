@@ -1,6 +1,10 @@
+/.github/
 /.vscode/
 /demo/
+/test/
+/src/test/
 *.tsbuildinfo
 .prettierrc.json
 rollup.config.js
 tsconfig.json
+web-test-runner.config.js
