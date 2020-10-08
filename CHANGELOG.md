@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Add syntax highlighting for TypeScript files.
+- Add `filename` property/attribute to `<code-sample-editor>` which allows
+  getting and setting the currently selected file.
 
 ### Fixed
 

@@ -18,6 +18,7 @@ import {
   customElement,
   css,
   property,
+  internalProperty,
   query,
   PropertyValues,
 } from 'lit-element';
@@ -83,8 +84,13 @@ export class CodeSampleEditor extends LitElement {
   @property({attribute: false})
   files?: SampleFile[];
 
-  // TODO: make a public property/method to select a file
-  @property({attribute: false})
+  /**
+   * The name of the project file that is currently being displayed.
+   */
+  @property()
+  filename?: string;
+
+  @internalProperty()
   private _currentFileIndex?: number;
 
   private get _currentFile() {
@@ -113,13 +119,22 @@ export class CodeSampleEditor extends LitElement {
     if (changedProperties.has('project')) {
       this._findProjectAndRegister();
     }
-    if (changedProperties.has('files')) {
+    if (changedProperties.has('files') || changedProperties.has('filename')) {
       this._currentFileIndex = 0;
+      if (this.filename && this.files) {
+        for (let i = 0; i < this.files.length; i++) {
+          const file = this.files[i];
+          if (file.name === this.filename) {
+            this._currentFileIndex = i;
+            break;
+          }
+        }
+      }
       // TODO(justinfagnani): whyyyy?
       if (this._tabBar) {
         await this._tabBar.updateComplete;
         this._tabBar.activeIndex = -1;
-        this._tabBar.activeIndex = 0;
+        this._tabBar.activeIndex = this._currentFileIndex;
       }
     }
     super.update(changedProperties);
@@ -153,6 +168,9 @@ export class CodeSampleEditor extends LitElement {
 
   private _tabActivated(e: CustomEvent<{index: number}>) {
     this._currentFileIndex = e.detail.index;
+    this.filename = this.files
+      ? this.files[this._currentFileIndex].name
+      : undefined;
   }
 
   private _findProjectAndRegister() {
