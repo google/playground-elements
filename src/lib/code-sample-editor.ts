@@ -90,6 +90,12 @@ export class CodeSampleEditor extends LitElement {
   @property()
   filename?: string;
 
+  /**
+   * If true, don't display the top file-picker. Default: false (visible).
+   */
+  @property({type: Boolean, attribute: 'no-file-picker'})
+  noFilePicker = false;
+
   @internalProperty()
   private _currentFileIndex?: number;
 
@@ -142,18 +148,20 @@ export class CodeSampleEditor extends LitElement {
 
   render() {
     return html`
-      <mwc-tab-bar
-        .activeIndex=${this._currentFileIndex || 0}
-        @MDCTabBar:activated=${this._tabActivated}
-      >
-        ${this.files?.map((file) => {
-          const label = file.name.substring(file.name.lastIndexOf('/') + 1);
-          return html`<mwc-tab label=${label}></mwc-tab>`;
-        })}
-        ${this.enableAddFile
-          ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
-          : nothing}
-      </mwc-tab-bar>
+      ${this.noFilePicker
+        ? ''
+        : html` <mwc-tab-bar
+            .activeIndex=${this._currentFileIndex || 0}
+            @MDCTabBar:activated=${this._tabActivated}
+          >
+            ${this.files?.map((file) => {
+              const label = file.name.substring(file.name.lastIndexOf('/') + 1);
+              return html`<mwc-tab label=${label}></mwc-tab>`;
+            })}
+            ${this.enableAddFile
+              ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
+              : nothing}
+          </mwc-tab-bar>`}
 
       <codemirror-editor
         .value=${this._currentFile?.content}

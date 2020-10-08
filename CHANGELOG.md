@@ -63,6 +63,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add syntax highlighting for TypeScript files.
 - Add `filename` property/attribute to `<code-sample-editor>` which allows
   getting and setting the currently selected file.
+- Add `noFilePicker` property (`no-file-picker` attribute) to
+  `<code-sample-editor>` which disables the top file selection tab-bar.
 
 ### Fixed
 
