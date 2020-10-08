@@ -87,6 +87,46 @@ export class MySecondElement extends LitElement {
     A demo for <code>&lt;mwc-button></code>.
   </p>
   <code-sample project-src="/demo/mwc-button/project.json"></code-sample>
+
+  <h2>Custom layout</h2>
+
+  By using <code>&lt;code-sample-project></code>,
+  <code>&lt;code-sample-editor></code>, and
+  <code>&lt;code-sample-preview></code> separately, you can create any kind of
+  layout:
+
+  <code-sample-project id="custom-project">
+    <script type="sample/html" filename="index.html">
+<!doctype html>
+<body>
+  <script src="./index.js">&lt;/script>
+</body>
+    </script>
+    <script type="sample/ts" filename="index.ts">
+document.body.textContent = 'Hello!';
+    </script>
+  </code-sample-project>
+
+  <h4>index.html</h4>
+  <code-sample-editor
+      project="custom-project"
+      filename="index.html"
+      no-file-picker
+      no-line-numbers>
+  </code-sample-editor>
+
+  <h4>index.ts</h4>
+  <code-sample-editor
+      project="custom-project"
+      filename="index.ts"
+      no-file-picker
+      no-line-numbers>
+  </code-sample-editor>
+
+  <h4>preview</h4>
+  <code-sample-preview
+      project="custom-project">
+  </code-sample-preview>
 </body>
 
 </html>
