@@ -91,7 +91,7 @@ export class CodeMirrorEditorElement extends LitElement {
   }
 
   update(changedProperties: PropertyValues) {
-    if (changedProperties.has('value') || changedProperties.has('src')) {
+    if (changedProperties.has('value') || changedProperties.has('type')) {
       this._createView();
     }
     super.update(changedProperties);
@@ -153,5 +153,11 @@ export class CodeMirrorEditorElement extends LitElement {
         [cssLang()];
     }
     return [];
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'codemirror-editor': CodeMirrorEditorElement;
   }
 }
