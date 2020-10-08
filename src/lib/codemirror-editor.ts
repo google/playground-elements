@@ -58,6 +58,11 @@ export class CodeMirrorEditorElement extends LitElement {
     .cm-wrap {
       height: 100%;
     }
+
+    /* Hide the caret when editor is not focused. */
+    .cm-wrap:not(.cm-focused) .cm-cursor {
+      display: none;
+    }
   `;
 
   @internalProperty()
