@@ -3,6 +3,7 @@
 /demo/
 /test/
 /src/test/
+/scripts/
 *.tsbuildinfo
 .prettierrc.json
 rollup.config.js
