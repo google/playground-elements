@@ -18,11 +18,17 @@ import {playwrightLauncher} from '@web/test-runner-playwright';
 export default {
   rootDir: './',
   // Note this file list can be overridden by wtr command-line arguments.
-  files: ['test/**/*.test.js'],
+  files: ['test/**/*_test.js'],
   nodeResolve: true,
   browsers: [
     playwrightLauncher({product: 'chromium'}),
     playwrightLauncher({product: 'firefox'}),
     playwrightLauncher({product: 'webkit'}),
   ],
+  testFramework: {
+    // https://mochajs.org/api/mocha
+    config: {
+      ui: 'tdd',
+    },
+  },
 };
