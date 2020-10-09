@@ -4,10 +4,7 @@
     "incremental": true,
     "target": "esnext",
     "module": "esnext",
-    "lib": [
-      "ES2017",
-      "DOM"
-    ],
+    "lib": ["ES2017", "ES2015.iterable", "DOM"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": false,
@@ -22,18 +19,11 @@
     "noImplicitThis": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/lib/worker-api.ts",
-    "src/shared/util.ts"
-  ],
-  "exclude": [
-    "src/service-worker",
-    "src/shared",
-    "src/typescript-worker"
-  ],
+  "include": ["src/**/*.ts", "src/lib/worker-api.ts", "src/shared/util.ts"],
+  "exclude": ["src/service-worker", "src/shared", "src/typescript-worker"],
   "references": [
     {
       "path": "src/service-worker"
