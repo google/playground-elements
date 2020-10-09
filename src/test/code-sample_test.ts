@@ -20,19 +20,22 @@ import {UpdatingElement} from 'lit-element';
 import {CodeMirrorEditorElement} from '../lib/codemirror-editor.js';
 import {CodeSampleProjectElement} from '../lib/code-sample-project.js';
 
-describe('code-sample', () => {
+suite('code-sample', () => {
   let container: HTMLDivElement;
+  let testRunning: boolean;
 
-  beforeEach(() => {
+  setup(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
+    testRunning = true;
   });
 
-  afterEach(() => {
+  teardown(() => {
     container.remove();
+    testRunning = false;
   });
 
-  it('is registered', () => {
+  test('is registered', () => {
     assert.instanceOf(document.createElement('code-sample'), CodeSampleElement);
   });
 
@@ -69,7 +72,7 @@ describe('code-sample', () => {
       const check = () => {
         if (iframe.contentDocument?.body?.textContent?.includes(text)) {
           resolve();
-        } else {
+        } else if (testRunning) {
           setTimeout(check, 10);
         }
       };
@@ -77,7 +80,7 @@ describe('code-sample', () => {
     });
   };
 
-  it('renders HTML', async () => {
+  test('renders HTML', async () => {
     render(
       html`
         <code-sample>
@@ -92,7 +95,7 @@ describe('code-sample', () => {
     await assertPreviewContains('Hello HTML');
   });
 
-  it('renders JS', async () => {
+  test('renders JS', async () => {
     render(
       html`
         <code-sample>
@@ -111,7 +114,7 @@ describe('code-sample', () => {
     await assertPreviewContains('Hello JS');
   });
 
-  it('renders TS', async () => {
+  test('renders TS', async () => {
     render(
       html`
         <code-sample>
@@ -131,7 +134,7 @@ describe('code-sample', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  it('re-renders HTML', async () => {
+  test('re-renders HTML', async () => {
     render(
       html`
         <code-sample>

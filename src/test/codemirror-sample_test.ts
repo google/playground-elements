@@ -16,26 +16,26 @@ import {assert} from '@esm-bundle/chai';
 import '../lib/codemirror-editor.js';
 import {CodeMirrorEditorElement} from '../lib/codemirror-editor.js';
 
-describe('codemirror-editor', () => {
+suite('codemirror-editor', () => {
   let container: HTMLDivElement;
 
-  beforeEach(() => {
+  setup(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
   });
 
-  afterEach(() => {
+  teardown(() => {
     container.remove();
   });
 
-  it('is registered', () => {
+  test('is registered', () => {
     assert.instanceOf(
       document.createElement('codemirror-editor'),
       CodeMirrorEditorElement
     );
   });
 
-  it('renders initial value', async () => {
+  test('renders initial value', async () => {
     const editor = document.createElement('codemirror-editor');
     editor.value = 'foo';
     container.appendChild(editor);
@@ -43,7 +43,7 @@ describe('codemirror-editor', () => {
     assert.include(editor.shadowRoot!.innerHTML, 'foo');
   });
 
-  it('renders updated value', async () => {
+  test('renders updated value', async () => {
     const editor = document.createElement('codemirror-editor');
     editor.value = 'foo';
     container.appendChild(editor);
@@ -53,7 +53,7 @@ describe('codemirror-editor', () => {
     assert.include(editor.shadowRoot!.innerHTML, 'bar');
   });
 
-  it('dispatches change event', async () => {
+  test('dispatches change event', async () => {
     const editor = document.createElement('codemirror-editor');
     editor.value = 'foo';
     container.appendChild(editor);
@@ -69,7 +69,7 @@ describe('codemirror-editor', () => {
     });
   });
 
-  describe('syntax highlight', () => {
+  suite('syntax highlight', () => {
     /**
      * Traverse the given root node depth first, and return the first node whose
      * trimmed text content is exactly equal to the given text.
@@ -107,16 +107,16 @@ describe('codemirror-editor', () => {
     const typeNameColor = 'rgb(0, 136, 85)';
     const atomColor = 'rgb(34, 17, 153)';
 
-    it('html', async () =>
+    test('html', async () =>
       assertHighlight('html', '<p>foo</p>', 'p', typeNameColor));
 
-    it('css', async () =>
+    test('css', async () =>
       assertHighlight('css', 'p { color: blue; }', 'blue', atomColor));
 
-    it('js', async () =>
+    test('js', async () =>
       assertHighlight('js', 'if (true) {}', 'true', atomColor));
 
-    it('ts', async () =>
+    test('ts', async () =>
       assertHighlight('ts', 'const x: string;', 'string', typeNameColor));
   });
 });
