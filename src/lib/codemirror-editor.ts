@@ -58,6 +58,11 @@ export class CodeMirrorEditorElement extends LitElement {
     .cm-wrap {
       height: 100%;
     }
+
+    /* Hide the caret when editor is not focused. */
+    .cm-wrap:not(.cm-focused) .cm-cursor {
+      display: none;
+    }
   `;
 
   @internalProperty()
@@ -86,6 +91,13 @@ export class CodeMirrorEditorElement extends LitElement {
   @property()
   type: 'js' | 'ts' | 'html' | 'css' | undefined;
 
+  /**
+   * If true, display a left-hand-side gutter with line numbers. Default false
+   * (hidden).
+   */
+  @property({type: Boolean, attribute: 'line-numbers'})
+  lineNumbers = false;
+
   render() {
     return html` ${this._editorView?.dom} ${this._capturedCodeMirrorStyles} `;
   }
@@ -100,6 +112,10 @@ export class CodeMirrorEditorElement extends LitElement {
   private _createView() {
     // This is called every time the value property is set externally, so that
     // we set up a fresh document with new state.
+    const optionalPlugins = [];
+    if (this.lineNumbers) {
+      optionalPlugins.push(lineNumbers());
+    }
     const view = new EditorView({
       dispatch: (t: Transaction) => {
         view.update([t]);
@@ -112,7 +128,6 @@ export class CodeMirrorEditorElement extends LitElement {
       state: EditorState.create({
         doc: this.value,
         extensions: [
-          lineNumbers(),
           highlightSpecialChars(),
           history(),
           drawSelection(),
@@ -126,6 +141,7 @@ export class CodeMirrorEditorElement extends LitElement {
             ...historyKeymap,
             ...commentKeymap,
           ]),
+          ...optionalPlugins,
         ],
       }),
       root: this.shadowRoot!,

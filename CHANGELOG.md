@@ -58,9 +58,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   or a direct reference to a `<code-sample-project>` element (which would allow
   the elements to live in different scopes).
 
+- The caret is now only displayed when an editor is on focus (previously it was
+  always displayed).
+
 ### Added
 
 - Add syntax highlighting for TypeScript files.
+- Add `filename` property/attribute to `<code-sample-editor>` which allows
+  getting and setting the currently selected file.
+- Add `noFilePicker` property (`no-file-picker` attribute) to
+  `<code-sample-editor>` which disables the top file selection tab-bar.
+- Add `lineNumbers` property (`line-numbers` attribute) to
+  `<code-sample-editor>` which enables the left-hand-side gutter with line
+  numbers. This is on by default in `<code-sample>`.
 
 ### Fixed
 
