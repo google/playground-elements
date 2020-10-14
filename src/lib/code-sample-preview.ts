@@ -20,8 +20,10 @@ import {
   property,
   query,
   PropertyValues,
+  internalProperty,
 } from 'lit-element';
 import {ifDefined} from 'lit-html/directives/if-defined.js';
+import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
 import '@material/mwc-textfield';
 import {CodeSampleProjectElement} from './code-sample-project.js';
@@ -75,10 +77,15 @@ export class CodeSamplePreviewElement extends LitElement {
       );
     }
 
-    iframe {
+    iframe,
+    slot {
       flex: 1;
       width: 100%;
       border: none;
+    }
+
+    [hidden] {
+      display: none;
     }
   `;
 
@@ -106,6 +113,12 @@ export class CodeSamplePreviewElement extends LitElement {
 
   private _project: CodeSampleProjectElement | undefined = undefined;
 
+  /**
+   * Whether the iframe has fired its "load" event at least once.
+   */
+  @internalProperty()
+  private _iframeLoaded = false;
+
   async update(changedProperties: PropertyValues) {
     if (changedProperties.has('project')) {
       this._findProjectAndRegister();
@@ -122,7 +135,12 @@ export class CodeSamplePreviewElement extends LitElement {
         ></mwc-icon-button>
         <div id="location">${this.location}</div>
       </div>
-      <iframe src="${ifDefined(this.src)}"></iframe>
+      ${this._iframeLoaded ? nothing : html`<slot></slot>`}
+      <iframe
+        src=${ifDefined(this.src)}
+        @load=${this._onIframeLoad}
+        ?hidden=${!this._iframeLoaded}
+      ></iframe>
     `;
   }
 
@@ -157,6 +175,14 @@ export class CodeSamplePreviewElement extends LitElement {
 
   private _onReloadClick() {
     this._project?.save();
+  }
+
+  private _onIframeLoad() {
+    if (this.src) {
+      // Check "src" because the iframe will fire a "load" for a blank page
+      // before "src" is set.
+      this._iframeLoaded = true;
+    }
   }
 }
 

@@ -64,17 +64,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Add syntax highlighting for TypeScript files.
+
 - Add `filename` property/attribute to `<code-sample-editor>` which allows
   getting and setting the currently selected file.
+
 - Add `noFilePicker` property (`no-file-picker` attribute) to
   `<code-sample-editor>` which disables the top file selection tab-bar.
+
 - Add `lineNumbers` property (`line-numbers` attribute) to
   `<code-sample-editor>` which enables the left-hand-side gutter with line
   numbers. This is on by default in `<code-sample>`.
-- Add a `<slot>` to `<code-sample-editor>` which will be rendered as-is until
-  the file is loaded. This facilitates pre-rendering syntax-highlighted code
-  before both the element has upgraded, and before the project files has been
-  fetched.
+
+- Add a `<slot>` to `<code-sample-editor>` which will be displayed until the
+  file is loaded. This facilitates pre-rendering syntax-highlighted code before
+  both the element has upgraded, and before the project file has been fetched.
+
+- Add a `<slot>` to `<code-sample-preview>` which will be displayed until the
+  preview iframe has loaded for the first time. This facilitates pre-rendering
+  preview HTML both before both the element has upgraded, and before the live
+  preview first renders.
 
 ### Fixed
 
