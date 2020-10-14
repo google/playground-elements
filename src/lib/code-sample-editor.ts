@@ -164,16 +164,19 @@ export class CodeSampleEditor extends LitElement {
               ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
               : nothing}
           </mwc-tab-bar>`}
-
-      <codemirror-editor
-        .value=${this._currentFile?.content}
-        .type=${this._currentFile
-          ? mimeTypeToTypeEnum(this._currentFile.contentType)
-          : undefined}
-        .lineNumbers=${this.lineNumbers}
-        @change=${this._onEdit}
-      >
-      </codemirror-editor>
+      ${this._currentFile
+        ? html`
+            <codemirror-editor
+              .value=${this._currentFile.content}
+              .type=${this._currentFile
+                ? mimeTypeToTypeEnum(this._currentFile.contentType)
+                : undefined}
+              .lineNumbers=${this.lineNumbers}
+              @change=${this._onEdit}
+            >
+            </codemirror-editor>
+          `
+        : html`<slot></slot>`}
     `;
   }
 
