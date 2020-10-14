@@ -127,6 +127,7 @@ export class CodeSampleElement extends LitElement {
 
       <div id="editor">
         <code-sample-editor
+          .lineNumbers=${true}
           .project=${projectId}
           .enableAddFile=${this.enableAddFile}
         >

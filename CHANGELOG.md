@@ -68,9 +68,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   getting and setting the currently selected file.
 - Add `noFilePicker` property (`no-file-picker` attribute) to
   `<code-sample-editor>` which disables the top file selection tab-bar.
-- Add `noLineNumbers` property (`no-line-numbers` attribute) to
-  `<code-sample-editor>` which disables the left-hand-side gutter with line
-  numbers.
+- Add `lineNumbers` property (`line-numbers` attribute) to
+  `<code-sample-editor>` which enables the left-hand-side gutter with line
+  numbers. This is on by default in `<code-sample>`.
 
 ### Fixed
 

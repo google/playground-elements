@@ -85,7 +85,8 @@ export class CodeSampleEditor extends LitElement {
   files?: SampleFile[];
 
   /**
-   * The name of the project file that is currently being displayed.
+   * The name of the project file that is currently being displayed. Set when
+   * changing tabs. Does not reflect to attribute.
    */
   @property()
   filename?: string;
@@ -97,11 +98,11 @@ export class CodeSampleEditor extends LitElement {
   noFilePicker = false;
 
   /**
-   * If true, don't display the left-hand-side gutter with line numbers. Default
-   * false (visible).
+   * If true, display a left-hand-side gutter with line numbers. Default false
+   * (hidden).
    */
-  @property({type: Boolean, attribute: 'no-line-numbers'})
-  noLineNumbers = false;
+  @property({type: Boolean, attribute: 'line-numbers'})
+  lineNumbers = false;
 
   @internalProperty()
   private _currentFileIndex?: number;
@@ -133,16 +134,10 @@ export class CodeSampleEditor extends LitElement {
       this._findProjectAndRegister();
     }
     if (changedProperties.has('files') || changedProperties.has('filename')) {
-      this._currentFileIndex = 0;
-      if (this.filename && this.files) {
-        for (let i = 0; i < this.files.length; i++) {
-          const file = this.files[i];
-          if (file.name === this.filename) {
-            this._currentFileIndex = i;
-            break;
-          }
-        }
-      }
+      this._currentFileIndex =
+        this.files && this.filename
+          ? this.files.map((f) => f.name).indexOf(this.filename)
+          : 0;
       // TODO(justinfagnani): whyyyy?
       if (this._tabBar) {
         await this._tabBar.updateComplete;
@@ -156,9 +151,9 @@ export class CodeSampleEditor extends LitElement {
   render() {
     return html`
       ${this.noFilePicker
-        ? ''
+        ? nothing
         : html` <mwc-tab-bar
-            .activeIndex=${this._currentFileIndex || 0}
+            .activeIndex=${this._currentFileIndex ?? 0}
             @MDCTabBar:activated=${this._tabActivated}
           >
             ${this.files?.map((file) => {
@@ -175,7 +170,7 @@ export class CodeSampleEditor extends LitElement {
         .type=${this._currentFile
           ? mimeTypeToTypeEnum(this._currentFile.contentType)
           : undefined}
-        .noLineNumbers=${this.noLineNumbers}
+        .lineNumbers=${this.lineNumbers}
         @change=${this._onEdit}
       >
       </codemirror-editor>
@@ -184,9 +179,7 @@ export class CodeSampleEditor extends LitElement {
 
   private _tabActivated(e: CustomEvent<{index: number}>) {
     this._currentFileIndex = e.detail.index;
-    this.filename = this.files
-      ? this.files[this._currentFileIndex].name
-      : undefined;
+    this.filename = this.files?.[this._currentFileIndex].name;
   }
 
   private _findProjectAndRegister() {
