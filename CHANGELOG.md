@@ -71,6 +71,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `lineNumbers` property (`line-numbers` attribute) to
   `<code-sample-editor>` which enables the left-hand-side gutter with line
   numbers. This is on by default in `<code-sample>`.
+- Add a `<slot>` to `<code-sample-editor>` which will be rendered as-is until
+  the file is loaded. This facilitates pre-rendering syntax-highlighted code
+  before both the element has upgraded, and before the project files has been
+  fetched.
 
 ### Fixed
 
