@@ -7,3 +7,4 @@
 service-worker.js
 typescript-worker.js
 /test/
+/_codemirror/

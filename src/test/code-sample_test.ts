@@ -155,13 +155,9 @@ suite('code-sample', () => {
       'codemirror-editor'
     )) as CodeMirrorEditorElement;
     const codemirrorInternals = (codemirror as unknown) as {
-      _editorView: CodeMirrorEditorElement['_editorView'];
+      _codemirror: CodeMirrorEditorElement['_codemirror'];
     };
-    codemirrorInternals._editorView.dispatch(
-      // TODO(aomarks) This actually appends. It would make more sense to
-      // replace, but need to figure out how the codemirror state API works.
-      codemirrorInternals._editorView.state.replaceSelection('Hello HTML 2')
-    );
+    codemirrorInternals._codemirror!.setValue('Hello HTML 2');
     const project = (await pierce(
       'code-sample',
       'code-sample-project'
