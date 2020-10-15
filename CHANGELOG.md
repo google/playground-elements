@@ -58,12 +58,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   or a direct reference to a `<code-sample-project>` element (which would allow
   the elements to live in different scopes).
 
+- Downgraded from CodeMirror v6 to v5 in order to gain support for nested
+  highlighting of HTML and CSS inside JS/TS. See
+  https://github.com/lezer-parser/javascript/issues/3. Will upgrade back to 6
+  once support is ready.
+
 - The caret is now only displayed when an editor is on focus (previously it was
   always displayed).
 
 ### Added
 
-- Add syntax highlighting for TypeScript files.
+- Add syntax highlighting of TypeScript files.
+
+- Add syntax highlighting of nested HTML and CSS inside JS/TS.
 
 - Add `filename` property/attribute to `<code-sample-editor>` which allows
   getting and setting the currently selected file.

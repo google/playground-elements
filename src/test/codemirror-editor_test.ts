@@ -61,11 +61,9 @@ suite('codemirror-editor', () => {
     await new Promise((resolve) => {
       editor.addEventListener('change', () => resolve());
       const editorInternals = (editor as unknown) as {
-        _editorView: CodeMirrorEditorElement['_editorView'];
+        _codemirror: CodeMirrorEditorElement['_codemirror'];
       };
-      editorInternals._editorView.dispatch(
-        editorInternals._editorView.state.replaceSelection('bar')
-      );
+      editorInternals._codemirror!.setValue('bar');
     });
   });
 
@@ -104,19 +102,33 @@ suite('codemirror-editor', () => {
       assert.equal(style.color, color);
     };
 
-    const typeNameColor = 'rgb(0, 136, 85)';
+    const tagColor = 'rgb(17, 119, 0)';
+    const typeColor = 'rgb(0, 136, 85)';
     const atomColor = 'rgb(34, 17, 153)';
+    const keywordColor = 'rgb(119, 0, 136)';
 
     test('html', async () =>
-      assertHighlight('html', '<p>foo</p>', 'p', typeNameColor));
+      assertHighlight('html', '<p>foo</p>', '<p>', tagColor));
 
     test('css', async () =>
-      assertHighlight('css', 'p { color: blue; }', 'blue', atomColor));
+      assertHighlight('css', 'p { color: blue; }', 'blue', keywordColor));
 
     test('js', async () =>
       assertHighlight('js', 'if (true) {}', 'true', atomColor));
 
     test('ts', async () =>
-      assertHighlight('ts', 'const x: string;', 'string', typeNameColor));
+      assertHighlight('ts', 'const x: string;', 'string', typeColor));
+
+    test('html-in-js', async () =>
+      assertHighlight('js', 'html`<p>foo</p>`', '<p>', tagColor));
+
+    test('html-in-ts', async () =>
+      assertHighlight('ts', 'html`<p>foo</p>`', '<p>', tagColor));
+
+    test('css-in-js', async () =>
+      assertHighlight('js', 'css`p { color: blue; }`', 'blue', keywordColor));
+
+    test('css-in-ts', async () =>
+      assertHighlight('ts', 'css`p { color: blue; }`', 'blue', keywordColor));
   });
 });
