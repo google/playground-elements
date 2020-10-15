@@ -39,8 +39,8 @@ import codemirrorStyles from '../_codemirror/codemirror-styles.js';
 declare function CodeMirror(
   callback: (host: HTMLElement) => void,
   options?: {
-    value?: any;
-    mode?: any;
+    value?: string;
+    mode?: string | null;
     lineNumbers?: boolean;
   }
 ): {
@@ -105,7 +105,7 @@ export class CodeMirrorEditorElement extends LitElement {
 
   private _createView() {
     const cm = CodeMirror(
-      (dom: any) => {
+      (dom) => {
         this.shadowRoot!.innerHTML = '';
         this.shadowRoot!.appendChild(dom);
       },
