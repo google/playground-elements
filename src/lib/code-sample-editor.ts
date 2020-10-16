@@ -52,6 +52,13 @@ import {Tab} from '@material/mwc-tab';
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
   static styles = css`
+    :host {
+      display: block;
+      /* Prevents scrollbars from changing container size and shifting layout
+      slightly. */
+      box-sizing: border-box;
+    }
+
     mwc-tab-bar {
       --mdc-tab-height: 35px;
       --mdc-typography-button-text-transform: none;
@@ -68,8 +75,18 @@ export class CodeSampleEditor extends LitElement {
       flex: 0;
     }
 
-    codemirror-editor {
+    slot {
+      display: block;
+    }
+
+    codemirror-editor,
+    slot {
       height: calc(100% - 35px - 1px);
+    }
+
+    :host([no-file-picker]) codemirror-editor,
+    slot {
+      height: calc(100%);
     }
   `;
 

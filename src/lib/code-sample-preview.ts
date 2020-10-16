@@ -38,6 +38,7 @@ import {CodeSampleProjectElement} from './code-sample-project.js';
 export class CodeSamplePreviewElement extends LitElement {
   static styles = css`
     :host {
+      display: block;
       position: relative;
     }
 
