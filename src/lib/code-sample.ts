@@ -134,8 +134,7 @@ export class CodeSampleElement extends LitElement {
         </code-sample-editor>
       </div>
 
-      <code-sample-preview .project=${projectId} location="index.html">
-      </code-sample-preview>
+      <code-sample-preview .project=${projectId}></code-sample-preview>
     `;
   }
 }

@@ -29,9 +29,8 @@ import '@material/mwc-textfield';
 import {CodeSampleProjectElement} from './code-sample-project.js';
 
 /**
- * An HTML preview component consisting of a wrapper around an iframe, and
- * a simple toolbar with a reload button and a label showing the currently
- * displayed HTML file.
+ * An HTML preview component consisting of an iframe and a floating reload
+ * button.
  *
  * @fires reload - Fired when the user clicks the reload button
  */
@@ -46,35 +45,14 @@ export class CodeSamplePreviewElement extends LitElement {
       display: flex;
       flex-direction: column;
       width: 400px;
+      position: relative;
     }
 
-    #toolbar {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex: 0 0 36px;
+    #refresh-button {
+      position: absolute;
+      top: 0;
+      right: 0;
       color: #444;
-      background: #f0f0f0;
-      border-bottom: 1px solid #ddd;
-      padding: 0 4px;
-      --mdc-typography-button-font-size: 0.75rem;
-      font-size: var(--mdc-typography-button-font-size, 0.75rem);
-    }
-
-    #toolbar mwc-icon-button {
-      cursor: default !important;
-      --mdc-icon-button-size: 32px;
-      --mdc-icon-size: 20px;
-    }
-
-    #location {
-      height: 24px;
-      line-height: 18px;
-      padding: 4px;
-      font-family: var(
-        --mdc-typography-button-font-family,
-        var(--mdc-typography-font-family, Roboto, sans-serif)
-      );
     }
 
     iframe,
@@ -94,12 +72,6 @@ export class CodeSamplePreviewElement extends LitElement {
    */
   @property()
   src: string | undefined;
-
-  /**
-   * The string to display in the location bar.
-   */
-  @property()
-  location?: string;
 
   @query('iframe')
   private _iframe!: HTMLIFrameElement;
@@ -128,13 +100,11 @@ export class CodeSamplePreviewElement extends LitElement {
 
   render() {
     return html`
-      <div id="toolbar">
-        <mwc-icon-button
-          icon="refresh"
-          @click=${this._onReloadClick}
-        ></mwc-icon-button>
-        <div id="location">${this.location}</div>
-      </div>
+      <mwc-icon-button
+        id="refresh-button"
+        icon="refresh"
+        @click=${this._onReloadClick}
+      ></mwc-icon-button>
       ${this._iframeLoaded ? nothing : html`<slot></slot>`}
       <iframe
         src=${ifDefined(this.src)}
