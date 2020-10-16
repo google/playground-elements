@@ -30,6 +30,7 @@ import {CodeSampleProjectElement} from './code-sample-project';
 import './codemirror-editor.js';
 import {CodeMirrorEditorElement} from './codemirror-editor.js';
 import {nothing} from 'lit-html';
+import '@material/mwc-icon-button';
 
 // Hack to workaround Safari crashing and reloading the entire browser tab
 // whenever an <mwc-tab> is clicked to switch files, because of a bug relating
