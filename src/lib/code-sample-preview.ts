@@ -48,7 +48,7 @@ export class CodeSamplePreviewElement extends LitElement {
       position: relative;
     }
 
-    #refresh-button {
+    #reload-button {
       position: absolute;
       top: 0;
       right: 0;
@@ -101,7 +101,8 @@ export class CodeSamplePreviewElement extends LitElement {
   render() {
     return html`
       <mwc-icon-button
-        id="refresh-button"
+        id="reload-button"
+        part="reload-button"
         icon="refresh"
         @click=${this._onReloadClick}
       ></mwc-icon-button>

@@ -127,6 +127,8 @@ export class CodeSampleElement extends LitElement {
 
       <div id="editor">
         <code-sample-editor
+          part="editor"
+          exportparts="file-picker"
           .lineNumbers=${true}
           .project=${projectId}
           .enableAddFile=${this.enableAddFile}
@@ -134,7 +136,11 @@ export class CodeSampleElement extends LitElement {
         </code-sample-editor>
       </div>
 
-      <code-sample-preview .project=${projectId}></code-sample-preview>
+      <code-sample-preview
+        part="preview"
+        exportparts="reload-button"
+        .project=${projectId}
+      ></code-sample-preview>
     `;
   }
 }

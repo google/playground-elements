@@ -153,6 +153,7 @@ export class CodeSampleEditor extends LitElement {
       ${this.noFilePicker
         ? nothing
         : html` <mwc-tab-bar
+            part="file-picker"
             .activeIndex=${this._currentFileIndex ?? 0}
             @MDCTabBar:activated=${this._tabActivated}
           >

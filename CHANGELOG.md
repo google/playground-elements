@@ -97,6 +97,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `<code-sample-preview>` toolbar and label have been removed. The reload
   button now floats in the top-right corner.
 
+- Added CSS Shadow Parts:
+  - `<code-sample-editor>`: `file-picker`
+  - `<code-sample-preview>`: `reload-button`
+  - `<code-sample>`: `editor`, `preview`, `file-picker`, `reload-button`
+
 ### Fixed
 
 - Fix absent CSS syntax highlighting.
