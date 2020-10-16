@@ -46,8 +46,19 @@ declare function CodeMirror(
 ): {
   getValue(): string;
   setValue(content: string): void;
+  setSize(width?: string | number, height?: string | number): void;
   on(eventName: 'change', handler: () => void): void;
 };
+
+declare global {
+  // TODO(aomarks) Remove when
+  // https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/908 lands.
+  class ResizeObserver {
+    constructor(callback: () => void);
+    observe(target: Element): void;
+    disconnect(): void;
+  }
+}
 
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
@@ -58,8 +69,10 @@ export class CodeMirrorEditorElement extends LitElement {
     css`
       :host {
         display: block;
-        overflow: hidden;
-        box-sizing: border-box;
+      }
+
+      .CodeMirror {
+        height: 100% !important;
       }
     `,
     codemirrorStyles,
@@ -96,11 +109,32 @@ export class CodeMirrorEditorElement extends LitElement {
   @property({type: Boolean, attribute: 'line-numbers'})
   lineNumbers = false;
 
+  private _resizeObserver?: ResizeObserver;
+
   update(changedProperties: PropertyValues) {
     if (changedProperties.has('value') || changedProperties.has('type')) {
       this._createView();
     }
     super.update(changedProperties);
+  }
+
+  connectedCallback() {
+    // CodeMirror uses JavaScript to control whether scrollbars are visible. It
+    // does so automatically on interaction, but won't notice container size
+    // changes. If the browser doesn't have ResizeObserver, scrollbars will
+    // sometimes be missing, but typing in the editor will fix it.
+    if (typeof ResizeObserver === 'function') {
+      this._resizeObserver = new ResizeObserver(() => {
+        this._codemirror?.setSize();
+      });
+      this._resizeObserver.observe(this);
+    }
+    super.connectedCallback();
+  }
+
+  disconnectedCallback() {
+    this._resizeObserver?.disconnect();
+    super.disconnectedCallback();
   }
 
   private _createView() {

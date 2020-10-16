@@ -67,6 +67,10 @@ export class CodeSampleEditor extends LitElement {
     mwc-tab {
       flex: 0;
     }
+
+    codemirror-editor {
+      height: calc(100% - 35px - 1px);
+    }
   `;
 
   /**
