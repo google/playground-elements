@@ -328,7 +328,30 @@ export class CodeSampleProjectElement extends LitElement {
     this._compiledFiles = await this._compiledFilesPromise;
   }
 
+  private _saveTimeoutId?: ReturnType<typeof setTimeout> = undefined;
+
+  private _clearSaveTimeout() {
+    if (this._saveTimeoutId !== undefined) {
+      clearTimeout(this._saveTimeoutId);
+      this._saveTimeoutId = undefined;
+    }
+  }
+
+  saveDebounced() {
+    this._clearSaveTimeout();
+    console.log('wa');
+    // TODO(aomarks) Consider exposing a property for auto-save timeout, but it
+    // should probably be on the editor or the preview, not the project.
+    this._saveTimeoutId = setTimeout(() => {
+      console.log('wat');
+      this.save();
+    }, 500);
+  }
+
   async save() {
+    // Clear in case a save is explicitly requested while a timer is already
+    // running.
+    this._clearSaveTimeout();
     await this._compileProject();
     for (const preview of this._previews) {
       preview.reload();

@@ -103,9 +103,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   is loading.
 
 - Added CSS Shadow Parts:
+
   - `<code-sample-editor>`: `file-picker`
   - `<code-sample-preview>`: `reload-button`
   - `<code-sample>`: `editor`, `preview`, `file-picker`, `reload-button`
+
+- Previews will now automatically reload on changes (0.5 second debounce).
 
 ### Fixed
 
