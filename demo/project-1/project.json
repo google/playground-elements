@@ -1,7 +1,10 @@
 {
   "files": {
-    "index.html": {},
-    "my-element.js": {},
-    "my-second-element.js": {}
+    "index.html": {
+      "label": "HTML"
+    },
+    "my-element.js": {
+      "label": "JS"
+    }
   }
 }

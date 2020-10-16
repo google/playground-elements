@@ -91,6 +91,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   preview HTML both before both the element has upgraded, and before the live
   preview first renders.
 
+- Add `label` property and attribute to project files. When set, the file picker
+  will display this label instead of the filename.
+
 ### Fixed
 
 - Fix absent CSS syntax highlighting.

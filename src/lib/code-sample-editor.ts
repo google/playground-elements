@@ -157,7 +157,9 @@ export class CodeSampleEditor extends LitElement {
             @MDCTabBar:activated=${this._tabActivated}
           >
             ${this.files?.map((file) => {
-              const label = file.name.substring(file.name.lastIndexOf('/') + 1);
+              const label =
+                file.label ||
+                file.name.substring(file.name.lastIndexOf('/') + 1);
               return html`<mwc-tab label=${label}></mwc-tab>`;
             })}
             ${this.enableAddFile
