@@ -25,6 +25,7 @@ import {
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
+import {IconButton} from '@material/mwc-icon-button';
 import {CodeSampleProjectElement} from './code-sample-project.js';
 
 /**
@@ -64,6 +65,19 @@ export class CodeSamplePreviewElement extends LitElement {
     [hidden] {
       display: none;
     }
+
+    .spinning {
+      animation: spin 0.5s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
   `;
 
   /**
@@ -75,6 +89,12 @@ export class CodeSamplePreviewElement extends LitElement {
   @query('iframe')
   private _iframe!: HTMLIFrameElement;
 
+  @query('slot')
+  private _slot?: HTMLSlotElement;
+
+  @query('#reload-button')
+  private _reloadButton!: IconButton;
+
   /**
    * The project that this preview is associated with. Either the
    * `<code-sample-project>` node itself, or its `id` in the host scope.
@@ -85,10 +105,16 @@ export class CodeSamplePreviewElement extends LitElement {
   private _project: CodeSampleProjectElement | undefined = undefined;
 
   /**
+   * Whether the iframe is currently loading.
+   */
+  @internalProperty()
+  private _loading = true;
+
+  /**
    * Whether the iframe has fired its "load" event at least once.
    */
   @internalProperty()
-  private _iframeLoaded = false;
+  private _loadedAtLeastOnce = false;
 
   async update(changedProperties: PropertyValues) {
     if (changedProperties.has('project')) {
@@ -103,15 +129,33 @@ export class CodeSamplePreviewElement extends LitElement {
         id="reload-button"
         part="reload-button"
         icon="refresh"
+        ?disabled=${!this.src}
         @click=${this._onReloadClick}
+        @animationiteration=${this._pokeReloadSpinAnimation}
       ></mwc-icon-button>
-      ${this._iframeLoaded ? nothing : html`<slot></slot>`}
+
+      ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
+
       <iframe
         src=${ifDefined(this.src)}
         @load=${this._onIframeLoad}
-        ?hidden=${!this._iframeLoaded}
+        ?hidden=${!this._loadedAtLeastOnce}
       ></iframe>
     `;
+  }
+
+  /**
+   * We manage the spinning animation manually (instead of with a property and
+   * template binding) because we want every rotation to complete fully, instead
+   * of snapping awkwardly back to its initial progression on load.
+   */
+  private _pokeReloadSpinAnimation() {
+    const classList = this._reloadButton.classList;
+    if (this._loading) {
+      classList.add('spinning');
+    } else {
+      classList.remove('spinning');
+    }
   }
 
   private _findProjectAndRegister() {
@@ -139,11 +183,43 @@ export class CodeSamplePreviewElement extends LitElement {
   }
 
   reload() {
-    const iframe = this._iframe;
-    iframe.contentWindow?.location.reload();
+    this._iframe.contentWindow?.location.reload();
+    this._loading = true;
+    this._pokeReloadSpinAnimation();
+  }
+
+  firstUpdated() {
+    // Loading should be initially indicated only when we're not pre-rendering,
+    // because in that case there should be no visible change once the actual
+    // iframe loads, and the indicator is distracting.
+    if (!this._slotHasAnyVisibleChildren()) {
+      this._pokeReloadSpinAnimation();
+    }
+  }
+
+  private _slotHasAnyVisibleChildren() {
+    const assigned = this._slot?.assignedNodes({flatten: true});
+    if (!assigned) {
+      return false;
+    }
+    for (const node of assigned) {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        continue;
+      }
+      if (
+        node.nodeType === Node.TEXT_NODE &&
+        (node.textContent || '').trim() === ''
+      ) {
+        continue;
+      }
+      return true;
+    }
+    return false;
   }
 
   private _onReloadClick() {
+    this._loading = true;
+    this._pokeReloadSpinAnimation();
     this._project?.save();
   }
 
@@ -151,7 +227,8 @@ export class CodeSamplePreviewElement extends LitElement {
     if (this.src) {
       // Check "src" because the iframe will fire a "load" for a blank page
       // before "src" is set.
-      this._iframeLoaded = true;
+      this._loading = false;
+      this._loadedAtLeastOnce = true;
     }
   }
 }
