@@ -25,7 +25,6 @@ import {
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
-import '@material/mwc-textfield';
 import {CodeSampleProjectElement} from './code-sample-project.js';
 
 /**
