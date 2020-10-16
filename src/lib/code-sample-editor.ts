@@ -62,8 +62,8 @@ export class CodeSampleEditor extends LitElement {
       --mdc-icon-size: 18px;
       color: #444;
       border-bottom: 1px solid #ddd;
-      flex: 0 0 36px;
     }
+
     mwc-tab {
       flex: 0;
     }

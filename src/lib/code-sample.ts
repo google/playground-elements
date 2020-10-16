@@ -69,23 +69,14 @@ export class CodeSampleElement extends LitElement {
       border: solid 1px #ddd;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    #editor {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 50%;
+    code-sample-editor {
+      width: 70%;
+      height: 100%;
       border-right: solid 1px #ddd;
     }
 
-    #editor > code-sample-editor {
-      flex: 1;
-    }
-
     code-sample-preview {
-      flex: 0 0 50%;
+      width: 30%;
       height: 100%;
     }
 
@@ -125,16 +116,14 @@ export class CodeSampleElement extends LitElement {
         <slot></slot>
       </code-sample-project>
 
-      <div id="editor">
-        <code-sample-editor
-          part="editor"
-          exportparts="file-picker"
-          .lineNumbers=${true}
-          .project=${projectId}
-          .enableAddFile=${this.enableAddFile}
-        >
-        </code-sample-editor>
-      </div>
+      <code-sample-editor
+        part="editor"
+        exportparts="file-picker"
+        .lineNumbers=${true}
+        .project=${projectId}
+        .enableAddFile=${this.enableAddFile}
+      >
+      </code-sample-editor>
 
       <code-sample-preview
         part="preview"

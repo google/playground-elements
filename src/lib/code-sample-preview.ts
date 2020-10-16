@@ -37,14 +37,7 @@ import {CodeSampleProjectElement} from './code-sample-project.js';
 @customElement('code-sample-preview')
 export class CodeSamplePreviewElement extends LitElement {
   static styles = css`
-    * {
-      box-sizing: border-box;
-    }
-
     :host {
-      display: flex;
-      flex-direction: column;
-      width: 400px;
       position: relative;
     }
 
@@ -57,8 +50,11 @@ export class CodeSamplePreviewElement extends LitElement {
 
     iframe,
     slot {
-      flex: 1;
       width: 100%;
+      height: 100%;
+    }
+
+    iframe {
       border: none;
     }
 
