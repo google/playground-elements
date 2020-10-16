@@ -38,21 +38,32 @@ import {CodeSampleProjectElement} from './code-sample-project.js';
 export class CodeSamplePreviewElement extends LitElement {
   static styles = css`
     :host {
-      display: block;
-      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #toolbar {
+      flex: 0 0 35px;
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #location {
+      margin: 0 10px;
     }
 
     #reload-button {
-      position: absolute;
-      top: 0;
-      right: 0;
       color: #444;
+      --mdc-icon-button-size: 32px;
+      --mdc-icon-size: 20px;
     }
 
     iframe,
     slot {
       width: 100%;
-      height: 100%;
+      flex: 1 0;
     }
 
     iframe {
@@ -82,6 +93,12 @@ export class CodeSamplePreviewElement extends LitElement {
    */
   @property()
   src: string | undefined;
+
+  /**
+   * The string to display in the location bar.
+   */
+  @property()
+  location?: string;
 
   @query('iframe')
   private _iframe!: HTMLIFrameElement;
@@ -122,14 +139,17 @@ export class CodeSamplePreviewElement extends LitElement {
 
   render() {
     return html`
-      <mwc-icon-button
-        id="reload-button"
-        part="reload-button"
-        icon="refresh"
-        ?disabled=${!this.src}
-        @click=${this._onReloadClick}
-        @animationiteration=${this._pokeReloadSpinAnimation}
-      ></mwc-icon-button>
+      <div id="toolbar" part="preview-toolbar">
+        <span id="location">${this.location}</span>
+        <mwc-icon-button
+          id="reload-button"
+          part="reload-button"
+          icon="refresh"
+          ?disabled=${!this.src}
+          @click=${this._onReloadClick}
+          @animationiteration=${this._pokeReloadSpinAnimation}
+        ></mwc-icon-button>
+      </div>
 
       ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
 

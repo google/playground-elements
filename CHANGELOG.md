@@ -97,10 +97,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `label` property and attribute to project files. When set, the file picker
   will display this label instead of the filename.
 
-- The `<code-sample-preview>` toolbar and label have been removed.
-
-- The reload button now floats in the top-right corner and spins when the iframe
-  is loading.
+- The reload button now spins when the iframe is loading.
 
 - Added CSS Shadow Parts:
 
