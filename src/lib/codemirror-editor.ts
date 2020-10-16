@@ -50,16 +50,6 @@ declare function CodeMirror(
   on(eventName: 'change', handler: () => void): void;
 };
 
-declare global {
-  // TODO(aomarks) Remove when
-  // https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/908 lands.
-  class ResizeObserver {
-    constructor(callback: () => void);
-    observe(target: Element): void;
-    disconnect(): void;
-  }
-}
-
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
  */
