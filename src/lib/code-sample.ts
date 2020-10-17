@@ -105,6 +105,13 @@ export class CodeSampleElement extends LitElement {
   @property({type: Boolean})
   enableAddFile = false;
 
+  /**
+   * If true, display a left-hand-side gutter with line numbers. Default false
+   * (hidden).
+   */
+  @property({type: Boolean, attribute: 'line-numbers'})
+  lineNumbers = false;
+
   render() {
     const projectId = 'project';
     return html`
@@ -119,7 +126,7 @@ export class CodeSampleElement extends LitElement {
       <code-sample-editor
         part="editor"
         exportparts="file-picker"
-        .lineNumbers=${true}
+        .lineNumbers=${this.lineNumbers}
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}
       >

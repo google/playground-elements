@@ -81,9 +81,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `noFilePicker` property (`no-file-picker` attribute) to
   `<code-sample-editor>` which disables the top file selection tab-bar.
 
-- Add `lineNumbers` property (`line-numbers` attribute) to
-  `<code-sample-editor>` which enables the left-hand-side gutter with line
-  numbers. This is on by default in `<code-sample>`.
+- Add `lineNumbers` property (`line-numbers` attribute) to `<code-sample>`,
+  `<code-sample-editor>`, and `<codemirror-editor>` which enables the
+  left-hand-side gutter with line numbers. Off by default.
 
 - Add a `<slot>` to `<code-sample-editor>` which will be displayed until the
   file is loaded. This facilitates pre-rendering syntax-highlighted code before
