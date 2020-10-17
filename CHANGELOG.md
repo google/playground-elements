@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The caret is now only displayed when an editor is on focus (previously it was
   always displayed).
 
-- The `<code-sample>` side-by-side layout is now consistently 70%/30% (widths be
+- The `<code-sample>` side-by-side layout is now consistently 70%/30% (widths can be
   changed using the `editor` and `preview` CSS shadow parts).
 
 ### Added
