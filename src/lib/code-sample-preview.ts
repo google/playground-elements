@@ -68,8 +68,13 @@ export class CodeSamplePreviewElement extends LitElement {
     }
 
     mwc-linear-progress {
+      /* There is no way to directly specify the height of a linear progress
+      bar, but zooming works well enough. It's 4px by default, and we want it to
+      be 2px to match the tab bar indicator.*/
+      zoom: 0.5;
+      --mdc-linear-progress-buffer-color: transparent;
       position: absolute;
-      top: 0;
+      top: -6px;
       width: 100%;
     }
 

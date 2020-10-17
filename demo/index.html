@@ -42,7 +42,7 @@
     This editor has no configuration file, just <code>&lt;script></code> tags
     with type attributes with a "sample/" prefix.
   </p>
-  <code-sample line-numbers>
+  <code-sample>
     <script type="sample/html" filename="index.html">
 <!doctype html>
 <html>
@@ -90,11 +90,22 @@ export class MySecondElement extends LitElement {
   </code-sample>
 
   <h2>TypeScript</h2>
-  <p>
-    Note that imports to other TypeScript files use the .js extension like
-    you would with tsc.
-  </p>
-  <code-sample project-src="/demo/typescript/project.json"></code-sample>
+  <section id="typescript">
+    <style>
+      #typescript code-sample::part(preview-toolbar) {
+        display: none;
+      }
+      #typescript code-sample::part(preview-loading-indicator) {
+        top: 0;
+      }
+    </style>
+    <p>
+      Note that imports to other TypeScript files use the .js extension like
+      you would with tsc.
+    </p>
+    <code-sample project-src="/demo/typescript/project.json"
+                 line-numbers></code-sample>
+  </section>
 
   <h2>Basic Project</h2>
   <p>
