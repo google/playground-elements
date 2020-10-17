@@ -25,10 +25,14 @@ export default {
     playwrightLauncher({product: 'firefox'}),
     playwrightLauncher({product: 'webkit'}),
   ],
+  browserStartTimeout: 30000, // default 30000
+  testsStartTimeout: 20000, // default 10000
+  testsFinishTimeout: 60000, // default 20000
   testFramework: {
     // https://mochajs.org/api/mocha
     config: {
       ui: 'tdd',
+      timeout: '10000', // default 2000
     },
   },
 };

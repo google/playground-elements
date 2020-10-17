@@ -24,7 +24,7 @@
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-replace": "^2.3.3",
     "@types/resize-observer-browser": "^0.1.4",
-    "@web/test-runner": "^0.8.3",
+    "@web/test-runner": "^0.9.4",
     "@web/test-runner-playwright": "^0.6.0",
     "codemirror": "^5.58.1",
     "codemirror-grammar-mode": "^0.1.10",
