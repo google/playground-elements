@@ -25,8 +25,8 @@ import {
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
-import {IconButton} from '@material/mwc-icon-button';
 import {CodeSampleProjectElement} from './code-sample-project.js';
+import '@material/mwc-linear-progress';
 
 /**
  * An HTML preview component consisting of an iframe and a floating reload
@@ -44,10 +44,22 @@ export class CodeSamplePreviewElement extends LitElement {
 
     #toolbar {
       flex: 0 0 35px;
-      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       border-bottom: 1px solid #ddd;
+      display: flex;
+      font-size: 14px;
+      color: #444;
+    }
+
+    #locationAndReloadButton {
+      display: flex;
       align-items: center;
       justify-content: space-between;
+      flex: 1;
+      /* Center the location and reload button as though the
+         linear-progress-indicator was not there. */
+      margin-bottom: -4px;
     }
 
     #location {
@@ -56,8 +68,8 @@ export class CodeSamplePreviewElement extends LitElement {
 
     #reload-button {
       color: #444;
-      --mdc-icon-button-size: 32px;
-      --mdc-icon-size: 20px;
+      --mdc-icon-button-size: 30px;
+      --mdc-icon-size: 18px;
     }
 
     iframe,
@@ -72,19 +84,6 @@ export class CodeSamplePreviewElement extends LitElement {
 
     [hidden] {
       display: none;
-    }
-
-    .spinning {
-      animation: spin 0.5s linear infinite;
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
     }
   `;
 
@@ -106,9 +105,6 @@ export class CodeSamplePreviewElement extends LitElement {
   @query('slot')
   private _slot?: HTMLSlotElement;
 
-  @query('#reload-button')
-  private _reloadButton!: IconButton;
-
   /**
    * The project that this preview is associated with. Either the
    * `<code-sample-project>` node itself, or its `id` in the host scope.
@@ -123,6 +119,12 @@ export class CodeSamplePreviewElement extends LitElement {
    */
   @internalProperty()
   private _loading = true;
+
+  /**
+   * Whether to show the loading bar.
+   */
+  @internalProperty()
+  private _showLoadingBar = false;
 
   /**
    * Whether the iframe has fired its "load" event at least once.
@@ -140,15 +142,20 @@ export class CodeSamplePreviewElement extends LitElement {
   render() {
     return html`
       <div id="toolbar" part="preview-toolbar">
-        <span id="location">${this.location}</span>
-        <mwc-icon-button
-          id="reload-button"
-          part="reload-button"
-          icon="refresh"
-          ?disabled=${!this.src}
-          @click=${this._onReloadClick}
-          @animationiteration=${this._pokeReloadSpinAnimation}
-        ></mwc-icon-button>
+        <div id="locationAndReloadButton">
+          <span id="location">${this.location}</span>
+          <mwc-icon-button
+            id="reload-button"
+            part="reload-button"
+            icon="refresh"
+            ?disabled=${!this.src}
+            @click=${this._onReloadClick}
+          ></mwc-icon-button>
+        </div>
+        <mwc-linear-progress
+          indeterminate
+          ?closed=${!this._showLoadingBar}
+        ></mwc-linear-progress>
       </div>
 
       ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
@@ -159,20 +166,6 @@ export class CodeSamplePreviewElement extends LitElement {
         ?hidden=${!this._loadedAtLeastOnce}
       ></iframe>
     `;
-  }
-
-  /**
-   * We manage the spinning animation manually (instead of with a property and
-   * template binding) because we want every rotation to complete fully, instead
-   * of snapping awkwardly back to its initial progression on load.
-   */
-  private _pokeReloadSpinAnimation() {
-    const classList = this._reloadButton.classList;
-    if (this._loading) {
-      classList.add('spinning');
-    } else {
-      classList.remove('spinning');
-    }
   }
 
   private _findProjectAndRegister() {
@@ -202,15 +195,45 @@ export class CodeSamplePreviewElement extends LitElement {
   reload() {
     this._iframe.contentWindow?.location.reload();
     this._loading = true;
-    this._pokeReloadSpinAnimation();
+    this._startLoadingBar();
+  }
+
+  private _startLoadingBarTime = 0;
+  private _stopLoadingBarTimerId?: ReturnType<typeof setTimeout>;
+
+  private _startLoadingBar() {
+    if (this._stopLoadingBarTimerId !== undefined) {
+      clearTimeout(this._stopLoadingBarTimerId);
+      this._stopLoadingBarTimerId = undefined;
+    }
+    if (this._showLoadingBar === false) {
+      this._showLoadingBar = true;
+      this._startLoadingBarTime = performance.now();
+    }
+  }
+
+  private _stopLoadingBar() {
+    if (this._showLoadingBar === false) {
+      return;
+    }
+    // We want to ensure the loading indicator is visible for some minimum
+    // amount of time, or else it might not display at all on a fast reload, or
+    // might only display for a brief flash.
+    const elapsed = performance.now() - this._startLoadingBarTime;
+    const minimum = 500;
+    const pending = Math.max(0, minimum - elapsed);
+    this._stopLoadingBarTimerId = setTimeout(() => {
+      this._showLoadingBar = false;
+      this._stopLoadingBarTimerId = undefined;
+    }, pending);
   }
 
   firstUpdated() {
     // Loading should be initially indicated only when we're not pre-rendering,
     // because in that case there should be no visible change once the actual
     // iframe loads, and the indicator is distracting.
-    if (!this._slotHasAnyVisibleChildren()) {
-      this._pokeReloadSpinAnimation();
+    if (this._loading && !this._slotHasAnyVisibleChildren()) {
+      this._startLoadingBar();
     }
   }
 
@@ -236,7 +259,7 @@ export class CodeSamplePreviewElement extends LitElement {
 
   private _onReloadClick() {
     this._loading = true;
-    this._pokeReloadSpinAnimation();
+    this._startLoadingBar();
     this._project?.save();
   }
 
@@ -246,6 +269,7 @@ export class CodeSamplePreviewElement extends LitElement {
       // before "src" is set.
       this._loading = false;
       this._loadedAtLeastOnce = true;
+      this._stopLoadingBar();
     }
   }
 }

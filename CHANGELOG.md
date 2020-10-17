@@ -97,7 +97,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `label` property and attribute to project files. When set, the file picker
   will display this label instead of the filename.
 
-- The reload button now spins when the iframe is loading.
+- An animated progress bar now displays when a preview is loading.
 
 - Added CSS Shadow Parts:
 

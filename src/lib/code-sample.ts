@@ -128,6 +128,7 @@ export class CodeSampleElement extends LitElement {
       <code-sample-preview
         part="preview"
         exportparts="reload-button, preview-toolbar"
+        location="Result"
         .project=${projectId}
       ></code-sample-preview>
     `;
