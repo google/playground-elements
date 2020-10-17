@@ -22,7 +22,10 @@ export default {
   nodeResolve: true,
   browsers: [
     playwrightLauncher({product: 'chromium'}),
-    playwrightLauncher({product: 'firefox'}),
+    // TODO(aomarks) Firefix is flaky, with service worker 404s. Probably needs
+    // to be addressed as part of
+    // https://github.com/PolymerLabs/code-sample-editor/issues/39
+    // playwrightLauncher({product: 'firefox'}),
     playwrightLauncher({product: 'webkit'}),
   ],
   browserStartTimeout: 30000, // default 30000
