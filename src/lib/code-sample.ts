@@ -69,23 +69,14 @@ export class CodeSampleElement extends LitElement {
       border: solid 1px #ddd;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    #editor {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 50%;
+    code-sample-editor {
+      width: 70%;
+      height: 100%;
       border-right: solid 1px #ddd;
     }
 
-    #editor > code-sample-editor {
-      flex: 1;
-    }
-
     code-sample-preview {
-      flex: 0 0 50%;
+      width: 30%;
       height: 100%;
     }
 
@@ -114,6 +105,13 @@ export class CodeSampleElement extends LitElement {
   @property({type: Boolean})
   enableAddFile = false;
 
+  /**
+   * If true, display a left-hand-side gutter with line numbers. Default false
+   * (hidden).
+   */
+  @property({type: Boolean, attribute: 'line-numbers'})
+  lineNumbers = false;
+
   render() {
     const projectId = 'project';
     return html`
@@ -125,17 +123,24 @@ export class CodeSampleElement extends LitElement {
         <slot></slot>
       </code-sample-project>
 
-      <div id="editor">
-        <code-sample-editor
-          .lineNumbers=${true}
-          .project=${projectId}
-          .enableAddFile=${this.enableAddFile}
-        >
-        </code-sample-editor>
-      </div>
+      <code-sample-editor
+        part="editor"
+        exportparts="file-picker"
+        .lineNumbers=${this.lineNumbers}
+        .project=${projectId}
+        .enableAddFile=${this.enableAddFile}
+      >
+      </code-sample-editor>
 
-      <code-sample-preview .project=${projectId} location="index.html">
-      </code-sample-preview>
+      <code-sample-preview
+        part="preview"
+        exportparts="preview-toolbar,
+                     preview-location,
+                     preview-reload-button,
+                     preview-loading-indicator"
+        location="Result"
+        .project=${projectId}
+      ></code-sample-preview>
     `;
   }
 }

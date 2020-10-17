@@ -25,62 +25,66 @@ import {
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
-import '@material/mwc-textfield';
 import {CodeSampleProjectElement} from './code-sample-project.js';
+import '@material/mwc-linear-progress';
 
 /**
- * An HTML preview component consisting of a wrapper around an iframe, and
- * a simple toolbar with a reload button and a label showing the currently
- * displayed HTML file.
+ * An HTML preview component consisting of an iframe and a floating reload
+ * button.
  *
  * @fires reload - Fired when the user clicks the reload button
  */
 @customElement('code-sample-preview')
 export class CodeSamplePreviewElement extends LitElement {
   static styles = css`
-    * {
-      box-sizing: border-box;
-    }
-
     :host {
       display: flex;
       flex-direction: column;
-      width: 400px;
     }
 
     #toolbar {
+      flex: 0 0 35px;
       display: flex;
-      flex-direction: row;
       align-items: center;
-      flex: 0 0 36px;
-      color: #444;
-      background: #f0f0f0;
+      justify-content: space-between;
       border-bottom: 1px solid #ddd;
-      padding: 0 4px;
-      --mdc-typography-button-font-size: 0.75rem;
-      font-size: var(--mdc-typography-button-font-size, 0.75rem);
-    }
-
-    #toolbar mwc-icon-button {
-      cursor: default !important;
-      --mdc-icon-button-size: 32px;
-      --mdc-icon-size: 20px;
+      font-size: 14px;
+      color: #444;
     }
 
     #location {
-      height: 24px;
-      line-height: 18px;
-      padding: 4px;
-      font-family: var(
-        --mdc-typography-button-font-family,
-        var(--mdc-typography-font-family, Roboto, sans-serif)
-      );
+      margin: 0 10px;
+    }
+
+    #reload-button {
+      color: #444;
+      --mdc-icon-button-size: 30px;
+      --mdc-icon-size: 18px;
+    }
+
+    #content {
+      position: relative;
+      flex: 1;
+    }
+
+    mwc-linear-progress {
+      /* There is no way to directly specify the height of a linear progress
+      bar, but zooming works well enough. It's 4px by default, and we want it to
+      be 2px to match the tab bar indicator.*/
+      zoom: 0.5;
+      --mdc-linear-progress-buffer-color: transparent;
+      position: absolute;
+      top: -6px;
+      width: 100%;
     }
 
     iframe,
     slot {
-      flex: 1;
       width: 100%;
+      height: 100%;
+    }
+
+    iframe {
       border: none;
     }
 
@@ -104,6 +108,9 @@ export class CodeSamplePreviewElement extends LitElement {
   @query('iframe')
   private _iframe!: HTMLIFrameElement;
 
+  @query('slot')
+  private _slot?: HTMLSlotElement;
+
   /**
    * The project that this preview is associated with. Either the
    * `<code-sample-project>` node itself, or its `id` in the host scope.
@@ -114,10 +121,22 @@ export class CodeSamplePreviewElement extends LitElement {
   private _project: CodeSampleProjectElement | undefined = undefined;
 
   /**
+   * Whether the iframe is currently loading.
+   */
+  @internalProperty()
+  private _loading = true;
+
+  /**
+   * Whether to show the loading bar.
+   */
+  @internalProperty()
+  private _showLoadingBar = false;
+
+  /**
    * Whether the iframe has fired its "load" event at least once.
    */
   @internalProperty()
-  private _iframeLoaded = false;
+  private _loadedAtLeastOnce = false;
 
   async update(changedProperties: PropertyValues) {
     if (changedProperties.has('project')) {
@@ -128,19 +147,32 @@ export class CodeSamplePreviewElement extends LitElement {
 
   render() {
     return html`
-      <div id="toolbar">
+      <div id="toolbar" part="preview-toolbar">
+        <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
+          id="reload-button"
+          part="preview-reload-button"
           icon="refresh"
+          ?disabled=${!this.src}
           @click=${this._onReloadClick}
         ></mwc-icon-button>
-        <div id="location">${this.location}</div>
       </div>
-      ${this._iframeLoaded ? nothing : html`<slot></slot>`}
-      <iframe
-        src=${ifDefined(this.src)}
-        @load=${this._onIframeLoad}
-        ?hidden=${!this._iframeLoaded}
-      ></iframe>
+
+      <div id="content">
+        <mwc-linear-progress
+          part="preview-loading-indicator"
+          indeterminate
+          ?closed=${!this._showLoadingBar}
+        ></mwc-linear-progress>
+
+        ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
+
+        <iframe
+          src=${ifDefined(this.src)}
+          @load=${this._onIframeLoad}
+          ?hidden=${!this._loadedAtLeastOnce}
+        ></iframe>
+      </div>
     `;
   }
 
@@ -169,11 +201,73 @@ export class CodeSamplePreviewElement extends LitElement {
   }
 
   reload() {
-    const iframe = this._iframe;
-    iframe.contentWindow?.location.reload();
+    this._iframe.contentWindow?.location.reload();
+    this._loading = true;
+    this._startLoadingBar();
+  }
+
+  private _startLoadingBarTime = 0;
+  private _stopLoadingBarTimerId?: ReturnType<typeof setTimeout>;
+
+  private _startLoadingBar() {
+    if (this._stopLoadingBarTimerId !== undefined) {
+      clearTimeout(this._stopLoadingBarTimerId);
+      this._stopLoadingBarTimerId = undefined;
+    }
+    if (this._showLoadingBar === false) {
+      this._showLoadingBar = true;
+      this._startLoadingBarTime = performance.now();
+    }
+  }
+
+  private _stopLoadingBar() {
+    if (this._showLoadingBar === false) {
+      return;
+    }
+    // We want to ensure the loading indicator is visible for some minimum
+    // amount of time, or else it might not display at all on a fast reload, or
+    // might only display for a brief flash.
+    const elapsed = performance.now() - this._startLoadingBarTime;
+    const minimum = 500;
+    const pending = Math.max(0, minimum - elapsed);
+    this._stopLoadingBarTimerId = setTimeout(() => {
+      this._showLoadingBar = false;
+      this._stopLoadingBarTimerId = undefined;
+    }, pending);
+  }
+
+  firstUpdated() {
+    // Loading should be initially indicated only when we're not pre-rendering,
+    // because in that case there should be no visible change once the actual
+    // iframe loads, and the indicator is distracting.
+    if (this._loading && !this._slotHasAnyVisibleChildren()) {
+      this._startLoadingBar();
+    }
+  }
+
+  private _slotHasAnyVisibleChildren() {
+    const assigned = this._slot?.assignedNodes({flatten: true});
+    if (!assigned) {
+      return false;
+    }
+    for (const node of assigned) {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        continue;
+      }
+      if (
+        node.nodeType === Node.TEXT_NODE &&
+        (node.textContent || '').trim() === ''
+      ) {
+        continue;
+      }
+      return true;
+    }
+    return false;
   }
 
   private _onReloadClick() {
+    this._loading = true;
+    this._startLoadingBar();
     this._project?.save();
   }
 
@@ -181,7 +275,9 @@ export class CodeSamplePreviewElement extends LitElement {
     if (this.src) {
       // Check "src" because the iframe will fire a "load" for a blank page
       // before "src" is set.
-      this._iframeLoaded = true;
+      this._loading = false;
+      this._loadedAtLeastOnce = true;
+      this._stopLoadingBar();
     }
   }
 }

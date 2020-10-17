@@ -164,11 +164,13 @@ export class CodeSampleProjectElement extends LitElement {
       const typeAttr = s.getAttribute('type');
       const fileType = typeAttr!.substring('sample/'.length);
       const name = s.getAttribute('filename')!;
+      const label = s.getAttribute('label') || undefined;
       // TODO (justinfagnani): better entity unescaping
       const content = s.textContent!.trim().replace('&lt;', '<');
       const contentType = typeEnumToMimeType(fileType);
       return {
         name,
+        label,
         content,
         contentType,
       };
@@ -202,7 +204,7 @@ export class CodeSampleProjectElement extends LitElement {
     const manifestFetched = await fetch(this.projectSrc);
     const manifest = (await manifestFetched.json()) as ProjectManifest;
 
-    const filenames = Object.keys(manifest.files || []);
+    const filenames = manifest.files ? Object.keys(manifest.files) : [];
     this._files = await Promise.all(
       filenames.map(async (filename) => {
         const fileUrl = new URL(filename, projectUrl);
@@ -215,6 +217,7 @@ export class CodeSampleProjectElement extends LitElement {
         const contentType = response.headers.get('Content-Type') || undefined;
         return {
           name: filename,
+          label: manifest.files![filename].label,
           content: await response.text(),
           contentType,
         };
@@ -305,6 +308,7 @@ export class CodeSampleProjectElement extends LitElement {
     if (compiledContent !== undefined) {
       return {
         name,
+        label: this._files?.find((f) => f.name === name)?.label,
         content: compiledContent,
         contentType: 'application/javascript',
       };
@@ -324,7 +328,28 @@ export class CodeSampleProjectElement extends LitElement {
     this._compiledFiles = await this._compiledFilesPromise;
   }
 
+  private _saveTimeoutId?: ReturnType<typeof setTimeout> = undefined;
+
+  private _clearSaveTimeout() {
+    if (this._saveTimeoutId !== undefined) {
+      clearTimeout(this._saveTimeoutId);
+      this._saveTimeoutId = undefined;
+    }
+  }
+
+  saveDebounced() {
+    this._clearSaveTimeout();
+    // TODO(aomarks) Consider exposing a property for auto-save timeout, but it
+    // should probably be on the editor or the preview, not the project.
+    this._saveTimeoutId = setTimeout(() => {
+      this.save();
+    }, 500);
+  }
+
   async save() {
+    // Clear in case a save is explicitly requested while a timer is already
+    // running.
+    this._clearSaveTimeout();
     await this._compileProject();
     for (const preview of this._previews) {
       preview.reload();

@@ -30,6 +30,7 @@ import {CodeSampleProjectElement} from './code-sample-project';
 import './codemirror-editor.js';
 import {CodeMirrorEditorElement} from './codemirror-editor.js';
 import {nothing} from 'lit-html';
+import '@material/mwc-icon-button';
 
 // Hack to workaround Safari crashing and reloading the entire browser tab
 // whenever an <mwc-tab> is clicked to switch files, because of a bug relating
@@ -51,6 +52,13 @@ import {Tab} from '@material/mwc-tab';
 @customElement('code-sample-editor')
 export class CodeSampleEditor extends LitElement {
   static styles = css`
+    :host {
+      display: block;
+      /* Prevents scrollbars from changing container size and shifting layout
+      slightly. */
+      box-sizing: border-box;
+    }
+
     mwc-tab-bar {
       --mdc-tab-height: 35px;
       --mdc-typography-button-text-transform: none;
@@ -61,10 +69,24 @@ export class CodeSampleEditor extends LitElement {
       --mdc-icon-size: 18px;
       color: #444;
       border-bottom: 1px solid #ddd;
-      flex: 0 0 36px;
     }
+
     mwc-tab {
       flex: 0;
+    }
+
+    slot {
+      display: block;
+    }
+
+    codemirror-editor,
+    slot {
+      height: calc(100% - 35px - 1px);
+    }
+
+    :host([no-file-picker]) codemirror-editor,
+    slot {
+      height: calc(100%);
     }
   `;
 
@@ -153,11 +175,14 @@ export class CodeSampleEditor extends LitElement {
       ${this.noFilePicker
         ? nothing
         : html` <mwc-tab-bar
+            part="file-picker"
             .activeIndex=${this._currentFileIndex ?? 0}
             @MDCTabBar:activated=${this._tabActivated}
           >
             ${this.files?.map((file) => {
-              const label = file.name.substring(file.name.lastIndexOf('/') + 1);
+              const label =
+                file.label ||
+                file.name.substring(file.name.lastIndexOf('/') + 1);
               return html`<mwc-tab label=${label}></mwc-tab>`;
             })}
             ${this.enableAddFile
@@ -213,7 +238,7 @@ export class CodeSampleEditor extends LitElement {
     const value = this._editor.value;
     if (this._currentFile) {
       this._currentFile.content = value!;
-      // TODO: send to worker?
+      this._project?.saveDebounced();
     }
   }
 }

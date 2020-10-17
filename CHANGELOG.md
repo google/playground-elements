@@ -66,6 +66,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The caret is now only displayed when an editor is on focus (previously it was
   always displayed).
 
+- The `<code-sample>` side-by-side layout is now consistently 70%/30% (widths can be
+  changed using the `editor` and `preview` CSS shadow parts).
+
 ### Added
 
 - Add syntax highlighting of TypeScript files.
@@ -78,9 +81,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `noFilePicker` property (`no-file-picker` attribute) to
   `<code-sample-editor>` which disables the top file selection tab-bar.
 
-- Add `lineNumbers` property (`line-numbers` attribute) to
-  `<code-sample-editor>` which enables the left-hand-side gutter with line
-  numbers. This is on by default in `<code-sample>`.
+- Add `lineNumbers` property (`line-numbers` attribute) to `<code-sample>`,
+  `<code-sample-editor>`, and `<codemirror-editor>` which enables the
+  left-hand-side gutter with line numbers. Off by default.
 
 - Add a `<slot>` to `<code-sample-editor>` which will be displayed until the
   file is loaded. This facilitates pre-rendering syntax-highlighted code before
@@ -91,9 +94,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   preview HTML both before both the element has upgraded, and before the live
   preview first renders.
 
+- Add `label` property and attribute to project files. When set, the file picker
+  will display this label instead of the filename.
+
+- An animated progress bar now displays when a preview is loading.
+
+- Added CSS Shadow Parts:
+
+  - `<code-sample-editor>`: `file-picker`
+  - `<code-sample-preview>`: `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
+  - `<code-sample>`: `editor`, `preview`, `file-picker`, `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
+
+- Previews will now automatically reload on changes (0.5 second debounce).
+
 ### Fixed
 
 - Fix absent CSS syntax highlighting.
+- Various styling/layout glitches.
 
 ## [0.1.0-pre.3] - 2020-10-05
 

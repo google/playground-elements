@@ -23,7 +23,8 @@
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@web/test-runner": "^0.8.3",
+    "@types/resize-observer-browser": "^0.1.4",
+    "@web/test-runner": "^0.9.4",
     "@web/test-runner-playwright": "^0.6.0",
     "codemirror": "^5.58.1",
     "codemirror-grammar-mode": "^0.1.10",
@@ -39,11 +40,10 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "@material/mwc-button": "=0.19.0-canary.615d861d.0",
     "@material/mwc-icon-button": "=0.19.0-canary.615d861d.0",
+    "@material/mwc-linear-progress": "^0.19.1",
     "@material/mwc-tab": "=0.19.0-canary.615d861d.0",
     "@material/mwc-tab-bar": "=0.19.0-canary.615d861d.0",
-    "@material/mwc-textfield": "=0.19.0-canary.615d861d.0",
     "comlink": "^4.3.0",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1"

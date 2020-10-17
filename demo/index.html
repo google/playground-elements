@@ -11,16 +11,27 @@
     }
     code-sample {
       margin-bottom: 48px;
+      max-width: 800px;
+
+      /* These are the default styles, but setting them here prevents resizing
+       * jank before upgrade. */
+      display: flex;
+      height: 350px;
+      border: 1px solid #ddd;
     }
     .sideBySide {
       display: flex;
       border: 1px solid #ddd;
-    }
-    .sideBySide > * {
-      width: 50%;
+      max-width: 800px;
+      height: 200px;
+      margin-bottom: 48px;
     }
     .sideBySide > code-sample-editor {
+      width: 70%;
       border-right: 1px solid #ddd;
+    }
+    .sideBySide > code-sample-preview {
+      width: 30%;
     }
   </style>
 </head>
@@ -79,16 +90,27 @@ export class MySecondElement extends LitElement {
   </code-sample>
 
   <h2>TypeScript</h2>
-  <p>
-    Note that imports to other TypeScript files use the .js extension like
-    you would with tsc.
-  </p>
-  <code-sample project-src="/demo/typescript/project.json"></code-sample>
+  <section id="typescript">
+    <style>
+      #typescript code-sample::part(preview-toolbar) {
+        display: none;
+      }
+      #typescript code-sample::part(preview-loading-indicator) {
+        top: 0;
+      }
+    </style>
+    <p>
+      Note that imports to other TypeScript files use the .js extension like
+      you would with tsc.
+    </p>
+    <code-sample project-src="/demo/typescript/project.json"
+                 line-numbers></code-sample>
+  </section>
 
   <h2>Basic Project</h2>
   <p>
-    An index.html and two local .js file, importing an npm package with bare
-    module specifiers.
+    An index.html and .js file, with custom display labels, importing an npm
+    package with bare module specifiers.
   </p>
   <code-sample project-src="/demo/project-1/project.json"></code-sample>
 
@@ -99,109 +121,109 @@ export class MySecondElement extends LitElement {
   <code-sample project-src="/demo/mwc-button/project.json"></code-sample>
 
   <h2>Custom layout</h2>
+  <section id="custom-layout">
+    <style>
+      #custom-layout code-sample-editor,
+      #custom-layout code-sample-preview {
+        display: block;
+        border: 1px solid #ddd;
+        max-width: 400px;
+        height: 100px;
+      }
+    </style>
 
-  By using <code>&lt;code-sample-project></code>,
-  <code>&lt;code-sample-editor></code>, and
-  <code>&lt;code-sample-preview></code> separately, you can create any kind of
-  layout:
+    By using <code>&lt;code-sample-project></code>,
+    <code>&lt;code-sample-editor></code>, and
+    <code>&lt;code-sample-preview></code> separately, you can create any kind of
+    layout:
 
-  <code-sample-project id="custom-project">
-    <script type="sample/html" filename="index.html">
+    <code-sample-project id="custom-project">
+      <script type="sample/html" filename="index.html">
 <!doctype html>
 <body>
   <script src="./index.js">&lt;/script>
 </body>
-    </script>
-    <script type="sample/ts" filename="index.ts">
-document.body.textContent = 'Hello!';
-    </script>
-  </code-sample-project>
+        </script>
+        <script type="sample/ts" filename="index.ts">
+    document.body.textContent = 'Hello!';
+        </script>
+      </code-sample-project>
 
-  <h4>index.html</h4>
-  <code-sample-editor
-      project="custom-project"
-      filename="index.html"
-      no-file-picker
-      no-line-numbers>
-  </code-sample-editor>
+    <h4>index.html</h4>
+    <code-sample-editor
+        project="custom-project"
+        filename="index.html"
+        no-file-picker
+        no-line-numbers>
+    </code-sample-editor>
 
-  <h4>index.ts</h4>
-  <code-sample-editor
-      project="custom-project"
-      filename="index.ts"
-      no-file-picker
-      no-line-numbers>
-  </code-sample-editor>
+    <h4>index.ts</h4>
+    <code-sample-editor
+        project="custom-project"
+        filename="index.ts"
+        no-file-picker
+        no-line-numbers>
+    </code-sample-editor>
 
-  <h4>preview</h4>
-  <code-sample-preview
-      project="custom-project">
-  </code-sample-preview>
+    <h4>preview</h4>
+    <code-sample-preview
+        project="custom-project">
+    </code-sample-preview>
+  </section>
 
   <h2 id="prerender">Pre-rendered editor</h2>
-  <code-sample-project id="prerenderProject">
-    <script type="sample/html" filename="index.html">
+  <section id="prerender">
+    <code-sample-project id="prerenderProject">
+      <script type="sample/html" filename="index.html">
 <!doctype html>
 <body>
   <p>Hello World!</p>
 </body>
+      </script>
+    </code-sample-project>
+
+    <button id="prerenderLoadButton">Click to load editor</button>
+    <script>
+      const projectId = 'prerenderProject'
+      const button = document.getElementById('prerenderLoadButton');
+      button.addEventListener('click', () => {
+        for (const id of ['prerenderEditor', 'prerenderPreview']) {
+          document.getElementById(id).project = projectId;
+        }
+      });
     </script>
-  </code-sample-project>
 
-  <button id="prerenderLoadButton">Click to load editor</button>
-  <script>
-    const projectId = 'prerenderProject'
-    const button = document.getElementById('prerenderLoadButton');
-    button.addEventListener('click', () => {
-      for (const id of ['prerenderEditor', 'prerenderPreview']) {
-        document.getElementById(id).project = projectId;
-      }
-    });
-  </script>
+    <link href="/node_modules/codemirror/lib/codemirror.css" rel="stylesheet">
+    <style>
+    .prerenderBody {
+      font-family: initial;
+      margin: 0 8px;
+    }
 
-  <style>
-  .ͼ1 .cm-scroller { font-family: monospace; line-height: 1.4; height: 100%; overflow-x: auto; position: relative; display: flex !important; align-items: flex-start !important; }
-  .ͼ1 .cm-content { margin: 0px; flex-grow: 2; min-height: 100%; display: block; white-space: pre; box-sizing: border-box; padding: 4px 0px; outline: none; }
-  .ͼ1 .cm-line { display: block; padding: 0px 2px 0px 4px; }
-  .ͼ5 { text-decoration: line-through; }
-  .ͼ6 { text-decoration: underline; }
-  .ͼ7 { text-decoration: underline; }
-  .ͼ8 { font-weight: bold; }
-  .ͼ9 { font-style: italic; }
-  .ͼa { color: rgb(119, 0, 136); }
-  .ͼb { color: rgb(34, 17, 153); }
-  .ͼc { color: rgb(17, 102, 68); }
-  .ͼd { color: rgb(170, 17, 17); }
-  .ͼe { color: rgb(238, 68, 0); }
-  .ͼf { color: rgb(0, 0, 255); }
-  .ͼg { color: rgb(0, 136, 85); }
-  .ͼh { color: rgb(17, 102, 119); }
-  .ͼi { color: rgb(34, 85, 102); }
-  .ͼj { color: rgb(0, 0, 204); }
-  .ͼk { color: rgb(153, 68, 0); }
-  .ͼl { color: rgb(85, 85, 85); }
-  .ͼm { color: rgb(255, 0, 0); }
-  .ͼ4 { display: inline-block; overflow: hidden; vertical-align: bottom; }
+    #prerenderLoadButton {
+      margin-bottom: 20px;
+    }
 
-  .prerenderBody {
-    font-family: initial;
-    margin: 0 8px;
-  }
-  </style>
+    /* These styles come from parent classes that we don't want to apply because
+    they mess with layout too much. */
+    .CodeMirror-line {
+      margin: 0;
+      padding-left: 4px;
+    }
+    </style>
 
-  <div class="sideBySide">
-    <code-sample-editor no-file-picker id="prerenderEditor">
-      <div class="cm-wrap ͼ1 cm-light ͼ3">
-        <div class="cm-scroller">
-          <div class="cm-content" style="tab-size: 4" role="textbox" aria-multiline="true"><div class="cm-line"><span class="ͼl">&lt;!doctype html&gt;</span></div><div class="cm-line">&lt;<span class="ͼg">body</span>&gt;</div><div class="cm-line">  &lt;<span class="ͼg">p</span>&gt;Hello World!&lt;/<span class="ͼg">p</span>&gt;</div><div class="cm-line">&lt;/<span class="ͼg">body</span>&gt;</div></div>
+    <div class="sideBySide">
+      <code-sample-editor no-file-picker id="prerenderEditor">
+        <div class="CodeMirror-lines cm-s-default">
+          <pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-meta">&lt;!doctype html&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;body&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">  <span class="cm-tag">&lt;p&gt;</span>Hello World!<span class="cm-tag">&lt;/p&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;/body&gt;</span></span></pre>
         </div>
-      </div>
-    </code-sample-editor>
+      </code-sample-editor>
 
-    <code-sample-preview id="prerenderPreview">
-      <div class="prerenderBody"><p>Hello World!</p></div>
-    </code-sample-preview>
-  </div>
+      <code-sample-preview id="prerenderPreview">
+        <div class="prerenderBody"><p>Hello World!</p></div>
+      </code-sample-preview>
+    </div>
+  </section>
 </body>
 
 </html>

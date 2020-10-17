@@ -1,21 +1,16 @@
-import {LitElement, html} from "https://unpkg.com/lit-element?module";
-import "./my-second-element.js"
+import {LitElement, html} from 'https://unpkg.com/lit-element?module';
 
 class MyElement extends LitElement {
   static get properties() {
     return {
       myNumber: {
-        type: Number
-      }
-    }
+        type: Number,
+      },
+    };
   }
 
-  render () {
-    return html`
-      <div>Here is ${this.myNumber}</div>
-      <div>And here is my second element:</div>
-      <my-second-element></my-second-element>
-    `;
+  render() {
+    return html` <div>Here is ${this.myNumber}</div> `;
   }
 }
 

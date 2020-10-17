@@ -28,8 +28,13 @@ export interface FileAPI {
 }
 
 export interface SampleFile {
+  /** Filename. */
   name: string;
+  /** Optional display label. */
+  label?: string;
+  /** File contents. */
   content: string;
+  /** MIME type. */
   contentType?: string;
 }
 
@@ -37,6 +42,8 @@ export interface FileOptions {
   // This is reserved to indicate if a file is a template, ie it shouldn't be
   // loaded itself, but copied to create new files. It's currently unused.
   isTemplate?: boolean;
+  /** Optional display label. */
+  label?: string;
 }
 
 export interface ProjectManifest {
