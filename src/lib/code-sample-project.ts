@@ -339,11 +339,9 @@ export class CodeSampleProjectElement extends LitElement {
 
   saveDebounced() {
     this._clearSaveTimeout();
-    console.log('wa');
     // TODO(aomarks) Consider exposing a property for auto-save timeout, but it
     // should probably be on the editor or the preview, not the project.
     this._saveTimeoutId = setTimeout(() => {
-      console.log('wat');
       this.save();
     }, 500);
   }

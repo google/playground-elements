@@ -238,7 +238,6 @@ export class CodeSampleEditor extends LitElement {
     const value = this._editor.value;
     if (this._currentFile) {
       this._currentFile.content = value!;
-      console.log('DOIT');
       this._project?.saveDebounced();
     }
   }
