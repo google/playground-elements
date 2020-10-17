@@ -44,22 +44,12 @@ export class CodeSamplePreviewElement extends LitElement {
 
     #toolbar {
       flex: 0 0 35px;
-      flex-direction: column;
-      justify-content: space-between;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      font-size: 14px;
-      color: #444;
-    }
-
-    #locationAndReloadButton {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex: 1;
-      /* Center the location and reload button as though the
-         linear-progress-indicator was not there. */
-      margin-bottom: -4px;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+      color: #444;
     }
 
     #location {
@@ -72,10 +62,21 @@ export class CodeSamplePreviewElement extends LitElement {
       --mdc-icon-size: 18px;
     }
 
+    #content {
+      position: relative;
+      flex: 1;
+    }
+
+    mwc-linear-progress {
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+
     iframe,
     slot {
       width: 100%;
-      flex: 1 0;
+      height: 100%;
     }
 
     iframe {
@@ -142,29 +143,31 @@ export class CodeSamplePreviewElement extends LitElement {
   render() {
     return html`
       <div id="toolbar" part="preview-toolbar">
-        <div id="locationAndReloadButton">
-          <span id="location">${this.location}</span>
-          <mwc-icon-button
-            id="reload-button"
-            part="reload-button"
-            icon="refresh"
-            ?disabled=${!this.src}
-            @click=${this._onReloadClick}
-          ></mwc-icon-button>
-        </div>
+        <span id="location" part="preview-location"> ${this.location}</span>
+        <mwc-icon-button
+          id="reload-button"
+          part="preview-reload-button"
+          icon="refresh"
+          ?disabled=${!this.src}
+          @click=${this._onReloadClick}
+        ></mwc-icon-button>
+      </div>
+
+      <div id="content">
         <mwc-linear-progress
+          part="preview-loading-indicator"
           indeterminate
           ?closed=${!this._showLoadingBar}
         ></mwc-linear-progress>
+
+        ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
+
+        <iframe
+          src=${ifDefined(this.src)}
+          @load=${this._onIframeLoad}
+          ?hidden=${!this._loadedAtLeastOnce}
+        ></iframe>
       </div>
-
-      ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
-
-      <iframe
-        src=${ifDefined(this.src)}
-        @load=${this._onIframeLoad}
-        ?hidden=${!this._loadedAtLeastOnce}
-      ></iframe>
     `;
   }
 
