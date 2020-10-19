@@ -7,7 +7,7 @@ export class MyElement extends LitElement {
 
   render() {
     return html`
-      <div>Here is \${this.myNumber}</div>
+      <div>Here is ${this.myNumber}</div>
       <div>And here is my second element:</div>
       <my-second-element></my-second-element>
     `;
