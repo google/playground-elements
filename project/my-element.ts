@@ -6,6 +6,6 @@ export class MyElement extends LitElement {
   greet = 'nobody';
 
   render() {
-    return html` <p>Hello <b>${this.greet}</b>!</p> `;
+    return html`<p>Hello <b>${this.greet}</b>!</p>`;
   }
 }
