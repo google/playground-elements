@@ -24,7 +24,7 @@ export default {
     playwrightLauncher({product: 'chromium'}),
     // TODO(aomarks) Firefix is flaky, with service worker 404s. Probably needs
     // to be addressed as part of
-    // https://github.com/PolymerLabs/code-sample-editor/issues/39
+    // https://github.com/PolymerLabs/playground-elements/issues/39
     // playwrightLauncher({product: 'firefox'}),
     playwrightLauncher({product: 'webkit'}),
   ],

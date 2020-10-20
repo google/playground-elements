@@ -21,41 +21,41 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- [**BREAKING**] Major refactor of elements to allow them to be more easily used
-  independently. The new elements are:
+- [**BREAKING**] Renaming and major refactor of elements to allow them to be
+  more easily used independently. The new elements are:
 
-  - `<code-sample>`: A single editor with file-selection bar and preview in
-    side-by-side layout. If a different layout is required, the editor and
+  - `<playground-ide>`: A single editor with file-selection bar and preview
+    in side-by-side layout. If a different layout is required, the editor and
     preview elements can instead be used directly, along with a project element.
     New equivalent of what used to be `<code-sample-editor>`.
 
-  - `<code-sample-project>`: New purely abstract element that coordinates
-    between the service worker, editor elements, and preview elements.
+  - `<playground-project>`: New purely abstract element that coordinates between
+    the service worker, editor elements, and preview elements.
 
-  - `<code-sample-editor>`: An editor with file-selection bar, tied to a project
+  - `<playground-editor>`: An editor with file-selection bar, tied to a project
     element. New equivalent to the left-hand-side side of what used to be
     `<code-sample-editor>`.
 
-  - `<code-sample-preview>`: A rendered HTML preview window, tied to a project
+  - `<playground-preview>`: A rendered HTML preview window, tied to a project
     element. New equivalent to the right-hand-side of what used to be
-    `<code-sample-editor-preview>`.
+    `<code-sample-preview>`.
 
-  - `<codemirror-editor>`: A pure CodeMirror editor, mostly unchanged from
-    previous version.
+  - `<playground-codemirror>`: A pure CodeMirror editor, mostly unchanged from
+    `<codemirror-editor>`.
 
-  Example usage without `<code-sample>`:
+  Example usage without `<playground-ide>`:
 
   ```html
-  <code-sample-project
+  <playground-project
     id="myProject"
     project-src="/demo/typescript/project.json"
-  ></code-sample-project>
-  <code-sample-editor project="myProject"></code-sample-editor>
-  <code-sample-preview project="myProject"></code-sample-preview>
+  ></playground-project>
+  <playground-editor project="myProject"></playground-editor>
+  <playground-preview project="myProject"></playground-preview>
   ```
 
   The `project` property can either be an ID in the host scope (as shown above)
-  or a direct reference to a `<code-sample-project>` element (which would allow
+  or a direct reference to a `<playground-project>` element (which would allow
   the elements to live in different scopes).
 
 - Downgraded from CodeMirror v6 to v5 in order to gain support for nested
@@ -66,8 +66,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The caret is now only displayed when an editor is on focus (previously it was
   always displayed).
 
-- The `<code-sample>` side-by-side layout is now consistently 70%/30% (widths can be
-  changed using the `editor` and `preview` CSS shadow parts).
+- The `<playground-ide>` side-by-side layout is now consistently 70%/30%
+  (widths can be changed using the `editor` and `preview` CSS shadow parts).
 
 ### Added
 
@@ -75,21 +75,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Add syntax highlighting of nested HTML and CSS inside JS/TS.
 
-- Add `filename` property/attribute to `<code-sample-editor>` which allows
+- Add `filename` property/attribute to `<playground-editor>` which allows
   getting and setting the currently selected file.
 
 - Add `noFilePicker` property (`no-file-picker` attribute) to
-  `<code-sample-editor>` which disables the top file selection tab-bar.
+  `<playground-editor>` which disables the top file selection tab-bar.
 
-- Add `lineNumbers` property (`line-numbers` attribute) to `<code-sample>`,
-  `<code-sample-editor>`, and `<codemirror-editor>` which enables the
-  left-hand-side gutter with line numbers. Off by default.
+- Add `lineNumbers` property (`line-numbers` attribute) to
+  `<playground-ide>`, `<playground-editor>`, and `<playground-codemirror>`
+  which enables the left-hand-side gutter with line numbers. Off by default.
 
-- Add a `<slot>` to `<code-sample-editor>` which will be displayed until the
-  file is loaded. This facilitates pre-rendering syntax-highlighted code before
-  both the element has upgraded, and before the project file has been fetched.
+- Add a `<slot>` to `<playground-editor>` which will be displayed until the file
+  is loaded. This facilitates pre-rendering syntax-highlighted code before both
+  the element has upgraded, and before the project file has been fetched.
 
-- Add a `<slot>` to `<code-sample-preview>` which will be displayed until the
+- Add a `<slot>` to `<playground-preview>` which will be displayed until the
   preview iframe has loaded for the first time. This facilitates pre-rendering
   preview HTML both before both the element has upgraded, and before the live
   preview first renders.
@@ -101,9 +101,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added CSS Shadow Parts:
 
-  - `<code-sample-editor>`: `file-picker`
-  - `<code-sample-preview>`: `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
-  - `<code-sample>`: `editor`, `preview`, `file-picker`, `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
+  - `<playground-editor>`: `file-picker`
+  - `<playground-preview>`: `preview-toolbar`, `preview-location`,
+    `preview-reload-button`, `preview-loading-indicator`
+  - `<playground-ide>`: `editor`, `preview`, `file-picker`,
+    `preview-toolbar`, `preview-location`, `preview-reload-button`,
+    `preview-loading-indicator`
 
 - Added CSS Custom Properties:
 
@@ -118,15 +121,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `--playground-highlight-color`
   - `--playground-bar-height`
 
-- Added `theme` property to `<code-sample>`, `<code-sample-editor>`, and
-  `<codemirror-editor>`, which sets the theme (currently only `default`,
+- Added `theme` property to `<playground-ide>`, `<playground-editor>`, and
+  `<playground-codemirror>`, which sets the theme (currently only `default`,
   `monokai`, `ambiance`, `ayu-mirage` are available, but a way to load other
   themes will follow).
 
 - Previews will now automatically reload on changes (0.5 second debounce).
 
-- Added `readonly` property/attribute to `<codemirror-editor>` which disables
-  the ability to edit.
+- Added `readonly` property/attribute to `<playground-codemirror>` which
+  disables the ability to edit.
 
 ### Fixed
 

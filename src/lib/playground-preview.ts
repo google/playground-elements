@@ -25,7 +25,7 @@ import {
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
-import {CodeSampleProjectElement} from './code-sample-project.js';
+import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
 
 /**
@@ -34,8 +34,8 @@ import '@material/mwc-linear-progress';
  *
  * @fires reload - Fired when the user clicks the reload button
  */
-@customElement('code-sample-preview')
-export class CodeSamplePreviewElement extends LitElement {
+@customElement('playground-preview')
+export class PlaygroundPreview extends LitElement {
   static styles = css`
     :host {
       display: flex;
@@ -124,12 +124,12 @@ export class CodeSamplePreviewElement extends LitElement {
 
   /**
    * The project that this preview is associated with. Either the
-   * `<code-sample-project>` node itself, or its `id` in the host scope.
+   * `<playground-project>` node itself, or its `id` in the host scope.
    */
   @property()
-  project: CodeSampleProjectElement | string | undefined = undefined;
+  project: PlaygroundProject | string | undefined = undefined;
 
-  private _project: CodeSampleProjectElement | undefined = undefined;
+  private _project: PlaygroundProject | undefined = undefined;
 
   /**
    * Whether the iframe is currently loading.
@@ -197,7 +197,7 @@ export class CodeSamplePreviewElement extends LitElement {
           | Document
           | ShadowRoot).getElementById(
           this.project
-        ) as CodeSampleProjectElement | null) || undefined;
+        ) as PlaygroundProject | null) || undefined;
     } else {
       this._project = undefined;
     }
@@ -295,6 +295,6 @@ export class CodeSamplePreviewElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'code-sample-preview': CodeSamplePreviewElement;
+    'playground-preview': PlaygroundPreview;
   }
 }

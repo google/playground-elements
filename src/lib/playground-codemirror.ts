@@ -73,8 +73,8 @@ const unreachable = (n: never) => n;
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
  */
-@customElement('codemirror-editor')
-export class CodeMirrorEditorElement extends LitElement {
+@customElement('playground-codemirror')
+export class PlaygroundCodeMirror extends LitElement {
   static styles = [
     css`
       :host {
@@ -156,7 +156,7 @@ export class CodeMirrorEditorElement extends LitElement {
 
   update(
     changedProperties: TypedMap<
-      Omit<CodeMirrorEditorElement, keyof LitElement | 'update'>
+      Omit<PlaygroundCodeMirror, keyof LitElement | 'update'>
     >
   ) {
     const cm = this._codemirror;
@@ -281,6 +281,6 @@ export class CodeMirrorEditorElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'codemirror-editor': CodeMirrorEditorElement;
+    'playground-codemirror': PlaygroundCodeMirror;
   }
 }

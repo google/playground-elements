@@ -4,12 +4,12 @@
 <head>
   <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
   <script src="https://unpkg.com/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-  <script type="module" src="../lib/code-sample.js"></script>
+  <script type="module" src="../lib/playground-ide.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
     }
-    code-sample {
+    playground-ide {
       margin-bottom: 48px;
       max-width: 800px;
 
@@ -26,11 +26,11 @@
       height: 200px;
       margin-bottom: 48px;
     }
-    .sideBySide > code-sample-editor {
+    .sideBySide > playground-editor {
       width: 70%;
       border-right: 1px solid #ddd;
     }
-    .sideBySide > code-sample-preview {
+    .sideBySide > playground-preview {
       width: 30%;
     }
   </style>
@@ -42,7 +42,7 @@
     This editor has no configuration file, just <code>&lt;script></code> tags
     with type attributes with a "sample/" prefix.
   </p>
-  <code-sample>
+  <playground-ide>
     <script type="sample/html" filename="index.html">
 <!doctype html>
 <html>
@@ -87,15 +87,15 @@ export class MySecondElement extends LitElement {
   }
 }
     </script>
-  </code-sample>
+  </playground-ide>
 
   <h2>TypeScript</h2>
   <section id="typescript">
     <style>
-      #typescript code-sample::part(preview-toolbar) {
+      #typescript playground-ide::part(preview-toolbar) {
         display: none;
       }
-      #typescript code-sample::part(preview-loading-indicator) {
+      #typescript playground-ide::part(preview-loading-indicator) {
         top: 0;
       }
     </style>
@@ -103,8 +103,8 @@ export class MySecondElement extends LitElement {
       Note that imports to other TypeScript files use the .js extension like
       you would with tsc.
     </p>
-    <code-sample project-src="/demo/typescript/project.json"
-                 line-numbers></code-sample>
+    <playground-ide project-src="/demo/typescript/project.json"
+                 line-numbers></playground-ide>
   </section>
 
   <h2>Basic Project</h2>
@@ -112,19 +112,19 @@ export class MySecondElement extends LitElement {
     An index.html and .js file, with custom display labels, importing an npm
     package with bare module specifiers.
   </p>
-  <code-sample project-src="/demo/project-1/project.json"></code-sample>
+  <playground-ide project-src="/demo/project-1/project.json"></playground-ide>
 
   <h2>MWC Demo</h2>
   <p>
     A demo for <code>&lt;mwc-button></code>.
   </p>
-  <code-sample project-src="/demo/mwc-button/project.json"></code-sample>
+  <playground-ide project-src="/demo/mwc-button/project.json"></playground-ide>
 
   <h2>Custom layout</h2>
   <section id="custom-layout">
     <style>
-      #custom-layout code-sample-editor,
-      #custom-layout code-sample-preview {
+      #custom-layout playground-editor,
+      #custom-layout playground-preview {
         display: block;
         border: 1px solid #ddd;
         max-width: 400px;
@@ -132,12 +132,12 @@ export class MySecondElement extends LitElement {
       }
     </style>
 
-    By using <code>&lt;code-sample-project></code>,
-    <code>&lt;code-sample-editor></code>, and
-    <code>&lt;code-sample-preview></code> separately, you can create any kind of
+    By using <code>&lt;playground-project></code>,
+    <code>&lt;playground-editor></code>, and
+    <code>&lt;playground-preview></code> separately, you can create any kind of
     layout:
 
-    <code-sample-project id="custom-project">
+    <playground-project id="custom-project">
       <script type="sample/html" filename="index.html">
 <!doctype html>
 <body>
@@ -147,40 +147,40 @@ export class MySecondElement extends LitElement {
         <script type="sample/ts" filename="index.ts">
     document.body.textContent = 'Hello!';
         </script>
-      </code-sample-project>
+      </playground-project>
 
     <h4>index.html</h4>
-    <code-sample-editor
+    <playground-editor
         project="custom-project"
         filename="index.html"
         no-file-picker
         no-line-numbers>
-    </code-sample-editor>
+    </playground-editor>
 
     <h4>index.ts</h4>
-    <code-sample-editor
+    <playground-editor
         project="custom-project"
         filename="index.ts"
         no-file-picker
         no-line-numbers>
-    </code-sample-editor>
+    </playground-editor>
 
     <h4>preview</h4>
-    <code-sample-preview
+    <playground-preview
         project="custom-project">
-    </code-sample-preview>
+    </playground-preview>
   </section>
 
   <h2 id="prerender">Pre-rendered editor</h2>
   <section id="prerender">
-    <code-sample-project id="prerenderProject">
+    <playground-project id="prerenderProject">
       <script type="sample/html" filename="index.html">
 <!doctype html>
 <body>
   <p>Hello World!</p>
 </body>
       </script>
-    </code-sample-project>
+    </playground-project>
 
     <button id="prerenderLoadButton">Click to load editor</button>
     <script>
@@ -213,15 +213,15 @@ export class MySecondElement extends LitElement {
     </style>
 
     <div class="sideBySide">
-      <code-sample-editor no-file-picker id="prerenderEditor">
+      <playground-editor no-file-picker id="prerenderEditor">
         <div class="CodeMirror-lines cm-s-default">
           <pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-meta">&lt;!doctype html&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;body&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">  <span class="cm-tag">&lt;p&gt;</span>Hello World!<span class="cm-tag">&lt;/p&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;/body&gt;</span></span></pre>
         </div>
-      </code-sample-editor>
+      </playground-editor>
 
-      <code-sample-preview id="prerenderPreview">
+      <playground-preview id="prerenderPreview">
         <div class="prerenderBody"><p>Hello World!</p></div>
-      </code-sample-preview>
+      </playground-preview>
     </div>
   </section>
 </body>

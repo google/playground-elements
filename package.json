@@ -1,10 +1,10 @@
 {
-  "name": "code-sample-editor",
+  "name": "playground-elements",
   "version": "0.1.0-pre.3",
   "description": "A multi-file code editor component with live preview",
   "type": "module",
-  "module": "lib/code-sample-editor.js",
-  "main": "lib/code-sample-editor.js",
+  "module": "lib/playground-ide.js",
+  "main": "lib/playground-ide.js",
   "scripts": {
     "build": "npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",

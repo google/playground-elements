@@ -26,9 +26,9 @@ import '@material/mwc-tab-bar';
 import {TabBar} from '@material/mwc-tab-bar';
 import '@material/mwc-tab';
 import {SampleFile} from '../shared/worker-api.js';
-import {CodeSampleProjectElement} from './code-sample-project';
-import './codemirror-editor.js';
-import {CodeMirrorEditorElement} from './codemirror-editor.js';
+import {PlaygroundProject} from './playground-project';
+import './playground-codemirror.js';
+import {PlaygroundCodeMirror} from './playground-codemirror.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
 
@@ -47,10 +47,10 @@ import {Tab} from '@material/mwc-tab';
 };
 
 /**
- * A text editor associated with a <code-sample-project>.
+ * A text editor associated with a <playground-project>.
  */
-@customElement('code-sample-editor')
-export class CodeSampleEditor extends LitElement {
+@customElement('playground-editor')
+export class PlaygroundEditor extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -94,12 +94,12 @@ export class CodeSampleEditor extends LitElement {
       display: block;
     }
 
-    codemirror-editor,
+    playground-codemirror,
     slot {
       height: calc(100% - var(--playground-bar-height, 35px));
     }
 
-    codemirror-editor {
+    playground-codemirror {
       border-radius: inherit;
       border-top-left-radius: 0;
       border-top-right-radius: 0;
@@ -109,7 +109,7 @@ export class CodeSampleEditor extends LitElement {
       background-color: var(--playground-code-background-color, unset);
     }
 
-    :host([no-file-picker]) codemirror-editor,
+    :host([no-file-picker]) playground-codemirror,
     slot {
       height: calc(100%);
     }
@@ -125,8 +125,8 @@ export class CodeSampleEditor extends LitElement {
   @query('mwc-tab-bar')
   private _tabBar!: TabBar;
 
-  @query('codemirror-editor')
-  private _editor!: CodeMirrorEditorElement;
+  @query('playground-codemirror')
+  private _editor!: PlaygroundCodeMirror;
 
   @property({attribute: false})
   files?: SampleFile[];
@@ -168,12 +168,12 @@ export class CodeSampleEditor extends LitElement {
 
   /**
    * The project that this editor is associated with. Either the
-   * `<code-sample-project>` node itself, or its `id` in the host scope.
+   * `<playground-project>` node itself, or its `id` in the host scope.
    */
   @property()
-  project: CodeSampleProjectElement | string | undefined = undefined;
+  project: PlaygroundProject | string | undefined = undefined;
 
-  private _project: CodeSampleProjectElement | undefined = undefined;
+  private _project: PlaygroundProject | undefined = undefined;
 
   /*
    * The type of the file being edited, as represented by its usual file
@@ -225,7 +225,7 @@ export class CodeSampleEditor extends LitElement {
           </mwc-tab-bar>`}
       ${this._currentFile
         ? html`
-            <codemirror-editor
+            <playground-codemirror
               .value=${this._currentFile.content}
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
@@ -234,7 +234,7 @@ export class CodeSampleEditor extends LitElement {
               .theme=${this.theme}
               @change=${this._onEdit}
             >
-            </codemirror-editor>
+            </playground-codemirror>
           `
         : html`<slot></slot>`}
     `;
@@ -255,7 +255,7 @@ export class CodeSampleEditor extends LitElement {
           | Document
           | ShadowRoot).getElementById(
           this.project
-        ) as CodeSampleProjectElement | null) || undefined;
+        ) as PlaygroundProject | null) || undefined;
     } else {
       this._project = undefined;
     }
@@ -280,7 +280,7 @@ export class CodeSampleEditor extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'code-sample-editor': CodeSampleEditor;
+    'playground-editor': PlaygroundEditor;
   }
 }
 

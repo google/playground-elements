@@ -13,14 +13,14 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import '../lib/code-sample.js';
-import {CodeSampleElement} from '../lib/code-sample.js';
+import '../lib/playground-ide.js';
+import {PlaygroundIde} from '../lib/playground-ide.js';
 import {html, render} from 'lit-html';
 import {UpdatingElement} from 'lit-element';
-import {CodeMirrorEditorElement} from '../lib/codemirror-editor.js';
-import {CodeSampleProjectElement} from '../lib/code-sample-project.js';
+import {PlaygroundCodeMirror} from '../lib/playground-codemirror.js';
+import {PlaygroundProject} from '../lib/playground-project.js';
 
-suite('code-sample', () => {
+suite('playground-ide', () => {
   let container: HTMLDivElement;
   let testRunning: boolean;
 
@@ -36,7 +36,7 @@ suite('code-sample', () => {
   });
 
   test('is registered', () => {
-    assert.instanceOf(document.createElement('code-sample'), CodeSampleElement);
+    assert.instanceOf(document.createElement('playground-ide'), PlaygroundIde);
   });
 
   const pierce = async (...selectors: string[]) => {
@@ -54,8 +54,8 @@ suite('code-sample', () => {
 
   const assertPreviewContains = async (text: string) => {
     const iframe = (await pierce(
-      'code-sample',
-      'code-sample-preview',
+      'playground-ide',
+      'playground-preview',
       'iframe'
     )) as HTMLIFrameElement;
     await new Promise<void>((resolve) => {
@@ -83,12 +83,12 @@ suite('code-sample', () => {
   test('renders HTML', async () => {
     render(
       html`
-        <code-sample>
+        <playground-ide>
           <script type="sample/html" filename="index.html">
             <p>Hello HTML</p>
             <script>console.log('hello');&lt;/script>
           </script>
-        </code-sample>
+        </playground-ide>
       `,
       container
     );
@@ -98,7 +98,7 @@ suite('code-sample', () => {
   test('renders JS', async () => {
     render(
       html`
-        <code-sample>
+        <playground-ide>
           <script type="sample/html" filename="index.html">
             <body>
               <script src="hello.js">&lt;/script>
@@ -107,7 +107,7 @@ suite('code-sample', () => {
           <script type="sample/js" filename="hello.js">
             document.body.textContent = 'Hello JS';
           </script>
-        </code-sample>
+        </playground-ide>
       `,
       container
     );
@@ -117,7 +117,7 @@ suite('code-sample', () => {
   test('renders TS', async () => {
     render(
       html`
-        <code-sample>
+        <playground-ide>
           <script type="sample/html" filename="index.html">
             <body>
               <script src="hello.js">&lt;/script>
@@ -127,7 +127,7 @@ suite('code-sample', () => {
             const hello: string = "Hello TS";
             document.body.textContent = hello;
           </script>
-        </code-sample>
+        </playground-ide>
       `,
       container
     );
@@ -137,31 +137,31 @@ suite('code-sample', () => {
   test('re-renders HTML', async () => {
     render(
       html`
-        <code-sample>
+        <playground-ide>
           <script type="sample/html" filename="index.html">
             <body>
               <p>Hello HTML 1</p>
             </body>
           </script>
-        </code-sample>
+        </playground-ide>
       `,
       container
     );
     await assertPreviewContains('Hello HTML 1');
 
     const codemirror = (await pierce(
-      'code-sample',
-      'code-sample-editor',
-      'codemirror-editor'
-    )) as CodeMirrorEditorElement;
+      'playground-ide',
+      'playground-editor',
+      'playground-codemirror'
+    )) as PlaygroundCodeMirror;
     const codemirrorInternals = (codemirror as unknown) as {
-      _codemirror: CodeMirrorEditorElement['_codemirror'];
+      _codemirror: PlaygroundCodeMirror['_codemirror'];
     };
     codemirrorInternals._codemirror!.setValue('Hello HTML 2');
     const project = (await pierce(
-      'code-sample',
-      'code-sample-project'
-    )) as CodeSampleProjectElement;
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
     await project.save();
     await assertPreviewContains('Hello HTML 2');
   });
