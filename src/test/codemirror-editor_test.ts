@@ -58,7 +58,7 @@ suite('codemirror-editor', () => {
     editor.value = 'foo';
     container.appendChild(editor);
     await editor.updateComplete;
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       editor.addEventListener('change', () => resolve());
       const editorInternals = (editor as unknown) as {
         _codemirror: CodeMirrorEditorElement['_codemirror'];

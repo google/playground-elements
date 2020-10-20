@@ -58,7 +58,7 @@ suite('code-sample', () => {
       'code-sample-preview',
       'iframe'
     )) as HTMLIFrameElement;
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const listener = () => {
         iframe.removeEventListener('load', listener);
         resolve();
@@ -68,7 +68,7 @@ suite('code-sample', () => {
     // TODO(aomarks) Chromium and Webkit both fire iframe "load" after the
     // contentDocument has actually loaded, but Firefox fires it before. Why is
     // that? If not for that, we wouldn't need to poll here.
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const check = () => {
         if (iframe.contentDocument?.body?.textContent?.includes(text)) {
           resolve();
