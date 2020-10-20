@@ -26,7 +26,14 @@ import {
 // https://github.com/lezer-parser/javascript/issues/3. This module sets a
 // `CodeMirror` global.
 import '../_codemirror/codemirror-bundle.js';
+
+// TODO(aomarks) Provide an API for loading these themes dynamically. We can
+// include a bunch of standard themes, but we don't want them to all be included
+// here if they aren't being used.
 import codemirrorStyles from '../_codemirror/codemirror-styles.js';
+import monokaiTheme from '../_codemirror/themes/monokai.css.js';
+import ambienceTheme from '../_codemirror/themes/ambiance.css.js';
+import ayuMirageTheme from '../_codemirror/themes/ayu-mirage.css.js';
 
 // TODO(aomarks) @types/codemirror exists, but installing it and referencing
 // global `CodeMirror` errors with:
@@ -42,6 +49,7 @@ declare function CodeMirror(
     value?: string;
     mode?: string | null;
     lineNumbers?: boolean;
+    theme?: string;
   }
 ): {
   getValue(): string;
@@ -64,6 +72,17 @@ export class CodeMirrorEditorElement extends LitElement {
         border-radius: var(--playground-border-radius, unset);
       }
 
+      :host(:not([probing-codemirror-theme])) {
+        background-color: var(
+          --playground-editor-background-color,
+          var(--playground-editor-theme-background-color)
+        );
+      }
+
+      :host(:not([probing-codemirror-theme])) .CodeMirror {
+        background-color: inherit !important;
+      }
+
       .CodeMirror {
         height: 100% !important;
         font-family: inherit !important;
@@ -75,6 +94,9 @@ export class CodeMirrorEditorElement extends LitElement {
       }
     `,
     codemirrorStyles,
+    monokaiTheme,
+    ambienceTheme,
+    ayuMirageTheme,
   ];
 
   // Used by tests.
@@ -108,10 +130,21 @@ export class CodeMirrorEditorElement extends LitElement {
   @property({type: Boolean, attribute: 'line-numbers', reflect: true})
   lineNumbers = false;
 
+  /**
+   * The CodeMirror theme to load.
+   */
+  @property()
+  theme = 'default';
+
   private _resizeObserver?: ResizeObserver;
 
   update(changedProperties: PropertyValues) {
-    if (changedProperties.has('value') || changedProperties.has('type')) {
+    if (
+      changedProperties.has('value') ||
+      changedProperties.has('type') ||
+      changedProperties.has('lineNumbers') ||
+      changedProperties.has('theme')
+    ) {
       this._createView();
     }
     super.update(changedProperties);
@@ -141,11 +174,13 @@ export class CodeMirrorEditorElement extends LitElement {
       (dom) => {
         this.shadowRoot!.innerHTML = '';
         this.shadowRoot!.appendChild(dom);
+        this._setBackgroundColor(dom);
       },
       {
         value: this.value,
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
+        theme: this.theme,
       }
     );
     cm.on('change', () => {
@@ -153,6 +188,19 @@ export class CodeMirrorEditorElement extends LitElement {
       this.dispatchEvent(new Event('change'));
     });
     this._codemirror = cm;
+  }
+
+  private _setBackgroundColor(codeMirrorRootElement: HTMLElement) {
+    this.setAttribute('probing-codemirror-theme', '');
+    requestAnimationFrame(() => {
+      const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
+        .backgroundColor;
+      this.style.setProperty(
+        '--playground-editor-theme-background-color',
+        themeBgColor
+      );
+      this.removeAttribute('probing-codemirror-theme');
+    });
   }
 
   private _getLanguageMode() {

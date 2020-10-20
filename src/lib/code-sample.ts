@@ -121,6 +121,12 @@ export class CodeSampleElement extends LitElement {
   @property({type: Boolean, attribute: 'line-numbers'})
   lineNumbers = false;
 
+  /**
+   * The CodeMirror theme to load.
+   */
+  @property()
+  theme = 'default';
+
   render() {
     const projectId = 'project';
     return html`
@@ -135,6 +141,7 @@ export class CodeSampleElement extends LitElement {
       <code-sample-editor
         part="editor"
         exportparts="file-picker"
+        .theme=${this.theme}
         .lineNumbers=${this.lineNumbers}
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}

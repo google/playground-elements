@@ -133,6 +133,12 @@ export class CodeSampleEditor extends LitElement {
   files?: SampleFile[];
 
   /**
+   * The CodeMirror theme to load.
+   */
+  @property()
+  theme = 'default';
+
+  /**
    * The name of the project file that is currently being displayed. Set when
    * changing tabs. Does not reflect to attribute.
    */
@@ -226,6 +232,7 @@ export class CodeSampleEditor extends LitElement {
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
               .lineNumbers=${this.lineNumbers}
+              .theme=${this.theme}
               @change=${this._onEdit}
             >
             </codemirror-editor>

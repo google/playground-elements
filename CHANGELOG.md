@@ -119,6 +119,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `--playground-border-radius`
   - `--playground-bar-height`
 
+- Added `theme` property to `<code-sample>`, `<code-sample-editor>`, and
+  `<codemirror-editor>`, which sets the theme (currently only `default`,
+  `monokai`, `ambiance`, `ayu-mirage` are available, but a way to load other
+  themes will follow).
+
 - Previews will now automatically reload on changes (0.5 second debounce).
 
 ### Fixed
