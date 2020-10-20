@@ -55,12 +55,9 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
-const serviceWorkerScriptUrl = new URL(
-  '../../service-worker.js',
-  import.meta.url
-);
+const serviceWorkerScriptUrl = new URL('../service-worker.js', import.meta.url);
 const typescriptWorkerScriptUrl = new URL(
-  '../../typescript-worker.js',
+  '../typescript-worker.js',
   import.meta.url
 );
 

@@ -40,16 +40,26 @@ export class CodeSamplePreviewElement extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
+      background-color: white;
+      font-family: sans-serif;
+      height: 350px;
     }
 
     #toolbar {
-      flex: 0 0 35px;
+      flex: 0 0 var(--playground-bar-height, 35px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
-      color: #444;
+      border-bottom: var(--playground-border, solid 1px #ddd);
+      font-size: 15px;
+      color: var(--playground-preview-toolbar-foreground-color, #444);
+      border-radius: inherit;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      background-color: var(
+        --playground-preview-toolbar-background-color,
+        white
+      );
     }
 
     #location {
@@ -76,6 +86,7 @@ export class CodeSamplePreviewElement extends LitElement {
       position: absolute;
       top: -6px;
       width: 100%;
+      --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
     }
 
     iframe,

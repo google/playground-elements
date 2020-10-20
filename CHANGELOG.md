@@ -105,12 +105,35 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `<code-sample-preview>`: `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
   - `<code-sample>`: `editor`, `preview`, `file-picker`, `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
 
+- Added CSS Custom Properties:
+
+  - `--playground-code-font-family`
+  - `--playground-code-font-size`
+  - `--playground-editor-background-color`
+  - `--playground-file-picker-background-color`
+  - `--playground-file-picker-foreground-color`
+  - `--playground-preview-toolbar-background-color`
+  - `--playground-preview-toolbar-foreground-color`
+  - `--playground-border`
+  - `--playground-highlight-color`
+  - `--playground-bar-height`
+
+- Added `theme` property to `<code-sample>`, `<code-sample-editor>`, and
+  `<codemirror-editor>`, which sets the theme (currently only `default`,
+  `monokai`, `ambiance`, `ayu-mirage` are available, but a way to load other
+  themes will follow).
+
 - Previews will now automatically reload on changes (0.5 second debounce).
+
+- Added `readonly` property/attribute to `<codemirror-editor>` which disables
+  the ability to edit.
 
 ### Fixed
 
 - Fix absent CSS syntax highlighting.
-- Various styling/layout glitches.
+- Fix various styling/layout glitches.
+- Fix service worker and TypeScript worker URLs, which reached up too many
+  parent directories.
 
 ## [0.1.0-pre.3] - 2020-10-05
 

@@ -66,18 +66,26 @@ export class CodeSampleElement extends LitElement {
     :host {
       display: flex;
       height: 350px;
-      border: solid 1px #ddd;
+      min-width: 300px;
+      border: var(--playground-border, solid 1px #ddd);
     }
 
     code-sample-editor {
-      width: 70%;
       height: 100%;
-      border-right: solid 1px #ddd;
+      width: 70%;
+      overflow: hidden;
+      border-radius: inherit;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: var(--playground-border, solid 1px #ddd);
     }
 
     code-sample-preview {
-      width: 30%;
       height: 100%;
+      width: 30%;
+      border-radius: inherit;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
     }
 
     slot {
@@ -112,6 +120,12 @@ export class CodeSampleElement extends LitElement {
   @property({type: Boolean, attribute: 'line-numbers'})
   lineNumbers = false;
 
+  /**
+   * The CodeMirror theme to load.
+   */
+  @property()
+  theme = 'default';
+
   render() {
     const projectId = 'project';
     return html`
@@ -126,6 +140,7 @@ export class CodeSampleElement extends LitElement {
       <code-sample-editor
         part="editor"
         exportparts="file-picker"
+        .theme=${this.theme}
         .lineNumbers=${this.lineNumbers}
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}

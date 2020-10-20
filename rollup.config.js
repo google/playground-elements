@@ -3,7 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import litcss from 'rollup-plugin-lit-css';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
-import replace from '@rollup/plugin-replace';
+import * as fs from 'fs';
 
 export function simpleReplace(replacements) {
   return {
@@ -16,6 +16,8 @@ export function simpleReplace(replacements) {
     },
   };
 }
+
+const themeNames = fs.readdirSync('node_modules/codemirror/theme');
 
 export default [
   {
@@ -75,6 +77,17 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
     external: ['lit-element'],
     plugins: [litcss({uglify: true})],
   },
+  ...themeNames.map((file) => {
+    return {
+      input: `node_modules/codemirror/theme/${file}`,
+      output: {
+        file: `_codemirror/themes/${file}.js`,
+        format: 'esm',
+      },
+      external: ['lit-element'],
+      plugins: [litcss({uglify: true})],
+    };
+  }),
   {
     input: 'service-worker/service-worker.js',
     output: {
