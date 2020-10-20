@@ -268,7 +268,7 @@ export class CodeSampleProjectElement extends LitElement {
   }
 
   private async _connectServiceWorker(worker: ServiceWorker) {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const {port1, port2} = new MessageChannel();
 
       const onMessage = (e: MessageEvent) => {
