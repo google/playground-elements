@@ -57,18 +57,34 @@ export class CodeSampleEditor extends LitElement {
       /* Prevents scrollbars from changing container size and shifting layout
       slightly. */
       box-sizing: border-box;
+      border-radius: var(--playground-border-radius);
+      height: 350px;
     }
 
     mwc-tab-bar {
-      --mdc-tab-height: 35px;
+      --mdc-tab-height: var(--playground-bar-height, 35px);
+      /* The tab bar doesn't hold its height unless there are tabs inside it.
+      Also setting height here prevents a resize flashes after the project file
+      manifest loads. */
+      height: var(--mdc-tab-height);
+      color: blue;
       --mdc-typography-button-text-transform: none;
       --mdc-typography-button-font-weight: normal;
       --mdc-typography-button-font-size: 0.75rem;
       --mdc-typography-button-letter-spacing: normal;
       --mdc-icon-button-size: 36px;
       --mdc-icon-size: 18px;
+      --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
+      --mdc-tab-text-label-color-default: var(
+        --playground-file-picker-foreground-color,
+        black
+      );
       color: #444;
-      border-bottom: 1px solid #ddd;
+      border-bottom: var(--playground-border, solid 1px #ddd);
+      background-color: var(--playground-file-picker-background-color, white);
+      border-radius: inherit;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     mwc-tab {
@@ -81,7 +97,17 @@ export class CodeSampleEditor extends LitElement {
 
     codemirror-editor,
     slot {
-      height: calc(100% - 35px - 1px);
+      height: calc(100% - var(--playground-bar-height, 35px) - 1px);
+    }
+
+    codemirror-editor {
+      border-radius: inherit;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    slot {
+      background-color: var(--playground-code-background-color, unset);
     }
 
     :host([no-file-picker]) codemirror-editor,
@@ -183,7 +209,10 @@ export class CodeSampleEditor extends LitElement {
               const label =
                 file.label ||
                 file.name.substring(file.name.lastIndexOf('/') + 1);
-              return html`<mwc-tab label=${label}></mwc-tab>`;
+              return html`<mwc-tab
+                .isFadingIndicator=${true}
+                label=${label}
+              ></mwc-tab>`;
             })}
             ${this.enableAddFile
               ? html`<mwc-icon-button icon="add"></mwc-icon-button>`

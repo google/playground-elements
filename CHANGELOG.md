@@ -105,6 +105,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `<code-sample-preview>`: `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
   - `<code-sample>`: `editor`, `preview`, `file-picker`, `preview-toolbar`, `preview-location`, `preview-reload-button`, `preview-loading-indicator`
 
+- Added CSS Custom Properties:
+
+  - `--playground-code-font-family`
+  - `--playground-code-font-size`
+  - `--playground-editor-background-color`
+  - `--playground-file-picker-background-color`
+  - `--playground-file-picker-foreground-color`
+  - `--playground-preview-toolbar-background-color`
+  - `--playground-preview-toolbar-foreground-color`
+  - `--playground-border`
+  - `--playground-highlight-color`
+  - `--playground-border-radius`
+  - `--playground-bar-height`
+
 - Previews will now automatically reload on changes (0.5 second debounce).
 
 ### Fixed

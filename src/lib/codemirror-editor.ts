@@ -59,10 +59,19 @@ export class CodeMirrorEditorElement extends LitElement {
     css`
       :host {
         display: block;
+        font-family: var(--playground-code-font-family, monospace);
+        font-size: var(--playground-code-font-size, unset);
+        border-radius: var(--playground-border-radius, unset);
       }
 
       .CodeMirror {
         height: 100% !important;
+        font-family: inherit !important;
+        border-radius: inherit;
+      }
+
+      .CodeMirror-scroll {
+        padding-left: 5px;
       }
     `,
     codemirrorStyles,
@@ -96,7 +105,7 @@ export class CodeMirrorEditorElement extends LitElement {
    * If true, display a left-hand-side gutter with line numbers. Default false
    * (hidden).
    */
-  @property({type: Boolean, attribute: 'line-numbers'})
+  @property({type: Boolean, attribute: 'line-numbers', reflect: true})
   lineNumbers = false;
 
   private _resizeObserver?: ResizeObserver;

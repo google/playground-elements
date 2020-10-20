@@ -66,18 +66,27 @@ export class CodeSampleElement extends LitElement {
     :host {
       display: flex;
       height: 350px;
-      border: solid 1px #ddd;
+      min-width: 300px;
+      border-radius: var(--playground-border-radius, unset);
+      border: var(--playground-border, solid 1px #ddd);
     }
 
     code-sample-editor {
-      width: 70%;
       height: 100%;
-      border-right: solid 1px #ddd;
+      width: 70%;
+      overflow: hidden;
+      border-radius: inherit;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: var(--playground-border, solid 1px #ddd);
     }
 
     code-sample-preview {
-      width: 30%;
       height: 100%;
+      width: 30%;
+      border-radius: inherit;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
     }
 
     slot {
