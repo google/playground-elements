@@ -26,8 +26,6 @@ import '../_codemirror/codemirror-bundle.js';
 // here if they aren't being used.
 import codemirrorStyles from '../_codemirror/codemirror-styles.js';
 import monokaiTheme from '../_codemirror/themes/monokai.css.js';
-import ambienceTheme from '../_codemirror/themes/ambiance.css.js';
-import ayuMirageTheme from '../_codemirror/themes/ayu-mirage.css.js';
 
 // TODO(aomarks) @types/codemirror exists, but installing it and referencing
 // global `CodeMirror` errors with:
@@ -108,8 +106,6 @@ export class CodeMirrorEditorElement extends LitElement {
     `,
     codemirrorStyles,
     monokaiTheme,
-    ambienceTheme,
-    ayuMirageTheme,
   ];
 
   // Used by tests.
