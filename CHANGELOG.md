@@ -132,7 +132,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Fix absent CSS syntax highlighting.
-- Various styling/layout glitches.
+- Fix various styling/layout glitches.
+- Fix service worker and TypeScript worker URLs, which reached up too many
+  parent directories.
 
 ## [0.1.0-pre.3] - 2020-10-05
 
