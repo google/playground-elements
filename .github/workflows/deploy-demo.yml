@@ -3,8 +3,7 @@ name: deploy-demo
 on:
   push:
     branches:
-      # TODO(aomarks) Switch to master once ready.
-      - configurator
+      - master
 
 jobs:
   test-and-deploy:
