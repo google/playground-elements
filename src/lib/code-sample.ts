@@ -67,7 +67,6 @@ export class CodeSampleElement extends LitElement {
       display: flex;
       height: 350px;
       min-width: 300px;
-      border-radius: var(--playground-border-radius, unset);
       border: var(--playground-border, solid 1px #ddd);
     }
 

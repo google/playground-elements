@@ -116,7 +116,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `--playground-preview-toolbar-foreground-color`
   - `--playground-border`
   - `--playground-highlight-color`
-  - `--playground-border-radius`
   - `--playground-bar-height`
 
 - Added `theme` property to `<code-sample>`, `<code-sample-editor>`, and

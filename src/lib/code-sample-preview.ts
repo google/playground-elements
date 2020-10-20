@@ -41,7 +41,6 @@ export class CodeSamplePreviewElement extends LitElement {
       display: flex;
       flex-direction: column;
       background-color: white;
-      border-radius: var(--playground-border-radius, unset);
       font-family: sans-serif;
       height: 350px;
     }

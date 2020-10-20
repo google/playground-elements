@@ -57,7 +57,6 @@ export class CodeSampleEditor extends LitElement {
       /* Prevents scrollbars from changing container size and shifting layout
       slightly. */
       box-sizing: border-box;
-      border-radius: var(--playground-border-radius);
       height: 350px;
     }
 
@@ -97,7 +96,7 @@ export class CodeSampleEditor extends LitElement {
 
     codemirror-editor,
     slot {
-      height: calc(100% - var(--playground-bar-height, 35px) - 1px);
+      height: calc(100% - var(--playground-bar-height, 35px));
     }
 
     codemirror-editor {

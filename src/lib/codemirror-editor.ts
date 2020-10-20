@@ -12,13 +12,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {
-  LitElement,
-  customElement,
-  css,
-  property,
-  PropertyValues,
-} from 'lit-element';
+import {LitElement, customElement, css, property} from 'lit-element';
 
 // TODO(aomarks) We use CodeMirror v5 instead of v6 only because we want support
 // for nested highlighting of HTML and CSS inside JS/TS. Upgrade back to v6 once
@@ -45,19 +39,38 @@ import ayuMirageTheme from '../_codemirror/themes/ayu-mirage.css.js';
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/codemirror/index.d.ts
 declare function CodeMirror(
   callback: (host: HTMLElement) => void,
-  options?: {
-    value?: string;
-    mode?: string | null;
-    lineNumbers?: boolean;
-    theme?: string;
-    readOnly?: boolean | 'nocursor';
-  }
+  options?: CodeMirrorConfiguration
 ): {
   getValue(): string;
   setValue(content: string): void;
   setSize(width?: string | number, height?: string | number): void;
+  setOption<K extends keyof CodeMirrorConfiguration>(
+    option: K,
+    value: CodeMirrorConfiguration[K]
+  ): void;
   on(eventName: 'change', handler: () => void): void;
 };
+
+interface CodeMirrorConfiguration {
+  value?: string;
+  mode?: string | null;
+  lineNumbers?: boolean;
+  theme?: string;
+  readOnly?: boolean | 'nocursor';
+}
+
+// TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
+// types to the ChangedProperties type.
+interface TypedMap<T> extends Map<keyof T, unknown> {
+  get<K extends keyof T>(key: K): T[K];
+  set<K extends keyof T>(key: K, value: T[K]): this;
+  delete<K extends keyof T>(key: K): boolean;
+  keys(): IterableIterator<keyof T>;
+  values(): IterableIterator<T[keyof T]>;
+  entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
+}
+
+const unreachable = (n: never) => n;
 
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
@@ -70,7 +83,6 @@ export class CodeMirrorEditorElement extends LitElement {
         display: block;
         font-family: var(--playground-code-font-family, monospace);
         font-size: var(--playground-code-font-size, unset);
-        border-radius: var(--playground-border-radius, unset);
       }
 
       :host(:not([probing-codemirror-theme])) {
@@ -145,15 +157,37 @@ export class CodeMirrorEditorElement extends LitElement {
 
   private _resizeObserver?: ResizeObserver;
 
-  update(changedProperties: PropertyValues) {
-    if (
-      changedProperties.has('value') ||
-      changedProperties.has('type') ||
-      changedProperties.has('lineNumbers') ||
-      changedProperties.has('theme') ||
-      changedProperties.has('readonly')
-    ) {
+  update(
+    changedProperties: TypedMap<
+      Omit<CodeMirrorEditorElement, keyof LitElement | 'update'>
+    >
+  ) {
+    const cm = this._codemirror;
+    if (cm === undefined) {
       this._createView();
+    } else {
+      for (const prop of changedProperties.keys()) {
+        switch (prop) {
+          case 'value':
+            cm.setValue(this.value ?? '');
+            break;
+          case 'lineNumbers':
+            cm.setOption('lineNumbers', this.lineNumbers);
+            break;
+          case 'type':
+            cm.setOption('mode', this._getLanguageMode());
+            break;
+          case 'theme':
+            cm.setOption('theme', this.theme);
+            this._setBackgroundColor();
+            break;
+          case 'readonly':
+            cm.setOption('readOnly', this.readonly);
+            break;
+          default:
+            unreachable(prop);
+        }
+      }
     }
     super.update(changedProperties);
   }
@@ -182,10 +216,9 @@ export class CodeMirrorEditorElement extends LitElement {
       (dom) => {
         this.shadowRoot!.innerHTML = '';
         this.shadowRoot!.appendChild(dom);
-        this._setBackgroundColor(dom);
       },
       {
-        value: this.value,
+        value: this.value ?? '',
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
         theme: this.theme,
@@ -197,19 +230,35 @@ export class CodeMirrorEditorElement extends LitElement {
       this.dispatchEvent(new Event('change'));
     });
     this._codemirror = cm;
+    this._setBackgroundColor();
   }
 
-  private _setBackgroundColor(codeMirrorRootElement: HTMLElement) {
+  /**
+   * We want the CodeMirror theme's background color to win if
+   * "--playground-editor-background-color" is unset.
+   *
+   * However, there are no values we can use as the default for that property
+   * that allow for this. "revert" seems like it should work, but it doesn't.
+   * "initial" and "unset" also don't work.
+   *
+   * So we instead maintain a private CSS property called
+   * "--playground-editor-theme-background-color" that is always set to the
+   * theme's background-color, and we use that as the default. We detect this by
+   * momentarily disabling the rule that applies
+   * "--playground-editor-background-color" whenever the theme changes.
+   */
+  private _setBackgroundColor() {
     this.setAttribute('probing-codemirror-theme', '');
-    requestAnimationFrame(() => {
-      const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
-        .backgroundColor;
-      this.style.setProperty(
-        '--playground-editor-theme-background-color',
-        themeBgColor
-      );
-      this.removeAttribute('probing-codemirror-theme');
-    });
+    const codeMirrorRootElement = this.shadowRoot!.querySelector(
+      '.CodeMirror'
+    )!;
+    const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
+      .backgroundColor;
+    this.style.setProperty(
+      '--playground-editor-theme-background-color',
+      themeBgColor
+    );
+    this.removeAttribute('probing-codemirror-theme');
   }
 
   private _getLanguageMode() {
