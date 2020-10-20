@@ -3,6 +3,8 @@
 /lib/
 /service-worker/
 /shared/
+/configurator/lib/
+/configurator/deploy/
 /typescript-worker/
 service-worker.js
 typescript-worker.js

@@ -8,11 +8,11 @@
   "scripts": {
     "build": "npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",
+    "build:configurator": "rollup -c rollup.config.configurator.js",
     "bundle": "rollup -c rollup.config.js",
     "test": "wtr",
     "watch": "npm run build:lib -- --watch & rollup -c rollup.config.js -w",
-    "serve": "es-dev-server --node-resolve --event-stream=false",
-    "dev": "npm run watch & npm run serve -- --open=demo/",
+    "serve": "es-dev-server --node-resolve --watch --open=configurator/",
     "format": "prettier src/**/*.ts --write",
     "prepublishOnly": "npm run build"
   },
@@ -32,6 +32,7 @@
     "google_modes": "git+https://github.com/codemirror/google-modes.git#57b26bb0e76ca5d3b83b12faf13ce1054d34bddf",
     "prettier": "^2.0.5",
     "rollup": "^2.21.0",
+    "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-lit-css": "^2.0.5",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-summary": "^1.2.3",
