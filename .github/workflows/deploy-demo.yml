@@ -1,0 +1,42 @@
+name: deploy-demo
+
+on:
+  push:
+    branches:
+      # TODO(aomarks) Switch to master once ready.
+      - configurator
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: NPM install
+        run: npm ci
+
+      - name: Build elements
+        run: npm run build
+
+      - name: Build configurator
+        run: npm run build:configurator
+
+      - name: Deploy to gh-pages
+        run: |
+          cp -r configurator/deploy ..
+          git fetch origin gh-pages --depth=1
+          git checkout --track origin/gh-pages
+          rm -rf *
+          mv ../deploy/* .
+          if [[ -n $(git status -s) ]]
+          then
+            git config user.name "$GITHUB_ACTOR (bot)"
+            git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+            git add -A
+            git commit -am "Deploy $GITHUB_SHA"
+            git push
+          fi
