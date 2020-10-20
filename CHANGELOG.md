@@ -126,6 +126,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Previews will now automatically reload on changes (0.5 second debounce).
 
+- Added `readonly` property/attribute to `<codemirror-editor>` which disables
+  the ability to edit.
+
 ### Fixed
 
 - Fix absent CSS syntax highlighting.

@@ -50,6 +50,7 @@ declare function CodeMirror(
     mode?: string | null;
     lineNumbers?: boolean;
     theme?: string;
+    readOnly?: boolean | 'nocursor';
   }
 ): {
   getValue(): string;
@@ -131,6 +132,12 @@ export class CodeMirrorEditorElement extends LitElement {
   lineNumbers = false;
 
   /**
+   * If true, this editor is not editable.
+   */
+  @property({type: Boolean, reflect: true})
+  readonly = false;
+
+  /**
    * The CodeMirror theme to load.
    */
   @property()
@@ -143,7 +150,8 @@ export class CodeMirrorEditorElement extends LitElement {
       changedProperties.has('value') ||
       changedProperties.has('type') ||
       changedProperties.has('lineNumbers') ||
-      changedProperties.has('theme')
+      changedProperties.has('theme') ||
+      changedProperties.has('readonly')
     ) {
       this._createView();
     }
@@ -181,6 +189,7 @@ export class CodeMirrorEditorElement extends LitElement {
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
         theme: this.theme,
+        readOnly: this.readonly,
       }
     );
     cm.on('change', () => {
