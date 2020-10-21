@@ -17,9 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.1.0] - 2020-10-21
 
 ### Changed
+
+- [**BREAKING*] NPM package renamed from `code-sample-editor` to
+  `playground-elements`.
 
 - [**BREAKING**] Renaming and major refactor of elements to allow them to be
   more easily used independently. The new elements are:
