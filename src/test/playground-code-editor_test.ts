@@ -13,10 +13,10 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import '../lib/playground-codemirror.js';
-import {PlaygroundCodeMirror} from '../lib/playground-codemirror.js';
+import '../lib/playground-code-editor.js';
+import {PlaygroundCodeEditor} from '../lib/playground-code-editor.js';
 
-suite('playground-codemirror', () => {
+suite('playground-code-editor', () => {
   let container: HTMLDivElement;
 
   setup(() => {
@@ -30,13 +30,13 @@ suite('playground-codemirror', () => {
 
   test('is registered', () => {
     assert.instanceOf(
-      document.createElement('playground-codemirror'),
-      PlaygroundCodeMirror
+      document.createElement('playground-code-editor'),
+      PlaygroundCodeEditor
     );
   });
 
   test('renders initial value', async () => {
-    const editor = document.createElement('playground-codemirror');
+    const editor = document.createElement('playground-code-editor');
     editor.value = 'foo';
     container.appendChild(editor);
     await editor.updateComplete;
@@ -44,7 +44,7 @@ suite('playground-codemirror', () => {
   });
 
   test('renders updated value', async () => {
-    const editor = document.createElement('playground-codemirror');
+    const editor = document.createElement('playground-code-editor');
     editor.value = 'foo';
     container.appendChild(editor);
     await editor.updateComplete;
@@ -54,14 +54,14 @@ suite('playground-codemirror', () => {
   });
 
   test('dispatches change event', async () => {
-    const editor = document.createElement('playground-codemirror');
+    const editor = document.createElement('playground-code-editor');
     editor.value = 'foo';
     container.appendChild(editor);
     await editor.updateComplete;
     await new Promise<void>((resolve) => {
       editor.addEventListener('change', () => resolve());
       const editorInternals = (editor as unknown) as {
-        _codemirror: PlaygroundCodeMirror['_codemirror'];
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
       };
       editorInternals._codemirror!.setValue('bar');
     });
@@ -86,12 +86,12 @@ suite('playground-codemirror', () => {
     };
 
     const assertHighlight = async (
-      type: PlaygroundCodeMirror['type'],
+      type: PlaygroundCodeEditor['type'],
       value: string,
       text: string,
       color: string
     ) => {
-      const editor = document.createElement('playground-codemirror');
+      const editor = document.createElement('playground-code-editor');
       editor.type = type;
       editor.value = value;
       container.appendChild(editor);

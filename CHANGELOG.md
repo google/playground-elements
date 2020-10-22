@@ -37,16 +37,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `<playground-project>`: New purely abstract element that coordinates between
     the service worker, editor elements, and preview elements.
 
-  - `<playground-editor>`: An editor with file-selection bar, tied to a project
+  - `<playground-file-editor>`: An editor with file-selection bar, tied to a project
     element. New equivalent to the left-hand-side side of what used to be
     `<code-sample-editor>`.
+
+  - `<playground-code-editor>`: A pure CodeMirror editor, mostly unchanged from
+    `<codemirror-editor>`.
 
   - `<playground-preview>`: A rendered HTML preview window, tied to a project
     element. New equivalent to the right-hand-side of what used to be
     `<code-sample-preview>`.
-
-  - `<playground-codemirror>`: A pure CodeMirror editor, mostly unchanged from
-    `<codemirror-editor>`.
 
   Example usage without `<playground-ide>`:
 
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     id="myProject"
     project-src="/demo/typescript/project.json"
   ></playground-project>
-  <playground-editor project="myProject"></playground-editor>
+  <playground-file-editor project="myProject"></playground-file-editor>
   <playground-preview project="myProject"></playground-preview>
   ```
 
@@ -80,17 +80,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Add syntax highlighting of nested HTML and CSS inside JS/TS.
 
-- Add `filename` property/attribute to `<playground-editor>` which allows
+- Add `filename` property/attribute to `<playground-file-editor>` which allows
   getting and setting the currently selected file.
 
 - Add `noFilePicker` property (`no-file-picker` attribute) to
-  `<playground-editor>` which disables the top file selection tab-bar.
+  `<playground-file-editor>` which disables the top file selection tab-bar.
 
 - Add `lineNumbers` property (`line-numbers` attribute) to
-  `<playground-ide>`, `<playground-editor>`, and `<playground-codemirror>`
+  `<playground-ide>`, `<playground-file-editor>`, and `<playground-code-editor>`
   which enables the left-hand-side gutter with line numbers. Off by default.
 
-- Add a `<slot>` to `<playground-editor>` which will be displayed until the file
+- Add a `<slot>` to `<playground-file-editor>` which will be displayed until the file
   is loaded. This facilitates pre-rendering syntax-highlighted code before both
   the element has upgraded, and before the project file has been fetched.
 
@@ -106,7 +106,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added CSS Shadow Parts:
 
-  - `<playground-editor>`: `file-picker`
+  - `<playground-file-editor>`: `file-picker`
   - `<playground-preview>`: `preview-toolbar`, `preview-location`,
     `preview-reload-button`, `preview-loading-indicator`
   - `<playground-ide>`: `editor`, `preview`, `file-picker`,
@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
   - `--playground-code-font-family`
   - `--playground-code-font-size`
-  - `--playground-editor-background-color`
+  - `--playground-file-editor-background-color`
   - `--playground-file-picker-background-color`
   - `--playground-file-picker-foreground-color`
   - `--playground-preview-toolbar-background-color`
@@ -126,14 +126,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `--playground-highlight-color`
   - `--playground-bar-height`
 
-- Added `theme` property to `<playground-ide>`, `<playground-editor>`, and
-  `<playground-codemirror>`, which sets the theme (currently only `default`,
+- Added `theme` property to `<playground-ide>`, `<playground-file-editor>`, and
+  `<playground-code-editor>`, which sets the theme (currently only `default`,
   `monokai`, `ambiance`, `ayu-mirage` are available, but a way to load other
   themes will follow).
 
 - Previews will now automatically reload on changes (0.5 second debounce).
 
-- Added `readonly` property/attribute to `<playground-codemirror>` which
+- Added `readonly` property/attribute to `<playground-code-editor>` which
   disables the ability to edit.
 
 ### Fixed

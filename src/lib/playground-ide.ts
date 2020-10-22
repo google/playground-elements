@@ -15,7 +15,7 @@
 import {LitElement, html, customElement, css, property} from 'lit-element';
 
 import './playground-project.js';
-import './playground-editor.js';
+import './playground-file-editor.js';
 import './playground-preview.js';
 
 /**
@@ -70,7 +70,7 @@ export class PlaygroundIde extends LitElement {
       border: var(--playground-border, solid 1px #ddd);
     }
 
-    playground-editor {
+    playground-file-editor {
       height: 100%;
       width: 70%;
       overflow: hidden;
@@ -137,7 +137,7 @@ export class PlaygroundIde extends LitElement {
         <slot></slot>
       </playground-project>
 
-      <playground-editor
+      <playground-file-editor
         part="editor"
         exportparts="file-picker"
         .theme=${this.theme}
@@ -145,7 +145,7 @@ export class PlaygroundIde extends LitElement {
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}
       >
-      </playground-editor>
+      </playground-file-editor>
 
       <playground-preview
         part="preview"

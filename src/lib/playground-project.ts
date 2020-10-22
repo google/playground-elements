@@ -33,8 +33,8 @@ import {
 } from '../shared/worker-api.js';
 import {getRandomString, endWithSlash} from '../shared/util.js';
 import {PlaygroundPreview} from './playground-preview.js';
-import './playground-editor.js';
-import {PlaygroundEditor} from './playground-editor.js';
+import './playground-file-editor.js';
+import {PlaygroundFileEditor} from './playground-file-editor.js';
 import './playground-preview.js';
 
 declare global {
@@ -62,7 +62,7 @@ const typescriptWorkerScriptUrl = new URL(
 );
 
 /**
- * Coordinates <playground-editor> and <playground-preview> elements.
+ * Coordinates <playground-file-editor> and <playground-preview> elements.
  */
 @customElement('playground-project')
 export class PlaygroundProject extends LitElement {
@@ -103,7 +103,7 @@ export class PlaygroundProject extends LitElement {
   private _slot!: HTMLSlotElement;
 
   /** The editors that have registered themselves with this project. */
-  private _editors = new Set<PlaygroundEditor>();
+  private _editors = new Set<PlaygroundFileEditor>();
 
   /** The previews that have registered themselves with this project. */
   private _previews = new Set<PlaygroundPreview>();
@@ -175,12 +175,12 @@ export class PlaygroundProject extends LitElement {
     this._compileProject();
   }
 
-  _registerEditor(editor: PlaygroundEditor) {
+  _registerEditor(editor: PlaygroundFileEditor) {
     editor.files = this._files;
     this._editors.add(editor);
   }
 
-  _unregisterEditor(editor: PlaygroundEditor) {
+  _unregisterEditor(editor: PlaygroundFileEditor) {
     this._editors.delete(editor);
   }
 

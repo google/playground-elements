@@ -26,7 +26,7 @@
       height: 200px;
       margin-bottom: 48px;
     }
-    .sideBySide > playground-editor {
+    .sideBySide > playground-file-editor {
       width: 70%;
       border-right: 1px solid #ddd;
     }
@@ -123,7 +123,7 @@ export class MySecondElement extends LitElement {
   <h2>Custom layout</h2>
   <section id="custom-layout">
     <style>
-      #custom-layout playground-editor,
+      #custom-layout playground-file-editor,
       #custom-layout playground-preview {
         display: block;
         border: 1px solid #ddd;
@@ -133,7 +133,7 @@ export class MySecondElement extends LitElement {
     </style>
 
     By using <code>&lt;playground-project></code>,
-    <code>&lt;playground-editor></code>, and
+    <code>&lt;playground-file-editor></code>, and
     <code>&lt;playground-preview></code> separately, you can create any kind of
     layout:
 
@@ -150,20 +150,20 @@ export class MySecondElement extends LitElement {
       </playground-project>
 
     <h4>index.html</h4>
-    <playground-editor
+    <playground-file-editor
         project="custom-project"
         filename="index.html"
         no-file-picker
         no-line-numbers>
-    </playground-editor>
+    </playground-file-editor>
 
     <h4>index.ts</h4>
-    <playground-editor
+    <playground-file-editor
         project="custom-project"
         filename="index.ts"
         no-file-picker
         no-line-numbers>
-    </playground-editor>
+    </playground-file-editor>
 
     <h4>preview</h4>
     <playground-preview
@@ -213,11 +213,11 @@ export class MySecondElement extends LitElement {
     </style>
 
     <div class="sideBySide">
-      <playground-editor no-file-picker id="prerenderEditor">
+      <playground-file-editor no-file-picker id="prerenderEditor">
         <div class="CodeMirror-lines cm-s-default">
           <pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-meta">&lt;!doctype html&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;body&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">  <span class="cm-tag">&lt;p&gt;</span>Hello World!<span class="cm-tag">&lt;/p&gt;</span></span></pre><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tag">&lt;/body&gt;</span></span></pre>
         </div>
-      </playground-editor>
+      </playground-file-editor>
 
       <playground-preview id="prerenderPreview">
         <div class="prerenderBody"><p>Hello World!</p></div>

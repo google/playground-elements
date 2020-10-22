@@ -17,7 +17,7 @@ import '../lib/playground-ide.js';
 import {PlaygroundIde} from '../lib/playground-ide.js';
 import {html, render} from 'lit-html';
 import {UpdatingElement} from 'lit-element';
-import {PlaygroundCodeMirror} from '../lib/playground-codemirror.js';
+import {PlaygroundCodeEditor} from '../lib/playground-code-editor.js';
 import {PlaygroundProject} from '../lib/playground-project.js';
 
 suite('playground-ide', () => {
@@ -151,11 +151,11 @@ suite('playground-ide', () => {
 
     const codemirror = (await pierce(
       'playground-ide',
-      'playground-editor',
-      'playground-codemirror'
-    )) as PlaygroundCodeMirror;
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
     const codemirrorInternals = (codemirror as unknown) as {
-      _codemirror: PlaygroundCodeMirror['_codemirror'];
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     codemirrorInternals._codemirror!.setValue('Hello HTML 2');
     const project = (await pierce(

@@ -15,7 +15,7 @@
 import {LitElement, customElement, html, css} from 'lit-element';
 
 import '../../lib/playground-ide.js';
-import '../../lib/playground-codemirror.js';
+import '../../lib/playground-code-editor.js';
 import {
   Knob,
   KnobId,
@@ -79,7 +79,7 @@ export class PlaygroundConfigurator extends LitElement {
       padding: 10px;
       --playground-code-font-family: 'Roboto Mono', monospace;
       --playground-code-font-size: 12px;
-      --playground-editor-background-color: #f7f7f7;
+      --playground-file-editor-background-color: #f7f7f7;
       background-color: #f7f7f7;
     }
 
@@ -226,14 +226,18 @@ export class PlaygroundConfigurator extends LitElement {
         <div id="code">
           <div>
             <h3>CSS</h3>
-            <playground-codemirror .value=${this.cssText} type="css" readonly>
-            </playground-codemirror>
+            <playground-code-editor .value=${this.cssText} type="css" readonly>
+            </playground-code-editor>
           </div>
 
           <div>
             <h3>HTML</h3>
-            <playground-codemirror .value=${this.htmlText} type="html" readonly>
-            </playground-codemirror>
+            <playground-code-editor
+              .value=${this.htmlText}
+              type="html"
+              readonly
+            >
+            </playground-code-editor>
           </div>
         </div>
       </div>

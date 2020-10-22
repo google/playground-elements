@@ -27,8 +27,8 @@ import {TabBar} from '@material/mwc-tab-bar';
 import '@material/mwc-tab';
 import {SampleFile} from '../shared/worker-api.js';
 import {PlaygroundProject} from './playground-project';
-import './playground-codemirror.js';
-import {PlaygroundCodeMirror} from './playground-codemirror.js';
+import './playground-code-editor.js';
+import {PlaygroundCodeEditor} from './playground-code-editor.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
 
@@ -49,8 +49,8 @@ import {Tab} from '@material/mwc-tab';
 /**
  * A text editor associated with a <playground-project>.
  */
-@customElement('playground-editor')
-export class PlaygroundEditor extends LitElement {
+@customElement('playground-file-editor')
+export class PlaygroundFileEditor extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -94,12 +94,12 @@ export class PlaygroundEditor extends LitElement {
       display: block;
     }
 
-    playground-codemirror,
+    playground-code-editor,
     slot {
       height: calc(100% - var(--playground-bar-height, 35px));
     }
 
-    playground-codemirror {
+    playground-code-editor {
       border-radius: inherit;
       border-top-left-radius: 0;
       border-top-right-radius: 0;
@@ -109,7 +109,7 @@ export class PlaygroundEditor extends LitElement {
       background-color: var(--playground-code-background-color, unset);
     }
 
-    :host([no-file-picker]) playground-codemirror,
+    :host([no-file-picker]) playground-code-editor,
     slot {
       height: calc(100%);
     }
@@ -125,8 +125,8 @@ export class PlaygroundEditor extends LitElement {
   @query('mwc-tab-bar')
   private _tabBar!: TabBar;
 
-  @query('playground-codemirror')
-  private _editor!: PlaygroundCodeMirror;
+  @query('playground-code-editor')
+  private _editor!: PlaygroundCodeEditor;
 
   @property({attribute: false})
   files?: SampleFile[];
@@ -225,7 +225,7 @@ export class PlaygroundEditor extends LitElement {
           </mwc-tab-bar>`}
       ${this._currentFile
         ? html`
-            <playground-codemirror
+            <playground-code-editor
               .value=${this._currentFile.content}
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
@@ -234,7 +234,7 @@ export class PlaygroundEditor extends LitElement {
               .theme=${this.theme}
               @change=${this._onEdit}
             >
-            </playground-codemirror>
+            </playground-code-editor>
           `
         : html`<slot></slot>`}
     `;
@@ -280,7 +280,7 @@ export class PlaygroundEditor extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'playground-editor': PlaygroundEditor;
+    'playground-file-editor': PlaygroundFileEditor;
   }
 }
 
