@@ -1,6 +1,6 @@
 # playground-elements
 
-[![Published on npm](https://img.shields.io/npm/v/code-sample-editor.svg)](https://www.npmjs.com/package/code-sample-editor) ![Tests](https://github.com/PolymerLabs/code-sample-editor/workflows/Tests/badge.svg)
+[![Published on npm](https://img.shields.io/npm/v/playground-elements.svg)](https://www.npmjs.com/package/playground-elements) ![Tests](https://github.com/PolymerLabs/playground-elements/workflows/Tests/badge.svg)
 
 ⚠️ _Active work in progress! Subject to rapid major changes._ ⚠️
 
@@ -126,7 +126,7 @@ Use the component:
 
 `<playground-ide>` uses bare module specifiers in its code, so you'll need a server that supports rewriting module specifiers with the Node module resolution algorithm, or a build tool like Rollup.
 
-`<playground-ide>` also uses `import.meta.url` to load the worker scripts. note that Webpack does not support that currently.
+`<playground-ide>` also uses `import.meta.url` to load the worker scripts.
 
 ## Development
 
