@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Invalid module import paths.
 
+### Changed
+
+- TypeScript decorator runtime is now imported from `tslib` instead of inlined.
+
 ## [0.1.0] - 2020-10-24
 
 - [**BREAKING**] NPM package and GitHub repo renamed from `code-sample-editor`

@@ -21,7 +21,8 @@
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true
   },
   "include": ["src/**/*.ts", "src/lib/worker-api.ts", "src/shared/util.ts"],
   "exclude": ["src/service-worker", "src/shared", "src/typescript-worker"],
