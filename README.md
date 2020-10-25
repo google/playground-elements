@@ -1,6 +1,6 @@
 # playground-elements
 
-[![Published on npm](https://img.shields.io/npm/v/playground-elements.svg)](https://www.npmjs.com/package/playground-elements) ![Tests](https://github.com/PolymerLabs/playground-elements/workflows/Tests/badge.svg)
+[![Published on npm](https://img.shields.io/npm/v/playground-elements.svg)](https://www.npmjs.com/package/playground-elements) [![Tests](https://github.com/PolymerLabs/playground-elements/workflows/Tests/badge.svg)](https://github.com/PolymerLabs/playground-elements/actions?query=workflow%3Atests+branch%3Amaster)
 
 ⚠️ _Active work in progress! Subject to rapid major changes._ ⚠️
 
