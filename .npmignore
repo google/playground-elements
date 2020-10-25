@@ -7,6 +7,7 @@
 /configurator/
 *.tsbuildinfo
 .prettierrc.json
+.prettierignore
 rollup.config.js
 tsconfig.json
 web-test-runner.config.js
