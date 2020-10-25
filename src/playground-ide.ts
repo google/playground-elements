@@ -22,11 +22,11 @@ import './playground-preview.js';
  * A multi-file code editor component with live preview that works without a
  * server.
  *
- * <playground> loads a project configuration file and the set of source files
- * it describes from the network. The source files can be edited locally. To
- * serve the locally edited files to the live preview, <playground> registers a
- * service worker to serve files to the preview from the main UI thread
- * directly, without a network roundtrip.
+ * <playground-ide> loads a project configuration file and the set of source
+ * files it describes from the network. The source files can be edited locally.
+ * To serve the locally edited files to the live preview, <playground-ide>
+ * registers a service worker to serve files to the preview from the main UI
+ * thread directly, without a network roundtrip.
  *
  * The project manifest is a JSON file with a "files" property. "files" is an
  * object with properties for each file. The key is the filename, relative to
@@ -42,14 +42,14 @@ import './playground-preview.js';
  * }
  * ```
  *
- * Files can also be given as <script> tag children of <playground>. The type
- * attribute must start with "sample/" and then the type of the file, one of:
- * "js", "ts", "html", or "css". The <script> must also have a "filename"
+ * Files can also be given as <script> tag children of <playground-ide>. The
+ * type attribute must start with "sample/" and then the type of the file, one
+ * of: "js", "ts", "html", or "css". The <script> must also have a "filename"
  * attribute.
  *
  * Example inline files:
  * ```html
- * <playground>
+ * <playground-ide>
  *   <script type="sample/html" filename="index.html">
  *     <script type="module" src="index.js">&lt;script>
  *     <h1>Hello World</h1>
