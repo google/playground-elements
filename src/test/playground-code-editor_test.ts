@@ -13,8 +13,8 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import '../lib/playground-code-editor.js';
-import {PlaygroundCodeEditor} from '../lib/playground-code-editor.js';
+import '../playground-code-editor.js';
+import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 
 suite('playground-code-editor', () => {
   let container: HTMLDivElement;

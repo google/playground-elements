@@ -4,9 +4,9 @@ import copy from 'rollup-plugin-copy';
 
 export default [
   {
-    input: 'configurator/lib/playground-configurator.js',
+    input: 'configurator/playground-configurator.js',
     output: {
-      file: 'configurator/deploy/lib/playground-configurator.js',
+      file: 'configurator/deploy/playground-configurator.js',
       format: 'esm',
     },
     plugins: [

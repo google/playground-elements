@@ -114,7 +114,7 @@ Load the component definition:
 ```html
 <script
   type="module"
-  src="/node_modules/playground-elements/lib/playground-ide.js"
+  src="/node_modules/playground-elements/playground-ide.js"
 ></script>
 ```
 

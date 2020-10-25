@@ -24,8 +24,8 @@ import '../_codemirror/codemirror-bundle.js';
 // TODO(aomarks) Provide an API for loading these themes dynamically. We can
 // include a bunch of standard themes, but we don't want them to all be included
 // here if they aren't being used.
-import codemirrorStyles from '../_codemirror/codemirror-styles.js';
-import monokaiTheme from '../_codemirror/themes/monokai.css.js';
+import codemirrorStyles from './_codemirror/codemirror-styles.js';
+import monokaiTheme from './_codemirror/themes/monokai.css.js';
 
 // TODO(aomarks) @types/codemirror exists, but installing it and referencing
 // global `CodeMirror` errors with:

@@ -5,8 +5,8 @@
   "homepage": "https://github.com/PolymerLabs/playground-elements#readme",
   "repository": "github:PolymerLabs/playground-elements",
   "type": "module",
-  "module": "lib/playground-ide.js",
-  "main": "lib/playground-ide.js",
+  "module": "playground-ide.js",
+  "main": "playground-ide.js",
   "scripts": {
     "build": "npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",

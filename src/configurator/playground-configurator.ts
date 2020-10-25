@@ -14,8 +14,8 @@
 
 import {LitElement, customElement, html, css} from 'lit-element';
 
-import '../../lib/playground-ide.js';
-import '../../lib/playground-code-editor.js';
+import '../playground-ide.js';
+import '../playground-code-editor.js';
 import {
   Knob,
   KnobId,

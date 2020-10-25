@@ -13,12 +13,12 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import '../lib/playground-ide.js';
-import {PlaygroundIde} from '../lib/playground-ide.js';
+import '../playground-ide.js';
+import {PlaygroundIde} from '../playground-ide.js';
 import {html, render} from 'lit-html';
 import {UpdatingElement} from 'lit-element';
-import {PlaygroundCodeEditor} from '../lib/playground-code-editor.js';
-import {PlaygroundProject} from '../lib/playground-project.js';
+import {PlaygroundCodeEditor} from '../playground-code-editor.js';
+import {PlaygroundProject} from '../playground-project.js';
 
 suite('playground-ide', () => {
   let container: HTMLDivElement;

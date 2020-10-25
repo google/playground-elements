@@ -27,7 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `playground-elements`.
 
 - [**BREAKING**] Renaming and major refactor of elements to allow them to be
-  more easily used independently. The new elements are:
+  more easily used independently. All element are now in the root of the NPM
+  package, instead of `lib/`. The new elements are:
 
   - `<playground-ide>`: A single editor with file-selection bar and preview
     in side-by-side layout. If a different layout is required, the editor and
