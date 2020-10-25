@@ -32,10 +32,10 @@ import {
   TypeScriptWorkerAPI,
 } from '../shared/worker-api.js';
 import {getRandomString, endWithSlash} from '../shared/util.js';
-import {CodeSamplePreviewElement} from './code-sample-preview.js';
-import './code-sample-editor.js';
-import {CodeSampleEditor} from './code-sample-editor.js';
-import './code-sample-preview.js';
+import {PlaygroundPreview} from './playground-preview.js';
+import './playground-file-editor.js';
+import {PlaygroundFileEditor} from './playground-file-editor.js';
+import './playground-preview.js';
 
 declare global {
   interface ImportMeta {
@@ -43,8 +43,8 @@ declare global {
   }
 }
 
-// Each <code-sample-project> has a unique session ID used to scope requests
-// from the preview iframes.
+// Each <playground-project> has a unique session ID used to scope requests from
+// the preview iframes.
 const sessions = new Set<string>();
 const generateUniqueSessionId = (): string => {
   let sessionId;
@@ -55,17 +55,17 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
-const serviceWorkerScriptUrl = new URL('../service-worker.js', import.meta.url);
+const serviceWorkerScriptUrl = new URL('./service-worker.js', import.meta.url);
 const typescriptWorkerScriptUrl = new URL(
-  '../typescript-worker.js',
+  './typescript-worker.js',
   import.meta.url
 );
 
 /**
- * Coordinates code-sample editors and previews.
+ * Coordinates <playground-file-editor> and <playground-preview> elements.
  */
-@customElement('code-sample-project')
-export class CodeSampleProjectElement extends LitElement {
+@customElement('playground-project')
+export class PlaygroundProject extends LitElement {
   /**
    * A document-relative path to a project configuration file.
    */
@@ -77,7 +77,7 @@ export class CodeSampleProjectElement extends LitElement {
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'code-sample-projects';
+  sandboxScope = 'playground-projects';
 
   // computed from this.sandboxScope
   _scopeUrl!: string;
@@ -103,10 +103,10 @@ export class CodeSampleProjectElement extends LitElement {
   private _slot!: HTMLSlotElement;
 
   /** The editors that have registered themselves with this project. */
-  private _editors = new Set<CodeSampleEditor>();
+  private _editors = new Set<PlaygroundFileEditor>();
 
   /** The previews that have registered themselves with this project. */
-  private _previews = new Set<CodeSamplePreviewElement>();
+  private _previews = new Set<PlaygroundPreview>();
 
   private get _previewSrc() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -175,21 +175,21 @@ export class CodeSampleProjectElement extends LitElement {
     this._compileProject();
   }
 
-  _registerEditor(editor: CodeSampleEditor) {
+  _registerEditor(editor: PlaygroundFileEditor) {
     editor.files = this._files;
     this._editors.add(editor);
   }
 
-  _unregisterEditor(editor: CodeSampleEditor) {
+  _unregisterEditor(editor: PlaygroundFileEditor) {
     this._editors.delete(editor);
   }
 
-  _registerPreview(preview: CodeSamplePreviewElement) {
+  _registerPreview(preview: PlaygroundPreview) {
     preview.src = this._previewSrc;
     this._previews.add(preview);
   }
 
-  _unregisterPreview(preview: CodeSamplePreviewElement) {
+  _unregisterPreview(preview: PlaygroundPreview) {
     this._previews.delete(preview);
   }
 
@@ -242,7 +242,7 @@ export class CodeSampleProjectElement extends LitElement {
   private async _installServiceWorker() {
     if (!('serviceWorker' in navigator)) {
       // TODO: show this in the UI
-      console.warn('ServiceWorker support required for <code-sample>');
+      console.warn('ServiceWorker support required for <playground-project>');
       return;
     }
 
@@ -375,6 +375,6 @@ const typeEnumToMimeType = (type?: string) => {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'code-sample-project': CodeSampleProjectElement;
+    'playground-project': PlaygroundProject;
   }
 }

@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "../../service-worker",
     "rootDir": ".",
+    "tsBuildInfoFile": "../../service-worker/.tsbuildinfo",
     "lib": [
       "ES2017",
       "WebWorker"

@@ -24,8 +24,8 @@ import '../_codemirror/codemirror-bundle.js';
 // TODO(aomarks) Provide an API for loading these themes dynamically. We can
 // include a bunch of standard themes, but we don't want them to all be included
 // here if they aren't being used.
-import codemirrorStyles from '../_codemirror/codemirror-styles.js';
-import monokaiTheme from '../_codemirror/themes/monokai.css.js';
+import codemirrorStyles from './_codemirror/codemirror-styles.js';
+import monokaiTheme from './_codemirror/themes/monokai.css.js';
 
 // TODO(aomarks) @types/codemirror exists, but installing it and referencing
 // global `CodeMirror` errors with:
@@ -73,8 +73,8 @@ const unreachable = (n: never) => n;
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
  */
-@customElement('codemirror-editor')
-export class CodeMirrorEditorElement extends LitElement {
+@customElement('playground-code-editor')
+export class PlaygroundCodeEditor extends LitElement {
   static styles = [
     css`
       :host {
@@ -85,8 +85,8 @@ export class CodeMirrorEditorElement extends LitElement {
 
       :host(:not([probing-codemirror-theme])) {
         background-color: var(
-          --playground-editor-background-color,
-          var(--playground-editor-theme-background-color)
+          --playground-file-editor-background-color,
+          var(--playground-file-editor-theme-background-color)
         );
       }
 
@@ -156,7 +156,7 @@ export class CodeMirrorEditorElement extends LitElement {
 
   update(
     changedProperties: TypedMap<
-      Omit<CodeMirrorEditorElement, keyof LitElement | 'update'>
+      Omit<PlaygroundCodeEditor, keyof LitElement | 'update'>
     >
   ) {
     const cm = this._codemirror;
@@ -238,17 +238,17 @@ export class CodeMirrorEditorElement extends LitElement {
 
   /**
    * We want the CodeMirror theme's background color to win if
-   * "--playground-editor-background-color" is unset.
+   * "--playground-file-editor-background-color" is unset.
    *
    * However, there are no values we can use as the default for that property
    * that allow for this. "revert" seems like it should work, but it doesn't.
    * "initial" and "unset" also don't work.
    *
    * So we instead maintain a private CSS property called
-   * "--playground-editor-theme-background-color" that is always set to the
+   * "--playground-file-editor-theme-background-color" that is always set to the
    * theme's background-color, and we use that as the default. We detect this by
    * momentarily disabling the rule that applies
-   * "--playground-editor-background-color" whenever the theme changes.
+   * "--playground-file-editor-background-color" whenever the theme changes.
    */
   private _setBackgroundColor() {
     this.setAttribute('probing-codemirror-theme', '');
@@ -258,7 +258,7 @@ export class CodeMirrorEditorElement extends LitElement {
     const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
       .backgroundColor;
     this.style.setProperty(
-      '--playground-editor-theme-background-color',
+      '--playground-file-editor-theme-background-color',
       themeBgColor
     );
     this.removeAttribute('probing-codemirror-theme');
@@ -281,6 +281,6 @@ export class CodeMirrorEditorElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'codemirror-editor': CodeMirrorEditorElement;
+    'playground-code-editor': PlaygroundCodeEditor;
   }
 }

@@ -14,19 +14,19 @@
 
 import {LitElement, html, customElement, css, property} from 'lit-element';
 
-import './code-sample-project.js';
-import './code-sample-editor.js';
-import './code-sample-preview.js';
+import './playground-project.js';
+import './playground-file-editor.js';
+import './playground-preview.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
  * server.
  *
- * <code-sample> loads a project configuration file and the set of source files
- * it describes from the network. The source files can be edited locally. To
- * serve the locally edited files to the live preview, <code-sample> registers a
- * service worker to serve files to the preview from the main UI thread
- * directly, without a network roundtrip.
+ * <playground-ide> loads a project configuration file and the set of source
+ * files it describes from the network. The source files can be edited locally.
+ * To serve the locally edited files to the live preview, <playground-ide>
+ * registers a service worker to serve files to the preview from the main UI
+ * thread directly, without a network roundtrip.
  *
  * The project manifest is a JSON file with a "files" property. "files" is an
  * object with properties for each file. The key is the filename, relative to
@@ -42,14 +42,14 @@ import './code-sample-preview.js';
  * }
  * ```
  *
- * Files can also be given as <script> tag children of <code-sample>. The type
- * attribute must start with "sample/" and then the type of the file, one of:
- * "js", "ts", "html", or "css". The <script> must also have a "filename"
+ * Files can also be given as <script> tag children of <playground-ide>. The
+ * type attribute must start with "sample/" and then the type of the file, one
+ * of: "js", "ts", "html", or "css". The <script> must also have a "filename"
  * attribute.
  *
  * Example inline files:
  * ```html
- * <code-sample>
+ * <playground-ide>
  *   <script type="sample/html" filename="index.html">
  *     <script type="module" src="index.js">&lt;script>
  *     <h1>Hello World</h1>
@@ -57,11 +57,11 @@ import './code-sample-preview.js';
  *   <script type="sample/js" filename="index.js">
  *     document.body.append('<h2>Hello from JS</h2>');
  *   </script>
- * </code-sample>
+ * </playground>
  * ```
  */
-@customElement('code-sample')
-export class CodeSampleElement extends LitElement {
+@customElement('playground-ide')
+export class PlaygroundIde extends LitElement {
   static styles = css`
     :host {
       display: flex;
@@ -70,7 +70,7 @@ export class CodeSampleElement extends LitElement {
       border: var(--playground-border, solid 1px #ddd);
     }
 
-    code-sample-editor {
+    playground-file-editor {
       height: 100%;
       width: 70%;
       overflow: hidden;
@@ -80,7 +80,7 @@ export class CodeSampleElement extends LitElement {
       border-right: var(--playground-border, solid 1px #ddd);
     }
 
-    code-sample-preview {
+    playground-preview {
       height: 100%;
       width: 30%;
       border-radius: inherit;
@@ -104,7 +104,7 @@ export class CodeSampleElement extends LitElement {
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'code-sample-projects';
+  sandboxScope = 'playground-projects';
 
   /**
    * Whether to show the "Add File" button on the UI that allows
@@ -129,15 +129,15 @@ export class CodeSampleElement extends LitElement {
   render() {
     const projectId = 'project';
     return html`
-      <code-sample-project
+      <playground-project
         id=${projectId}
         .projectSrc=${this.projectSrc}
         .sandboxScope=${this.sandboxScope}
       >
         <slot></slot>
-      </code-sample-project>
+      </playground-project>
 
-      <code-sample-editor
+      <playground-file-editor
         part="editor"
         exportparts="file-picker"
         .theme=${this.theme}
@@ -145,9 +145,9 @@ export class CodeSampleElement extends LitElement {
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}
       >
-      </code-sample-editor>
+      </playground-file-editor>
 
-      <code-sample-preview
+      <playground-preview
         part="preview"
         exportparts="preview-toolbar,
                      preview-location,
@@ -155,13 +155,13 @@ export class CodeSampleElement extends LitElement {
                      preview-loading-indicator"
         location="Result"
         .project=${projectId}
-      ></code-sample-preview>
+      ></playground-preview>
     `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'code-sample': CodeSampleElement;
+    'playground-ide': PlaygroundIde;
   }
 }

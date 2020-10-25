@@ -1,19 +1,24 @@
-# code-sample-editor
+# playground-elements
+
+[![Published on npm](https://img.shields.io/npm/v/playground-elements.svg)](https://www.npmjs.com/package/playground-elements) ![Tests](https://github.com/PolymerLabs/playground-elements/workflows/Tests/badge.svg)
+
+⚠️ _Active work in progress! Subject to rapid major changes._ ⚠️
 
 A multi-file code editor component with live preview
 
 ## Introduction
 
-`<code-sample-editor>` is a web component that allows you to embed multi-file, editable, live-preview code examples that use JavaScript, TypeScript, HTML and CSS. It's like a mini-IDE that you can embed many times in a page, and it works without a server!
+`<playground-ide>` is a web component that allows you to embed multi-file, editable, live-preview code examples that use JavaScript, TypeScript, HTML and CSS. It's like a mini-IDE that you can embed many times in a page, and it works without a server!
 
 ## Features
 
 ### No server-required
-`<code-sample-editor>` uses a service worker to send files from the main page to the preview iframe. Users can edit examples locally and the edited files are served to the iframe without ever hitting the network. This means you can use `<code-sample-editor>` with a static file server, and preview reloads are ultra-fast!
+
+`<playground-ide>` uses a service worker to send files from the main page to the preview iframe. Users can edit examples locally and the edited files are served to the iframe without ever hitting the network. This means you can use `<playground-ide>` with a static file server, and preview reloads are ultra-fast!
 
 ### Multi-file unbundled editing
 
-`<code-sample-editor>` serves each file indivdually to the preview iframe, instead of bundling them first. This gives faster refresh times and means taht you can utilize the standard web platform features in your examples without a bundler getting in the way and potentially breaking things. The experience is very much like working wtih a static file server.
+`<playground-ide>` serves each file indivdually to the preview iframe, instead of bundling them first. This gives faster refresh times and means taht you can utilize the standard web platform features in your examples without a bundler getting in the way and potentially breaking things. The experience is very much like working wtih a static file server.
 
 HTML can have multiple `<script>` and `<link>` tags, even dynamically added. CSS can use `@import` and `url()`. JavaScript can use `import.meta.url`, dynamic `import()`, and `fetch()`. It all just works.
 
@@ -27,7 +32,7 @@ If you import a module by name, like:
 import {html, render} from 'lit-html';
 ```
 
-`<code-sample-editor>` will automatically rewrite the import specifier to use [unpkg.com](unpkg.com) URLs:
+`<playground-ide>` will automatically rewrite the import specifier to use [unpkg.com](unpkg.com) URLs:
 
 ```js
 import {html, render} from 'https://unpkg.com/lit-html?module';
@@ -35,22 +40,27 @@ import {html, render} from 'https://unpkg.com/lit-html?module';
 
 ### TypeScript support
 
-Besides standard JavaScript, `<code-sample-editor>` supports TypeScript files, which are automatically transpiled to JavaScript in a web worker.
+Besides standard JavaScript, `<playground-ide>` supports TypeScript files, which are automatically transpiled to JavaScript in a web worker.
 
 The TypeScript worker behaves exactly like the `tsc` compiler does, so the examples match local code. This means that when you import other TypeScript files, you do with with a `.js` extension, which matches the compiler output.
 
 `my-element.ts`
+
 ```ts
 import {LitElement, html, customElement} from 'lit-element';
 
 @customElement('my-element')
-class MyElement extends LitElement { /* ... */ }
+class MyElement extends LitElement {
+  /* ... */
+}
 ```
 
 `index.html`
+
 ```html
 <script type="module" src="my-element.js"></script>
 ```
+
 Note the filename of `my-element.js`.
 
 ### Inline or external sources
@@ -58,7 +68,7 @@ Note the filename of `my-element.js`.
 You can define an example entirely in HTML for simplicity:
 
 ```html
-<code-sample-editor>
+<playground-ide>
   <script type="sample/html" filename="index.html">
     <script type="module" src="my-element.js">&lt;/script>
     <h1>Hello World!</h1>
@@ -70,16 +80,17 @@ You can define an example entirely in HTML for simplicity:
     class MyElement extends LitElement { /* ... */ }
     customElements.define('my-element', MyElement);
   </script>
-</code-sample-editor>
+</playground-ide>
 ```
 
 Or define your project in a JSON manifest:
 
 ```html
-<code-sample-editor project-src="./example-1.json"></code-sample-editor>
+<playground-ide project-src="./example-1.json"></playground-ide>
 ```
 
 `example-1.json`:
+
 ```json
 {
   "files": {
@@ -93,30 +104,34 @@ Or define your project in a JSON manifest:
 ## Getting Started
 
 Install with npm:
+
 ```sh
-npm i code-sample-editor
+npm i playground-elements
 ```
 
 Load the component definition:
+
 ```html
 <script
-  type="module" 
-  src="/node_modules/code-sample-editor/lib/code-sample-editor.js">
-</script>
+  type="module"
+  src="/node_modules/playground-elements/playground-ide.js"
+></script>
 ```
 
 Use the component:
+
 ```html
-<code-sample-editor project-src="./example-1.json"></code-sample-editor>
+<playground-ide project-src="./example-1.json"></playground-ide>
 ```
 
-`<code-sample-editor>` uses bare module specifiers in its code, so you'll need a server that supports rewriting module specifiers with the Node module resolution algorithm, or a build tool like Rollup.
+`<playground-ide>` uses bare module specifiers in its code, so you'll need a server that supports rewriting module specifiers with the Node module resolution algorithm, or a build tool like Rollup.
 
-`<code-sample-editor>` also uses `import.meta.url` to load the worker scripts. note that Webpack does not support that currently.
+`<playground-ide>` also uses `import.meta.url` to load the worker scripts.
 
 ## Development
 
 After cloning the repo:
+
 ```sh
 npm install
 

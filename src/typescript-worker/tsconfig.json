@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "../../typescript-worker",
     "rootDir": ".",
+    "tsBuildInfoFile": "../../typescript-worker/.tsbuildinfo",
     "lib": [
       "ES2017",
       "WebWorker"

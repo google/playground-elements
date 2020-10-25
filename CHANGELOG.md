@@ -17,6 +17,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [0.1.0] - 2020-10-24
+
+- [**BREAKING**] NPM package and GitHub repo renamed from `code-sample-editor`
+  to `playground-elements`.
+
+- [**BREAKING**] Renamed all elements:
+
+  - `<code-sample> -> <playground-ide>`
+  - `<code-sample-project>` -> `<playground-project>`
+  - `<code-sample-editor>` -> `<playground-file-editor>`
+  - `<codemirror-editor>` -> `<playground-code-editor>`
+
+- [**BREAKING**] Renamed all element JS modules:
+  - `./lib/code-sample.js` -> `./playground-ide.js`
+  - `./lib/code-sample-project.js` -> `./playground-project.js`
+  - `./lib/code-sample-editor.js` -> `./playground-file-editor.js`
+  - `./lib/codemirror-editor.js` -> `./playground-code-editor.js`
+
 ## [0.1.0-pre.4] - 2020-10-22
 
 ### Changed

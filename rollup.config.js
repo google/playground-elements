@@ -3,7 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import litcss from 'rollup-plugin-lit-css';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
-import * as fs from 'fs';
 
 export function simpleReplace(replacements) {
   return {
@@ -17,7 +16,8 @@ export function simpleReplace(replacements) {
   };
 }
 
-const themeNames = fs.readdirSync('node_modules/codemirror/theme');
+// TODO(aomarks) Support more themes.
+const themeNames = ['monokai.css'];
 
 export default [
   {

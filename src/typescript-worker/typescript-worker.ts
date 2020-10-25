@@ -60,13 +60,13 @@ const transformers: ts.CustomTransformers = {
 
 const workerAPI: TypeScriptWorkerAPI = {
   /**
-   * Compiles a project, returning a Map of compiled file contents. The map
-   * only contains context for files that are compiled. Other files are skipped.
+   * Compiles a project, returning a Map of compiled file contents. The map only
+   * contains context for files that are compiled. Other files are skipped.
    *
    * TODO (justinfagnani): This does a new compilation for each call, we should
    * keep the Program in memory and accept updates to the files to do
    * incremental compilation. We could also share a DocumentRegistry across
-   * multiple code-sample-editor instances to save memory and type analysis of
+   * multiple <playground-project> instances to save memory and type analysis of
    * common lib files like lit-element, lib.d.ts and dom.d.ts.
    */
   async compileProject(files: Array<SampleFile>) {

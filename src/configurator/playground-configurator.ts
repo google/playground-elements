@@ -14,8 +14,8 @@
 
 import {LitElement, customElement, html, css} from 'lit-element';
 
-import '../../lib/code-sample.js';
-import '../../lib/codemirror-editor.js';
+import '../playground-ide.js';
+import '../playground-code-editor.js';
 import {
   Knob,
   KnobId,
@@ -66,7 +66,7 @@ export class PlaygroundConfigurator extends LitElement {
       position: relative;
     }
 
-    code-sample {
+    playground-ide {
       flex: 1;
       margin: 50px;
       max-width: 900px;
@@ -79,7 +79,7 @@ export class PlaygroundConfigurator extends LitElement {
       padding: 10px;
       --playground-code-font-family: 'Roboto Mono', monospace;
       --playground-code-font-size: 12px;
-      --playground-editor-background-color: #f7f7f7;
+      --playground-file-editor-background-color: #f7f7f7;
       background-color: #f7f7f7;
     }
 
@@ -213,12 +213,12 @@ export class PlaygroundConfigurator extends LitElement {
           id="container"
           style="background-color:${this.values.getValue('pageBackground')}"
         >
-          <code-sample
+          <playground-ide
             theme=${this.values.getValue('theme')}
             .lineNumbers=${this.values.getValue('lineNumbers')}
             project-src="./project/project.json"
           >
-          </code-sample>
+          </playground-ide>
 
           ${githubCorner}
         </div>
@@ -226,14 +226,18 @@ export class PlaygroundConfigurator extends LitElement {
         <div id="code">
           <div>
             <h3>CSS</h3>
-            <codemirror-editor .value=${this.cssText} type="css" readonly>
-            </codemirror-editor>
+            <playground-code-editor .value=${this.cssText} type="css" readonly>
+            </playground-code-editor>
           </div>
 
           <div>
             <h3>HTML</h3>
-            <codemirror-editor .value=${this.htmlText} type="html" readonly>
-            </codemirror-editor>
+            <playground-code-editor
+              .value=${this.htmlText}
+              type="html"
+              readonly
+            >
+            </playground-code-editor>
           </div>
         </div>
       </div>
@@ -254,8 +258,8 @@ export class PlaygroundConfigurator extends LitElement {
 
   private get htmlText() {
     return `
-<code-sample${this.htmlTextAttributes}>
-</code-sample>
+<playground-ide${this.htmlTextAttributes}>
+</playground-ide>
 `;
   }
 
@@ -303,7 +307,7 @@ export class PlaygroundConfigurator extends LitElement {
       props.push(line);
     }
     return `
-code-sample {
+playground-ide {
 ${props.join('\n')}
 }
     `;
@@ -425,7 +429,7 @@ function throwUnreachable(_x: never, msg: string) {
  * https://tholman.com/github-corners/
  */
 const githubCorner = html`<a
-    href="https://github.com/PolymerLabs/code-sample-editor"
+    href="https://github.com/PolymerLabs/playground-elements"
     class="github-corner"
     aria-label="View source on GitHub"
     ><svg

@@ -119,7 +119,7 @@ export const knobs = [
     id: 'editorBackground',
     label: 'Background',
     section: 'code editor',
-    cssProperty: '--playground-editor-background-color',
+    cssProperty: '--playground-file-editor-background-color',
     default: '',
     unsetLabel: 'From theme',
   }),
