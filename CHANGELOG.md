@@ -17,6 +17,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Added
+
+- Added `--playground-preview-size` CSS custom property to control the initial
+  size of the RHS preview bar in `<playground-ide>`. The LHS editor will take up
+  all additional space. Defaults to `30%`.
+
+- Added `resizable` property/attribute which allows users to click and drag in
+  the space between the LHS editor and RHS preview of `<playground-ide>` to
+  change their relative sizes.
+
 ## [0.1.0] - 2020-10-24
 
 - [**BREAKING**] NPM package and GitHub repo renamed from `code-sample-editor`

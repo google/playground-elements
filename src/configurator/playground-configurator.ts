@@ -214,8 +214,9 @@ export class PlaygroundConfigurator extends LitElement {
           style="background-color:${this.values.getValue('pageBackground')}"
         >
           <playground-ide
-            theme=${this.values.getValue('theme')}
+            .theme=${this.values.getValue('theme')}
             .lineNumbers=${this.values.getValue('lineNumbers')}
+            .resizable=${this.values.getValue('resizable')}
             project-src="./project/project.json"
           >
           </playground-ide>
