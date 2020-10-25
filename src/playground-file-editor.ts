@@ -26,7 +26,7 @@ import '@material/mwc-tab-bar';
 import {TabBar} from '@material/mwc-tab-bar';
 import '@material/mwc-tab';
 import {SampleFile} from '../shared/worker-api.js';
-import {PlaygroundProject} from './playground-project';
+import {PlaygroundProject} from './playground-project.js';
 import './playground-code-editor.js';
 import {PlaygroundCodeEditor} from './playground-code-editor.js';
 import {nothing} from 'lit-html';
