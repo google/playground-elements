@@ -10,6 +10,9 @@
 /typescript-worker/
 service-worker.js
 typescript-worker.js
+/index.js
+/index.d.ts
+/index.d.ts.map
 /playground-*.js
 /playground-*.d.ts
 /playground-*.d.ts.map
