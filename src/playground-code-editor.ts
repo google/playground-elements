@@ -19,7 +19,7 @@ import {LitElement, customElement, css, property} from 'lit-element';
 // support is available. See
 // https://github.com/lezer-parser/javascript/issues/3. This module sets a
 // `CodeMirror` global.
-import '../_codemirror/codemirror-bundle.js';
+import './_codemirror/codemirror-bundle.js';
 
 // TODO(aomarks) Provide an API for loading these themes dynamically. We can
 // include a bunch of standard themes, but we don't want them to all be included
