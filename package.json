@@ -9,6 +9,7 @@
   "main": "playground-ide.js",
   "scripts": {
     "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
+    "nuke": "rm -rf node_modules package-lock.json && npm install",
     "build": "npm run clean && npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",
     "build:configurator": "rollup -c rollup.config.configurator.js",
