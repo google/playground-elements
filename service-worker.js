@@ -330,7 +330,7 @@
         },
     };
     /**
-     * A collection of FileAPI objects registered by <code-sample-editor> instances,
+     * A collection of FileAPI objects registered by <playground-project> instances,
      * keyed by session ID.
      */
     const fileAPIs = new Map();
