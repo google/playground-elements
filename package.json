@@ -8,7 +8,8 @@
   "module": "playground-ide.js",
   "main": "playground-ide.js",
   "scripts": {
-    "build": "npm run build:lib && npm run bundle",
+    "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
+    "build": "npm run clean && npm run build:lib && npm run bundle",
     "build:lib": "tsc --build",
     "build:configurator": "rollup -c rollup.config.configurator.js",
     "bundle": "rollup -c rollup.config.js",
