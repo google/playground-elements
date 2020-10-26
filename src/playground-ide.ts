@@ -252,12 +252,12 @@ export class PlaygroundIde extends LitElement {
     };
     bar.addEventListener('pointermove', onPointermove);
 
-    const stopDragging = () => {
+    const onPointerup = () => {
       bar.releasePointerCapture(pointerId);
       bar.removeEventListener('pointermove', onPointermove);
-      bar.removeEventListener('pointerup', stopDragging);
+      bar.removeEventListener('pointerup', onPointerup);
     };
-    bar.addEventListener('pointerup', stopDragging);
+    bar.addEventListener('pointerup', onPointerup);
   }
 }
 
