@@ -227,7 +227,7 @@ export class PlaygroundIde extends LitElement {
       // Note we set this property on the RHS element instead of the host so
       // that when "resizable" is toggled, we don't reset a host value that the
       // user might have set.
-      this._rhs.style.removeProperty('--playground-preview-width');
+      this._rhs?.style.removeProperty('--playground-preview-width');
     }
     super.update(changedProperties);
   }
