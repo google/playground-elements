@@ -232,9 +232,9 @@ export class PlaygroundIde extends LitElement {
     super.update(changedProperties);
   }
 
-  private onResizeBarPointerdown(event: PointerEvent) {
+  private onResizeBarPointerdown({pointerId}: PointerEvent) {
     const bar = this._resizeBar;
-    bar.setPointerCapture(event.pointerId);
+    bar.setPointerCapture(pointerId);
 
     const rhsStyle = this._rhs.style;
     const {left: hostLeft, right: hostRight} = this.getBoundingClientRect();
@@ -253,6 +253,7 @@ export class PlaygroundIde extends LitElement {
     bar.addEventListener('pointermove', onPointermove);
 
     const stopDragging = () => {
+      bar.releasePointerCapture(pointerId);
       bar.removeEventListener('pointermove', onPointermove);
       bar.removeEventListener('pointerup', stopDragging);
     };
