@@ -174,8 +174,8 @@ export class PlaygroundIde extends LitElement {
   @property()
   theme = 'default';
 
-  @query('#resizeOverlay')
-  private _resizeOverlay!: HTMLDivElement;
+  @query('#resizeBar')
+  private _resizeBar!: HTMLDivElement;
 
   @query('#rhs')
   private _rhs!: HTMLDivElement;
@@ -204,10 +204,9 @@ export class PlaygroundIde extends LitElement {
       <div id="rhs">
         ${this.resizable
           ? html`<div
-                id="resizeBar"
-                @mousedown=${this.onResizeBarMousedown}
-              ></div>
-              <div id="resizeOverlay"></div>`
+              id="resizeBar"
+              @pointerdown=${this.onResizeBarPointerdown}
+            ></div>`
           : nothing}
 
         <playground-preview
@@ -224,26 +223,26 @@ export class PlaygroundIde extends LitElement {
   }
 
   async update(changedProperties: PropertyValues<this>) {
-    super.update(changedProperties);
     if (changedProperties.has('resizable') && this.resizable === false) {
       // Note we set this property on the RHS element instead of the host so
       // that when "resizable" is toggled, we don't reset a host value that the
       // user might have set.
       this._rhs.style.removeProperty('--playground-preview-width');
     }
+    super.update(changedProperties);
   }
 
-  private onResizeBarMousedown() {
-    const rhsStyle = this._rhs.style;
-    const overlay = this._resizeOverlay;
-    overlay.classList.add('resizing');
+  private onResizeBarPointerdown(event: PointerEvent) {
+    const bar = this._resizeBar;
+    bar.setPointerCapture(event.pointerId);
 
+    const rhsStyle = this._rhs.style;
     const {left: hostLeft, right: hostRight} = this.getBoundingClientRect();
     const hostWidth = hostRight - hostLeft;
     const rhsMinWidth = 100;
     const rhsMaxWidth = hostWidth - 100;
 
-    const onMousemove = (event: MouseEvent) => {
+    const onPointermove = (event: PointerEvent) => {
       const rhsWidth = Math.min(
         rhsMaxWidth,
         Math.max(rhsMinWidth, hostRight - event.clientX)
@@ -251,16 +250,13 @@ export class PlaygroundIde extends LitElement {
       const percent = (rhsWidth / hostWidth) * 100;
       rhsStyle.setProperty('--playground-preview-width', `${percent}%`);
     };
-    overlay.addEventListener('mousemove', onMousemove);
+    bar.addEventListener('pointermove', onPointermove);
 
     const stopDragging = () => {
-      overlay.classList.remove('resizing');
-      overlay.removeEventListener('mousemove', onMousemove);
-      overlay.removeEventListener('mouseup', stopDragging);
-      overlay.removeEventListener('mouseout', stopDragging);
+      bar.removeEventListener('pointermove', onPointermove);
+      bar.removeEventListener('pointerup', stopDragging);
     };
-    overlay.addEventListener('mouseup', stopDragging);
-    overlay.addEventListener('mouseout', stopDragging);
+    bar.addEventListener('pointerup', stopDragging);
   }
 }
 
