@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Invalid module import paths.
+- Reload button icon now respects `--playground-preview-toolbar-foreground-color`.
 
 ### Changed
 
