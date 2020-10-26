@@ -30,8 +30,8 @@ import {
   ESTABLISH_HANDSHAKE,
   HANDSHAKE_RECEIVED,
   TypeScriptWorkerAPI,
-} from '../shared/worker-api.js';
-import {getRandomString, endWithSlash} from '../shared/util.js';
+} from './shared/worker-api.js';
+import {getRandomString, endWithSlash} from './shared/util.js';
 import {PlaygroundPreview} from './playground-preview.js';
 import './playground-file-editor.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';

@@ -166,11 +166,28 @@ export const knobs = [
     default: true,
     section: 'general',
   }),
+  checkbox({
+    id: 'resizable',
+    label: 'Resizable',
+    section: 'general',
+    default: false,
+    htmlAttribute: 'resizable',
+  }),
   color({
     id: 'highlight',
     label: 'Highlight',
     cssProperty: '--playground-highlight-color',
     default: '#6200ee',
+    section: 'general',
+  }),
+  slider({
+    id: 'previewWidth',
+    label: 'Preview width',
+    cssProperty: '--playground-preview-width',
+    formatCss: (val) => `${val}%`,
+    min: 0,
+    max: 100,
+    default: 30,
     section: 'general',
   }),
   slider({

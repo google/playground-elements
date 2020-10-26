@@ -1,6 +1,6 @@
 {
   "name": "playground-elements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A multi-file code editor component with live preview",
   "homepage": "https://github.com/PolymerLabs/playground-elements#readme",
   "repository": "github:PolymerLabs/playground-elements",
@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
     "nuke": "rm -rf node_modules package-lock.json && npm install",
-    "build": "npm run clean && npm run build:lib && npm run bundle",
+    "build": "npm run clean && npm run build:lib && npm run bundle && npm run build:configurator",
     "build:lib": "tsc --build",
     "build:configurator": "rollup -c rollup.config.configurator.js",
     "bundle": "rollup -c rollup.config.js",
@@ -51,6 +51,7 @@
     "@material/mwc-tab-bar": "=0.19.0-canary.615d861d.0",
     "comlink": "^4.3.0",
     "lit-element": "^2.3.1",
-    "lit-html": "^1.2.1"
+    "lit-html": "^1.2.1",
+    "tslib": "^2.0.3"
   }
 }

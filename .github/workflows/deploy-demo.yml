@@ -18,11 +18,8 @@ jobs:
       - name: NPM install
         run: npm ci
 
-      - name: Build elements
+      - name: Build
         run: npm run build
-
-      - name: Build configurator
-        run: npm run build:configurator
 
       - name: Deploy to gh-pages
         run: |

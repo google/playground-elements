@@ -67,7 +67,6 @@ export class PlaygroundPreview extends LitElement {
     }
 
     #reload-button {
-      color: #444;
       --mdc-icon-button-size: 30px;
       --mdc-icon-size: 18px;
     }

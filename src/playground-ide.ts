@@ -12,7 +12,16 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, html, customElement, css, property} from 'lit-element';
+import {
+  LitElement,
+  html,
+  customElement,
+  css,
+  query,
+  property,
+  PropertyValues,
+} from 'lit-element';
+import {nothing} from 'lit-html';
 
 import './playground-project.js';
 import './playground-file-editor.js';
@@ -66,13 +75,14 @@ export class PlaygroundIde extends LitElement {
     :host {
       display: flex;
       height: 350px;
-      min-width: 300px;
+      min-width: 200px;
       border: var(--playground-border, solid 1px #ddd);
     }
 
     playground-file-editor {
       height: 100%;
-      width: 70%;
+      flex: 1;
+      min-width: 100px;
       overflow: hidden;
       border-radius: inherit;
       border-top-right-radius: 0;
@@ -80,9 +90,16 @@ export class PlaygroundIde extends LitElement {
       border-right: var(--playground-border, solid 1px #ddd);
     }
 
+    #rhs {
+      height: 100%;
+      width: max(100px, var(--playground-preview-width, 30%));
+      position: relative;
+      border-radius: inherit;
+    }
+
     playground-preview {
       height: 100%;
-      width: 30%;
+      width: 100%;
       border-radius: inherit;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -90,6 +107,30 @@ export class PlaygroundIde extends LitElement {
 
     slot {
       display: none;
+    }
+
+    #resizeBar {
+      position: absolute;
+      top: 0;
+      left: -5px;
+      width: 10px;
+      height: 100%;
+      z-index: 9;
+      cursor: col-resize;
+    }
+
+    #resizeOverlay {
+      display: none;
+    }
+    #resizeOverlay.resizing {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99999;
+      cursor: col-resize;
     }
   `;
 
@@ -121,10 +162,23 @@ export class PlaygroundIde extends LitElement {
   lineNumbers = false;
 
   /**
+   * If true, allow the user to change the relative size of the LHS editor and
+   * RHS preview by clicking and dragging in the space between them.
+   */
+  @property({type: Boolean})
+  resizable = false;
+
+  /**
    * The CodeMirror theme to load.
    */
   @property()
   theme = 'default';
+
+  @query('#resizeBar')
+  private _resizeBar!: HTMLDivElement;
+
+  @query('#rhs')
+  private _rhs!: HTMLDivElement;
 
   render() {
     const projectId = 'project';
@@ -147,16 +201,63 @@ export class PlaygroundIde extends LitElement {
       >
       </playground-file-editor>
 
-      <playground-preview
-        part="preview"
-        exportparts="preview-toolbar,
-                     preview-location,
-                     preview-reload-button,
-                     preview-loading-indicator"
-        location="Result"
-        .project=${projectId}
-      ></playground-preview>
+      <div id="rhs">
+        ${this.resizable
+          ? html`<div
+              id="resizeBar"
+              @pointerdown=${this.onResizeBarPointerdown}
+            ></div>`
+          : nothing}
+
+        <playground-preview
+          part="preview"
+          exportparts="preview-toolbar,
+                       preview-location,
+                       preview-reload-button,
+                       preview-loading-indicator"
+          location="Result"
+          .project=${projectId}
+        ></playground-preview>
+      </div>
     `;
+  }
+
+  async update(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('resizable') && this.resizable === false) {
+      // Note we set this property on the RHS element instead of the host so
+      // that when "resizable" is toggled, we don't reset a host value that the
+      // user might have set.
+      this._rhs?.style.removeProperty('--playground-preview-width');
+    }
+    super.update(changedProperties);
+  }
+
+  private onResizeBarPointerdown({pointerId}: PointerEvent) {
+    const bar = this._resizeBar;
+    bar.setPointerCapture(pointerId);
+
+    const rhsStyle = this._rhs.style;
+    const {left: hostLeft, right: hostRight} = this.getBoundingClientRect();
+    const hostWidth = hostRight - hostLeft;
+    const rhsMinWidth = 100;
+    const rhsMaxWidth = hostWidth - 100;
+
+    const onPointermove = (event: PointerEvent) => {
+      const rhsWidth = Math.min(
+        rhsMaxWidth,
+        Math.max(rhsMinWidth, hostRight - event.clientX)
+      );
+      const percent = (rhsWidth / hostWidth) * 100;
+      rhsStyle.setProperty('--playground-preview-width', `${percent}%`);
+    };
+    bar.addEventListener('pointermove', onPointermove);
+
+    const onPointerup = () => {
+      bar.releasePointerCapture(pointerId);
+      bar.removeEventListener('pointermove', onPointermove);
+      bar.removeEventListener('pointerup', onPointerup);
+    };
+    bar.addEventListener('pointerup', onPointerup);
   }
 }
 
