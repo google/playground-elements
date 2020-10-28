@@ -24,9 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - [**BREAKING**] Replaced `theme` property with new custom property based
   theming system (see below).
 
-- [**BREAKING**] Renamed `*-background-color` CSS custom properties to
-  `*-background` and apply to `background` instead of `background-color` (to
-  support background images):
+- [**BREAKING**] Renamed CSS custom properties:
+  - `playground-code-color` -> `playground-code-default-color`
   - `playground-file-editor-background-color` -> `playground-code-background`
   - `playground-file-picker-background-color` -> `playground-file-picker-background`
   - `playground-preview-toolbar-background-color` -> `playground-preview-toolbar-background`
