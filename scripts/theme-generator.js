@@ -36,13 +36,6 @@ import * as webDevServer from '@web/dev-server';
 import * as playwright from 'playwright';
 import CleanCSS from 'clean-css';
 
-// csso
-//import csso from 'csso';
-
-// cssnano
-//import postcss from 'postcss';
-//import cssnano from 'cssnano';
-
 const rootDir = pathlib.resolve(
   pathlib.dirname(url.fileURLToPath(import.meta.url)),
   '..'
@@ -68,14 +61,6 @@ const minifyCss = (cssText) => {
   }
   let minified = result.styles;
   return minified;
-
-  // csso
-  //return csso.minify(cssText).css;
-
-  // cssnano
-  //const processor = postcss(cssnano({preset: 'advanced'}));
-  //const result = await processor.process(cssText, {from: undefined});
-  //return result.css;
 };
 
 const postMinifyCss = (css) => {
