@@ -40,7 +40,7 @@ export class PlaygroundPreview extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      background-color: white;
+      background: white;
       font-family: sans-serif;
       height: 350px;
     }
@@ -56,10 +56,7 @@ export class PlaygroundPreview extends LitElement {
       border-radius: inherit;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
-      background-color: var(
-        --playground-preview-toolbar-background-color,
-        white
-      );
+      background: var(--playground-preview-toolbar-background, white);
     }
 
     #location {

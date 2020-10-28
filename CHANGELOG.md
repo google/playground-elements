@@ -17,6 +17,71 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] Replaced `theme` property with new custom property based
+  theming system (see below).
+
+- [**BREAKING**] Renamed CSS custom properties:
+  - `playground-code-color` -> `playground-code-default-color`
+  - `playground-file-editor-background-color` -> `playground-code-background`
+  - `playground-file-picker-background-color` -> `playground-file-picker-background`
+  - `playground-preview-toolbar-background-color` -> `playground-preview-toolbar-background`
+
+### Added
+
+- Added CSS Custom Properties for configuring the CodeMirror theme.
+
+  Includes broad properties like `--playground-code-background` and
+  `--playground-selection-color`, as well as token-specific properties like
+  `--playground-code-keyword-color` and `--playground-code-string-color`.
+
+  See the `themes/` directory for more examples of what can be customized.
+
+- Added `themes/` directory which includes CSS files and JS modules for each of
+  the standard CodeMirror themes, adapted to use CSS Custom Properties.
+
+  Use the configurator at https://polymerlabs.github.io/playground-elements/ to
+  try out the available themes.
+
+  To load a theme, load its stylesheet into your document or shadow root scope,
+  and set the corresponding `playground-theme-NAME` class on any playground
+  element or ancestor.
+
+  In HTML:
+
+  ```html
+  <head>
+    <link
+      rel="stylesheet"
+      href="/node_modules/playground-elements/themes/mbo.css"
+    />
+  </head>
+
+  <body class="playground-theme-mbo">
+    <playground-ide></playground-ide>
+  </body>
+  ```
+
+  In a LitElement:
+
+  ```js
+  import mbo from 'playground-elements/themes/mbo.css.js';
+
+  class MyElement extends LitElement {
+    static styles = [mbo, css`...`];
+
+    render() {
+      return `
+        <playground-ide class="playground-theme-mbo">
+        </playground-ide>
+      `;
+    }
+  }
+  ```
+
 ## [0.1.1] - 2020-10-26
 
 ### Added

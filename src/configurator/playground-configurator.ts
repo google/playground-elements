@@ -28,111 +28,115 @@ import {
   knobsById,
   knobsBySection,
 } from './knobs.js';
+import {themeStyles} from './themes.js';
 
 /**
  * A configurator for the playground-* elements.
  */
 @customElement('playground-configurator')
 export class PlaygroundConfigurator extends LitElement {
-  static styles = css`
-    :host {
-      display: flex;
-      font-family: Roboto, Arial, Helvetica, sans-serif;
-    }
+  static styles = [
+    ...themeStyles,
+    css`
+      :host {
+        display: flex;
+        font-family: Roboto, Arial, Helvetica, sans-serif;
+      }
 
-    #lhs {
-      width: 260px;
-      overflow-y: auto;
-      border-right: 1px solid #ccc;
-      box-shadow: -2px 0 6px 0px rgb(0 0 0 / 50%);
-      z-index: 1;
-      color: #424242;
-      font-size: 13px;
-    }
+      #lhs {
+        width: 285px;
+        overflow-y: auto;
+        border-right: 1px solid #ccc;
+        box-shadow: -2px 0 6px 0px rgb(0 0 0 / 50%);
+        z-index: 1;
+        color: #424242;
+        font-size: 13px;
+      }
 
-    #rhs {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: auto;
-    }
+      #rhs {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: auto;
+      }
 
-    #container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex: 1;
-      /* To position the GitHub cat corner. */
-      position: relative;
-    }
+      #container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+        /* To position the GitHub cat corner. */
+        position: relative;
+      }
 
-    playground-ide {
-      flex: 1;
-      margin: 50px;
-      max-width: 900px;
-    }
+      playground-ide {
+        flex: 1;
+        margin: 50px;
+        max-width: 900px;
+      }
 
-    #code {
-      display: flex;
-      flex-wrap: wrap;
-      border-top: 1px solid #ccc;
-      padding: 10px;
-      --playground-code-font-family: 'Roboto Mono', monospace;
-      --playground-code-font-size: 12px;
-      --playground-file-editor-background-color: #f7f7f7;
-      background-color: #f7f7f7;
-    }
+      #code {
+        display: flex;
+        flex-wrap: wrap;
+        border-top: 1px solid #ccc;
+        padding: 10px;
+        --playground-code-font-family: 'Roboto Mono', monospace;
+        --playground-code-font-size: 12px;
+        --playground-code-background: transparent;
+        background-color: #f7f7f7;
+      }
 
-    h3 {
-      color: #949494;
-      font-weight: 400;
-      text-transform: uppercase;
-    }
+      h3 {
+        color: #949494;
+        font-weight: 400;
+        text-transform: uppercase;
+      }
 
-    #code h3 {
-      margin: 0;
-    }
+      #code h3 {
+        margin: 0;
+      }
 
-    #lhs section {
-      padding: 15px;
-      border-bottom: 1px solid #ccc;
-    }
+      #lhs section {
+        padding: 15px;
+        border-bottom: 1px solid #ccc;
+      }
 
-    .sectionLabel {
-      margin-top: 5px;
-    }
+      .sectionLabel {
+        margin-top: 5px;
+      }
 
-    .knobs {
-      display: grid;
-      grid-template-columns: 70px 1fr;
-      max-width: 400px;
-      row-gap: 15px;
-      column-gap: 10px;
-      align-items: center;
-    }
+      .knobs {
+        display: grid;
+        grid-template-columns: 70px 1fr;
+        max-width: 400px;
+        row-gap: 15px;
+        column-gap: 10px;
+        align-items: center;
+      }
 
-    input[type='range'] {
-      width: 100px;
-    }
+      input[type='range'] {
+        width: 120px;
+      }
 
-    .knobs label {
-      text-align: right;
-      cursor: pointer;
-    }
+      .knobs label {
+        text-align: right;
+        cursor: pointer;
+      }
 
-    #container {
-      flex: 1;
-    }
+      #container {
+        flex: 1;
+      }
 
-    .sliderAndValue {
-      display: flex;
-      align-items: center;
-    }
+      .sliderAndValue {
+        display: flex;
+        align-items: center;
+      }
 
-    .sliderValue {
-      margin-left: 5px;
-    }
-  `;
+      .sliderValue {
+        margin-left: 5px;
+      }
+    `,
+  ];
 
   private values = new KnobValues();
 
@@ -214,7 +218,7 @@ export class PlaygroundConfigurator extends LitElement {
           style="background-color:${this.values.getValue('pageBackground')}"
         >
           <playground-ide
-            .theme=${this.values.getValue('theme')}
+            class="playground-theme-${this.values.getValue('theme')}"
             .lineNumbers=${this.values.getValue('lineNumbers')}
             .resizable=${this.values.getValue('resizable')}
             project-src="./project/project.json"
@@ -258,10 +262,19 @@ export class PlaygroundConfigurator extends LitElement {
   }
 
   private get htmlText() {
-    return `
+    return `${this.themeImport}
 <playground-ide${this.htmlTextAttributes}>
 </playground-ide>
 `;
+  }
+
+  private get themeImport() {
+    const theme = this.values.getValue('theme');
+    if (theme === 'default') {
+      return '';
+    }
+    return `<import rel="stylesheet"
+        src="/node_modules/playground-elements/themes/${theme}.css">\n`;
   }
 
   private get htmlTextAttributes() {
@@ -285,6 +298,10 @@ export class PlaygroundConfigurator extends LitElement {
           attributes.push(` ${knob.htmlAttribute}="${value}"`);
           break;
       }
+    }
+    const theme = this.values.getValue('theme');
+    if (theme !== 'default') {
+      attributes.push(` class="playground-theme-${theme}"`);
     }
     return attributes.join('');
   }

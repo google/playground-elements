@@ -1,6 +1,5 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import litcss from 'rollup-plugin-lit-css';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
 
@@ -15,9 +14,6 @@ export function simpleReplace(replacements) {
     },
   };
 }
-
-// TODO(aomarks) Support more themes.
-const themeNames = ['monokai.css'];
 
 export default [
   {
@@ -68,26 +64,6 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       summary(),
     ],
   },
-  {
-    input: 'node_modules/codemirror/lib/codemirror.css',
-    output: {
-      file: '_codemirror/codemirror-styles.js',
-      format: 'esm',
-    },
-    external: ['lit-element'],
-    plugins: [litcss({uglify: true})],
-  },
-  ...themeNames.map((file) => {
-    return {
-      input: `node_modules/codemirror/theme/${file}`,
-      output: {
-        file: `_codemirror/themes/${file}.js`,
-        format: 'esm',
-      },
-      external: ['lit-element'],
-      plugins: [litcss({uglify: true})],
-    };
-  }),
   {
     input: 'service-worker/service-worker.js',
     output: {

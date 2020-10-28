@@ -18,4 +18,8 @@ typescript-worker.js
 /playground-*.d.ts.map
 /test/
 /_codemirror/
+/themes/
+/src/themes/
+/src/_codemirror/codemirror-styles.ts
+/src/configurator/themes.ts
 .tsbuildinfo

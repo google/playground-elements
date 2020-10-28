@@ -168,12 +168,6 @@ export class PlaygroundIde extends LitElement {
   @property({type: Boolean})
   resizable = false;
 
-  /**
-   * The CodeMirror theme to load.
-   */
-  @property()
-  theme = 'default';
-
   @query('#resizeBar')
   private _resizeBar!: HTMLDivElement;
 
@@ -194,7 +188,6 @@ export class PlaygroundIde extends LitElement {
       <playground-file-editor
         part="editor"
         exportparts="file-picker"
-        .theme=${this.theme}
         .lineNumbers=${this.lineNumbers}
         .project=${projectId}
         .enableAddFile=${this.enableAddFile}

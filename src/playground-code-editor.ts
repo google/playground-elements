@@ -20,12 +20,7 @@ import {LitElement, customElement, css, property} from 'lit-element';
 // https://github.com/lezer-parser/javascript/issues/3. This module sets a
 // `CodeMirror` global.
 import './_codemirror/codemirror-bundle.js';
-
-// TODO(aomarks) Provide an API for loading these themes dynamically. We can
-// include a bunch of standard themes, but we don't want them to all be included
-// here if they aren't being used.
 import codemirrorStyles from './_codemirror/codemirror-styles.js';
-import monokaiTheme from './_codemirror/themes/monokai.css.js';
 
 // TODO(aomarks) @types/codemirror exists, but installing it and referencing
 // global `CodeMirror` errors with:
@@ -53,7 +48,6 @@ interface CodeMirrorConfiguration {
   value?: string;
   mode?: string | null;
   lineNumbers?: boolean;
-  theme?: string;
   readOnly?: boolean | 'nocursor';
 }
 
@@ -83,17 +77,6 @@ export class PlaygroundCodeEditor extends LitElement {
         font-size: var(--playground-code-font-size, unset);
       }
 
-      :host(:not([probing-codemirror-theme])) {
-        background-color: var(
-          --playground-file-editor-background-color,
-          var(--playground-file-editor-theme-background-color)
-        );
-      }
-
-      :host(:not([probing-codemirror-theme])) .CodeMirror {
-        background-color: inherit !important;
-      }
-
       .CodeMirror {
         height: 100% !important;
         font-family: inherit !important;
@@ -105,7 +88,6 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     `,
     codemirrorStyles,
-    monokaiTheme,
   ];
 
   // Used by tests.
@@ -145,12 +127,6 @@ export class PlaygroundCodeEditor extends LitElement {
   @property({type: Boolean, reflect: true})
   readonly = false;
 
-  /**
-   * The CodeMirror theme to load.
-   */
-  @property()
-  theme = 'default';
-
   private _resizeObserver?: ResizeObserver;
   private _valueChangingFromOutside = false;
 
@@ -175,10 +151,6 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'type':
             cm.setOption('mode', this._getLanguageMode());
-            break;
-          case 'theme':
-            cm.setOption('theme', this.theme);
-            this._setBackgroundColor();
             break;
           case 'readonly':
             cm.setOption('readOnly', this.readonly);
@@ -220,7 +192,6 @@ export class PlaygroundCodeEditor extends LitElement {
         value: this.value ?? '',
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
-        theme: this.theme,
         readOnly: this.readonly,
       }
     );
@@ -233,35 +204,6 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
     this._codemirror = cm;
-    this._setBackgroundColor();
-  }
-
-  /**
-   * We want the CodeMirror theme's background color to win if
-   * "--playground-file-editor-background-color" is unset.
-   *
-   * However, there are no values we can use as the default for that property
-   * that allow for this. "revert" seems like it should work, but it doesn't.
-   * "initial" and "unset" also don't work.
-   *
-   * So we instead maintain a private CSS property called
-   * "--playground-file-editor-theme-background-color" that is always set to the
-   * theme's background-color, and we use that as the default. We detect this by
-   * momentarily disabling the rule that applies
-   * "--playground-file-editor-background-color" whenever the theme changes.
-   */
-  private _setBackgroundColor() {
-    this.setAttribute('probing-codemirror-theme', '');
-    const codeMirrorRootElement = this.shadowRoot!.querySelector(
-      '.CodeMirror'
-    )!;
-    const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
-      .backgroundColor;
-    this.style.setProperty(
-      '--playground-file-editor-theme-background-color',
-      themeBgColor
-    );
-    this.removeAttribute('probing-codemirror-theme');
   }
 
   private _getLanguageMode() {

@@ -17,6 +17,8 @@
   * should just use another library.
   */
 
+import {themeNames} from './themes.js';
+
 interface BaseKnob<Id extends string, T> {
   id: Id;
   label: string;
@@ -80,8 +82,7 @@ export const knobs = [
     id: 'theme',
     label: 'Theme',
     section: 'code editor',
-    htmlAttribute: 'theme',
-    options: ['default', 'monokai'],
+    options: ['default', ...themeNames],
     default: 'default',
   }),
   select({
@@ -119,7 +120,8 @@ export const knobs = [
     id: 'editorBackground',
     label: 'Background',
     section: 'code editor',
-    cssProperty: '--playground-file-editor-background-color',
+    cssProperty: '--playground-code-background',
+    formatCss: (val) => `${val} !important`,
     default: '',
     unsetLabel: 'From theme',
   }),
@@ -128,7 +130,7 @@ export const knobs = [
   color({
     id: 'filePickerBackground',
     label: 'Background',
-    cssProperty: '--playground-file-picker-background-color',
+    cssProperty: '--playground-file-picker-background',
     default: '#ffffff',
     section: 'file picker',
   }),
@@ -144,7 +146,7 @@ export const knobs = [
   color({
     id: 'previewToolbarBackground',
     label: 'Background',
-    cssProperty: '--playground-preview-toolbar-background-color',
+    cssProperty: '--playground-preview-toolbar-background',
     default: '#ffffff',
     section: 'preview toolbar',
   }),
