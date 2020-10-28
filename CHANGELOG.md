@@ -82,6 +82,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   }
   ```
 
+### Fixed
+
+- Fix inconsistent line-number guttter sizing.
+
 ## [0.1.1] - 2020-10-26
 
 ### Added
