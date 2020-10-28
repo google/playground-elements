@@ -59,7 +59,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <span class="cm-number"      from="color" to="--playground-code-number-color">     number</span>
       <span class="cm-operator"    from="color" to="--playground-code-operator-color">   operator</span>
       <span class="cm-positive"    from="color" to="--playground-code-positive-color">   positive</span>
-      <span class="cm-property"    from="color" to="--playground-code-property-color">   property</span>
       <span class="cm-qualifier"   from="color" to="--playground-code-qualifier-color">  qualifier</span>
       <span class="cm-quote"       from="color" to="--playground-code-quote-color">      quote</span>
       <span class="cm-string"      from="color" to="--playground-code-string-color">     string</span>
@@ -69,6 +68,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <span class="cm-variable"    from="color" to="--playground-code-variable-color">   variable</span>
       <span class="cm-variable-2"  from="color" to="--playground-code-variable-2-color"> variable-2</span>
       <span class="cm-variable-3"  from="color" to="--playground-code-variable-3-color"> variable-3</span>
+
+      <!-- Note "callee" and "property" must come last, because they are
+      typically paired with "variable" and "def", respectively, and we want
+      "callee" and "property" selectors to take precedence. (Also we assume we
+      that we emit rules in the same order as declared here.) -->
+      <span class="cm-callee"      from="color" to="--playground-code-callee-color">     callee</span>
+      <span class="cm-property"    from="color" to="--playground-code-property-color">   property</span>
     </span>
   </span>
 </div>
