@@ -36,6 +36,13 @@ import * as webDevServer from '@web/dev-server';
 import * as playwright from 'playwright';
 import CleanCSS from 'clean-css';
 
+// csso
+//import csso from 'csso';
+
+// cssnano
+//import postcss from 'postcss';
+//import cssnano from 'cssnano';
+
 const rootDir = pathlib.resolve(
   pathlib.dirname(url.fileURLToPath(import.meta.url)),
   '..'
@@ -60,17 +67,29 @@ const minifyCss = (cssText) => {
     throw new Error(`CleanCSS errors: ${result.errors.join(';')}`);
   }
   let minified = result.styles;
+  return minified;
+
+  // csso
+  //return csso.minify(cssText).css;
+
+  // cssnano
+  //const processor = postcss(cssnano({preset: 'advanced'}));
+  //const result = await processor.process(cssText, {from: undefined});
+  //return result.css;
+};
+
+const postMinifyCss = (css) => {
   // The string value of `window.getComputedStyle(...).background` includes all
   // values, but in practice only color and url are set, so we can strip off
   // most of it.
-  minified = minified.replace(
-    / (none )?repeat scroll 0% 0%\/auto padding-box border-box/g,
+  css = css.replace(
+    / none repeat scroll 0% 0%\s*\/\s*auto padding-box border-box/g,
     ''
   );
   // The computed value of a `border` property includes all values even when
   // width is 0. We can strip off the rest when width is 0.
-  minified = minified.replace(/0px none rgb.*;/g, '0px;');
-  return minified;
+  css = css.replace(/0px none rgb.*;/g, '0px;');
+  return css;
 };
 
 const fromMap = {
@@ -106,25 +125,32 @@ const makeDefaultCss = (results) => {
   const fakeValues = {};
   let i = 0;
   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  for (const {from, to, value, selector} of Object.values(results)) {
+  for (const {from, to, value, selector, extraSelectors} of Object.values(
+    results
+  )) {
     let fakeValue;
     do {
-      fakeValue = Array.from(
-        new Array(10),
-        () => alphabet[Math.floor(Math.random() * alphabet.length)]
-      ).join('');
+      fakeValue =
+        'fake' +
+        Array.from(
+          new Array(10),
+          () => alphabet[Math.floor(Math.random() * alphabet.length)]
+        ).join('');
     } while (fakeValue in fakeValues);
     fakeValues[fakeValue] = `var(${to}, ${value})`;
     const realFrom = fromMap[from];
     if (!realFrom) {
       throw new Error(`No mapping for ${from}`);
     }
-    css += `${selector} { ${realFrom}: ${fakeValue}; }\n`;
+    css += `${selector} ${
+      extraSelectors ? ',' + extraSelectors : ''
+    }{ ${realFrom}: ${fakeValue}; }\n`;
   }
   css = minifyCss(css);
   for (const [fake, real] of Object.entries(fakeValues)) {
-    css = css.replace(fake, real);
+    css = css.replace(new RegExp(fake, 'g'), real);
   }
+  css = postMinifyCss(css);
   return css;
 };
 
@@ -132,9 +158,11 @@ const makeThemeCss = (themeName, results, defaultResults) => {
   const excludeDefaults = Object.values(results).filter(
     (r) => defaultResults[r.to].value !== r.value
   );
-  return minifyCss(`.playground-theme-${themeName} {
+  return postMinifyCss(
+    minifyCss(`.playground-theme-${themeName} {
 ${excludeDefaults.map(({to, value}) => `  ${to}: ${value};`).join('\n')}
-}`);
+}`)
+  );
 };
 
 const makeCssModule = (css) => {

@@ -27,9 +27,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <div class="CodeMirror-cursor" from="borderLeftColor" to="--playground-code-cursor-color">cursor</div>
 
   <!-- selections -->
-  <div class="CodeMirror-selected"                    from="background" to="--playground-code-selected-background">        selected</div>
-  <div class="CodeMirror-focused CodeMirror-selected" from="background" to="--playground-code-focused-selected-background">focused-selected</div>
-  <span class="CodeMirror-line" psuedo="::selection"  from="background" to="--playground-code-selection-background">       ::selection</span>
+  <div class="CodeMirror-selected"
+       extra-selectors=".CodeMirror-focused .CodeMirror-selected,
+                        .CodeMirror-line::selection,
+                        .CodeMirror-line > span > span::selection,
+                        .CodeMirror-line > span::selection,
+                        .CodeMirror-line::selection"
+       from="background" to="--playground-code-selection-background">selection</div>
 
   <!-- gutters -->
   <div class="CodeMirror-gutters"       from="background"   to="--playground-code-gutter-background">       gutter-background</div>
@@ -101,9 +105,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       const from = probe.getAttribute('from');
       const to = probe.getAttribute('to');
       const pseudo = probe.getAttribute('psuedo');
+      const extraSelectors = probe.getAttribute('extra-selectors');
       const style = window.getComputedStyle(probe, pseudo || null);
       const selector = [...probe.classList].map((c) => `.${c}`).join(' ') + (pseudo || '');
-      results[to] = {from, to, value: style[from], selector};
+      results[to] = {from, to, value: style[from], selector, extraSelectors};
     }
 
     if (styleHref) {
