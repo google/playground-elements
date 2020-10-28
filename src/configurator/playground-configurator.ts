@@ -79,8 +79,8 @@ export class PlaygroundConfigurator extends LitElement {
       padding: 10px;
       --playground-code-font-family: 'Roboto Mono', monospace;
       --playground-code-font-size: 12px;
-      --playground-file-editor-background-color: #f7f7f7;
-      background-color: #f7f7f7;
+      --playground-file-editor-background: #f7f7f7;
+      background: #f7f7f7;
     }
 
     h3 {
@@ -211,7 +211,7 @@ export class PlaygroundConfigurator extends LitElement {
       <div id="rhs">
         <div
           id="container"
-          style="background-color:${this.values.getValue('pageBackground')}"
+          style="background:${this.values.getValue('pageBackground')}"
         >
           <playground-ide
             .theme=${this.values.getValue('theme')}

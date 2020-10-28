@@ -84,14 +84,14 @@ export class PlaygroundCodeEditor extends LitElement {
       }
 
       :host(:not([probing-codemirror-theme])) {
-        background-color: var(
-          --playground-file-editor-background-color,
-          var(--playground-file-editor-theme-background-color)
+        background: var(
+          --playground-file-editor-background,
+          var(--playground-file-editor-theme-background)
         );
       }
 
       :host(:not([probing-codemirror-theme])) .CodeMirror {
-        background-color: inherit !important;
+        background: inherit !important;
       }
 
       .CodeMirror {
@@ -238,17 +238,17 @@ export class PlaygroundCodeEditor extends LitElement {
 
   /**
    * We want the CodeMirror theme's background color to win if
-   * "--playground-file-editor-background-color" is unset.
+   * "--playground-file-editor-background" is unset.
    *
    * However, there are no values we can use as the default for that property
    * that allow for this. "revert" seems like it should work, but it doesn't.
    * "initial" and "unset" also don't work.
    *
    * So we instead maintain a private CSS property called
-   * "--playground-file-editor-theme-background-color" that is always set to the
-   * theme's background-color, and we use that as the default. We detect this by
+   * "--playground-file-editor-theme-background" that is always set to the
+   * theme's background, and we use that as the default. We detect this by
    * momentarily disabling the rule that applies
-   * "--playground-file-editor-background-color" whenever the theme changes.
+   * "--playground-file-editor-background" whenever the theme changes.
    */
   private _setBackgroundColor() {
     this.setAttribute('probing-codemirror-theme', '');
@@ -258,7 +258,7 @@ export class PlaygroundCodeEditor extends LitElement {
     const themeBgColor = window.getComputedStyle(codeMirrorRootElement)
       .backgroundColor;
     this.style.setProperty(
-      '--playground-file-editor-theme-background-color',
+      '--playground-file-editor-theme-background',
       themeBgColor
     );
     this.removeAttribute('probing-codemirror-theme');

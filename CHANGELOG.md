@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] Renamed `*-background-color` CSS custom properties to
+  `*-background` and apply to `background` instead of `background-color` (to
+  support background images):
+  - `playground-file-editor-background-color` -> `playground-file-editor-background`
+  - `playground-file-picker-background-color` -> `playground-file-picker-background`
+  - `playground-preview-toolbar-background-color` -> `playground-preview-toolbar-background`
+
 ## [0.1.1] - 2020-10-26
 
 ### Added
