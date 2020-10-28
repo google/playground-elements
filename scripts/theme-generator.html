@@ -1,0 +1,119 @@
+<!doctype html>
+
+<!--
+Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css">
+
+<style>
+  span {
+    /* better for debugging */
+    display: block;
+  }
+</style>
+
+<div id="container" class="CodeMirror">
+  <!-- base background/foreground -->
+  <span class="CodeMirror" from="background" to="--playground-code-background" style="background:inherit">background</span>
+  <span class="CodeMirror" from="color"      to="--playground-code-color"      style="color:inherit">     color</span>
+
+  <!-- caret -->
+  <div class="CodeMirror-cursor" from="borderLeftColor" to="--playground-code-cursor-color">cursor</div>
+
+  <!-- selections -->
+  <div class="CodeMirror-selected"                    from="background" to="--playground-code-selected-background">        selected</div>
+  <div class="CodeMirror-focused CodeMirror-selected" from="background" to="--playground-code-focused-selected-background">focused-selected</div>
+  <div class="CodeMirror-activeline-background"       from="background" to="--playground-code-activeline-background">      activeline</div>
+  <span class="CodeMirror-line" psuedo="::selection"  from="background" to="--playground-code-selection-background">       ::selection</span>
+
+  <!-- gutters -->
+  <div class="CodeMirror-gutters"       from="background"   to="--playground-code-gutter-background">       gutter-background</div>
+  <div class="CodeMirror-gutter-filler" from="background"   to="--playground-code-gutter-filler-background">gutter-filler-background</div>
+  <div class="CodeMirror-gutters"       from="borderRight"  to="--playground-code-gutter-border-right">     gutter-border</div>
+  <div class="CodeMirror-gutters"       from="boxShadow"    to="--playground-code-gutter-box-shadow">       gutter-box-shadow</div>
+  <div class="CodeMirror-linenumber"    from="color"        to="--playground-code-linenumber-color">        linenumber</div>
+
+  <!-- tokens -->
+  <span class="CodeMirror-line">
+    <span class="presentation">
+      <span class="cm-atom"        from="color" to="--playground-code-atom-color">       atom</span>
+      <span class="cm-attribute"   from="color" to="--playground-code-attribute-color">  attribute</span>
+      <span class="cm-bracket"     from="color" to="--playground-code-bracket-color">    bracket</span>
+      <span class="cm-builtin"     from="color" to="--playground-code-builtin-color">    builtin</span>
+      <span class="cm-comment"     from="color" to="--playground-code-comment-color">    comment</span>
+      <span class="cm-def"         from="color" to="--playground-code-def-color">        def</span>
+      <span class="cm-error"       from="color" to="--playground-code-error-color">      error</span>
+      <span class="cm-header"      from="color" to="--playground-code-header-color">     header</span>
+      <span class="cm-header"      from="color" to="--playground-code-header-color">     header</span>
+      <span class="cm-hr"          from="color" to="--playground-code-hr-color">         hr</span>
+      <span class="cm-invalidchar" from="color" to="--playground-code-invalidchar-color">invalidchar</span>
+      <span class="cm-keyword"     from="color" to="--playground-code-keyword-color">    keyword</span>
+      <span class="cm-link"        from="color" to="--playground-code-link-color">       link</span>
+      <span class="cm-meta"        from="color" to="--playground-code-meta-color">       meta</span>
+      <span class="cm-number"      from="color" to="--playground-code-number-color">     number</span>
+      <span class="cm-operator"    from="color" to="--playground-code-operator-color">   operator</span>
+      <span class="cm-positive"    from="color" to="--playground-code-positive-color">   positive</span>
+      <span class="cm-property"    from="color" to="--playground-code-property-color">   property</span>
+      <span class="cm-qualifier"   from="color" to="--playground-code-qualifier-color">  qualifier</span>
+      <span class="cm-quote"       from="color" to="--playground-code-quote-color">      quote</span>
+      <span class="cm-string"      from="color" to="--playground-code-string-color">     string</span>
+      <span class="cm-string-2"    from="color" to="--playground-code-string-2-color">   string-2</span>
+      <span class="cm-tag"         from="color" to="--playground-code-tag-color">        tag</span>
+      <span class="cm-type"        from="color" to="--playground-code-type-color">       type</span>
+      <span class="cm-variable"    from="color" to="--playground-code-variable-color">   variable</span>
+      <span class="cm-variable-2"  from="color" to="--playground-code-variable-2-color"> variable-2</span>
+      <span class="cm-variable-3"  from="color" to="--playground-code-variable-3-color"> variable-3</span>
+    </span>
+  </span>
+</div>
+
+<script type="module">
+  const container = document.getElementById('container');
+  let pending = false;
+
+  window.probe = async (themeName, styleHref) => {
+    if (pending) {
+      throw new Error('One at a time!');
+    }
+    pending = true;
+
+    let styleLink;
+    if (styleHref) {
+      styleLink = document.createElement('link');
+      styleLink.rel = 'stylesheet';
+      styleLink.href = styleHref;
+      await new Promise((resolve) => {
+        const onLoad = () => {
+          styleLink.removeEventListener('load', onLoad);
+          resolve();
+        };
+        styleLink.addEventListener('load', onLoad);
+        document.head.appendChild(styleLink);
+      });
+    }
+
+    container.className = `CodeMirror cm-s-${themeName}`;
+    const results = {};
+    const probes = container.querySelectorAll('[from][to]');
+    for (const probe of probes) {
+      const from = probe.getAttribute('from');
+      const to = probe.getAttribute('to');
+      const pseudo = probe.getAttribute('psuedo');
+      const style = window.getComputedStyle(probe, pseudo || null);
+      const selector = [...probe.classList].map((c) => `.${c}`).join(' ') + (pseudo || '');
+      results[to] = {from, to, value: style[from], selector};
+    }
+
+    if (styleHref) {
+      styleLink.remove();
+    }
+    pending = false;
+    return results;
+  }
+</script>

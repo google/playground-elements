@@ -5,6 +5,7 @@
 /src/test/
 /src/configurator/
 /configurator/
+/scripts/
 *.tsbuildinfo
 .prettierrc.json
 .prettierignore

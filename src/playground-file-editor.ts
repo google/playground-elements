@@ -106,7 +106,7 @@ export class PlaygroundFileEditor extends LitElement {
     }
 
     slot {
-      background: var(--playground-file-editor-background, unset);
+      background: var(--playground-code-background, unset);
     }
 
     :host([no-file-picker]) playground-code-editor,
@@ -130,12 +130,6 @@ export class PlaygroundFileEditor extends LitElement {
 
   @property({attribute: false})
   files?: SampleFile[];
-
-  /**
-   * The CodeMirror theme to load.
-   */
-  @property()
-  theme = 'default';
 
   /**
    * The name of the project file that is currently being displayed. Set when
@@ -231,7 +225,6 @@ export class PlaygroundFileEditor extends LitElement {
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
               .lineNumbers=${this.lineNumbers}
-              .theme=${this.theme}
               @change=${this._onEdit}
             >
             </playground-code-editor>
