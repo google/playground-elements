@@ -8,6 +8,7 @@
   "module": "playground-ide.js",
   "main": "playground-ide.js",
   "scripts": {
+    "postinstall": "cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js",
     "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
     "nuke": "rm -rf node_modules package-lock.json && npm install",
     "build": "npm run clean && npm run build:themes && npm run build:lib && npm run bundle && npm run build:configurator",
@@ -32,6 +33,7 @@
     "@web/dev-server": "0.0.15",
     "@web/test-runner": "^0.9.4",
     "@web/test-runner-playwright": "^0.6.0",
+    "@web/test-runner-puppeteer": "^0.7.2",
     "clean-css": "^4.2.3",
     "codemirror": "^5.58.1",
     "codemirror-grammar-mode": "^0.1.10",
