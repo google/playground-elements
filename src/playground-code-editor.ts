@@ -82,10 +82,6 @@ export class PlaygroundCodeEditor extends LitElement {
         font-family: inherit !important;
         border-radius: inherit;
       }
-
-      .CodeMirror-scroll {
-        padding-left: 5px;
-      }
     `,
     codemirrorStyles,
   ];
