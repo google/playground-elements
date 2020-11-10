@@ -23,3 +23,4 @@ typescript-worker.js
 /src/_codemirror/codemirror-styles.ts
 /src/configurator/themes.ts
 .tsbuildinfo
+playground-service-worker-proxy.*

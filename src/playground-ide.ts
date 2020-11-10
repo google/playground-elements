@@ -141,11 +141,31 @@ export class PlaygroundIde extends LitElement {
   projectSrc?: string;
 
   /**
+   * Base URL for script execution sandbox.
+   *
+   * It is highly advised to change this property to a URL on a separate origin
+   * which has no privileges to perform sensitive actions or access sensitive
+   * data. This is because this element will execute arbitrary JavaScript, and
+   * does not have the ability to sanitize or sandbox it.
+   *
+   * This URL must host the following files from the playground-elements
+   * package:
+   *   1. playground-service-worker-proxy.html
+   *   2. service-worker.js
+   *
+   * Defaults to the directory containing the script that defines this element
+   * on the same origin (typically something like
+   * "/node_modules/playground-elements/").
+   */
+  @property({attribute: 'sandbox-base-url'})
+  sandboxBaseUrl = new URL('..', import.meta.url).href;
+
+  /**
    * The service worker scope to register on
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'playground-projects';
+  sandboxScope = 'playground-projects/';
 
   /**
    * Whether to show the "Add File" button on the UI that allows
@@ -180,6 +200,7 @@ export class PlaygroundIde extends LitElement {
       <playground-project
         id=${projectId}
         .projectSrc=${this.projectSrc}
+        .sandboxBaseUrl=${this.sandboxBaseUrl}
         .sandboxScope=${this.sandboxScope}
       >
         <slot></slot>

@@ -208,7 +208,10 @@ export class PlaygroundPreview extends LitElement {
   }
 
   reload() {
-    this._iframe.contentWindow?.location.reload();
+    // Note we can't use contentWindow.location.reload() here, because the
+    // IFrame might be on a different origin.
+    this._iframe.src = '';
+    this._iframe.src = this.src!;
     this._loading = true;
     this._startLoadingBar();
   }

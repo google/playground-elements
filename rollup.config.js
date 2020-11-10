@@ -2,8 +2,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
+import * as fs from 'fs';
 
-export function simpleReplace(replacements) {
+function simpleReplace(replacements) {
   return {
     name: 'simple-replace',
     renderChunk(code) {
@@ -15,7 +16,54 @@ export function simpleReplace(replacements) {
   };
 }
 
+function inlineHtml(htmlOutPath) {
+  return {
+    name: 'inline-html',
+    generateBundle: async (_outputOptions, bundles, isWrite) => {
+      if (!isWrite) {
+        return;
+      }
+      const scripts = [];
+      for (const [name, bundle] of Object.entries(bundles)) {
+        scripts.push(`<script type="module">${bundle.code.trim()}</script>`);
+        // Don't emit the input bundle as its own file.
+        delete bundles[name];
+      }
+      const html = `<!doctype html>${scripts.join('')}`;
+      await fs.promises.writeFile(htmlOutPath, html, 'utf8');
+    },
+  };
+}
+
+const terserOptions = {
+  warnings: true,
+  ecma: 2017,
+  compress: {
+    unsafe: true,
+    passes: 2,
+  },
+  output: {
+    // "some" preserves @license and @preserve comments
+    comments: 'some',
+    inline_script: false,
+  },
+  mangle: {
+    properties: false,
+  },
+};
+
 export default [
+  {
+    input: 'playground-service-worker-proxy.js',
+    output: {
+      file: 'playground-service-worker-proxy-temp-bundle.js',
+      format: 'esm',
+    },
+    plugins: [
+      terser(terserOptions),
+      inlineHtml('playground-service-worker-proxy.html'),
+    ],
+  },
   {
     input: 'src/_codemirror/codemirror-bundle.js',
     output: {
@@ -45,22 +93,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
         [/typeof exports ?===? ?['"`]object['"`]/g, 'false'],
         [/typeof define ?===? ?['"`]function['"`]/g, 'false'],
       ]),
-      terser({
-        warnings: true,
-        ecma: 2017,
-        compress: {
-          unsafe: true,
-          passes: 2,
-        },
-        output: {
-          // "some" preserves @license and @preserve comments
-          comments: 'some',
-          inline_script: false,
-        },
-        mangle: {
-          properties: false,
-        },
-      }),
+      terser(terserOptions),
       summary(),
     ],
   },
