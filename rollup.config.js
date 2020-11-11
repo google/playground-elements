@@ -16,6 +16,10 @@ function simpleReplace(replacements) {
   };
 }
 
+/**
+ * Rollup plugin which generates an HTML file with all input JavaScript
+ * bundles inlined into script tags.
+ */
 function inlineHtml(htmlOutPath) {
   return {
     name: 'inline-html',
@@ -53,6 +57,9 @@ const terserOptions = {
 };
 
 export default [
+  // Generate playground-service-worker-proxy.html, the HTML file + inline
+  // script that proxies between a project and a service worker on a possibly
+  // different origin.
   {
     input: 'playground-service-worker-proxy.js',
     output: {

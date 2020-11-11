@@ -269,10 +269,15 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _onServiceWorkerProxyIframeLoad() {
+    // This iframe exists to proxy messages between this project and the service
+    // worker, because the service worker may be running on a different origin
+    // for security.
     const window = this._iframe.contentWindow;
     if (!window) {
-      console.error('IFrame did not have window');
-      return;
+      throw new Error(
+        'Unexpected internal error: ' +
+          '<playground-project> service worker proxy iframe had no contentWindow'
+      );
     }
     // This channel is persistent, and is only used to receieve new service
     // worker channel ports from the proxy iframe. Note we can get new service
@@ -287,6 +292,11 @@ export class PlaygroundProject extends LitElement {
       url: 'playground-service-worker.js',
       scope: this.sandboxScope,
     };
+    console.log(this._iframe.src, this._normalizedSandboxBaseUrl.origin);
+    // We could constrain targetOrigin to
+    // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
+    // security benefit, and would add the limitation that the sandboxBaseUrl
+    // can't redirect to another origin.
     window.postMessage(initMessage, '*', [initMessage.port]);
   }
 
