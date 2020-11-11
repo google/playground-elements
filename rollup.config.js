@@ -104,7 +104,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       format: 'iife',
       exports: 'none',
     },
-    plugins: [resolve()],
+    plugins: [resolve(), terser(terserOptions)],
   },
   {
     input: 'typescript-worker/playground-typescript-worker.js',
@@ -118,6 +118,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
         ignore: (id) => true,
       }),
       resolve(),
+      terser(terserOptions),
     ],
   },
 ];
