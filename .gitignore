@@ -8,7 +8,6 @@
 /configurator/*.d.ts.map
 /configurator/deploy/
 /typescript-worker/
-service-worker.js
 typescript-worker.js
 /index.js
 /index.d.ts
@@ -23,4 +22,5 @@ typescript-worker.js
 /src/_codemirror/codemirror-styles.ts
 /src/configurator/themes.ts
 .tsbuildinfo
-playground-service-worker-proxy.*
+/playground-service-worker.*
+/playground-service-worker-proxy.*

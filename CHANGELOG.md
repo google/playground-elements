@@ -21,9 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- [**BREAKING**] The `playground-service-worker-proxy.html` file is now required
-  to exist in the same directory as `service-worker.js` (may break bundling
-  configurations).
+- [**BREAKING**] `service-worker.js` has been renamed to
+  `playground-service-worker.js`, and an additional file called
+  `playground-service-worker-proxy.html` is now also required. This change may
+  affect bundling configurations
 
 ### Added
 

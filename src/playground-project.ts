@@ -82,8 +82,8 @@ export class PlaygroundProject extends LitElement {
    *
    * This URL must host the following files from the playground-elements
    * package:
-   *   1. playground-service-worker-proxy.html
-   *   2. service-worker.js
+   *   1. playground-service-worker.js
+   *   2. playground-service-worker-proxy.html
    *
    * Defaults to the directory containing the script that defines this element
    * on the same origin (typically something like
@@ -284,7 +284,7 @@ export class PlaygroundProject extends LitElement {
     port1.start();
     const initMessage: ProxyInitMessage = {
       port: port2,
-      url: 'service-worker.js',
+      url: 'playground-service-worker.js',
       scope: this.sandboxScope,
     };
     window.postMessage(initMessage, '*', [initMessage.port]);

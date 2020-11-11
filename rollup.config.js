@@ -98,9 +98,9 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
     ],
   },
   {
-    input: 'service-worker/service-worker.js',
+    input: 'service-worker/playground-service-worker.js',
     output: {
-      file: 'service-worker.js',
+      file: 'playground-service-worker.js',
       format: 'iife',
       exports: 'none',
     },

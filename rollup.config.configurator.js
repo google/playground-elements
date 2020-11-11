@@ -40,7 +40,11 @@ export default [
             dest: 'configurator/deploy/',
           },
           {
-            src: 'service-worker.js',
+            src: 'playground-service-worker.js',
+            dest: 'configurator/deploy/',
+          },
+          {
+            src: 'playground-service-worker-proxy.html',
             dest: 'configurator/deploy/',
           },
         ],
