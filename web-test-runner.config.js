@@ -23,7 +23,7 @@ export default {
   nodeResolve: true,
   browsers: [
     playwrightLauncher({product: 'chromium'}),
-    //playwrightLauncher({product: 'webkit'}),
+    playwrightLauncher({product: 'webkit'}),
     // Playwright Firefox does not seem to work at all with Service Workers. The
     // issue can be reproduced by launching Firefox with flag "-juggler 0". So
     // for now we'll use Puppeteer for Firefox.
