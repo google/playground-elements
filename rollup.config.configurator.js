@@ -36,7 +36,7 @@ export default [
             dest: 'configurator/deploy/',
           },
           {
-            src: 'typescript-worker.js',
+            src: 'playground-typescript-worker.js',
             dest: 'configurator/deploy/',
           },
           {

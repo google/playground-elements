@@ -22,9 +22,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - [**BREAKING**] `service-worker.js` has been renamed to
-  `playground-service-worker.js`, and an additional file called
+  `playground-service-worker.js`, `typescript-worker.js` has been renamed to
+  `playground-typescript-worker.js`, and an additional file called
   `playground-service-worker-proxy.html` is now also required. This change may
-  affect bundling configurations
+  affect bundling configurations.
 
 ### Added
 

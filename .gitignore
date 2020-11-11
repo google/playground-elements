@@ -8,7 +8,7 @@
 /configurator/*.d.ts.map
 /configurator/deploy/
 /typescript-worker/
-typescript-worker.js
+/playground-typescript-worker.js
 /index.js
 /index.d.ts
 /index.d.ts.map

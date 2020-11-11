@@ -57,7 +57,7 @@ const generateUniqueSessionId = (): string => {
 };
 
 const typescriptWorkerScriptUrl = new URL(
-  './typescript-worker.js',
+  './playground-typescript-worker.js',
   import.meta.url
 );
 

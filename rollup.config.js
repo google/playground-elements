@@ -107,9 +107,9 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
     plugins: [resolve()],
   },
   {
-    input: 'typescript-worker/typescript-worker.js',
+    input: 'typescript-worker/playground-typescript-worker.js',
     output: {
-      file: 'typescript-worker.js',
+      file: 'playground-typescript-worker.js',
       format: 'iife',
       exports: 'none',
     },
