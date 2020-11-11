@@ -13,6 +13,7 @@
  */
 
 import {playwrightLauncher} from '@web/test-runner-playwright';
+import {puppeteerLauncher} from '@web/test-runner-puppeteer';
 
 // https://modern-web.dev/docs/test-runner/cli-and-configuration/
 export default {
@@ -22,11 +23,19 @@ export default {
   nodeResolve: true,
   browsers: [
     playwrightLauncher({product: 'chromium'}),
-    // TODO(aomarks) Firefix is flaky, with service worker 404s. Probably needs
-    // to be addressed as part of
-    // https://github.com/PolymerLabs/playground-elements/issues/39
-    // playwrightLauncher({product: 'firefox'}),
     playwrightLauncher({product: 'webkit'}),
+    // Playwright Firefox does not seem to work at all with Service Workers. The
+    // issue can be reproduced by launching Firefox with flag "-juggler 0". So
+    // for now we'll use Puppeteer for Firefox.
+    //
+    // Also note we can't use Puppeteer for both Chromium and Firefox, because
+    // only one or the other can be installed at once (see our "postinstall" NPM
+    // script). See
+    // https://modern-web.dev/docs/test-runner/browser-launchers/puppeteer/.
+    //
+    // TODO(aomarks) Look into this a little more and file an issue on
+    // Playwright (or Firefox).
+    puppeteerLauncher({launchOptions: {product: 'firefox'}}),
   ],
   browserStartTimeout: 30000, // default 30000
   testsStartTimeout: 20000, // default 10000
