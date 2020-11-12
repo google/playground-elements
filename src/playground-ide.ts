@@ -158,7 +158,7 @@ export class PlaygroundIde extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = new URL('..', import.meta.url).href;
+  sandboxBaseUrl = new URL('.', import.meta.url).href;
 
   /**
    * The service worker scope to register on
