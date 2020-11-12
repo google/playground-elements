@@ -17,6 +17,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] `service-worker.js` has been renamed to
+  `playground-service-worker.js`, `typescript-worker.js` has been renamed to
+  `playground-typescript-worker.js`, and an additional file called
+  `playground-service-worker-proxy.html` is now also required. This change may
+  affect bundling configurations.
+
+### Added
+
+- Service Workers and scripts are now able and advised to run on a second
+  origin, in order to isolate arbitrary script execution from sensitive actions
+  or data on the host origin.
+
+  The `sandboxBaseUrl` property (or `sandbox-base-url` attribute) has been added
+  `<playground-ide>` and `<playground-project>` to control this origin.
+
+  If the default same origin is used, a warning will be logged to the console.
+
 ## [0.2.0] - 2020-10-28
 
 ### Changed

@@ -2,8 +2,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
+import * as fs from 'fs';
 
-export function simpleReplace(replacements) {
+function simpleReplace(replacements) {
   return {
     name: 'simple-replace',
     renderChunk(code) {
@@ -15,7 +16,61 @@ export function simpleReplace(replacements) {
   };
 }
 
+/**
+ * Rollup plugin which generates an HTML file with all input JavaScript
+ * bundles inlined into script tags.
+ */
+function inlineHtml(htmlOutPath) {
+  return {
+    name: 'inline-html',
+    generateBundle: async (_outputOptions, bundles, isWrite) => {
+      if (!isWrite) {
+        return;
+      }
+      const scripts = [];
+      for (const [name, bundle] of Object.entries(bundles)) {
+        scripts.push(`<script type="module">${bundle.code.trim()}</script>`);
+        // Don't emit the input bundle as its own file.
+        delete bundles[name];
+      }
+      const html = `<!doctype html>${scripts.join('')}`;
+      await fs.promises.writeFile(htmlOutPath, html, 'utf8');
+    },
+  };
+}
+
+const terserOptions = {
+  warnings: true,
+  ecma: 2017,
+  compress: {
+    unsafe: true,
+    passes: 2,
+  },
+  output: {
+    // "some" preserves @license and @preserve comments
+    comments: 'some',
+    inline_script: false,
+  },
+  mangle: {
+    properties: false,
+  },
+};
+
 export default [
+  // Generate playground-service-worker-proxy.html, the HTML file + inline
+  // script that proxies between a project and a service worker on a possibly
+  // different origin.
+  {
+    input: 'playground-service-worker-proxy.js',
+    output: {
+      file: 'playground-service-worker-proxy-temp-bundle.js',
+      format: 'esm',
+    },
+    plugins: [
+      terser(terserOptions),
+      inlineHtml('playground-service-worker-proxy.html'),
+    ],
+  },
   {
     input: 'src/_codemirror/codemirror-bundle.js',
     output: {
@@ -45,38 +100,23 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
         [/typeof exports ?===? ?['"`]object['"`]/g, 'false'],
         [/typeof define ?===? ?['"`]function['"`]/g, 'false'],
       ]),
-      terser({
-        warnings: true,
-        ecma: 2017,
-        compress: {
-          unsafe: true,
-          passes: 2,
-        },
-        output: {
-          // "some" preserves @license and @preserve comments
-          comments: 'some',
-          inline_script: false,
-        },
-        mangle: {
-          properties: false,
-        },
-      }),
+      terser(terserOptions),
       summary(),
     ],
   },
   {
-    input: 'service-worker/service-worker.js',
+    input: 'service-worker/playground-service-worker.js',
     output: {
-      file: 'service-worker.js',
+      file: 'playground-service-worker.js',
       format: 'iife',
       exports: 'none',
     },
-    plugins: [resolve()],
+    plugins: [resolve(), terser(terserOptions)],
   },
   {
-    input: 'typescript-worker/typescript-worker.js',
+    input: 'typescript-worker/playground-typescript-worker.js',
     output: {
-      file: 'typescript-worker.js',
+      file: 'playground-typescript-worker.js',
       format: 'iife',
       exports: 'none',
     },
@@ -85,6 +125,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
         ignore: (id) => true,
       }),
       resolve(),
+      terser(terserOptions),
     ],
   },
 ];

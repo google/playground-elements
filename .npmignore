@@ -12,3 +12,5 @@
 rollup.config.js
 tsconfig.json
 web-test-runner.config.js
+playground-service-worker-proxy.*
+!playground-service-worker-proxy.html

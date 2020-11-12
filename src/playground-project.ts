@@ -15,6 +15,7 @@
 import {
   LitElement,
   html,
+  css,
   customElement,
   property,
   query,
@@ -27,7 +28,6 @@ import {
   SampleFile,
   ServiceWorkerAPI,
   ProjectManifest,
-  ESTABLISH_HANDSHAKE,
   HANDSHAKE_RECEIVED,
   TypeScriptWorkerAPI,
 } from './shared/worker-api.js';
@@ -36,6 +36,7 @@ import {PlaygroundPreview} from './playground-preview.js';
 import './playground-file-editor.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';
 import './playground-preview.js';
+import {ProxyInitMessage} from './playground-service-worker-proxy.js';
 
 declare global {
   interface ImportMeta {
@@ -55,9 +56,8 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
-const serviceWorkerScriptUrl = new URL('./service-worker.js', import.meta.url);
 const typescriptWorkerScriptUrl = new URL(
-  './typescript-worker.js',
+  './playground-typescript-worker.js',
   import.meta.url
 );
 
@@ -73,14 +73,31 @@ export class PlaygroundProject extends LitElement {
   projectSrc?: string;
 
   /**
+   * Base URL for script execution sandbox.
+   *
+   * It is highly advised to change this property to a URL on a separate origin
+   * which has no privileges to perform sensitive actions or access sensitive
+   * data. This is because this element will execute arbitrary JavaScript, and
+   * does not have the ability to sanitize or sandbox it.
+   *
+   * This URL must host the following files from the playground-elements
+   * package:
+   *   1. playground-service-worker.js
+   *   2. playground-service-worker-proxy.html
+   *
+   * Defaults to the directory containing the script that defines this element
+   * on the same origin (typically something like
+   * "/node_modules/playground-elements/").
+   */
+  @property({attribute: 'sandbox-base-url'})
+  sandboxBaseUrl = new URL('..', import.meta.url).href;
+
+  /**
    * The service worker scope to register on
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'playground-projects';
-
-  // computed from this.sandboxScope
-  _scopeUrl!: string;
+  sandboxScope = 'playground-projects/';
 
   /**
    * A unique identifier for this instance so the service worker can keep an
@@ -102,11 +119,20 @@ export class PlaygroundProject extends LitElement {
   @query('slot')
   private _slot!: HTMLSlotElement;
 
+  @query('iframe')
+  private _iframe!: HTMLIFrameElement;
+
   /** The editors that have registered themselves with this project. */
   private _editors = new Set<PlaygroundFileEditor>();
 
   /** The previews that have registered themselves with this project. */
   private _previews = new Set<PlaygroundPreview>();
+
+  private get _normalizedSandboxBaseUrl() {
+    const url = new URL(this.sandboxBaseUrl, document.location.href);
+    url.pathname = endWithSlash(url.pathname);
+    return url;
+  }
 
   private get _previewSrc() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -116,19 +142,27 @@ export class PlaygroundProject extends LitElement {
       return undefined;
     }
     // TODO (justinfagnani): lookup URL to show from project config
-    const indexUrl = new URL(`./${this._sessionId}/index.html`, this._scopeUrl);
+    const indexUrl = new URL(
+      `${endWithSlash(this.sandboxScope)}${this._sessionId}/index.html`,
+      this._normalizedSandboxBaseUrl
+    );
     return indexUrl.href;
   }
 
-  update(changedProperties: PropertyValues) {
-    if (changedProperties.has('sandboxScope')) {
-      // Ensure scope is relative to this module and always ends in a slash
-      this._scopeUrl = new URL(
-        './' + endWithSlash(this.sandboxScope),
-        import.meta.url
-      ).href;
-      this._startWorkers();
+  private get _serviceWorkerProxyIframeUrl() {
+    return new URL(
+      'playground-service-worker-proxy.html',
+      this._normalizedSandboxBaseUrl
+    ).href;
+  }
+
+  static styles = css`
+    iframe {
+      display: none;
     }
+  `;
+
+  update(changedProperties: PropertyValues) {
     if (changedProperties.has('projectSrc')) {
       this._fetchProject();
     }
@@ -147,7 +181,13 @@ export class PlaygroundProject extends LitElement {
   }
 
   render() {
-    return html`<slot @slotchange=${this._slotChange}></slot>`;
+    return html`
+      <slot @slotchange=${this._slotChange}></slot>
+      <iframe
+        src=${this._serviceWorkerProxyIframeUrl}
+        @load=${this._onServiceWorkerProxyIframeLoad}
+      ></iframe>
+    `;
   }
 
   private _slotChange(_e: Event) {
@@ -223,79 +263,58 @@ export class PlaygroundProject extends LitElement {
     this._compileProject();
   }
 
-  private async _startWorkers() {
-    await Promise.all([
-      this._startTypeScriptWorker(),
-      this._installServiceWorker(),
-    ]);
+  firstUpdated() {
+    const worker = new Worker(typescriptWorkerScriptUrl);
+    this._typescriptWorkerAPI = wrap<TypeScriptWorkerAPI>(worker);
   }
 
-  private async _startTypeScriptWorker() {
-    if (this._typescriptWorkerAPI === undefined) {
-      const worker = new Worker(typescriptWorkerScriptUrl);
-      this._typescriptWorkerAPI = wrap<TypeScriptWorkerAPI>(worker);
-    } else {
-      console.debug('typescript-worker already started');
-    }
-  }
-
-  private async _installServiceWorker() {
-    if (!('serviceWorker' in navigator)) {
-      // TODO: show this in the UI
-      console.warn('ServiceWorker support required for <playground-project>');
-      return;
-    }
-
-    const registration = await navigator.serviceWorker.register(
-      serviceWorkerScriptUrl.href,
-      {scope: this._scopeUrl}
-    );
-
-    registration.addEventListener('updatefound', () => {
-      // We can get a new service worker at any time, so we need to listen for
-      // updates and connect to new workers on demand.
-      const newWorker = registration.installing;
-      if (newWorker) {
-        this._connectServiceWorker(newWorker);
-      }
-    });
-
-    if (registration.active) {
-      this._connectServiceWorker(registration.active);
-    } else {
-      console.warn('unhandled service worker registration state', registration);
-    }
-  }
-
-  private async _connectServiceWorker(worker: ServiceWorker) {
-    return new Promise<void>((resolve) => {
-      const {port1, port2} = new MessageChannel();
-
-      const onMessage = (e: MessageEvent) => {
-        if (e.data.initComlink === HANDSHAKE_RECEIVED) {
-          port1.removeEventListener('message', onMessage);
-          this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port1);
-          this._serviceWorkerAPI.setFileAPI(
-            proxy({
-              getFile: (name: string) => this._getFile(name),
-            }),
-            this._sessionId
-          );
-          resolve();
-        }
-      };
-
-      port1.addEventListener('message', onMessage);
-      port1.start();
-      worker.postMessage(
-        {
-          initComlink: ESTABLISH_HANDSHAKE,
-          port: port2,
-        },
-        [port2]
+  private _onServiceWorkerProxyIframeLoad() {
+    // This iframe exists to proxy messages between this project and the service
+    // worker, because the service worker may be running on a different origin
+    // for security.
+    const window = this._iframe.contentWindow;
+    if (!window) {
+      throw new Error(
+        'Unexpected internal error: ' +
+          '<playground-project> service worker proxy iframe had no contentWindow'
       );
-      // TODO: timeout
-    });
+    }
+    // This channel is persistent, and is only used to receieve new service
+    // worker channel ports from the proxy iframe. Note we can get new service
+    // worker ports at any time from the proxy, when the service worker updates.
+    const {port1, port2} = new MessageChannel();
+    port1.addEventListener('message', (event: MessageEvent<MessagePort>) =>
+      this._onNewServiceWorkerPort(event.data)
+    );
+    port1.start();
+    const initMessage: ProxyInitMessage = {
+      port: port2,
+      url: 'playground-service-worker.js',
+      scope: this.sandboxScope,
+    };
+    console.log(this._iframe.src, this._normalizedSandboxBaseUrl.origin);
+    // We could constrain targetOrigin to
+    // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
+    // security benefit, and would add the limitation that the sandboxBaseUrl
+    // can't redirect to another origin.
+    window.postMessage(initMessage, '*', [initMessage.port]);
+  }
+
+  private _onNewServiceWorkerPort(port: MessagePort) {
+    const onMessage = (e: MessageEvent) => {
+      if (e.data.initComlink === HANDSHAKE_RECEIVED) {
+        port.removeEventListener('message', onMessage);
+        this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
+        this._serviceWorkerAPI.setFileAPI(
+          proxy({
+            getFile: (name: string) => this._getFile(name),
+          }),
+          this._sessionId
+        );
+      }
+    };
+    port.addEventListener('message', onMessage);
+    port.start();
   }
 
   private async _getFile(name: string): Promise<SampleFile | undefined> {
