@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.3.1] - 2020-11-11
+
+### Fixed
+
+- Remove debugging log statement.
+- Remove unecessary file from NPM package.
+
 ## [0.3.0] - 2020-11-11
 
 ### Changed
