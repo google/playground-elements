@@ -1519,7 +1519,7 @@ let vr=class extends le{constructor(){super(...arguments),this.project=void 0,th
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-const wr=new Set,kr=new URL("./playground-typescript-worker.js",import.meta.url);let Cr=class extends le{constructor(){super(...arguments),this.sandboxBaseUrl=new URL("..",import.meta.url).href,this.sandboxScope="playground-projects/",this._sessionId=(()=>{let e;do{e=crypto.getRandomValues(new Uint32Array(1))[0].toString(32)}while(wr.has(e));return wr.add(e),e})(),this._compiledFilesPromise=Promise.resolve(void 0),this._editors=new Set,this._previews=new Set,this._saveTimeoutId=void 0}get _normalizedSandboxBaseUrl(){const e=new URL(this.sandboxBaseUrl,document.location.href);return e.pathname=Te(e.pathname),e}get _previewSrc(){if(void 0!==this._serviceWorkerAPI&&void 0!==this._files)return new URL(`${Te(this.sandboxScope)}${this._sessionId}/index.html`,this._normalizedSandboxBaseUrl).href}get _serviceWorkerProxyIframeUrl(){return new URL("playground-service-worker-proxy.html",this._normalizedSandboxBaseUrl).href}update(e){if(e.has("projectSrc")&&this._fetchProject(),e.has("_files"))for(const e of this._editors)e.files=this._files;if(e.has("_serviceWorkerAPI")){const e=this._previewSrc;for(const t of this._previews)t.src=e}super.update(e)}render(){return P`
+const wr=new Set,kr=new URL("./playground-typescript-worker.js",import.meta.url);let Cr=class extends le{constructor(){super(...arguments),this.sandboxBaseUrl=new URL(".",import.meta.url).href,this.sandboxScope="playground-projects/",this._sessionId=(()=>{let e;do{e=crypto.getRandomValues(new Uint32Array(1))[0].toString(32)}while(wr.has(e));return wr.add(e),e})(),this._compiledFilesPromise=Promise.resolve(void 0),this._editors=new Set,this._previews=new Set,this._saveTimeoutId=void 0}get _normalizedSandboxBaseUrl(){const e=new URL(this.sandboxBaseUrl,document.location.href);return e.pathname=Te(e.pathname),e}get _previewSrc(){if(void 0!==this._serviceWorkerAPI&&void 0!==this._files)return new URL(`${Te(this.sandboxScope)}${this._sessionId}/index.html`,this._normalizedSandboxBaseUrl).href}get _serviceWorkerProxyIframeUrl(){return new URL("playground-service-worker-proxy.html",this._normalizedSandboxBaseUrl).href}update(e){if(e.has("projectSrc")&&this._fetchProject(),e.has("_files"))for(const e of this._editors)e.files=this._files;if(e.has("_serviceWorkerAPI")){const e=this._previewSrc;for(const t of this._previews)t.src=e}super.update(e)}render(){return P`
       <slot @slotchange=${this._slotChange}></slot>
       <iframe
         src=${this._serviceWorkerProxyIframeUrl}
@@ -1542,7 +1542,7 @@ const wr=new Set,kr=new URL("./playground-typescript-worker.js",import.meta.url)
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
- */let Sr=class extends le{constructor(){super(...arguments),this.sandboxBaseUrl=new URL("..",import.meta.url).href,this.sandboxScope="playground-projects/",this.enableAddFile=!1,this.lineNumbers=!1,this.resizable=!1}render(){const e="project";return P`
+ */let Sr=class extends le{constructor(){super(...arguments),this.sandboxBaseUrl=new URL(".",import.meta.url).href,this.sandboxScope="playground-projects/",this.enableAddFile=!1,this.lineNumbers=!1,this.resizable=!1}render(){const e="project";return P`
       <playground-project
         id=${e}
         .projectSrc=${this.projectSrc}
