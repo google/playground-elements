@@ -1,0 +1,27 @@
+<!doctype html><script type="module">/**
+ * @license
+ * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+/**
+ * @license
+ * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+(async()=>{try{parent.window.console.warn("Playground sandbox is executing with the same origin as its parent.","This could be a security risk.","https://github.com/PolymerLabs/playground-elements#security")}catch{}const{url:e,scope:t,port:s}=await new Promise((e=>{const t=s=>{window.removeEventListener("message",t),e(s.data)};window.addEventListener("message",t)})),n=await navigator.serviceWorker.register(new URL(e,import.meta.url).href,{scope:t}),a=e=>{const{port1:t,port2:n}=new MessageChannel;s.postMessage(t,[t]),e.postMessage({initComlink:1,port:n},[n])};n.addEventListener("updatefound",(()=>{n.installing&&a(n.installing)})),n.active&&a(n.active)})();</script>
