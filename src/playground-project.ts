@@ -292,7 +292,6 @@ export class PlaygroundProject extends LitElement {
       url: 'playground-service-worker.js',
       scope: this.sandboxScope,
     };
-    console.log(this._iframe.src, this._normalizedSandboxBaseUrl.origin);
     // We could constrain targetOrigin to
     // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
     // security benefit, and would add the limitation that the sandboxBaseUrl
