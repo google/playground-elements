@@ -26,7 +26,7 @@ jobs:
           cp -r configurator/deploy ..
           git fetch origin gh-pages --depth=1
           git checkout --track origin/gh-pages
-          rm -rf * .*
+          ls -A1 | grep -vx .git | xargs rm -rf
           mv ../deploy/* .
           if [[ -n $(git status -s) ]]
           then
