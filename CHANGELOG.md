@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Removed
+
+- Removed some unnecessary files from NPM package.
 
 ## [0.3.1] - 2020-11-11
 
