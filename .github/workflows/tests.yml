@@ -11,13 +11,17 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 15
 
       # Installs system dependencies needed for playwright.
       - uses: microsoft/playwright-github-action@v1
 
       - name: NPM install
         run: npm ci
+
+      # https://github.com/npm/cli/issues/1905
+      - name: NPM prepare (workaround)
+        run: npm run prepare
 
       - name: Build
         run: npm run build
