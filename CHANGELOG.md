@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Fixed
+
+- Fix installation error relating to missing `node_modules/puppeteer` directory.
+
 ### Removed
 
 - Removed some unnecessary files from NPM package.
