@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fix installation error relating to missing `node_modules/puppeteer` directory.
 
+### Changed
+
+- Bumped and un-pinned `@material/mwc` dependencies.
+
 ### Removed
 
 - Removed some unnecessary files from NPM package.
