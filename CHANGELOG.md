@@ -17,7 +17,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## [0.3.2] - 2020-11-30
+
+### Fixed
+
+- Fix installation error relating to missing `node_modules/puppeteer` directory.
+
+### Changed
+
+- Bumped and un-pinned `@material/mwc` dependencies.
+
+### Removed
+
+- Removed some unnecessary files from NPM package.
 
 ## [0.3.1] - 2020-11-11
 
