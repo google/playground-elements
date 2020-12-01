@@ -69,6 +69,7 @@ export class PlaygroundPreview extends LitElement {
     }
 
     #content {
+      max-height: 100%;
       position: relative;
       flex: 1;
     }
