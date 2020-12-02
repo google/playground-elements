@@ -13,7 +13,7 @@ export default {
         ) {
           return {
             body: ctx.body.replace(
-              /\n\n<!-- injected by web-dev-server.*<\/script>\n\n/gs,
+              /<!-- injected by web-dev-server.*<\/script>/gs,
               ''
             ),
           };
