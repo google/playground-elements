@@ -11,17 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
-## Unreleased
-
+<!-- ## Unreleased -->
 <!-- ### Changed -->
-
 <!-- ### Added -->
+<!-- ### Fixed -->
+<!-- ### Removed -->
+
+## [0.3.3] - 2020-12-01
 
 ### Fixed
 
-- Fix Safari scrolling bug by limiting preview max-height
-
-<!-- ### Removed -->
+- Fix Safari scrolling bug by limiting preview max-height.
 
 ## [0.3.2] - 2020-11-30
 
