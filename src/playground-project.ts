@@ -272,8 +272,8 @@ export class PlaygroundProject extends LitElement {
     // This iframe exists to proxy messages between this project and the service
     // worker, because the service worker may be running on a different origin
     // for security.
-    const window = this._iframe.contentWindow;
-    if (!window) {
+    const iframeWindow = this._iframe.contentWindow;
+    if (!iframeWindow) {
       throw new Error(
         'Unexpected internal error: ' +
           '<playground-project> service worker proxy iframe had no contentWindow'
@@ -296,7 +296,7 @@ export class PlaygroundProject extends LitElement {
     // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
     // security benefit, and would add the limitation that the sandboxBaseUrl
     // can't redirect to another origin.
-    window.postMessage(initMessage, '*', [initMessage.port]);
+    iframeWindow.postMessage(initMessage, '*', [initMessage.port]);
   }
 
   private _onNewServiceWorkerPort(port: MessagePort) {
