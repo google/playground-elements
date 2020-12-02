@@ -1476,6 +1476,7 @@ let vr=class extends le{constructor(){super(...arguments),this.project=void 0,th
     }
 
     #content {
+      max-height: 100%;
       position: relative;
       flex: 1;
     }
