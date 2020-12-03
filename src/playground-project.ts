@@ -171,7 +171,10 @@ export class PlaygroundProject extends LitElement {
         editor.files = this._files;
       }
     }
-    if (changedProperties.has('_serviceWorkerAPI')) {
+    if (
+      changedProperties.has('_serviceWorkerAPI') ||
+      changedProperties.has('_files')
+    ) {
       const previewSrc = this._previewSrc;
       for (const preview of this._previews) {
         preview.src = previewSrc;
@@ -191,12 +194,15 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _slotChange(_e: Event) {
+    if (this.projectSrc) {
+      // Note that the slotchange event will fire even if the only child is
+      // whitespace.
+      return;
+    }
     const elements = this._slot.assignedElements({flatten: true});
     const sampleScripts = elements.filter((e) =>
       e.matches('script[type^=sample][filename]')
     );
-    // TODO (justinfagnani): detect both inline samples and a manifest
-    // and give an warning.
     this._files = sampleScripts.map((s) => {
       const typeAttr = s.getAttribute('type');
       const fileType = typeAttr!.substring('sample/'.length);
