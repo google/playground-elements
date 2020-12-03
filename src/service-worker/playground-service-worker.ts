@@ -39,7 +39,7 @@ const workerAPI: ServiceWorkerAPI = {
  * keyed by session ID.
  */
 const fileAPIs = new Map<SessionID, FileAPI>();
-const getFile = async (e: FetchEvent, path: string, sessionId: SessionID) => {
+const getFile = async (_e: FetchEvent, path: string, sessionId: SessionID) => {
   const fileAPI = fileAPIs.get(sessionId);
   if (fileAPI) {
     const file = await fileAPI.getFile(path);
@@ -52,7 +52,10 @@ const getFile = async (e: FetchEvent, path: string, sessionId: SessionID) => {
   } else {
     console.warn(`No FileAPI for session ${sessionId}`);
   }
-  return fetch(e.request);
+  // Don't delegate to a server fetch. We know this request was within our
+  // scope, so it's in our virtual filesystem, and we're within our rights to
+  // force a 404 here. Who knows what the server would respond with.
+  return new Response('404 playground file not found', {status: 404});
 };
 
 const onFetch = (e: FetchEvent) => {
