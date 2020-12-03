@@ -36,6 +36,12 @@ export const CONNECT_PROJECT_TO_SW = 3;
  */
 export const ACKNOWLEDGE_SW_CONNECTION = 4;
 
+/**
+ * Sent from the service worker to the proxy, to notify when a file API is
+ * missing and hence a re-connection is probably required.
+ */
+export const MISSING_FILE_API = 5;
+
 export type PlaygroundMessage =
   | {
       type: typeof CONFIGURE_PROXY;
@@ -53,6 +59,9 @@ export type PlaygroundMessage =
     }
   | {
       type: typeof ACKNOWLEDGE_SW_CONNECTION;
+    }
+  | {
+      type: typeof MISSING_FILE_API;
     };
 
 export interface ServiceWorkerAPI {

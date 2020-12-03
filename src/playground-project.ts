@@ -152,8 +152,10 @@ export class PlaygroundProject extends LitElement {
   }
 
   private get _serviceWorkerProxyIframeUrl() {
+    // We include the session ID as a query parameter so that the service worker
+    // can figure out which proxy client goes with which session.
     return new URL(
-      'playground-service-worker-proxy.html',
+      `playground-service-worker-proxy.html?playground-session-id=${this._sessionId}`,
       this._normalizedSandboxBaseUrl
     ).href;
   }

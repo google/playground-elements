@@ -17,6 +17,7 @@ import {
   CONNECT_SW_TO_PROJECT,
   CONNECT_PROJECT_TO_SW,
   CONFIGURE_PROXY,
+  MISSING_FILE_API,
 } from './shared/worker-api.js';
 
 (async () => {
@@ -76,6 +77,19 @@ import {
       connect(registration.installing);
     }
   });
+
+  navigator.serviceWorker.addEventListener(
+    'message',
+    (event: MessageEvent<PlaygroundMessage>) => {
+      if (event.data.type === MISSING_FILE_API && registration.active) {
+        // A fetch was made for a session that the service worker doesn't have a
+        // file API for. Most likely the service worker was stopped and lost its
+        // state, as can happen at any time. The fetch re-awakened it, and now
+        // the fetch is waiting for us to re-connect.
+        connect(registration.active);
+      }
+    }
+  );
 
   if (registration.active) {
     connect(registration.active);

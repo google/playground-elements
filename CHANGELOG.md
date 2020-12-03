@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fix race condition where preview could load too early and 404.
 - Fix race condition where preview could sometimes never load.
+- Fix preview 404 that could occur after leaving page idle for some time.
 
 ## [0.3.3] - 2020-12-01
 

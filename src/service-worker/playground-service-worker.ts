@@ -15,15 +15,23 @@
 import {
   ACKNOWLEDGE_SW_CONNECTION,
   CONNECT_SW_TO_PROJECT,
+  MISSING_FILE_API,
   PlaygroundMessage,
   ServiceWorkerAPI,
   FileAPI,
 } from '../shared/worker-api.js';
 import {expose} from 'comlink';
+import {Deferred} from '../shared/deferred.js';
 
 declare var self: ServiceWorkerGlobalScope;
 
 type SessionID = string;
+
+/**
+ * A collection of FileAPI objects registered by <playground-project> instances,
+ * keyed by session ID.
+ */
+const fileAPIs = new Map<string, Deferred<FileAPI>>();
 
 /**
  * API exposed to the UI thread via Comlink. The static methods on this class
@@ -31,17 +39,56 @@ type SessionID = string;
  */
 const workerAPI: ServiceWorkerAPI = {
   setFileAPI(fileAPI: FileAPI, sessionID: SessionID) {
-    fileAPIs.set(sessionID, fileAPI);
+    let deferred = fileAPIs.get(sessionID);
+    if (deferred === undefined || deferred.resolved) {
+      deferred = new Deferred();
+      fileAPIs.set(sessionID, deferred);
+    }
+    deferred.resolve(fileAPI);
   },
 };
 
-/**
- * A collection of FileAPI objects registered by <playground-project> instances,
- * keyed by session ID.
- */
-const fileAPIs = new Map<SessionID, FileAPI>();
+const findSessionProxyClient = async (
+  sessionId: string
+): Promise<Client | undefined> => {
+  for (const client of await self.clients.matchAll({
+    includeUncontrolled: true,
+  })) {
+    if (
+      new URL(client.url).searchParams.get('playground-session-id') ===
+      sessionId
+    ) {
+      return client;
+    }
+  }
+  return undefined;
+};
+
+const getFileApi = async (sessionId: string): Promise<FileAPI | undefined> => {
+  let deferred = fileAPIs.get(sessionId);
+  if (deferred !== undefined) {
+    return deferred.promise;
+  }
+  // Find the proxy that manages this session, and tell it to connect us to the
+  // session file API. Service Workers can stop and start at any time, clearing
+  // global state. This kind of restart does _not_ count as a state change. The
+  // only way we can tell this has happened is that a fetch occurs for a session
+  // we don't know about.
+  const client = await findSessionProxyClient(sessionId);
+  if (client === undefined) {
+    // This could happen if a user directly opened a playground URL after a
+    // proxy iframe has been destroyed.
+    return undefined;
+  }
+  deferred = new Deferred();
+  fileAPIs.set(sessionId, deferred);
+  const missingMessage: PlaygroundMessage = {type: MISSING_FILE_API};
+  client.postMessage(missingMessage);
+  return deferred.promise;
+};
+
 const getFile = async (_e: FetchEvent, path: string, sessionId: SessionID) => {
-  const fileAPI = fileAPIs.get(sessionId);
+  const fileAPI = await getFileApi(sessionId);
   if (fileAPI) {
     const file = await fileAPI.getFile(path);
     if (file) {
