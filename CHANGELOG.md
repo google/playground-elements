@@ -17,6 +17,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- The playground service worker now serves its own 404s when a file is not
+  found, instead of forwarding the request to the server.
+
+### Fixed
+
+- Fix race condition where preview could load too early and 404.
+- Fix race condition where preview could sometimes never load.
+- Fix preview 404 that could occur after leaving page idle for some time.
+
 ## [0.3.3] - 2020-12-01
 
 ### Fixed

@@ -12,13 +12,13 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {ESTABLISH_HANDSHAKE} from './shared/worker-api.js';
-
-export interface ProxyInitMessage {
-  port: MessagePort;
-  url: string;
-  scope: string;
-}
+import {
+  PlaygroundMessage,
+  CONNECT_SW_TO_PROJECT,
+  CONNECT_PROJECT_TO_SW,
+  CONFIGURE_PROXY,
+  MISSING_FILE_API,
+} from './shared/worker-api.js';
 
 (async () => {
   try {
@@ -35,15 +35,19 @@ export interface ProxyInitMessage {
   // Wait for our parent to send us:
   // 1. The URL and scope of the Service Worker to register.
   // 2. A MessagePort, on which we'll forward up new Service Worker ports.
-  const {url, scope, port: parentPort} = await new Promise<ProxyInitMessage>(
-    (resolve) => {
-      const listener = (event: MessageEvent<ProxyInitMessage>) => {
+  const {url, scope, port: parentPort} = await new Promise<{
+    url: string;
+    scope: string;
+    port: MessagePort;
+  }>((resolve) => {
+    const listener = (event: MessageEvent<PlaygroundMessage>) => {
+      if (event.data.type === CONFIGURE_PROXY) {
         window.removeEventListener('message', listener);
         resolve(event.data);
-      };
-      window.addEventListener('message', listener);
-    }
-  );
+      }
+    };
+    window.addEventListener('message', listener);
+  });
 
   const registration = await navigator.serviceWorker.register(
     new URL(url, import.meta.url).href,
@@ -52,8 +56,18 @@ export interface ProxyInitMessage {
 
   const connect = (sw: ServiceWorker) => {
     const {port1, port2} = new MessageChannel();
-    parentPort.postMessage(port1, [port1]);
-    sw.postMessage({initComlink: ESTABLISH_HANDSHAKE, port: port2}, [port2]);
+
+    const projectMessage: PlaygroundMessage = {
+      type: CONNECT_PROJECT_TO_SW,
+      port: port1,
+    };
+    parentPort.postMessage(projectMessage, [projectMessage.port]);
+
+    const swMessage: PlaygroundMessage = {
+      type: CONNECT_SW_TO_PROJECT,
+      port: port2,
+    };
+    sw.postMessage(swMessage, [swMessage.port]);
   };
 
   registration.addEventListener('updatefound', () => {
@@ -63,6 +77,19 @@ export interface ProxyInitMessage {
       connect(registration.installing);
     }
   });
+
+  navigator.serviceWorker.addEventListener(
+    'message',
+    (event: MessageEvent<PlaygroundMessage>) => {
+      if (event.data.type === MISSING_FILE_API && registration.active) {
+        // A fetch was made for a session that the service worker doesn't have a
+        // file API for. Most likely the service worker was stopped and lost its
+        // state, as can happen at any time. The fetch re-awakened it, and now
+        // the fetch is waiting for us to re-connect.
+        connect(registration.active);
+      }
+    }
+  );
 
   if (registration.active) {
     connect(registration.active);

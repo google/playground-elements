@@ -28,15 +28,17 @@ import {
   SampleFile,
   ServiceWorkerAPI,
   ProjectManifest,
-  HANDSHAKE_RECEIVED,
+  PlaygroundMessage,
   TypeScriptWorkerAPI,
+  CONFIGURE_PROXY,
+  CONNECT_PROJECT_TO_SW,
+  ACKNOWLEDGE_SW_CONNECTION,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
 import {PlaygroundPreview} from './playground-preview.js';
 import './playground-file-editor.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';
 import './playground-preview.js';
-import {ProxyInitMessage} from './playground-service-worker-proxy.js';
 
 declare global {
   interface ImportMeta {
@@ -150,8 +152,10 @@ export class PlaygroundProject extends LitElement {
   }
 
   private get _serviceWorkerProxyIframeUrl() {
+    // We include the session ID as a query parameter so that the service worker
+    // can figure out which proxy client goes with which session.
     return new URL(
-      'playground-service-worker-proxy.html',
+      `playground-service-worker-proxy.html?playground-session-id=${this._sessionId}`,
       this._normalizedSandboxBaseUrl
     ).href;
   }
@@ -171,7 +175,10 @@ export class PlaygroundProject extends LitElement {
         editor.files = this._files;
       }
     }
-    if (changedProperties.has('_serviceWorkerAPI')) {
+    if (
+      changedProperties.has('_serviceWorkerAPI') ||
+      changedProperties.has('_files')
+    ) {
       const previewSrc = this._previewSrc;
       for (const preview of this._previews) {
         preview.src = previewSrc;
@@ -191,12 +198,15 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _slotChange(_e: Event) {
+    if (this.projectSrc) {
+      // Note that the slotchange event will fire even if the only child is
+      // whitespace.
+      return;
+    }
     const elements = this._slot.assignedElements({flatten: true});
     const sampleScripts = elements.filter((e) =>
       e.matches('script[type^=sample][filename]')
     );
-    // TODO (justinfagnani): detect both inline samples and a manifest
-    // and give an warning.
     this._files = sampleScripts.map((s) => {
       const typeAttr = s.getAttribute('type');
       const fileType = typeAttr!.substring('sample/'.length);
@@ -272,8 +282,8 @@ export class PlaygroundProject extends LitElement {
     // This iframe exists to proxy messages between this project and the service
     // worker, because the service worker may be running on a different origin
     // for security.
-    const window = this._iframe.contentWindow;
-    if (!window) {
+    const iframeWindow = this._iframe.contentWindow;
+    if (!iframeWindow) {
       throw new Error(
         'Unexpected internal error: ' +
           '<playground-project> service worker proxy iframe had no contentWindow'
@@ -283,25 +293,31 @@ export class PlaygroundProject extends LitElement {
     // worker channel ports from the proxy iframe. Note we can get new service
     // worker ports at any time from the proxy, when the service worker updates.
     const {port1, port2} = new MessageChannel();
-    port1.addEventListener('message', (event: MessageEvent<MessagePort>) =>
-      this._onNewServiceWorkerPort(event.data)
+    port1.addEventListener(
+      'message',
+      (event: MessageEvent<PlaygroundMessage>) => {
+        if (event.data.type === CONNECT_PROJECT_TO_SW) {
+          this._onNewServiceWorkerPort(event.data.port);
+        }
+      }
     );
     port1.start();
-    const initMessage: ProxyInitMessage = {
-      port: port2,
+    const configureMessage: PlaygroundMessage = {
+      type: CONFIGURE_PROXY,
       url: 'playground-service-worker.js',
       scope: this.sandboxScope,
+      port: port2,
     };
     // We could constrain targetOrigin to
     // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
     // security benefit, and would add the limitation that the sandboxBaseUrl
     // can't redirect to another origin.
-    window.postMessage(initMessage, '*', [initMessage.port]);
+    iframeWindow.postMessage(configureMessage, '*', [configureMessage.port]);
   }
 
   private _onNewServiceWorkerPort(port: MessagePort) {
-    const onMessage = (e: MessageEvent) => {
-      if (e.data.initComlink === HANDSHAKE_RECEIVED) {
+    const onMessage = (e: MessageEvent<PlaygroundMessage>) => {
+      if (e.data.type === ACKNOWLEDGE_SW_CONNECTION) {
         port.removeEventListener('message', onMessage);
         this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
         this._serviceWorkerAPI.setFileAPI(
