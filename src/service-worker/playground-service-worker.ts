@@ -13,8 +13,9 @@
  */
 
 import {
-  HANDSHAKE_RECEIVED,
-  ESTABLISH_HANDSHAKE,
+  ACKNOWLEDGE_SW_CONNECTION,
+  CONNECT_SW_TO_PROJECT,
+  PlaygroundMessage,
   ServiceWorkerAPI,
   FileAPI,
 } from '../shared/worker-api.js';
@@ -99,12 +100,13 @@ const onActivate = (event: ExtendableEvent) => {
   event.waitUntil(self.clients.claim());
 };
 
-const onMessage = (e: ExtendableMessageEvent) => {
+const onMessage = (
+  e: Omit<ExtendableMessageEvent, 'data'> & {data: PlaygroundMessage}
+) => {
   // Receive a handshake message from a page and setup Comlink.
-  if (e.data.initComlink === ESTABLISH_HANDSHAKE) {
-    (e.data.port as MessagePort).postMessage({
-      initComlink: HANDSHAKE_RECEIVED,
-    });
+  if (e.data.type === CONNECT_SW_TO_PROJECT) {
+    const ack: PlaygroundMessage = {type: ACKNOWLEDGE_SW_CONNECTION};
+    e.data.port.postMessage(ack);
     expose(workerAPI, e.data.port);
   }
 };

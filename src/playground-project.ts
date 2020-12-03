@@ -28,15 +28,17 @@ import {
   SampleFile,
   ServiceWorkerAPI,
   ProjectManifest,
-  HANDSHAKE_RECEIVED,
+  PlaygroundMessage,
   TypeScriptWorkerAPI,
+  CONFIGURE_PROXY,
+  CONNECT_PROJECT_TO_SW,
+  ACKNOWLEDGE_SW_CONNECTION,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
 import {PlaygroundPreview} from './playground-preview.js';
 import './playground-file-editor.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';
 import './playground-preview.js';
-import {ProxyInitMessage} from './playground-service-worker-proxy.js';
 
 declare global {
   interface ImportMeta {
@@ -289,25 +291,31 @@ export class PlaygroundProject extends LitElement {
     // worker channel ports from the proxy iframe. Note we can get new service
     // worker ports at any time from the proxy, when the service worker updates.
     const {port1, port2} = new MessageChannel();
-    port1.addEventListener('message', (event: MessageEvent<MessagePort>) =>
-      this._onNewServiceWorkerPort(event.data)
+    port1.addEventListener(
+      'message',
+      (event: MessageEvent<PlaygroundMessage>) => {
+        if (event.data.type === CONNECT_PROJECT_TO_SW) {
+          this._onNewServiceWorkerPort(event.data.port);
+        }
+      }
     );
     port1.start();
-    const initMessage: ProxyInitMessage = {
-      port: port2,
+    const configureMessage: PlaygroundMessage = {
+      type: CONFIGURE_PROXY,
       url: 'playground-service-worker.js',
       scope: this.sandboxScope,
+      port: port2,
     };
     // We could constrain targetOrigin to
     // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
     // security benefit, and would add the limitation that the sandboxBaseUrl
     // can't redirect to another origin.
-    iframeWindow.postMessage(initMessage, '*', [initMessage.port]);
+    iframeWindow.postMessage(configureMessage, '*', [configureMessage.port]);
   }
 
   private _onNewServiceWorkerPort(port: MessagePort) {
-    const onMessage = (e: MessageEvent) => {
-      if (e.data.initComlink === HANDSHAKE_RECEIVED) {
+    const onMessage = (e: MessageEvent<PlaygroundMessage>) => {
+      if (e.data.type === ACKNOWLEDGE_SW_CONNECTION) {
         port.removeEventListener('message', onMessage);
         this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
         this._serviceWorkerAPI.setFileAPI(
