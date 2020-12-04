@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [0.3.5] - 2020-12-03
+
+### Fixed
+
+- Fix `mwc-tab` race condition bug (dependency version bump).
+
 ## [0.3.4] - 2020-12-03
 
 ### Changed
