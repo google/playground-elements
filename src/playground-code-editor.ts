@@ -37,6 +37,7 @@ declare function CodeMirror(
   getValue(): string;
   setValue(content: string): void;
   setSize(width?: string | number, height?: string | number): void;
+  refresh(): void;
   setOption<K extends keyof CodeMirrorConfiguration>(
     option: K,
     value: CodeMirrorConfiguration[K]
@@ -166,7 +167,7 @@ export class PlaygroundCodeEditor extends LitElement {
     // sometimes be missing, but typing in the editor will fix it.
     if (typeof ResizeObserver === 'function') {
       this._resizeObserver = new ResizeObserver(() => {
-        this._codemirror?.setSize();
+        this._codemirror?.refresh();
       });
       this._resizeObserver.observe(this);
     }
