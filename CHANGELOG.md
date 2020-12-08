@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Fixed
+
+- Fix shifted/hidden code in Safari when line numbers are enabled.
+
 ## [0.3.5] - 2020-12-03
 
 ### Fixed
