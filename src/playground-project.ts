@@ -160,6 +160,30 @@ export class PlaygroundProject extends LitElement {
     ).href;
   }
 
+  private _filesSetExternally = false;
+
+  /**
+   * Get or set the array of project files.
+   *
+   * Files set through this property always take precedence over `projectSrc`
+   * and slotted children.
+   */
+  @property({type: Object})
+  get files(): SampleFile[] | undefined {
+    return this._files;
+  }
+
+  set files(files: SampleFile[] | undefined) {
+    if (!files) {
+      return;
+    }
+    this._filesSetExternally = true;
+    this._files = files;
+    if (this._typescriptWorkerAPI) {
+      this._compileProject();
+    }
+  }
+
   static styles = css`
     iframe {
       display: none;
@@ -174,6 +198,7 @@ export class PlaygroundProject extends LitElement {
       for (const editor of this._editors) {
         editor.files = this._files;
       }
+      this.dispatchEvent(new CustomEvent('filesChanged'));
     }
     if (
       changedProperties.has('_serviceWorkerAPI') ||
@@ -198,7 +223,7 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _slotChange(_e: Event) {
-    if (this.projectSrc) {
+    if (this.projectSrc || this._filesSetExternally) {
       // Note that the slotchange event will fire even if the only child is
       // whitespace.
       return;
@@ -244,7 +269,7 @@ export class PlaygroundProject extends LitElement {
   }
 
   private async _fetchProject() {
-    if (!this.projectSrc) {
+    if (!this.projectSrc || this._filesSetExternally) {
       return;
     }
     const projectUrl = new URL(this.projectSrc, document.baseURI);
@@ -252,7 +277,7 @@ export class PlaygroundProject extends LitElement {
     const manifest = (await manifestFetched.json()) as ProjectManifest;
 
     const filenames = manifest.files ? Object.keys(manifest.files) : [];
-    this._files = await Promise.all(
+    const files = await Promise.all(
       filenames.map(async (filename) => {
         const fileUrl = new URL(filename, projectUrl);
         const response = await fetch(fileUrl.href);
@@ -270,12 +295,18 @@ export class PlaygroundProject extends LitElement {
         };
       })
     );
-    this._compileProject();
+    if (!this._filesSetExternally) {
+      this._files = files;
+      this._compileProject();
+    }
   }
 
   firstUpdated() {
     const worker = new Worker(typescriptWorkerScriptUrl);
     this._typescriptWorkerAPI = wrap<TypeScriptWorkerAPI>(worker);
+    if (this._files) {
+      this._compileProject();
+    }
   }
 
   private _onServiceWorkerProxyIframeLoad() {

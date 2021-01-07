@@ -17,6 +17,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [0.3.7] - 2021-01-07
+
+### Added
+
+- Added `files` property to `<playground-ide>` and `<playground-project>`. Use
+  this property to directly get and set the array of project files (e.g. to
+  save/restore the project state).
+
+  Note that directly setting `files` always takes precedence over setting
+  `projectSrc`, and both take precedence over slotted children.
+
+### Changed
+
+- It is no longer necessary to load the Material Icons font. The reload button
+  icon is now inlined SVG.
+
 ## [0.3.6] - 2020-12-08
 
 ### Fixed
