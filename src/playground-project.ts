@@ -36,9 +36,7 @@ import {
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
 import {PlaygroundPreview} from './playground-preview.js';
-import './playground-file-editor.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';
-import './playground-preview.js';
 
 declare global {
   interface ImportMeta {
