@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## [0.3.7] - 2021-01-07
+## [0.3.7] - 2021-01-08
 
 ### Added
 
@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - It is no longer necessary to load the Material Icons font. The reload button
   icon is now inlined SVG.
+
+### Fixed
+
+- Fix caret placement issues with some dynamic layouts.
 
 ## [0.3.6] - 2020-12-08
 
