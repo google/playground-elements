@@ -168,7 +168,6 @@ export class PlaygroundProject extends LitElement {
    * Files set through this property always take precedence over `projectSrc`
    * and slotted children.
    */
-  @property({type: Object})
   get files(): SampleFile[] | undefined {
     return this._files;
   }
@@ -182,6 +181,7 @@ export class PlaygroundProject extends LitElement {
     if (this._typescriptWorkerAPI) {
       this._compileProject();
     }
+    this.requestUpdate();
   }
 
   static styles = css`
@@ -296,6 +296,8 @@ export class PlaygroundProject extends LitElement {
       })
     );
     if (!this._filesSetExternally) {
+      // Note we check _filesSetExternally again here in case it was set while
+      // we were fetching the project and its files.
       this._files = files;
       this._compileProject();
     }

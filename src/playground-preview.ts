@@ -163,6 +163,7 @@ export class PlaygroundPreview extends LitElement {
           ?disabled=${!this.src}
           @click=${this._onReloadClick}
         >
+          <!-- Source: https://material.io/resources/icons/?icon=refresh&style=baseline -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

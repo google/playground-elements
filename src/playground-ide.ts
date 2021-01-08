@@ -196,7 +196,7 @@ export class PlaygroundIde extends LitElement {
    * Files set through this property always take precedence over `projectSrc`
    * and slotted children.
    */
-  @property({type: Object})
+  @property({attribute: false})
   files?: SampleFile[];
 
   @query('#resizeBar')
