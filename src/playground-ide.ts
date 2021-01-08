@@ -22,10 +22,12 @@ import {
   PropertyValues,
 } from 'lit-element';
 import {nothing} from 'lit-html';
+import {SampleFile} from './shared/worker-api.js';
 
 import './playground-project.js';
 import './playground-file-editor.js';
 import './playground-preview.js';
+import {PlaygroundProject} from './playground-project.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -188,17 +190,31 @@ export class PlaygroundIde extends LitElement {
   @property({type: Boolean})
   resizable = false;
 
+  /**
+   * Get or set the array of project files.
+   *
+   * Files set through this property always take precedence over `projectSrc`
+   * and slotted children.
+   */
+  @property({attribute: false})
+  files?: SampleFile[];
+
   @query('#resizeBar')
   private _resizeBar!: HTMLDivElement;
 
   @query('#rhs')
   private _rhs!: HTMLDivElement;
 
+  @query('playground-project')
+  private _project!: PlaygroundProject;
+
   render() {
     const projectId = 'project';
     return html`
       <playground-project
         id=${projectId}
+        .files=${this.files}
+        @filesChanged=${this._onFilesChanged}
         .projectSrc=${this.projectSrc}
         .sandboxBaseUrl=${this.sandboxBaseUrl}
         .sandboxScope=${this.sandboxScope}
@@ -244,6 +260,10 @@ export class PlaygroundIde extends LitElement {
       this._rhs?.style.removeProperty('--playground-preview-width');
     }
     super.update(changedProperties);
+  }
+
+  private _onFilesChanged() {
+    this.files = this._project.files;
   }
 
   private onResizeBarPointerdown({pointerId}: PointerEvent) {

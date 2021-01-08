@@ -184,6 +184,15 @@ export class PlaygroundCodeEditor extends LitElement {
       (dom) => {
         this.shadowRoot!.innerHTML = '';
         this.shadowRoot!.appendChild(dom);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // It seems that some dynamic layouts confuse CodeMirror, causing it
+            // to measure itself too soon, which then causes the position of
+            // interactions to be interpreted incorrectly. Here we hackily force
+            // a refresh after initial layout is usually done.
+            this._codemirror?.refresh();
+          });
+        });
       },
       {
         value: this.value ?? '',
