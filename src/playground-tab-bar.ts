@@ -1,0 +1,376 @@
+/**
+ * @license
+ * Copyright (c) 2021 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+
+import {
+  html,
+  customElement,
+  css,
+  property,
+  internalProperty,
+  query,
+  PropertyValues,
+  CSSResult,
+} from 'lit-element';
+import {nothing} from 'lit-html';
+
+import '@material/mwc-tab-bar';
+import '@material/mwc-icon-button';
+import {TabBar} from '@material/mwc-tab-bar';
+import {Tab} from '@material/mwc-tab';
+import {style as mwcTabStyle} from '@material/mwc-tab/mwc-tab-css.js';
+
+import './playground-code-editor.js';
+import './playground-file-system-controls.js';
+import {PlaygroundFileEditor} from './playground-file-editor.js';
+import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
+import {PlaygroundProject} from './playground-project.js';
+import {PlaygroundConnectedElement} from './playground-connected-element.js';
+
+/**
+ * A horizontal bar of tabs for switching between playground files, with
+ * optional controls for create/delete/rename.
+ */
+@customElement('playground-tab-bar')
+export class PlaygroundTabBar extends PlaygroundConnectedElement {
+  static styles = css`
+    :host {
+      display: flex;
+      height: var(--playground-bar-height, 35px);
+      background: #eaeaea;
+      flex-direction: row;
+      align-items: center;
+      --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
+    }
+
+    mwc-tab-bar {
+      overflow: hidden;
+      height: 100%;
+      --mdc-tab-height: var(--playground-bar-height, 35px);
+      --mdc-typography-button-text-transform: none;
+      --mdc-typography-button-font-weight: normal;
+      --mdc-typography-button-font-size: 0.75rem;
+      --mdc-typography-button-letter-spacing: normal;
+    }
+
+    .add-file-button {
+      margin: 0 4px 0 8px;
+      opacity: 70%;
+      --mdc-icon-button-size: 24px;
+      --mdc-icon-size: 24px;
+    }
+
+    .add-file-button:hover {
+      opacity: 100%;
+    }
+  `;
+
+  /**
+   * Allow the user to add, remove, and rename files in the project's virtual
+   * filesystem. Disabled by default.
+   */
+  @property({type: Boolean})
+  editableFileSystem = false;
+
+  @internalProperty()
+  private _activeFileName = '';
+
+  @internalProperty()
+  private _activeFileIndex = 0;
+
+  @query('mwc-tab-bar')
+  private _tabBar?: TabBar;
+
+  @query('playground-file-system-controls')
+  private _fileSystemControls?: PlaygroundFileSystemControls;
+
+  /**
+   * The actual `<playground-file-editor>` node, determined by the `editor`
+   * property.
+   */
+  @internalProperty()
+  private _editor?: PlaygroundFileEditor;
+
+  /**
+   * The editor that this tab bar controls. Either the
+   * `<playground-file-editor>` node itself, or its `id` in the host scope.
+   */
+  @property()
+  set editor(elementOrId: PlaygroundFileEditor | string) {
+    if (typeof elementOrId === 'string') {
+      // Defer querying the host to a rAF because if the host renders this
+      // element before the one we're querying for, it might not quite exist
+      // yet.
+      requestAnimationFrame(() => {
+        const root = this.getRootNode() as ShadowRoot | Document;
+        this._editor =
+          (root.getElementById(elementOrId) as PlaygroundFileEditor | null) ??
+          undefined;
+      });
+    } else {
+      this._editor = elementOrId;
+    }
+  }
+
+  private get _files() {
+    return this._project?.files ?? [];
+  }
+
+  update(changedProperties: PropertyValues) {
+    if (changedProperties.has('_project')) {
+      const oldProject = changedProperties.get('_project') as PlaygroundProject;
+      if (oldProject) {
+        oldProject.removeEventListener(
+          'filesChanged',
+          this._onProjectFilesChanged
+        );
+      }
+      if (this._project) {
+        this._onProjectFilesChanged();
+        this._project.addEventListener(
+          'filesChanged',
+          this._onProjectFilesChanged
+        );
+      }
+    }
+    super.update(changedProperties);
+  }
+
+  render() {
+    return html`
+      <mwc-tab-bar
+        .activeIndex=${this._activeFileIndex}
+        @MDCTabBar:activated=${this._onTabActivated}
+      >
+        ${this._files.map(
+          ({name}, index) =>
+            html`<playground-tab
+              .isFadingIndicator=${true}
+              .index=${index}
+              .label=${name}
+              .showMenuButton=${this.editableFileSystem}
+              @openMenu=${this._onOpenMenu}
+            ></playground-tab>`
+        )}
+      </mwc-tab-bar>
+
+      ${this.editableFileSystem
+        ? html`
+            <mwc-icon-button
+              class="add-file-button"
+              @click=${this._onClickAddFile}
+            >
+              <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
+              <svg fill="currentcolor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              </svg>
+            </mwc-icon-button>
+
+            <playground-file-system-controls
+              .project=${this._project}
+              @newFile=${this._onNewFile}
+            >
+            </playground-file-system-controls>
+          `
+        : nothing}
+    `;
+  }
+
+  async updated() {
+    // TODO(aomarks) There still seems to be a timing bug where the mwc-tab-bar
+    // activeIndex property doesn't initially take. This hack pokes the bar
+    // after render to make sure the active tab is really selected.
+    if (!this._tabBar) {
+      return;
+    }
+    await this._tabBar.updateComplete;
+    this._tabBar.activeIndex = -1;
+    this._tabBar.activeIndex = this._activeFileIndex;
+  }
+
+  private _onProjectFilesChanged = () => {
+    this._setNewActiveFile();
+    if (this._editor) {
+      this._editor.filename = this._activeFileName;
+    }
+    this.requestUpdate();
+  };
+
+  private _onTabActivated(event: CustomEvent<{index: number}>) {
+    const index = event.detail.index;
+    const name = this._files[index].name;
+    if (name !== this._activeFileName) {
+      this._activeFileName = name;
+      this._activeFileIndex = index;
+      if (this._editor) {
+        this._editor.filename = name;
+      }
+    }
+  }
+
+  private _onOpenMenu(
+    event: CustomEvent<{index: number; anchor: HTMLElement}>
+  ) {
+    const controls = this._fileSystemControls;
+    if (!controls) {
+      return;
+    }
+    controls.state = 'menu';
+    controls.filename = this._files[event.detail.index].name;
+    controls.anchorElement = event.detail.anchor;
+  }
+
+  private _onClickAddFile(event: Event) {
+    const controls = this._fileSystemControls;
+    if (!controls) {
+      return;
+    }
+    controls.state = 'newfile';
+    controls.anchorElement = event.target as HTMLElement;
+  }
+
+  private _onNewFile(event: CustomEvent<{filename: string}>) {
+    this._activeFileName = event.detail.filename;
+    // TODO(aomarks) We should focus the editor here. However,
+    // CodeMirror.focus() isn't working for some reason.
+  }
+
+  /**
+   * Whenever a file is created, deleted, or renamed, figure out what the best
+   * new active tab should be.
+   */
+  private _setNewActiveFile() {
+    if (this._files.length === 0) {
+      this._activeFileIndex = 0;
+      this._activeFileName = '';
+      return;
+    }
+
+    // Stay on the same filename if it's still around, even though its index
+    // might have changed.
+    if (this._activeFileName) {
+      const index = this._files.findIndex(
+        (file) => file.name === this._activeFileName
+      );
+      if (index >= 0) {
+        this._activeFileIndex = index;
+        return;
+      }
+    }
+
+    // The active file was deleted, and it was the final tab. Move to the next
+    // tab down.
+    if (this._activeFileIndex > this._files.length - 1) {
+      this._activeFileIndex = this._files.length - 1;
+      this._activeFileName = this._files[this._activeFileIndex].name;
+      return;
+    }
+
+    // The active file was deleted, and another file has now taken the tab
+    // position of the old one. Select that file.
+    this._activeFileName = this._files[this._activeFileIndex].name;
+  }
+}
+
+/**
+ * Internal element for tabs within <playground-tab-bar>.
+ *
+ * This is a subclass of <mwc-tab>. We subclass because <mwc-tab> only supports
+ * text labels, and has no way to slot in our menu button.
+ *
+ * Note we can't subclass TabBase, because <mwc-tab-bar> relies on an instanceof
+ * check for Tab.
+ */
+@customElement('playground-tab')
+class PlaygroundTab extends Tab {
+  /**
+   * Whether to show the 3-dots menu button.
+   */
+  @property({type: Boolean})
+  showMenuButton = false;
+
+  /**
+   * 0-indexed position of this tab in the tab list.
+   *
+   * Note this could be parsed from the 1-indexed `id` that <mwc-tab-bar> sets
+   * on each instance after slotting, but taking a property here is simpler.
+   */
+  index = 0;
+
+  static styles = ([
+    mwcTabStyle,
+    css`
+      :host {
+        /* Vertically center the menu button. */
+        display: flex;
+        align-items: center;
+      }
+
+      .mdc-tab {
+        /* A little extra room for the menu button. */
+        padding-right: calc(var(--mdc-tab-horizontal-padding, 24px) + 8px);
+      }
+
+      .menu-button {
+        /* Shift the menu button to be inside the tab itself. */
+        margin-left: -24px;
+        z-index: 1;
+        opacity: 70%;
+        --mdc-icon-button-size: 24px;
+        --mdc-icon-size: 16px;
+      }
+
+      .menu-button:hover {
+        opacity: 100%;
+      }
+    `,
+  ] as unknown) as CSSResult;
+
+  render() {
+    return html`${super.render()}
+    ${this.showMenuButton ? this._menuButton : nothing} `;
+  }
+
+  private get _menuButton() {
+    return html`<mwc-icon-button
+      class="menu-button"
+      @click=${this._onClickMenuButton}
+    >
+      <!-- Source: https://material.io/resources/icons/?icon=menu&style=baseline -->
+      <svg viewBox="0 0 24 24" fill="currentcolor">
+        <path
+          d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+        />
+      </svg>
+    </mwc-icon-button>`;
+  }
+
+  private _onClickMenuButton(event: Event) {
+    this.dispatchEvent(
+      new CustomEvent<{index: number; anchor: HTMLElement}>('openMenu', {
+        composed: true,
+        detail: {
+          index: this.index,
+          anchor: event.target as HTMLElement,
+        },
+      })
+    );
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'playground-tab-bar': PlaygroundTabBar;
+    'playground-tab': PlaygroundTab;
+  }
+}
