@@ -1710,13 +1710,40 @@ let Lo=class extends Oo{constructor(){super(...arguments),this.state="closed",th
       quick
       .open=${"closed"!==this.state}
       .anchor=${this.anchorElement}
+      corner="BOTTOM_START"
       .classList=${this.state}
       @closed=${this._onSurfaceClosed}
       ><div class="wrapper">${this._surfaceContents}</div></mwc-menu-surface
     >`}async updated(){if(!this._postStateChangeRenderDone){if("menu"===this.state){const e=this._menuList;e&&(await e.updateComplete,e.focusItemAtIndex(0))}else if("rename"===this.state||"newfile"===this.state){const e=this._filenameInput;e&&(await e.updateComplete,e.focus(),"rename"===this.state&&e.setSelectionRange(0,e.value.lastIndexOf(".")))}this._postStateChangeRenderDone=!0}}get _surfaceContents(){switch(this.state){case"closed":return y;case"menu":return this._menu;case"rename":return this._rename;case"newfile":return this._newFile}}get _menu(){return B`
       <mwc-list class="menu-list" @action=${this._onMenuAction}>
-        <mwc-list-item>Rename</mwc-list-item>
-        <mwc-list-item>Delete</mwc-list-item>
+        <mwc-list-item graphic="icon">
+          Rename
+          <svg
+            slot="graphic"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            fill="currentcolor"
+          >
+            <path
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+            />
+          </svg>
+        </mwc-list-item>
+        <mwc-list-item graphic="icon">
+          Delete
+          <svg
+            slot="graphic"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentcolor"
+          >
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            />
+          </svg>
+        </mwc-list-item>
       </mwc-list>
     `}get _rename(){return B`
       <mwc-textfield
@@ -1754,6 +1781,16 @@ let Lo=class extends Oo{constructor(){super(...arguments),this.state="closed",th
         >
       </div>
     `}_onSurfaceClosed(){this.state="closed"}_onClickCancel(){this._surface.close()}_onMenuAction(e){switch(e.detail.index){case 0:return this._onMenuSelectRename();case 1:return this._onMenuSelectDelete()}}_onMenuSelectRename(){this.state="rename"}_onMenuSelectDelete(){this._surface.close(),this._project&&this.filename&&this._project.deleteFile(this.filename)}_onFilenameInputChange(){this.requestUpdate()}get _filenameInputValid(){return!!(this._project&&this._filenameInput&&this._project.isValidNewFilename(this._filenameInput.value))}_onFilenameInputKeydown(e){"Enter"===e.key&&!1===this._submitButton?.disabled&&(e.preventDefault(),this._submitButton.click())}_onSubmitRename(){this._surface.close();const e=this.filename,t=this._filenameInput?.value;this._project&&e&&t&&this._project.renameFile(e,t)}_onSubmitNewFile(){this._surface.close();const e=this._filenameInput?.value;this._project&&e&&(this._project.addFile(e),this.dispatchEvent(new CustomEvent("newFile",{detail:{filename:e}})))}};Lo.styles=ae`
+    mwc-menu-surface.menu {
+      --mdc-typography-subtitle1-font-size: 13px;
+      --mdc-list-item-graphic-margin: 14px;
+    }
+
+    mwc-list-item {
+      min-width: 100px;
+      height: 40px;
+    }
+
     mwc-menu-surface.rename > .wrapper,
     mwc-menu-surface.newfile > .wrapper {
       padding: 18px;
@@ -1783,10 +1820,7 @@ let Lo=class extends Oo{constructor(){super(...arguments),this.state="closed",th
  * http://polymer.github.io/PATENTS.txt
  */
 let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSystem=!1,this._activeFileName="",this._activeFileIndex=0,this._onProjectFilesChanged=()=>{this._setNewActiveFile(),this._editor&&(this._editor.filename=this._activeFileName),this.requestUpdate()}}set editor(e){"string"==typeof e?requestAnimationFrame((()=>{const t=this.getRootNode();this._editor=t.getElementById(e)??void 0})):this._editor=e}get _files(){return this._project?.files??[]}update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&(this._onProjectFilesChanged(),this._project.addEventListener("filesChanged",this._onProjectFilesChanged))}super.update(e)}render(){return B`
-      <mwc-tab-bar
-        .activeIndex=${this._activeFileIndex}
-        @MDCTabBar:activated=${this._onTabActivated}
-      >
+      <mwc-tab-bar activeIndex="1" @MDCTabBar:activated=${this._onTabActivated}>
         ${this._files.map((({name:e},t)=>B`<playground-tab
               .isFadingIndicator=${!0}
               .index=${t}
@@ -1834,7 +1868,7 @@ let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSyste
     }
 
     .add-file-button {
-      margin: 0 4px 0 8px;
+      margin: 0 4px;
       opacity: 70%;
       --mdc-icon-button-size: 24px;
       --mdc-icon-size: 24px;
@@ -1861,24 +1895,22 @@ let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSyste
         align-items: center;
       }
 
-      .mdc-tab {
-        /* A little extra room for the menu button. */
-        padding-right: calc(var(--mdc-tab-horizontal-padding, 24px) + 8px);
-      }
-
       .menu-button {
         /* Shift the menu button to be inside the tab itself. */
         margin-left: -24px;
         z-index: 1;
-        opacity: 70%;
+        opacity: 0;
         --mdc-icon-button-size: 24px;
         --mdc-icon-size: 16px;
       }
 
-      .menu-button:hover {
+      :host(:hover) .menu-button,
+      :host(:focus) .menu-button {
+        /* Note we use opacity instead of visibility so that keyboard focus
+           works. */
         opacity: 100%;
       }
-    `],e([Y({type:Boolean})],Ro.prototype,"showMenuButton",void 0),Ro=e([G("playground-tab")],Ro);
+    `],e([Y({type:Boolean,reflect:!0})],Ro.prototype,"showMenuButton",void 0),Ro=e([G("playground-tab")],Ro);
 /**
  * @license
  * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
@@ -1892,7 +1924,7 @@ let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSyste
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-let Io=class extends Oo{constructor(){super(...arguments),this.lineNumbers=!1,this._onProjectFilesChanged=()=>{!this.filename&&this._files.length>0&&(this.filename=this._files[0].name),this.requestUpdate()}}get _files(){return this._project?.files??[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&this._project.addEventListener("filesChanged",this._onProjectFilesChanged)}super.update(e)}render(){return B`
+let Io=class extends Oo{constructor(){super(...arguments),this.lineNumbers=!1,this._onProjectFilesChanged=()=>{this.filename??=this._files[0]?.name,this.requestUpdate()}}get _files(){return this._project?.files??[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&this._project.addEventListener("filesChanged",this._onProjectFilesChanged)}super.update(e)}render(){return B`
       ${this._files?B`
             <playground-code-editor
               .value=${wo(this._currentFile?.content??"")}
