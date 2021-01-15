@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [0.4.1] - 2021-01-15
+
+### Fixed
+
+- Fixed `<playground-file-editor>` not always displaying initial file.
+- Fixed `editable-file-system` attribute name (was `editableFileSystem`).
+- Fixed `<playground-ide>` not stretching `<playground-file-editor>` vertically.
+
 ## [0.4.0] - 2021-01-15
 
 ### Added
