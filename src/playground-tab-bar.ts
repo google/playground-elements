@@ -148,10 +148,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   render() {
     return html`
-      <mwc-tab-bar
-        .activeIndex=${this._activeFileIndex}
-        @MDCTabBar:activated=${this._onTabActivated}
-      >
+      <mwc-tab-bar activeIndex="1" @MDCTabBar:activated=${this._onTabActivated}>
         ${this._files.map(
           ({name}, index) =>
             html`<playground-tab
@@ -296,7 +293,7 @@ class PlaygroundTab extends Tab {
   /**
    * Whether to show the 3-dots menu button.
    */
-  @property({type: Boolean})
+  @property({type: Boolean, reflect: true})
   showMenuButton = false;
 
   /**
@@ -316,7 +313,7 @@ class PlaygroundTab extends Tab {
         align-items: center;
       }
 
-      .mdc-tab {
+      :host([showMenuButton]) .mdc-tab {
         /* A little extra room for the menu button. */
         padding-right: calc(var(--mdc-tab-horizontal-padding, 24px) + 8px);
       }
@@ -325,12 +322,15 @@ class PlaygroundTab extends Tab {
         /* Shift the menu button to be inside the tab itself. */
         margin-left: -24px;
         z-index: 1;
-        opacity: 70%;
+        opacity: 0;
         --mdc-icon-button-size: 24px;
         --mdc-icon-size: 16px;
       }
 
-      .menu-button:hover {
+      :host(:hover) .menu-button,
+      :host(:focus) .menu-button {
+        /* Note we use opacity instead of visibility so that keyboard focus
+           works. */
         opacity: 100%;
       }
     `,

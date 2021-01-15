@@ -41,6 +41,16 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 @customElement('playground-file-system-controls')
 export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   static styles = css`
+    mwc-menu-surface.menu {
+      --mdc-typography-subtitle1-font-size: 13px;
+      --mdc-list-item-graphic-margin: 14px;
+    }
+
+    mwc-list-item {
+      min-width: 100px;
+      height: 40px;
+    }
+
     mwc-menu-surface.rename > .wrapper,
     mwc-menu-surface.newfile > .wrapper {
       padding: 18px;
@@ -107,6 +117,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       quick
       .open=${this.state !== 'closed'}
       .anchor=${this.anchorElement}
+      corner="BOTTOM_START"
       .classList=${this.state}
       @closed=${this._onSurfaceClosed}
       ><div class="wrapper">${this._surfaceContents}</div></mwc-menu-surface
@@ -156,8 +167,34 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private get _menu() {
     return html`
       <mwc-list class="menu-list" @action=${this._onMenuAction}>
-        <mwc-list-item>Rename</mwc-list-item>
-        <mwc-list-item>Delete</mwc-list-item>
+        <mwc-list-item graphic="icon">
+          Rename
+          <svg
+            slot="graphic"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            fill="currentcolor"
+          >
+            <path
+              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+            />
+          </svg>
+        </mwc-list-item>
+        <mwc-list-item graphic="icon">
+          Delete
+          <svg
+            slot="graphic"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentcolor"
+          >
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            />
+          </svg>
+        </mwc-list-item>
       </mwc-list>
     `;
   }

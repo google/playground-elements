@@ -126,9 +126,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   }
 
   private _onProjectFilesChanged = () => {
-    if (!this.filename && this._files.length > 0) {
-      this.filename = this._files[0].name;
-    }
+    this.filename ??= this._files[0]?.name;
     this.requestUpdate();
   };
 
