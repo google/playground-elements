@@ -99,6 +99,10 @@ export class PlaygroundIde extends LitElement {
       flex-shrink: 0;
     }
 
+    playground-file-editor {
+      flex: 1;
+    }
+
     #rhs {
       height: 100%;
       width: max(100px, var(--playground-preview-width, 30%));
@@ -180,7 +184,7 @@ export class PlaygroundIde extends LitElement {
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
-  @property({type: Boolean})
+  @property({type: Boolean, attribute: 'editable-file-system'})
   editableFileSystem = false;
 
   /**

@@ -79,7 +79,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
-  @property({type: Boolean})
+  @property({type: Boolean, attribute: 'editable-file-system'})
   editableFileSystem = false;
 
   @internalProperty()

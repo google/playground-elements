@@ -98,6 +98,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
           this._onProjectFilesChanged
         );
       }
+      this._onProjectFilesChanged();
     }
     super.update(changedProperties);
   }
