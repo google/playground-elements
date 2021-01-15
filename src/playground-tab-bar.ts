@@ -64,7 +64,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
 
     .add-file-button {
-      margin: 0 4px 0 8px;
+      margin: 0 4px;
       opacity: 70%;
       --mdc-icon-button-size: 24px;
       --mdc-icon-size: 24px;
@@ -311,11 +311,6 @@ class PlaygroundTab extends Tab {
         /* Vertically center the menu button. */
         display: flex;
         align-items: center;
-      }
-
-      :host([showMenuButton]) .mdc-tab {
-        /* A little extra room for the menu button. */
-        padding-right: calc(var(--mdc-tab-horizontal-padding, 24px) + 8px);
       }
 
       .menu-button {
