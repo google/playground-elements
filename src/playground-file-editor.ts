@@ -13,44 +13,27 @@
  */
 
 import {
-  LitElement,
   html,
   customElement,
   css,
   property,
-  internalProperty,
   query,
   PropertyValues,
 } from 'lit-element';
-import '@material/mwc-tab-bar';
-import {TabBar} from '@material/mwc-tab-bar';
-import '@material/mwc-tab';
-import {SampleFile} from '../shared/worker-api.js';
-import {PlaygroundProject} from './playground-project.js';
-import './playground-code-editor.js';
-import {PlaygroundCodeEditor} from './playground-code-editor.js';
-import {nothing} from 'lit-html';
+import {live} from 'lit-html/directives/live.js';
+
 import '@material/mwc-icon-button';
 
-// Hack to workaround Safari crashing and reloading the entire browser tab
-// whenever an <mwc-tab> is clicked to switch files, because of a bug relating
-// to delegatesFocus and shadow roots.
-//
-// https://bugs.webkit.org/show_bug.cgi?id=215732
-// https://github.com/material-components/material-components-web-components/issues/1720
-import {Tab} from '@material/mwc-tab';
-((Tab.prototype as unknown) as {
-  createRenderRoot: Tab['createRenderRoot'];
-  attachShadow: Tab['attachShadow'];
-}).createRenderRoot = function () {
-  return this.attachShadow({mode: 'open', delegatesFocus: false});
-};
+import './playground-code-editor.js';
+import {PlaygroundProject} from './playground-project.js';
+import {PlaygroundCodeEditor} from './playground-code-editor.js';
+import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
 /**
  * A text editor associated with a <playground-project>.
  */
 @customElement('playground-file-editor')
-export class PlaygroundFileEditor extends LitElement {
+export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   static styles = css`
     :host {
       display: block;
@@ -60,89 +43,28 @@ export class PlaygroundFileEditor extends LitElement {
       height: 350px;
     }
 
-    mwc-tab-bar {
-      --mdc-tab-height: var(--playground-bar-height, 35px);
-      /* The tab bar doesn't hold its height unless there are tabs inside it.
-      Also setting height here prevents a resize flashes after the project file
-      manifest loads. */
-      height: var(--mdc-tab-height);
-      color: blue;
-      --mdc-typography-button-text-transform: none;
-      --mdc-typography-button-font-weight: normal;
-      --mdc-typography-button-font-size: 0.75rem;
-      --mdc-typography-button-letter-spacing: normal;
-      --mdc-icon-button-size: 36px;
-      --mdc-icon-size: 18px;
-      --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
-      --mdc-tab-text-label-color-default: var(
-        --playground-file-picker-foreground-color,
-        black
-      );
-      color: #444;
-      border-bottom: var(--playground-border, solid 1px #ddd);
-      background: var(--playground-file-picker-background, white);
-      border-radius: inherit;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    mwc-tab {
-      flex: 0;
-    }
-
     slot {
+      height: 100%;
       display: block;
-    }
-
-    playground-code-editor,
-    slot {
-      height: calc(100% - var(--playground-bar-height, 35px));
+      background: var(--playground-code-background, unset);
     }
 
     playground-code-editor {
+      height: 100%;
       border-radius: inherit;
       border-top-left-radius: 0;
       border-top-right-radius: 0;
     }
-
-    slot {
-      background: var(--playground-code-background, unset);
-    }
-
-    :host([no-file-picker]) playground-code-editor,
-    slot {
-      height: calc(100%);
-    }
   `;
-
-  /**
-   * Whether to show the "Add File" button on the UI that allows
-   * users to add a new blank file to the project.
-   */
-  @property({type: Boolean})
-  enableAddFile = false;
-
-  @query('mwc-tab-bar')
-  private _tabBar!: TabBar;
 
   @query('playground-code-editor')
   private _editor!: PlaygroundCodeEditor;
 
-  @property({attribute: false})
-  files?: SampleFile[];
-
   /**
-   * The name of the project file that is currently being displayed. Set when
-   * changing tabs. Does not reflect to attribute.
+   * The name of the project file that is currently being displayed.
    */
   @property()
   filename?: string;
-
-  /**
-   * If true, don't display the top file-picker. Default: false (visible).
-   */
-  @property({type: Boolean, attribute: 'no-file-picker'})
-  noFilePicker = false;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
@@ -151,45 +73,30 @@ export class PlaygroundFileEditor extends LitElement {
   @property({type: Boolean, attribute: 'line-numbers'})
   lineNumbers = false;
 
-  @internalProperty()
-  private _currentFileIndex?: number;
-
-  private get _currentFile() {
-    return this._currentFileIndex === undefined
-      ? undefined
-      : this.files?.[this._currentFileIndex];
+  private get _files() {
+    return this._project?.files ?? [];
   }
 
-  /**
-   * The project that this editor is associated with. Either the
-   * `<playground-project>` node itself, or its `id` in the host scope.
-   */
-  @property()
-  project: PlaygroundProject | string | undefined = undefined;
-
-  private _project: PlaygroundProject | undefined = undefined;
-
-  /*
-   * The type of the file being edited, as represented by its usual file
-   * extension.
-   */
-  @property()
-  type: 'js' | 'ts' | 'html' | 'css' | undefined;
+  private get _currentFile() {
+    return this.filename
+      ? this._files.find((file) => file.name === this.filename)
+      : undefined;
+  }
 
   async update(changedProperties: PropertyValues) {
-    if (changedProperties.has('project')) {
-      this._findProjectAndRegister();
-    }
-    if (changedProperties.has('files') || changedProperties.has('filename')) {
-      this._currentFileIndex =
-        this.files && this.filename
-          ? this.files.map((f) => f.name).indexOf(this.filename)
-          : 0;
-      // TODO(justinfagnani): whyyyy?
-      if (this._tabBar) {
-        await this._tabBar.updateComplete;
-        this._tabBar.activeIndex = -1;
-        this._tabBar.activeIndex = this._currentFileIndex;
+    if (changedProperties.has('_project')) {
+      const oldProject = changedProperties.get('_project') as PlaygroundProject;
+      if (oldProject) {
+        oldProject.removeEventListener(
+          'filesChanged',
+          this._onProjectFilesChanged
+        );
+      }
+      if (this._project) {
+        this._project.addEventListener(
+          'filesChanged',
+          this._onProjectFilesChanged
+        );
       }
     }
     super.update(changedProperties);
@@ -197,34 +104,19 @@ export class PlaygroundFileEditor extends LitElement {
 
   render() {
     return html`
-      ${this.noFilePicker
-        ? nothing
-        : html` <mwc-tab-bar
-            part="file-picker"
-            .activeIndex=${this._currentFileIndex ?? 0}
-            @MDCTabBar:activated=${this._tabActivated}
-          >
-            ${this.files?.map((file) => {
-              const label =
-                file.label ||
-                file.name.substring(file.name.lastIndexOf('/') + 1);
-              return html`<mwc-tab
-                .isFadingIndicator=${true}
-                label=${label}
-              ></mwc-tab>`;
-            })}
-            ${this.enableAddFile
-              ? html`<mwc-icon-button icon="add"></mwc-icon-button>`
-              : nothing}
-          </mwc-tab-bar>`}
-      ${this._currentFile
+      ${this._files
         ? html`
             <playground-code-editor
-              .value=${this._currentFile.content}
+              .value=${
+                // We need live() because the lit's dirty-checking value for
+                // content is not updated by user edits.
+                live(this._currentFile?.content ?? '')
+              }
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
               .lineNumbers=${this.lineNumbers}
+              .readonly=${!this._currentFile}
               @change=${this._onEdit}
             >
             </playground-code-editor>
@@ -233,34 +125,10 @@ export class PlaygroundFileEditor extends LitElement {
     `;
   }
 
-  private _tabActivated(e: CustomEvent<{index: number}>) {
-    this._currentFileIndex = e.detail.index;
-    this.filename = this.files?.[this._currentFileIndex].name;
-  }
-
-  private _findProjectAndRegister() {
-    const prevProject = this._project;
-    if (this.project instanceof HTMLElement) {
-      this._project = this.project;
-    } else if (typeof this.project === 'string') {
-      this._project =
-        (((this.getRootNode() as unknown) as
-          | Document
-          | ShadowRoot).getElementById(
-          this.project
-        ) as PlaygroundProject | null) || undefined;
-    } else {
-      this._project = undefined;
-    }
-    if (prevProject !== this._project) {
-      if (prevProject) {
-        prevProject._unregisterEditor(this);
-      }
-      if (this._project) {
-        this._project._registerEditor(this);
-      }
-    }
-  }
+  private _onProjectFilesChanged = () => {
+    this.filename ??= this._files[0]?.name;
+    this.requestUpdate();
+  };
 
   private _onEdit() {
     const value = this._editor.value;

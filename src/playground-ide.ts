@@ -22,12 +22,13 @@ import {
   PropertyValues,
 } from 'lit-element';
 import {nothing} from 'lit-html';
-import {SampleFile} from './shared/worker-api.js';
 
 import './playground-project.js';
+import './playground-tab-bar.js';
 import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
+import {SampleFile} from './shared/worker-api.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -81,7 +82,9 @@ export class PlaygroundIde extends LitElement {
       border: var(--playground-border, solid 1px #ddd);
     }
 
-    playground-file-editor {
+    #lhs {
+      display: flex;
+      flex-direction: column;
       height: 100%;
       flex: 1;
       min-width: 100px;
@@ -90,6 +93,10 @@ export class PlaygroundIde extends LitElement {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
       border-right: var(--playground-border, solid 1px #ddd);
+    }
+
+    playground-tab-bar {
+      flex-shrink: 0;
     }
 
     #rhs {
@@ -170,11 +177,11 @@ export class PlaygroundIde extends LitElement {
   sandboxScope = 'playground-projects/';
 
   /**
-   * Whether to show the "Add File" button on the UI that allows
-   * users to add a new blank file to the project.
+   * Allow the user to add, remove, and rename files in the project's virtual
+   * filesystem. Disabled by default.
    */
   @property({type: Boolean})
-  enableAddFile = false;
+  editableFileSystem = false;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
@@ -210,6 +217,7 @@ export class PlaygroundIde extends LitElement {
 
   render() {
     const projectId = 'project';
+    const editorId = 'editor';
     return html`
       <playground-project
         id=${projectId}
@@ -222,14 +230,23 @@ export class PlaygroundIde extends LitElement {
         <slot></slot>
       </playground-project>
 
-      <playground-file-editor
-        part="editor"
-        exportparts="file-picker"
-        .lineNumbers=${this.lineNumbers}
-        .project=${projectId}
-        .enableAddFile=${this.enableAddFile}
-      >
-      </playground-file-editor>
+      <div id="lhs">
+        <playground-tab-bar
+          part="tab-bar"
+          .project=${projectId}
+          .editor=${editorId}
+          .editableFileSystem=${this.editableFileSystem}
+        >
+        </playground-tab-bar>
+
+        <playground-file-editor
+          id=${editorId}
+          part="editor"
+          .lineNumbers=${this.lineNumbers}
+          .project=${projectId}
+        >
+        </playground-file-editor>
+      </div>
 
       <div id="rhs">
         ${this.resizable

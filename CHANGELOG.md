@@ -17,6 +17,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [0.4.0] - 2021-01-15
+
+### Added
+
+- Added `editableFileSystem` property (`editable-file-system` attribute) to
+  `<playground-ide>`. When `true`, the user will be able to create, delete, and
+  rename files in the virtual filesystem.
+
+  - To create a new file: click the "+" icon button in the tab bar.
+  - To rename a file: click the three-dots menu button on its tab, and select
+    "Rename".
+  - To delete a file: click the three-dots menu button on its tab, and select
+    "Delete".
+
+- Added `<playground-file-system-controls>` element which displays popup
+  menus/dialogs for creating, deleting, and renaming files.
+
+### Changed
+
+- [**BREAKING**] The tab bar has been factored into a new standalone element
+  called `<playground-tab-bar>`. The `<playground-file-editor>` element no
+  longer integrates the tab bar, and the `noFilePicker` property has been
+  removed.
+
+- [**BREAKING**] The following CSS custom properties have been renamed:
+
+  - `--playground-file-picker-background` -> `--playground-tab-bar-background`
+  - `--playground-file-picker-foreground` -> `--playground-tab-bar-foreground`
+
+- [**BREAKING**] The following CSS shadow parts have been renamed:
+
+  - `file-picker` -> `tab-bar`
+
 ## [0.3.7] - 2021-01-08
 
 ### Added

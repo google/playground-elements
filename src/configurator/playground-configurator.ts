@@ -221,6 +221,7 @@ export class PlaygroundConfigurator extends LitElement {
             class="playground-theme-${this.values.getValue('theme')}"
             .lineNumbers=${this.values.getValue('lineNumbers')}
             .resizable=${this.values.getValue('resizable')}
+            .editableFileSystem=${this.values.getValue('editableFileSystem')}
             project-src="./project/project.json"
           >
           </playground-ide>

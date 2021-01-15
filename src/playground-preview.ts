@@ -14,7 +14,6 @@
 
 import {
   customElement,
-  LitElement,
   html,
   css,
   property,
@@ -22,11 +21,11 @@ import {
   PropertyValues,
   internalProperty,
 } from 'lit-element';
-import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
 import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
+import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
 /**
  * An HTML preview component consisting of an iframe and a floating reload
@@ -35,7 +34,7 @@ import '@material/mwc-linear-progress';
  * @fires reload - Fired when the user clicks the reload button
  */
 @customElement('playground-preview')
-export class PlaygroundPreview extends LitElement {
+export class PlaygroundPreview extends PlaygroundConnectedElement {
   static styles = css`
     :host {
       display: flex;
@@ -102,12 +101,6 @@ export class PlaygroundPreview extends LitElement {
   `;
 
   /**
-   * The URL of the document to load.
-   */
-  @property()
-  src: string | undefined;
-
-  /**
    * The string to display in the location bar.
    */
   @property()
@@ -118,15 +111,6 @@ export class PlaygroundPreview extends LitElement {
 
   @query('slot')
   private _slot?: HTMLSlotElement;
-
-  /**
-   * The project that this preview is associated with. Either the
-   * `<playground-project>` node itself, or its `id` in the host scope.
-   */
-  @property()
-  project: PlaygroundProject | string | undefined = undefined;
-
-  private _project: PlaygroundProject | undefined = undefined;
 
   /**
    * Whether the iframe is currently loading.
@@ -146,11 +130,30 @@ export class PlaygroundPreview extends LitElement {
   @internalProperty()
   private _loadedAtLeastOnce = false;
 
-  async update(changedProperties: PropertyValues) {
-    if (changedProperties.has('project')) {
-      this._findProjectAndRegister();
+  update(changedProperties: PropertyValues) {
+    if (changedProperties.has('_project')) {
+      const oldProject = changedProperties.get('_project') as PlaygroundProject;
+      if (oldProject) {
+        oldProject.removeEventListener('urlChanged', this.reload);
+        oldProject.removeEventListener('filesChanged', this.reload);
+        oldProject.removeEventListener('contentChanged', this.reload);
+      }
+      if (this._project) {
+        this._project.addEventListener('urlChanged', this.reload);
+        this._project.addEventListener('filesChanged', this.reload);
+        this._project.addEventListener('contentChanged', this.reload);
+      }
     }
     super.update(changedProperties);
+  }
+
+  private get _indexUrl() {
+    const base = this._project?.baseUrl;
+    if (!base) {
+      return '';
+    }
+    const url = new URL('index.html', base);
+    return url.toString();
   }
 
   render() {
@@ -160,8 +163,8 @@ export class PlaygroundPreview extends LitElement {
         <mwc-icon-button
           id="reload-button"
           part="preview-reload-button"
-          ?disabled=${!this.src}
-          @click=${this._onReloadClick}
+          ?disabled=${!this._indexUrl}
+          @click=${this.reload}
         >
           <!-- Source: https://material.io/resources/icons/?icon=refresh&style=baseline -->
           <svg
@@ -188,7 +191,6 @@ export class PlaygroundPreview extends LitElement {
         ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
 
         <iframe
-          src=${ifDefined(this.src)}
           @load=${this._onIframeLoad}
           ?hidden=${!this._loadedAtLeastOnce}
         ></iframe>
@@ -196,38 +198,27 @@ export class PlaygroundPreview extends LitElement {
     `;
   }
 
-  private _findProjectAndRegister() {
-    const prevProject = this._project;
-    if (this.project instanceof HTMLElement) {
-      this._project = this.project;
-    } else if (typeof this.project === 'string') {
-      this._project =
-        (((this.getRootNode() as unknown) as
-          | Document
-          | ShadowRoot).getElementById(
-          this.project
-        ) as PlaygroundProject | null) || undefined;
-    } else {
-      this._project = undefined;
-    }
-    if (prevProject !== this._project) {
-      if (prevProject) {
-        prevProject._unregisterPreview(this);
-      }
-      if (this._project) {
-        this._project._registerPreview(this);
-      }
+  updated() {
+    // TODO(aomarks) If we instead use an `ifDefined(this._indexUrl)` binding in
+    // the template, then the preview loads twice. I must be doing something
+    // dumb, but this hacky way of synchronizing the src works correctly for
+    // now. Figure out the more elegant solution.
+    if (this._iframe?.src !== this._indexUrl) {
+      this._iframe.src = this._indexUrl;
     }
   }
 
-  reload() {
+  reload = () => {
+    if (!this._iframe) {
+      return;
+    }
     // Note we can't use contentWindow.location.reload() here, because the
     // IFrame might be on a different origin.
     this._iframe.src = '';
-    this._iframe.src = this.src!;
+    this._iframe.src = this._indexUrl;
     this._loading = true;
     this._startLoadingBar();
-  }
+  };
 
   private _startLoadingBarTime = 0;
   private _stopLoadingBarTimerId?: ReturnType<typeof setTimeout>;
@@ -288,14 +279,8 @@ export class PlaygroundPreview extends LitElement {
     return false;
   }
 
-  private _onReloadClick() {
-    this._loading = true;
-    this._startLoadingBar();
-    this._project?.save();
-  }
-
   private _onIframeLoad() {
-    if (this.src) {
+    if (this._indexUrl) {
       // Check "src" because the iframe will fire a "load" for a blank page
       // before "src" is set.
       this._loading = false;

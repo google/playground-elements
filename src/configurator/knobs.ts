@@ -12,10 +12,10 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
- /**
-  * This kinda turned into something like storybook.js and similar. Maybe we
-  * should just use another library.
-  */
+/**
+ * This kinda turned into something like storybook.js and similar. Maybe we
+ * should just use another library.
+ */
 
 import {themeNames} from './themes.js';
 
@@ -126,20 +126,20 @@ export const knobs = [
     unsetLabel: 'From theme',
   }),
 
-  // file picker
+  // tab bar
   color({
-    id: 'filePickerBackground',
+    id: 'tabBarBackground',
     label: 'Background',
-    cssProperty: '--playground-file-picker-background',
+    cssProperty: '--playground-tab-bar-background',
     default: '#ffffff',
-    section: 'file picker',
+    section: 'tab bar',
   }),
   color({
-    id: 'filePickerForeground',
+    id: 'tabBarForeground',
     label: 'Foreground',
-    cssProperty: '--playground-file-picker-foreground-color',
+    cssProperty: '--playground-tab-bar-foreground-color',
     default: '#000000',
-    section: 'file picker',
+    section: 'tab bar',
   }),
 
   // preview toolbar
@@ -174,6 +174,13 @@ export const knobs = [
     section: 'general',
     default: false,
     htmlAttribute: 'resizable',
+  }),
+  checkbox({
+    id: 'editableFileSystem',
+    label: 'Editable filesystem',
+    section: 'general',
+    default: false,
+    htmlAttribute: 'editable-file-system',
   }),
   color({
     id: 'highlight',

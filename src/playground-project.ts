@@ -35,14 +35,6 @@ import {
   ACKNOWLEDGE_SW_CONNECTION,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
-import {PlaygroundPreview} from './playground-preview.js';
-import {PlaygroundFileEditor} from './playground-file-editor.js';
-
-declare global {
-  interface ImportMeta {
-    url: string;
-  }
-}
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -122,19 +114,13 @@ export class PlaygroundProject extends LitElement {
   @query('iframe')
   private _iframe!: HTMLIFrameElement;
 
-  /** The editors that have registered themselves with this project. */
-  private _editors = new Set<PlaygroundFileEditor>();
-
-  /** The previews that have registered themselves with this project. */
-  private _previews = new Set<PlaygroundPreview>();
-
   private get _normalizedSandboxBaseUrl() {
     const url = new URL(this.sandboxBaseUrl, document.location.href);
     url.pathname = endWithSlash(url.pathname);
     return url;
   }
 
-  private get _previewSrc() {
+  get baseUrl() {
     // Make sure that we've connected to the Service Worker and loaded the
     // project files before generating the preview URL. This ensures that there
     // are files to load when the iframe navigates to the URL.
@@ -143,7 +129,7 @@ export class PlaygroundProject extends LitElement {
     }
     // TODO (justinfagnani): lookup URL to show from project config
     const indexUrl = new URL(
-      `${endWithSlash(this.sandboxScope)}${this._sessionId}/index.html`,
+      `${endWithSlash(this.sandboxScope)}${this._sessionId}/`,
       this._normalizedSandboxBaseUrl
     );
     return indexUrl.href;
@@ -193,19 +179,15 @@ export class PlaygroundProject extends LitElement {
       this._fetchProject();
     }
     if (changedProperties.has('_files')) {
-      for (const editor of this._editors) {
-        editor.files = this._files;
-      }
       this.dispatchEvent(new CustomEvent('filesChanged'));
     }
     if (
+      changedProperties.has('sandboxScope') ||
+      changedProperties.has('_files') ||
       changedProperties.has('_serviceWorkerAPI') ||
-      changedProperties.has('_files')
+      changedProperties.has('_sessionId')
     ) {
-      const previewSrc = this._previewSrc;
-      for (const preview of this._previews) {
-        preview.src = previewSrc;
-      }
+      this.dispatchEvent(new CustomEvent('urlChanged'));
     }
     super.update(changedProperties);
   }
@@ -246,24 +228,6 @@ export class PlaygroundProject extends LitElement {
       };
     });
     this._compileProject();
-  }
-
-  _registerEditor(editor: PlaygroundFileEditor) {
-    editor.files = this._files;
-    this._editors.add(editor);
-  }
-
-  _unregisterEditor(editor: PlaygroundFileEditor) {
-    this._editors.delete(editor);
-  }
-
-  _registerPreview(preview: PlaygroundPreview) {
-    preview.src = this._previewSrc;
-    this._previews.add(preview);
-  }
-
-  _unregisterPreview(preview: PlaygroundPreview) {
-    this._previews.delete(preview);
   }
 
   private async _fetchProject() {
@@ -413,11 +377,61 @@ export class PlaygroundProject extends LitElement {
     // running.
     this._clearSaveTimeout();
     await this._compileProject();
-    for (const preview of this._previews) {
-      preview.reload();
+    this.dispatchEvent(new CustomEvent('contentChanged'));
+  }
+
+  isValidNewFilename(name: string): boolean {
+    return (
+      !!name && !!this._files && !this._files.some((file) => file.name === name)
+    );
+  }
+
+  addFile(name: string) {
+    if (!this._files) {
+      return;
     }
+    if (!this.isValidNewFilename(name)) {
+      return;
+    }
+    this._files = [
+      ...this._files,
+      {name, content: '', contentType: typeFromFilename(name)},
+    ];
+    this.save();
+  }
+
+  deleteFile(filename: string) {
+    this._files = this._files?.filter((file) => file.name !== filename);
+    this.save();
+  }
+
+  renameFile(oldName: string, newName: string) {
+    if (!oldName || !this._files) {
+      return;
+    }
+    if (!this.isValidNewFilename(newName)) {
+      return;
+    }
+    const file = this._files.find((file) => file.name === oldName);
+    if (!file) {
+      return;
+    }
+    // TODO(aomarks) Check name is unique;
+    file.name = newName;
+    file.contentType = typeFromFilename(newName);
+    this._files = [...this._files];
+    this.save();
   }
 }
+
+const typeFromFilename = (filename: string) => {
+  const idx = filename.lastIndexOf('.');
+  if (idx === -1 || idx === filename.length - 1) {
+    return undefined;
+  }
+  const extension = filename.slice(idx + 1);
+  return typeEnumToMimeType(extension);
+};
 
 const typeEnumToMimeType = (type?: string) => {
   // TODO: infer type based on extension too
