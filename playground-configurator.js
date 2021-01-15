@@ -1877,7 +1877,7 @@ let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSyste
     .add-file-button:hover {
       opacity: 100%;
     }
-  `,e([Y({type:Boolean})],Ao.prototype,"editableFileSystem",void 0),e([Q()],Ao.prototype,"_activeFileName",void 0),e([Q()],Ao.prototype,"_activeFileIndex",void 0),e([X("mwc-tab-bar")],Ao.prototype,"_tabBar",void 0),e([X("playground-file-system-controls")],Ao.prototype,"_fileSystemControls",void 0),e([Q()],Ao.prototype,"_editor",void 0),e([Y()],Ao.prototype,"editor",null),Ao=e([G("playground-tab-bar")],Ao);let Ro=class extends St{constructor(){super(...arguments),this.showMenuButton=!1,this.index=0}render(){return B`${super.render()}
+  `,e([Y({type:Boolean,attribute:"editable-file-system"})],Ao.prototype,"editableFileSystem",void 0),e([Q()],Ao.prototype,"_activeFileName",void 0),e([Q()],Ao.prototype,"_activeFileIndex",void 0),e([X("mwc-tab-bar")],Ao.prototype,"_tabBar",void 0),e([X("playground-file-system-controls")],Ao.prototype,"_fileSystemControls",void 0),e([Q()],Ao.prototype,"_editor",void 0),e([Y()],Ao.prototype,"editor",null),Ao=e([G("playground-tab-bar")],Ao);let Ro=class extends St{constructor(){super(...arguments),this.showMenuButton=!1,this.index=0}render(){return B`${super.render()}
     ${this.showMenuButton?this._menuButton:y} `}get _menuButton(){return B`<mwc-icon-button
       class="menu-button"
       @click=${this._onClickMenuButton}
@@ -1924,7 +1924,7 @@ let Ao=class extends Oo{constructor(){super(...arguments),this.editableFileSyste
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-let Io=class extends Oo{constructor(){super(...arguments),this.lineNumbers=!1,this._onProjectFilesChanged=()=>{this.filename??=this._files[0]?.name,this.requestUpdate()}}get _files(){return this._project?.files??[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&this._project.addEventListener("filesChanged",this._onProjectFilesChanged)}super.update(e)}render(){return B`
+let Io=class extends Oo{constructor(){super(...arguments),this.lineNumbers=!1,this._onProjectFilesChanged=()=>{this.filename??=this._files[0]?.name,this.requestUpdate()}}get _files(){return this._project?.files??[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&this._project.addEventListener("filesChanged",this._onProjectFilesChanged),this._onProjectFilesChanged()}super.update(e)}render(){return B`
       ${this._files?B`
             <playground-code-editor
               .value=${wo(this._currentFile?.content??"")}
@@ -2198,6 +2198,10 @@ let Bo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=ne
       flex-shrink: 0;
     }
 
+    playground-file-editor {
+      flex: 1;
+    }
+
     #rhs {
       height: 100%;
       width: max(100px, var(--playground-preview-width, 30%));
@@ -2240,7 +2244,7 @@ let Bo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=ne
       z-index: 99999;
       cursor: col-resize;
     }
-  `,e([Y({attribute:"project-src"})],Bo.prototype,"projectSrc",void 0),e([Y({attribute:"sandbox-base-url"})],Bo.prototype,"sandboxBaseUrl",void 0),e([Y({attribute:"sandbox-scope"})],Bo.prototype,"sandboxScope",void 0),e([Y({type:Boolean})],Bo.prototype,"editableFileSystem",void 0),e([Y({type:Boolean,attribute:"line-numbers"})],Bo.prototype,"lineNumbers",void 0),e([Y({type:Boolean})],Bo.prototype,"resizable",void 0),e([Y({attribute:!1})],Bo.prototype,"files",void 0),e([X("#resizeBar")],Bo.prototype,"_resizeBar",void 0),e([X("#rhs")],Bo.prototype,"_rhs",void 0),e([X("playground-project")],Bo.prototype,"_project",void 0),Bo=e([G("playground-ide")],Bo);const Wo=[ae`
+  `,e([Y({attribute:"project-src"})],Bo.prototype,"projectSrc",void 0),e([Y({attribute:"sandbox-base-url"})],Bo.prototype,"sandboxBaseUrl",void 0),e([Y({attribute:"sandbox-scope"})],Bo.prototype,"sandboxScope",void 0),e([Y({type:Boolean,attribute:"editable-file-system"})],Bo.prototype,"editableFileSystem",void 0),e([Y({type:Boolean,attribute:"line-numbers"})],Bo.prototype,"lineNumbers",void 0),e([Y({type:Boolean})],Bo.prototype,"resizable",void 0),e([Y({attribute:!1})],Bo.prototype,"files",void 0),e([X("#resizeBar")],Bo.prototype,"_resizeBar",void 0),e([X("#rhs")],Bo.prototype,"_rhs",void 0),e([X("playground-project")],Bo.prototype,"_project",void 0),Bo=e([G("playground-ide")],Bo);const Wo=[ae`
 .playground-theme-3024-day {
   --playground-code-background: rgb(247, 247, 247);
   --playground-code-default-color: rgb(58, 52, 50);
