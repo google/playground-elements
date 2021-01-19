@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Fixed
+
+- Bare module imports in `.js` files are now resolved to unpkg.com URLs just
+  like `.ts` files.
+
 ## [0.4.1] - 2021-01-15
 
 ### Fixed

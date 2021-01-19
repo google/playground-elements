@@ -23,6 +23,9 @@ const compilerOptions = {
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  allowJs: true,
+  // Allow emit of js files despite having the same name as input.
+  suppressOutputPathCheck: true,
 };
 
 /**
@@ -83,8 +86,7 @@ const workerAPI: TypeScriptWorkerAPI = {
     const program = languageService.getProgram();
     const emittedFiles = new Map<string, string>();
     for (const file of files) {
-      // Request an emit for ach TypeScritp file
-      if (file.name.endsWith('.ts')) {
+      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const url = new URL(file.name, self.origin).href;
         const sourceFile = program!.getSourceFile(url);
         program!.emit(
@@ -175,7 +177,7 @@ const loadFiles = (
 
     // For each file, fetch its imports
     for (const file of files) {
-      if (file.name.endsWith('.ts')) {
+      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const referrerUrl = new URL(file.name, self.origin);
         const preProcessedFile = ts.preProcessFile(
           file.content,
@@ -332,7 +334,8 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   fileExists(fileName: string): boolean {
-    return this.files.has(fileName);
+    const file = this.files.get(fileName);
+    return file !== undefined && file.status === 'resolved';
   }
 
   readFile(fileName: string): string | undefined {
