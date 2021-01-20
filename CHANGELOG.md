@@ -19,10 +19,63 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Import maps are now supported. This allows customizing the URL that a bare
+  module specifier resolves to, e.g. to a specific version, or to a different
+  CDN.
+
+  Note that import maps currently only apply to the _immediate imports of
+  project source files_, not to external transitive dependencies.
+
+  Also note `scopes` are not yet supported, only `imports`.
+
+  See https://github.com/WICG/import-maps and
+  https://wicg.github.io/import-maps/ for more information on import maps.
+
+  Previously, all bare modules resolved to unpkg.com URLs at the latest version.
+  This continues to be the fallback behavior if no import map is provided, or no
+  entry in it matches.
+
+  To specify an import map in a JSON project manifest, add an `importMap`
+  property:
+
+  ```json
+  {
+    "files": {
+      "index.html": {},
+      "my-element.ts": {}
+    },
+    "importMap": {
+      "imports": {
+        "lit-html": "https://unpkg.com/lit-html@next-major",
+        "lit-html/": "https://unpkg.com/lit-html@next-major/"
+      }
+    }
+  }
+  ```
+
+  To specify an import map inline, add a `<script type="sample/importmap">`
+  slotted child:
+
+  ```html
+  <playground-ide>
+    <script type="sample/importmap">
+      {
+        "imports": {
+          "lit-html": "https://unpkg.com/lit-html@next-major",
+          "lit-html/": "https://unpkg.com/lit-html@next-major/"
+        }
+      }
+    </script>
+    ...
+  </playground-ide>
+  ```
+
 ### Fixed
 
-- Bare module imports in `.js` files are now resolved to unpkg.com URLs just
-  like `.ts` files.
+- Bare module imports in `.js` files are now resolved in the same way as `.ts`
+  files.
 
 ## [0.4.1] - 2021-01-15
 

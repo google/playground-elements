@@ -33,6 +33,7 @@ import {
   CONFIGURE_PROXY,
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
+  ModuleImportMap,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
 
@@ -107,6 +108,7 @@ export class PlaygroundProject extends LitElement {
     Map<string, string> | undefined
   >(undefined);
   private _compiledFiles?: Map<string, string>;
+  private _importMap?: ModuleImportMap;
 
   @query('slot')
   private _slot!: HTMLSlotElement;
@@ -208,25 +210,40 @@ export class PlaygroundProject extends LitElement {
       // whitespace.
       return;
     }
-    const elements = this._slot.assignedElements({flatten: true});
-    const sampleScripts = elements.filter((e) =>
-      e.matches('script[type^=sample][filename]')
-    );
-    this._files = sampleScripts.map((s) => {
+    const files: SampleFile[] = [];
+    let importMap: ModuleImportMap = {};
+    for (const s of this._slot.assignedElements({flatten: true})) {
       const typeAttr = s.getAttribute('type');
-      const fileType = typeAttr!.substring('sample/'.length);
-      const name = s.getAttribute('filename')!;
-      const label = s.getAttribute('label') || undefined;
+      if (!typeAttr || !typeAttr.startsWith('sample/')) {
+        continue;
+      }
+      const fileType = typeAttr.substring('sample/'.length);
       // TODO (justinfagnani): better entity unescaping
       const content = s.textContent!.trim().replace('&lt;', '<');
-      const contentType = typeEnumToMimeType(fileType);
-      return {
-        name,
-        label,
-        content,
-        contentType,
-      };
-    });
+
+      if (fileType === 'importmap') {
+        try {
+          importMap = JSON.parse(content) as ModuleImportMap;
+        } catch {
+          console.warn('Invalid importmap JSON', s);
+        }
+      } else {
+        const name = s.getAttribute('filename');
+        if (!name) {
+          continue;
+        }
+        const label = s.getAttribute('label') || undefined;
+        const contentType = typeEnumToMimeType(fileType);
+        files.push({
+          name,
+          label,
+          content,
+          contentType,
+        });
+      }
+    }
+    this._files = files;
+    this._importMap = importMap;
     this._compileProject();
   }
 
@@ -261,6 +278,7 @@ export class PlaygroundProject extends LitElement {
       // Note we check _filesSetExternally again here in case it was set while
       // we were fetching the project and its files.
       this._files = files;
+      this._importMap = manifest.importMap;
       this._compileProject();
     }
   }
@@ -348,7 +366,8 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     this._compiledFilesPromise = (this._typescriptWorkerAPI!.compileProject(
-      this._files
+      this._files,
+      this._importMap
     ) as any) as Promise<Map<string, string>>;
     this._compiledFiles = undefined;
     this._compiledFiles = await this._compiledFilesPromise;
