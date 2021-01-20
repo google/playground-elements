@@ -108,7 +108,24 @@ export class PlaygroundProject extends LitElement {
     Map<string, string> | undefined
   >(undefined);
   private _compiledFiles?: Map<string, string>;
-  private _importMap?: ModuleImportMap;
+
+  private _validImportMap: ModuleImportMap = {};
+
+  private set _importMap(importMap: ModuleImportMap) {
+    const errors = validateImportMap(importMap);
+    if (errors.length > 0) {
+      for (const error of errors) {
+        console.error(error);
+      }
+      this._validImportMap = {};
+    } else {
+      this._validImportMap = importMap;
+    }
+  }
+
+  private get _importMap(): ModuleImportMap {
+    return this._validImportMap;
+  }
 
   @query('slot')
   private _slot!: HTMLSlotElement;
@@ -214,7 +231,7 @@ export class PlaygroundProject extends LitElement {
     let importMap: ModuleImportMap = {};
     for (const s of this._slot.assignedElements({flatten: true})) {
       const typeAttr = s.getAttribute('type');
-      if (!typeAttr || !typeAttr.startsWith('sample/')) {
+      if (!typeAttr?.startsWith('sample/')) {
         continue;
       }
       const fileType = typeAttr.substring('sample/'.length);
@@ -225,13 +242,14 @@ export class PlaygroundProject extends LitElement {
         try {
           importMap = JSON.parse(content) as ModuleImportMap;
         } catch {
-          console.warn('Invalid importmap JSON', s);
+          console.error('Invalid import map JSON', s);
         }
       } else {
         const name = s.getAttribute('filename');
         if (!name) {
           continue;
         }
+        // Note "" is an invalid label.
         const label = s.getAttribute('label') || undefined;
         const contentType = typeEnumToMimeType(fileType);
         files.push({
@@ -278,7 +296,7 @@ export class PlaygroundProject extends LitElement {
       // Note we check _filesSetExternally again here in case it was set while
       // we were fetching the project and its files.
       this._files = files;
-      this._importMap = manifest.importMap;
+      this._importMap = manifest.importMap ?? {};
       this._compileProject();
     }
   }
@@ -469,6 +487,70 @@ const typeEnumToMimeType = (type?: string) => {
       return 'text/css; charset=utf-8';
   }
   return undefined;
+};
+
+/**
+ * Validate an import map configuration (https://wicg.github.io/import-maps/).
+ * Returns an array of errors. If empty, the import map is valid.
+ */
+const validateImportMap = (importMap: unknown): string[] => {
+  const errors = [];
+
+  if (typeof importMap !== 'object' || importMap === null) {
+    errors.push(
+      `Import map is invalid because it must be an object,` +
+        ` but it was ${importMap === null ? 'null' : typeof importMap}.`
+    );
+    return errors;
+  }
+
+  const invalidKeys = Object.keys(importMap).filter((key) => key !== 'imports');
+  if (invalidKeys.length > 0) {
+    errors.push(
+      `Invalid import map properties: ${[...invalidKeys].join(', ')}.` +
+        ` Only "imports" are currently supported.`
+    );
+  }
+  const imports = (importMap as {imports: unknown}).imports;
+  if (imports === undefined) {
+    return errors;
+  }
+
+  if (typeof imports !== 'object' || imports === null) {
+    errors.push(
+      `Import map "imports" property is invalid` +
+        ` because it must be an object,` +
+        ` but it was ${imports === null ? 'null' : typeof imports}.`
+    );
+    return errors;
+  }
+
+  for (const [specifierKey, resolutionResult] of Object.entries(imports)) {
+    if (typeof resolutionResult !== 'string') {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address must be a string, but was` +
+          ` ${resolutionResult === null ? 'null' : typeof resolutionResult}`
+      );
+      continue;
+    }
+    if (specifierKey.endsWith('/') && !resolutionResult.endsWith('/')) {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address "${resolutionResult}" must end in a forward-slash.`
+      );
+    }
+    try {
+      new URL(resolutionResult);
+    } catch {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address "${resolutionResult}" is not a valid URL.`
+      );
+    }
+  }
+
+  return errors;
 };
 
 declare global {

@@ -69,8 +69,8 @@ const workerAPI: TypeScriptWorkerAPI = {
    * multiple <playground-project> instances to save memory and type analysis of
    * common lib files like lit-element, lib.d.ts and dom.d.ts.
    */
-  async compileProject(files: Array<SampleFile>, importMap?: ModuleImportMap) {
-    const moduleResolver = new ModuleResolver(importMap ?? {});
+  async compileProject(files: Array<SampleFile>, importMap: ModuleImportMap) {
+    const moduleResolver = new ModuleResolver(importMap);
     const loadedFiles = await loadFiles(files, moduleResolver);
     const languageServiceHost = new WorkerLanguageServiceHost(
       loadedFiles,
