@@ -33,6 +33,7 @@ import {
   CONFIGURE_PROXY,
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
+  ModuleImportMap,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
 
@@ -107,6 +108,24 @@ export class PlaygroundProject extends LitElement {
     Map<string, string> | undefined
   >(undefined);
   private _compiledFiles?: Map<string, string>;
+
+  private _validImportMap: ModuleImportMap = {};
+
+  private set _importMap(importMap: ModuleImportMap) {
+    const errors = validateImportMap(importMap);
+    if (errors.length > 0) {
+      for (const error of errors) {
+        console.error(error);
+      }
+      this._validImportMap = {};
+    } else {
+      this._validImportMap = importMap;
+    }
+  }
+
+  private get _importMap(): ModuleImportMap {
+    return this._validImportMap;
+  }
 
   @query('slot')
   private _slot!: HTMLSlotElement;
@@ -208,25 +227,41 @@ export class PlaygroundProject extends LitElement {
       // whitespace.
       return;
     }
-    const elements = this._slot.assignedElements({flatten: true});
-    const sampleScripts = elements.filter((e) =>
-      e.matches('script[type^=sample][filename]')
-    );
-    this._files = sampleScripts.map((s) => {
+    const files: SampleFile[] = [];
+    let importMap: ModuleImportMap = {};
+    for (const s of this._slot.assignedElements({flatten: true})) {
       const typeAttr = s.getAttribute('type');
-      const fileType = typeAttr!.substring('sample/'.length);
-      const name = s.getAttribute('filename')!;
-      const label = s.getAttribute('label') || undefined;
+      if (!typeAttr?.startsWith('sample/')) {
+        continue;
+      }
+      const fileType = typeAttr.substring('sample/'.length);
       // TODO (justinfagnani): better entity unescaping
       const content = s.textContent!.trim().replace('&lt;', '<');
-      const contentType = typeEnumToMimeType(fileType);
-      return {
-        name,
-        label,
-        content,
-        contentType,
-      };
-    });
+
+      if (fileType === 'importmap') {
+        try {
+          importMap = JSON.parse(content) as ModuleImportMap;
+        } catch {
+          console.error('Invalid import map JSON', s);
+        }
+      } else {
+        const name = s.getAttribute('filename');
+        if (!name) {
+          continue;
+        }
+        // Note "" is an invalid label.
+        const label = s.getAttribute('label') || undefined;
+        const contentType = typeEnumToMimeType(fileType);
+        files.push({
+          name,
+          label,
+          content,
+          contentType,
+        });
+      }
+    }
+    this._files = files;
+    this._importMap = importMap;
     this._compileProject();
   }
 
@@ -261,6 +296,7 @@ export class PlaygroundProject extends LitElement {
       // Note we check _filesSetExternally again here in case it was set while
       // we were fetching the project and its files.
       this._files = files;
+      this._importMap = manifest.importMap ?? {};
       this._compileProject();
     }
   }
@@ -348,7 +384,8 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     this._compiledFilesPromise = (this._typescriptWorkerAPI!.compileProject(
-      this._files
+      this._files,
+      this._importMap
     ) as any) as Promise<Map<string, string>>;
     this._compiledFiles = undefined;
     this._compiledFiles = await this._compiledFilesPromise;
@@ -450,6 +487,70 @@ const typeEnumToMimeType = (type?: string) => {
       return 'text/css; charset=utf-8';
   }
   return undefined;
+};
+
+/**
+ * Validate an import map configuration (https://wicg.github.io/import-maps/).
+ * Returns an array of errors. If empty, the import map is valid.
+ */
+const validateImportMap = (importMap: unknown): string[] => {
+  const errors = [];
+
+  if (typeof importMap !== 'object' || importMap === null) {
+    errors.push(
+      `Import map is invalid because it must be an object,` +
+        ` but it was ${importMap === null ? 'null' : typeof importMap}.`
+    );
+    return errors;
+  }
+
+  const invalidKeys = Object.keys(importMap).filter((key) => key !== 'imports');
+  if (invalidKeys.length > 0) {
+    errors.push(
+      `Invalid import map properties: ${[...invalidKeys].join(', ')}.` +
+        ` Only "imports" are currently supported.`
+    );
+  }
+  const imports = (importMap as {imports: unknown}).imports;
+  if (imports === undefined) {
+    return errors;
+  }
+
+  if (typeof imports !== 'object' || imports === null) {
+    errors.push(
+      `Import map "imports" property is invalid` +
+        ` because it must be an object,` +
+        ` but it was ${imports === null ? 'null' : typeof imports}.`
+    );
+    return errors;
+  }
+
+  for (const [specifierKey, resolutionResult] of Object.entries(imports)) {
+    if (typeof resolutionResult !== 'string') {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address must be a string, but was` +
+          ` ${resolutionResult === null ? 'null' : typeof resolutionResult}`
+      );
+      continue;
+    }
+    if (specifierKey.endsWith('/') && !resolutionResult.endsWith('/')) {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address "${resolutionResult}" must end in a forward-slash.`
+      );
+    }
+    try {
+      new URL(resolutionResult);
+    } catch {
+      errors.push(
+        `Import map key "${specifierKey}" is invalid because` +
+          ` address "${resolutionResult}" is not a valid URL.`
+      );
+    }
+  }
+
+  return errors;
 };
 
 declare global {

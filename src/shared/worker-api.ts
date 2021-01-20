@@ -69,7 +69,10 @@ export interface ServiceWorkerAPI {
 }
 
 export interface TypeScriptWorkerAPI {
-  compileProject(files: Array<SampleFile>): Promise<Map<string, string>>;
+  compileProject(
+    files: Array<SampleFile>,
+    importMap: ModuleImportMap
+  ): Promise<Map<string, string>>;
 }
 
 export interface FileAPI {
@@ -97,4 +100,10 @@ export interface FileOptions {
 
 export interface ProjectManifest {
   files?: {[filename: string]: FileOptions};
+  importMap?: ModuleImportMap;
+}
+
+export interface ModuleImportMap {
+  imports?: {[name: string]: string};
+  // No scopes for now.
 }

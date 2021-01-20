@@ -12,7 +12,11 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {TypeScriptWorkerAPI, SampleFile} from '../shared/worker-api.js';
+import {
+  TypeScriptWorkerAPI,
+  SampleFile,
+  ModuleImportMap,
+} from '../shared/worker-api.js';
 import {expose} from 'comlink';
 import * as ts from 'typescript';
 
@@ -23,6 +27,9 @@ const compilerOptions = {
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  allowJs: true,
+  // Allow emit of js files despite having the same name as input.
+  suppressOutputPathCheck: true,
 };
 
 /**
@@ -31,12 +38,13 @@ const compilerOptions = {
  * rewrites ourselves to ensure less module duplication.
  */
 const makeBareSpecifierTransformVisitor = (
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
+  moduleResolver: ModuleResolver
 ): ts.Visitor => {
   const visitor: ts.Visitor = (node) => {
     if (ts.isImportDeclaration(node)) {
       const specifier = (node.moduleSpecifier as ts.StringLiteral).text;
-      const {type, url} = resolveSpecifier(specifier, self.origin);
+      const {type, url} = moduleResolver.resolve(specifier, self.origin);
       if (type === 'bare') {
         const newNode = ts.getMutableClone(node);
         (newNode as {
@@ -50,14 +58,6 @@ const makeBareSpecifierTransformVisitor = (
   return visitor;
 };
 
-const transformers: ts.CustomTransformers = {
-  after: [
-    (context: ts.TransformationContext) => <T extends ts.Node>(node: T) => {
-      return ts.visitNode(node, makeBareSpecifierTransformVisitor(context));
-    },
-  ],
-};
-
 const workerAPI: TypeScriptWorkerAPI = {
   /**
    * Compiles a project, returning a Map of compiled file contents. The map only
@@ -69,8 +69,9 @@ const workerAPI: TypeScriptWorkerAPI = {
    * multiple <playground-project> instances to save memory and type analysis of
    * common lib files like lit-element, lib.d.ts and dom.d.ts.
    */
-  async compileProject(files: Array<SampleFile>) {
-    const loadedFiles = await loadFiles(files);
+  async compileProject(files: Array<SampleFile>, importMap: ModuleImportMap) {
+    const moduleResolver = new ModuleResolver(importMap);
+    const loadedFiles = await loadFiles(files, moduleResolver);
     const languageServiceHost = new WorkerLanguageServiceHost(
       loadedFiles,
       self.origin,
@@ -82,9 +83,18 @@ const workerAPI: TypeScriptWorkerAPI = {
     );
     const program = languageService.getProgram();
     const emittedFiles = new Map<string, string>();
+    const transformers: ts.CustomTransformers = {
+      after: [
+        (context: ts.TransformationContext) => <T extends ts.Node>(node: T) => {
+          return ts.visitNode(
+            node,
+            makeBareSpecifierTransformVisitor(context, moduleResolver)
+          );
+        },
+      ],
+    };
     for (const file of files) {
-      // Request an emit for ach TypeScritp file
-      if (file.name.endsWith('.ts')) {
+      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const url = new URL(file.name, self.origin).href;
         const sourceFile = program!.getSourceFile(url);
         program!.emit(
@@ -133,7 +143,8 @@ type FileRecord = PendingFileRecord | ResolvedFileRecord | RedirectedFileRecord;
  * checking we will load the entire module graph here.
  */
 const loadFiles = (
-  files: Array<SampleFile>
+  files: Array<SampleFile>,
+  moduleResolver: ModuleResolver
 ): Promise<Map<string, FileRecord>> => {
   return new Promise(async (resolve, _reject) => {
     const fileRecords = new Map<string, FileRecord>();
@@ -175,7 +186,7 @@ const loadFiles = (
 
     // For each file, fetch its imports
     for (const file of files) {
-      if (file.name.endsWith('.ts')) {
+      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const referrerUrl = new URL(file.name, self.origin);
         const preProcessedFile = ts.preProcessFile(
           file.content,
@@ -185,7 +196,7 @@ const loadFiles = (
 
         for (const importedFile of preProcessedFile.importedFiles) {
           const specifier = importedFile.fileName;
-          const {type, url} = resolveSpecifier(specifier, referrerUrl);
+          const {type, url} = moduleResolver.resolve(specifier, referrerUrl);
 
           if (!fileRecords.has(url)) {
             pendingFileCount++;
@@ -279,30 +290,93 @@ type ResolvedSpecifier = {
 
 /**
  * Resolve an import specifier. Uses HTML-spec semantics for URLs and relative
- * paths, and returns an unpkg.com URL for bare-specifiers.
+ * paths. Uses import map configuration if provided and matching, otherwise
+ * falls back to unpkg.com URL for bare-specifiers.
  */
-const resolveSpecifier = (
-  specifier: string,
-  referrer: string | URL
-): ResolvedSpecifier => {
-  try {
-    return {
-      type: 'url' as const,
-      url: new URL(specifier).href,
-    };
-  } catch (e) {
-    if (isRelativeOrAbsolutePath(specifier)) {
+class ModuleResolver {
+  private importMap: ModuleImportMap;
+
+  constructor(importMap: ModuleImportMap) {
+    this.importMap = importMap;
+  }
+
+  resolve(specifier: string, referrer: string | URL): ResolvedSpecifier {
+    const importMapUrl = this._resolveUsingImportMap(specifier);
+    if (importMapUrl !== null) {
+      return {type: 'bare' as const, url: importMapUrl};
+    }
+    try {
       return {
-        type: 'relative' as const,
-        url: new URL(specifier, referrer).href,
+        type: 'url' as const,
+        url: new URL(specifier).href,
+      };
+    } catch (e) {
+      if (isRelativeOrAbsolutePath(specifier)) {
+        return {
+          type: 'relative' as const,
+          url: new URL(specifier, referrer).href,
+        };
+      }
+      return {
+        type: 'bare' as const,
+        url: `https://unpkg.com/${specifier}`,
       };
     }
-    return {
-      type: 'bare' as const,
-      url: `https://unpkg.com/${specifier}`,
-    };
   }
-};
+
+  private _resolveUsingImportMap(specifier: string): string | null {
+    // For overview, see https://github.com/WICG/import-maps
+    // For algorithm, see https://wicg.github.io/import-maps/#resolving
+    // TODO(aomarks) Add support for `scopes`.
+    for (const [specifierKey, resolutionResult] of Object.entries(
+      this.importMap.imports ?? {}
+    )) {
+      // Note that per spec we shouldn't do a lookup for the exact match case,
+      // because if a trailing-slash mapping also matches and comes first, it
+      // should have precedence.
+      if (specifierKey === specifier) {
+        return resolutionResult;
+      }
+
+      if (specifierKey.endsWith('/') && specifier.startsWith(specifierKey)) {
+        if (!resolutionResult.endsWith('/')) {
+          console.warn(
+            `Could not resolve module specifier "${specifier}"` +
+              ` using import map key "${specifierKey}" because` +
+              ` address "${resolutionResult}" must end in a forward-slash.`
+          );
+          return null;
+        }
+
+        const afterPrefix = specifier.substring(specifierKey.length);
+        let url;
+        try {
+          url = new URL(afterPrefix, resolutionResult);
+        } catch {
+          console.warn(
+            `Could not resolve module specifier "${specifier}"` +
+              ` using import map key "${specifierKey}" because` +
+              ` "${afterPrefix}" could not be parsed` +
+              ` relative to "${resolutionResult}".`
+          );
+          return null;
+        }
+
+        const urlSerialized = url.href;
+        if (!urlSerialized.startsWith(resolutionResult)) {
+          console.warn(
+            `Could not resolve module specifier "${specifier}"` +
+              ` using import map key "${specifierKey}" because` +
+              ` "${afterPrefix}" backtracked above "${resolutionResult}".`
+          );
+          return null;
+        }
+        return urlSerialized;
+      }
+    }
+    return null;
+  }
+}
 
 class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   readonly compilerOptions: ts.CompilerOptions;
@@ -332,7 +406,8 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   fileExists(fileName: string): boolean {
-    return this.files.has(fileName);
+    const file = this.files.get(fileName);
+    return file !== undefined && file.status === 'resolved';
   }
 
   readFile(fileName: string): string | undefined {
