@@ -49,7 +49,7 @@ const makeBareSpecifierTransformVisitor = (
         const newNode = ts.getMutableClone(node);
         (newNode as {
           moduleSpecifier: ts.ImportDeclaration['moduleSpecifier'];
-        }).moduleSpecifier = ts.createStringLiteral(url + '?module');
+        }).moduleSpecifier = ts.createStringLiteral(url);
         return newNode;
       }
     }
@@ -319,7 +319,7 @@ class ModuleResolver {
       }
       return {
         type: 'bare' as const,
-        url: `https://unpkg.com/${specifier}`,
+        url: `https://unpkg.com/${specifier}?module`,
       };
     }
   }

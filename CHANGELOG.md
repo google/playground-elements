@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Fixed
+
+- Do not add `?module` parameter to import map URLs for bare module specifiers,
+  only to fallback unpkg.com URLs.
+
 ## [0.4.2] - 2021-01-21
 
 ### Added
