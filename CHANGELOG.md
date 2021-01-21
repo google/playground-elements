@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Do not add `?module` parameter to import map URLs for bare module specifiers,
   only to fallback unpkg.com URLs.
 
+- Prevent `z-index` issues with CodeMirror scrollbars and other elements by
+  using a separate stacking context.
+
 ## [0.4.2] - 2021-01-21
 
 ### Added

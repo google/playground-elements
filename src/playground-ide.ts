@@ -80,6 +80,10 @@ export class PlaygroundIde extends LitElement {
       height: 350px;
       min-width: 200px;
       border: var(--playground-border, solid 1px #ddd);
+      /* The invisible resize bar has a high z-index so that it's above
+      CodeMirror. But we don't want it also above other elements on the page.
+      Force a new stacking context. */
+      isolation: isolate;
     }
 
     #lhs {
