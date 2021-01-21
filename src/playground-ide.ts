@@ -270,7 +270,6 @@ export class PlaygroundIde extends LitElement {
                        preview-location,
                        preview-reload-button,
                        preview-loading-indicator"
-          location="Result"
           .project=${projectId}
         ></playground-preview>
       </div>

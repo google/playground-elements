@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Prevent `z-index` issues with CodeMirror scrollbars and other elements by
   using a separate stacking context.
 
+### Changed
+
+- `<playground-preview>` now has a default label (called `location`) of
+  `"Result"`.
+
 ## [0.4.2] - 2021-01-21
 
 ### Added
