@@ -1095,6 +1095,10 @@ span.CodeMirror-selectedtext {
         display: block;
         font-family: var(--playground-code-font-family, monospace);
         font-size: var(--playground-code-font-size, unset);
+        /* CodeMirror uses z-indexes up to 6 to e.g. place scrollbars above the
+        code area. However, this can create undesirable stacking effects with
+        the rest of the page. Force a new stacking context. */
+        isolation: isolate;
       }
 
       .CodeMirror {
@@ -2012,7 +2016,7 @@ const No=ae`@keyframes mdc-linear-progress-primary-indeterminate-translate{0%{tr
  * subject to an additional IP rights grant found at
  * http://polymer.github.io/PATENTS.txt
  */
-let Bo=class extends Lo{constructor(){super(...arguments),this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{this._iframe&&(this._iframe.src="",this._iframe.src=this._indexUrl,this._loading=!0,this._startLoadingBar())},this._startLoadingBarTime=0}update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("urlChanged",this.reload),t.removeEventListener("filesChanged",this.reload),t.removeEventListener("contentChanged",this.reload)),this._project&&(this._project.addEventListener("urlChanged",this.reload),this._project.addEventListener("filesChanged",this.reload),this._project.addEventListener("contentChanged",this.reload))}super.update(e)}get _indexUrl(){const e=this._project?.baseUrl;return e?new URL("index.html",e).toString():""}render(){return B`
+let Bo=class extends Lo{constructor(){super(...arguments),this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{this._iframe&&(this._iframe.src="",this._iframe.src=this._indexUrl,this._loading=!0,this._startLoadingBar())},this._startLoadingBarTime=0}update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("urlChanged",this.reload),t.removeEventListener("filesChanged",this.reload),t.removeEventListener("contentChanged",this.reload)),this._project&&(this._project.addEventListener("urlChanged",this.reload),this._project.addEventListener("filesChanged",this.reload),this._project.addEventListener("contentChanged",this.reload))}super.update(e)}get _indexUrl(){const e=this._project?.baseUrl;return e?new URL("index.html",e).toString():""}render(){return B`
       <div id="toolbar" part="preview-toolbar">
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
@@ -2169,7 +2173,6 @@ let Wo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=ne
                        preview-location,
                        preview-reload-button,
                        preview-loading-indicator"
-          location="Result"
           .project=${e}
         ></playground-preview>
       </div>
@@ -2179,6 +2182,10 @@ let Wo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=ne
       height: 350px;
       min-width: 200px;
       border: var(--playground-border, solid 1px #ddd);
+      /* The invisible resize bar has a high z-index so that it's above
+      CodeMirror. But we don't want it also above other elements on the page.
+      Force a new stacking context. */
+      isolation: isolate;
     }
 
     #lhs {
