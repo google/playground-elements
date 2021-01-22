@@ -104,7 +104,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
    * The string to display in the location bar.
    */
   @property()
-  location?: string;
+  location = 'Result';
 
   @query('iframe')
   private _iframe!: HTMLIFrameElement;

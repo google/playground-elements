@@ -76,6 +76,10 @@ export class PlaygroundCodeEditor extends LitElement {
         display: block;
         font-family: var(--playground-code-font-family, monospace);
         font-size: var(--playground-code-font-size, unset);
+        /* CodeMirror uses z-indexes up to 6 to e.g. place scrollbars above the
+        code area. However, this can create undesirable stacking effects with
+        the rest of the page. Force a new stacking context. */
+        isolation: isolate;
       }
 
       .CodeMirror {
