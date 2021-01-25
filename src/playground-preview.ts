@@ -135,13 +135,13 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
       const oldProject = changedProperties.get('_project') as PlaygroundProject;
       if (oldProject) {
         oldProject.removeEventListener('urlChanged', this.reload);
-        oldProject.removeEventListener('filesChanged', this.reload);
-        oldProject.removeEventListener('contentChanged', this.reload);
+        // To be more responsive, we start loading as soon as compilation
+        // starts. This is safe because requests block on compilation finishing.
+        oldProject.removeEventListener('compileStart', this.reload);
       }
       if (this._project) {
         this._project.addEventListener('urlChanged', this.reload);
-        this._project.addEventListener('filesChanged', this.reload);
-        this._project.addEventListener('contentChanged', this.reload);
+        this._project.addEventListener('compileStart', this.reload);
       }
     }
     super.update(changedProperties);
