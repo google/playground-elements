@@ -1,6 +1,6 @@
 {
   "name": "playground-elements",
-  "version": "0.4.3",
+  "version": "0.5.0-pre.1",
   "description": "A multi-file code editor component with live preview",
   "homepage": "https://github.com/PolymerLabs/playground-elements#readme",
   "repository": "github:PolymerLabs/playground-elements",
@@ -78,7 +78,9 @@
     "@material/mwc-tab": "^0.20.0",
     "@material/mwc-tab-bar": "^0.20.0",
     "@material/mwc-textfield": "^0.20.0",
+    "@types/es-module-lexer": "^0.3.0",
     "comlink": "^4.3.0",
+    "es-module-lexer": "^0.3.26",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1",
     "tslib": "^2.0.3"

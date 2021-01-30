@@ -164,6 +164,11 @@ export class PlaygroundIde extends LitElement {
     // case we need to handle is properties set before upgrade or before we
     // first render the <playground-project>.
     //
+    // Note we set `hasChanged: () => false` because we don't need to trigger
+    // `update` when this property changes. (Why be a lit property at all?
+    // Because we want [1] to respond to atribute changes, and [2] to inherit
+    // property values set before upgrade).
+    //
     // TODO(aomarks) Maybe a "delegate" decorator for this pattern?
     const project = this._project;
     if (project) {
