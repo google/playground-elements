@@ -153,9 +153,65 @@ export class PlaygroundIde extends LitElement {
 
   /**
    * A document-relative path to a project configuration file.
+   *
+   * When both `projectSrc` and `files` are set, the one set most recently wins.
+   * Slotted children win only if both `projectSrc` and `files` are undefined.
    */
-  @property({attribute: 'project-src'})
-  projectSrc?: string;
+  @property({attribute: 'project-src', hasChanged: () => false})
+  get projectSrc(): string | undefined {
+    // To minimize synchronization complexity, we delegate the `projectSrc` and
+    // `files` getters/setters directly to our <playground-project>. The only
+    // case we need to handle is properties set before upgrade or before we
+    // first render the <playground-project>.
+    //
+    // Note we set `hasChanged: () => false` because we don't need to trigger
+    // `update` when this property changes. (Why be a lit property at all?
+    // Because we want [1] to respond to atribute changes, and [2] to inherit
+    // property values set before upgrade).
+    //
+    // TODO(aomarks) Maybe a "delegate" decorator for this pattern?
+    const project = this._project;
+    if (project) {
+      return project.projectSrc;
+    } else {
+      // We haven't rendered yet.
+      return this._projectSrcSetBeforeRender;
+    }
+  }
+
+  set projectSrc(src: string | undefined) {
+    const project = this._project;
+    if (project) {
+      project.projectSrc = src;
+    } else {
+      this._projectSrcSetBeforeRender = src;
+    }
+  }
+
+  /**
+   * Get or set the array of project files.
+   *
+   * When both `projectSrc` and `files` are set, the one set most recently wins.
+   * Slotted children win only if both `projectSrc` and `files` are undefined.
+   */
+  @property({attribute: false, hasChanged: () => false})
+  get files(): SampleFile[] | undefined {
+    const project = this._project;
+    if (project) {
+      return project.files;
+    } else {
+      return this._filesSetBeforeRender;
+    }
+  }
+
+  set files(files: SampleFile[] | undefined) {
+    const project = this._project;
+    if (project) {
+      project.files = files;
+    } else {
+      this._filesSetBeforeRender = files;
+    }
+  }
 
   /**
    * Base URL for script execution sandbox.
@@ -205,14 +261,8 @@ export class PlaygroundIde extends LitElement {
   @property({type: Boolean})
   resizable = false;
 
-  /**
-   * Get or set the array of project files.
-   *
-   * Files set through this property always take precedence over `projectSrc`
-   * and slotted children.
-   */
-  @property({attribute: false})
-  files?: SampleFile[];
+  @query('playground-project')
+  private _project!: PlaygroundProject;
 
   @query('#resizeBar')
   private _resizeBar!: HTMLDivElement;
@@ -220,8 +270,8 @@ export class PlaygroundIde extends LitElement {
   @query('#rhs')
   private _rhs!: HTMLDivElement;
 
-  @query('playground-project')
-  private _project!: PlaygroundProject;
+  private _filesSetBeforeRender?: SampleFile[];
+  private _projectSrcSetBeforeRender?: string;
 
   render() {
     const projectId = 'project';
@@ -229,9 +279,6 @@ export class PlaygroundIde extends LitElement {
     return html`
       <playground-project
         id=${projectId}
-        .files=${this.files}
-        @filesChanged=${this._onFilesChanged}
-        .projectSrc=${this.projectSrc}
         .sandboxBaseUrl=${this.sandboxBaseUrl}
         .sandboxScope=${this.sandboxScope}
       >
@@ -260,7 +307,7 @@ export class PlaygroundIde extends LitElement {
         ${this.resizable
           ? html`<div
               id="resizeBar"
-              @pointerdown=${this.onResizeBarPointerdown}
+              @pointerdown=${this._onResizeBarPointerdown}
             ></div>`
           : nothing}
 
@@ -276,6 +323,17 @@ export class PlaygroundIde extends LitElement {
     `;
   }
 
+  firstUpdated() {
+    if (this._filesSetBeforeRender) {
+      this._project.files = this._filesSetBeforeRender;
+      this._filesSetBeforeRender = undefined;
+    }
+    if (this._projectSrcSetBeforeRender) {
+      this._project.projectSrc = this._projectSrcSetBeforeRender;
+      this._projectSrcSetBeforeRender = undefined;
+    }
+  }
+
   async update(changedProperties: PropertyValues<this>) {
     if (changedProperties.has('resizable') && this.resizable === false) {
       // Note we set this property on the RHS element instead of the host so
@@ -286,11 +344,7 @@ export class PlaygroundIde extends LitElement {
     super.update(changedProperties);
   }
 
-  private _onFilesChanged() {
-    this.files = this._project.files;
-  }
-
-  private onResizeBarPointerdown({pointerId}: PointerEvent) {
+  private _onResizeBarPointerdown({pointerId}: PointerEvent) {
     const bar = this._resizeBar;
     bar.setPointerCapture(pointerId);
 

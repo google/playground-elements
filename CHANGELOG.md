@@ -17,6 +17,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] When both `projectSrc` and `files` are set, it is now the _most
+  recently set_ property that wins. Previously, `files` always won.
+
+- `<playground-preview>` now auto-reloads after 300ms, previously 500ms.
+
+### Added
+
+- `<playground-project>` now emits a `compileStart` and `compileDone` event.
+
+### Removed
+
+- [**BREAKING**] `<playground-project>` no longer emits a `contentChanged` event.
+
 ## [0.4.3] - 2021-01-21
 
 ### Fixed

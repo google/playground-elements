@@ -36,6 +36,7 @@ import {
   ModuleImportMap,
 } from './shared/worker-api.js';
 import {getRandomString, endWithSlash} from './shared/util.js';
+import {Deferred} from './shared/deferred.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -61,9 +62,74 @@ const typescriptWorkerScriptUrl = new URL(
 export class PlaygroundProject extends LitElement {
   /**
    * A document-relative path to a project configuration file.
+   *
+   * When both `projectSrc` and `files` are set, the one set most recently wins.
+   * Slotted children win only if both `projectSrc` and `files` are undefined
    */
-  @property({attribute: 'project-src'})
-  projectSrc?: string;
+  @property({attribute: 'project-src', hasChanged: () => false})
+  get projectSrc(): string | undefined {
+    if (this._source.type === 'url') {
+      return this._source.url;
+    }
+    return undefined;
+  }
+
+  set projectSrc(url: string | undefined) {
+    if (url) {
+      if (this._source.type !== 'url' || this._source.url !== url) {
+        this._source = {type: 'url', url};
+      }
+    } else if (this._source.type === 'url') {
+      this._source = {type: 'none'};
+    }
+  }
+
+  /**
+   * Get or set the array of project files.
+   *
+   * When both `projectSrc` and `files` are set, the one set most recently wins.
+   * Slotted children win only if both `projectSrc` and `files` are undefined
+   */
+  @property({attribute: false, hasChanged: () => false})
+  get files(): SampleFile[] | undefined {
+    return this._files;
+  }
+
+  set files(files: SampleFile[] | undefined) {
+    if (files) {
+      for (const file of files) {
+        if (!file.contentType) {
+          file.contentType = typeFromFilename(file.name);
+        }
+      }
+      this._source = {type: 'direct', files};
+    } else if (this._source.type === 'direct') {
+      this._source = {type: 'none'};
+    }
+  }
+
+  /**
+   * This property is used to settle which of the multiple ways a project can be
+   * specified was set most recently.
+   */
+  @internalProperty()
+  private _source:
+    | {
+        type: 'none';
+      }
+    | {
+        type: 'direct';
+        files: SampleFile[];
+      }
+    | {
+        type: 'url';
+        url: string;
+      }
+    | {
+        type: 'slot';
+        files: SampleFile[];
+        importMap: ModuleImportMap;
+      } = {type: 'none'};
 
   /**
    * Base URL for script execution sandbox.
@@ -98,12 +164,15 @@ export class PlaygroundProject extends LitElement {
    */
   private readonly _sessionId: string = generateUniqueSessionId();
 
-  @internalProperty()
   private _files?: SampleFile[];
 
   @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
-  private _typescriptWorkerAPI?: Remote<TypeScriptWorkerAPI>;
+
+  private _deferredTypeScriptWorkerApi = new Deferred<
+    Remote<TypeScriptWorkerAPI>
+  >();
+
   private _compiledFilesPromise = Promise.resolve<
     Map<string, string> | undefined
   >(undefined);
@@ -163,52 +232,57 @@ export class PlaygroundProject extends LitElement {
     ).href;
   }
 
-  private _filesSetExternally = false;
-
-  /**
-   * Get or set the array of project files.
-   *
-   * Files set through this property always take precedence over `projectSrc`
-   * and slotted children.
-   */
-  get files(): SampleFile[] | undefined {
-    return this._files;
-  }
-
-  set files(files: SampleFile[] | undefined) {
-    if (!files) {
-      return;
-    }
-    this._filesSetExternally = true;
-    this._files = files;
-    if (this._typescriptWorkerAPI) {
-      this._compileProject();
-    }
-    this.requestUpdate();
-  }
-
   static styles = css`
     iframe {
       display: none;
     }
   `;
 
-  update(changedProperties: PropertyValues) {
-    if (changedProperties.has('projectSrc')) {
-      this._fetchProject();
-    }
-    if (changedProperties.has('_files')) {
-      this.dispatchEvent(new CustomEvent('filesChanged'));
+  async update(changedProperties: PropertyValues) {
+    if (changedProperties.has('_source')) {
+      this._loadProjectFromSource();
     }
     if (
       changedProperties.has('sandboxScope') ||
-      changedProperties.has('_files') ||
-      changedProperties.has('_serviceWorkerAPI') ||
-      changedProperties.has('_sessionId')
+      changedProperties.has('sandboxBaseUrl') ||
+      changedProperties.has('_serviceWorkerAPI')
     ) {
       this.dispatchEvent(new CustomEvent('urlChanged'));
     }
     super.update(changedProperties);
+  }
+
+  private async _loadProjectFromSource() {
+    const source = this._source;
+    switch (source.type) {
+      case 'none':
+        this._files = undefined;
+        this._importMap = {};
+        break;
+      case 'direct':
+        this._files = source.files;
+        this._importMap = {};
+        break;
+      case 'slot':
+        this._files = source.files;
+        this._importMap = source.importMap;
+        break;
+      case 'url':
+        const {files, importMap} = await fetchProject(source.url);
+        // Note the source could have changed while fetching, hence the
+        // double-check here.
+        if (source !== this._source) {
+          return;
+        }
+        this._files = files;
+        this._importMap = importMap;
+        break;
+      default:
+        source as void; // Exhaustive check.
+        break;
+    }
+    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.save();
   }
 
   render() {
@@ -222,13 +296,18 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _slotChange(_e: Event) {
-    if (this.projectSrc || this._filesSetExternally) {
-      // Note that the slotchange event will fire even if the only child is
-      // whitespace.
+    const {type} = this._source;
+    if (type !== 'none' && type !== 'slot') {
+      // It's a little tricky to do "most recent wins" with slots, because the
+      // slotchange event will always fire after the first render, giving the
+      // illusion that it was set after the other methods. We could do some
+      // extra book-keeping to make this work, but it doesn't seem worth the
+      // complexity, because it should be very rare to [1] set a `projectSrc` or
+      // `files`, and then [2] slot some new children.
       return;
     }
     const files: SampleFile[] = [];
-    let importMap: ModuleImportMap = {};
+    let importMap: ModuleImportMap | undefined = undefined;
     for (const s of this._slot.assignedElements({flatten: true})) {
       const typeAttr = s.getAttribute('type');
       if (!typeAttr?.startsWith('sample/')) {
@@ -260,53 +339,16 @@ export class PlaygroundProject extends LitElement {
         });
       }
     }
-    this._files = files;
-    this._importMap = importMap;
-    this._compileProject();
-  }
-
-  private async _fetchProject() {
-    if (!this.projectSrc || this._filesSetExternally) {
-      return;
-    }
-    const projectUrl = new URL(this.projectSrc, document.baseURI);
-    const manifestFetched = await fetch(this.projectSrc);
-    const manifest = (await manifestFetched.json()) as ProjectManifest;
-
-    const filenames = manifest.files ? Object.keys(manifest.files) : [];
-    const files = await Promise.all(
-      filenames.map(async (filename) => {
-        const fileUrl = new URL(filename, projectUrl);
-        const response = await fetch(fileUrl.href);
-        if (response.status === 404) {
-          throw new Error(`Could not find file ${filename}`);
-        }
-
-        // Remember the mime type so that the service worker can set it
-        const contentType = response.headers.get('Content-Type') || undefined;
-        return {
-          name: filename,
-          label: manifest.files![filename].label,
-          content: await response.text(),
-          contentType,
-        };
-      })
-    );
-    if (!this._filesSetExternally) {
-      // Note we check _filesSetExternally again here in case it was set while
-      // we were fetching the project and its files.
-      this._files = files;
-      this._importMap = manifest.importMap ?? {};
-      this._compileProject();
+    if (files.length > 0 || importMap !== undefined) {
+      this._source = {type: 'slot', files, importMap: importMap ?? {}};
     }
   }
 
   firstUpdated() {
     const worker = new Worker(typescriptWorkerScriptUrl);
-    this._typescriptWorkerAPI = wrap<TypeScriptWorkerAPI>(worker);
-    if (this._files) {
-      this._compileProject();
-    }
+    this._deferredTypeScriptWorkerApi.resolve(
+      wrap<TypeScriptWorkerAPI>(worker)
+    );
   }
 
   private _onServiceWorkerProxyIframeLoad() {
@@ -379,16 +421,23 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  private async _compileProject() {
-    if (this._files === undefined) {
-      return;
-    }
-    this._compiledFilesPromise = (this._typescriptWorkerAPI!.compileProject(
-      this._files,
-      this._importMap
-    ) as any) as Promise<Map<string, string>>;
+  async save() {
+    // Clear in case a save is explicitly requested while a timer is already
+    // running.
+    this._clearSaveTimeout();
     this._compiledFiles = undefined;
-    this._compiledFiles = await this._compiledFilesPromise;
+    this.dispatchEvent(new CustomEvent('compileStart'));
+    if (this._files !== undefined) {
+      const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+      this._compiledFilesPromise = (workerApi.compileProject(
+        this._files,
+        this._importMap
+      ) as any) as Promise<Map<string, string>>;
+      this._compiledFiles = await this._compiledFilesPromise;
+    } else {
+      this._compiledFilesPromise = Promise.resolve(undefined);
+    }
+    this.dispatchEvent(new CustomEvent('compileDone'));
   }
 
   private _saveTimeoutId?: ReturnType<typeof setTimeout> = undefined;
@@ -406,15 +455,7 @@ export class PlaygroundProject extends LitElement {
     // should probably be on the editor or the preview, not the project.
     this._saveTimeoutId = setTimeout(() => {
       this.save();
-    }, 500);
-  }
-
-  async save() {
-    // Clear in case a save is explicitly requested while a timer is already
-    // running.
-    this._clearSaveTimeout();
-    await this._compileProject();
-    this.dispatchEvent(new CustomEvent('contentChanged'));
+    }, 300);
   }
 
   isValidNewFilename(name: string): boolean {
@@ -434,11 +475,13 @@ export class PlaygroundProject extends LitElement {
       ...this._files,
       {name, content: '', contentType: typeFromFilename(name)},
     ];
+    this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
 
   deleteFile(filename: string) {
     this._files = this._files?.filter((file) => file.name !== filename);
+    this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
 
@@ -457,9 +500,37 @@ export class PlaygroundProject extends LitElement {
     file.name = newName;
     file.contentType = typeFromFilename(newName);
     this._files = [...this._files];
+    this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
 }
+
+const fetchProject = async (url: string) => {
+  const projectUrl = new URL(url, document.baseURI);
+  const manifestFetched = await fetch(url);
+  const manifest = (await manifestFetched.json()) as ProjectManifest;
+
+  const filenames = manifest.files ? Object.keys(manifest.files) : [];
+  const files = await Promise.all(
+    filenames.map(async (filename) => {
+      const fileUrl = new URL(filename, projectUrl);
+      const response = await fetch(fileUrl.href);
+      if (response.status === 404) {
+        throw new Error(`Could not find file ${filename}`);
+      }
+
+      // Remember the mime type so that the service worker can set it
+      const contentType = response.headers.get('Content-Type') || undefined;
+      return {
+        name: filename,
+        label: manifest.files![filename].label,
+        content: await response.text(),
+        contentType,
+      };
+    })
+  );
+  return {files, importMap: manifest.importMap ?? {}};
+};
 
 const typeFromFilename = (filename: string) => {
   const idx = filename.lastIndexOf('.');
