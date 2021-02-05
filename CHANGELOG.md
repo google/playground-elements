@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] Leading whitespace that is common to all lines of slotted
+  `<script>` files will now be trimmed, along with empty leading/trailing lines.
+  To disable this behavior, add the `preserve-whitespace` attribute.
+
 ## [0.5.0] - 2021-01-30
 
 ### Changed
