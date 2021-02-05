@@ -131,7 +131,7 @@ export const knobs = [
     id: 'tabBarBackground',
     label: 'Background',
     cssProperty: '--playground-tab-bar-background',
-    default: '#ffffff',
+    default: '#eaeaea',
     section: 'tab bar',
   }),
   color({

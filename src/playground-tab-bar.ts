@@ -47,7 +47,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     :host {
       display: flex;
       height: var(--playground-bar-height, 35px);
-      background: #eaeaea;
+      background: var(--playground-tab-bar-background, #eaeaea);
       flex-direction: row;
       align-items: center;
       --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
@@ -57,6 +57,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       overflow: hidden;
       height: 100%;
       --mdc-tab-height: var(--playground-bar-height, 35px);
+      --mdc-tab-text-label-color-default: var(
+        --playground-tab-bar-foreground-color,
+        #000
+      );
       --mdc-typography-button-text-transform: none;
       --mdc-typography-button-font-weight: normal;
       --mdc-typography-button-font-size: 0.75rem;

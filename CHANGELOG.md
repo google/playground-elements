@@ -25,6 +25,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `<script>` files will now be trimmed, along with empty leading/trailing lines.
   To disable this behavior, add the `preserve-whitespace` attribute.
 
+### Added
+
+- Added `--playground-floating-controls-color` to control the highlight color of
+  buttons and text inputs in floating add/remove/rename file controls. Defaults
+  to `var(--playground-highlight-color, #6200ee)`.
+
+### Fixed
+
+- Fix regression where `--playground-tab-bar-background` and
+  `--playground-tab-bar-foreground-color` did not apply correctly.
+
 ## [0.5.0] - 2021-01-30
 
 ### Changed
