@@ -5,7 +5,7 @@
   Serverless code experiences with web components.
   <br>
   <br>
-  <img src="./images/preview.png" width="703" height="319">
+  <img src="./images/preview.png" width="650">
  <br><br>
   <a href="https://www.npmjs.com/package/playground-elements">
     <img height="20" src="https://img.shields.io/npm/v/playground-elements.svg"></img></a>
