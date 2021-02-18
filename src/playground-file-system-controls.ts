@@ -22,11 +22,15 @@ import {
 } from 'lit-element';
 import {nothing} from 'lit-html';
 
-import '@material/mwc-menu/mwc-menu-surface.js';
+// Note despite usual best practices, we should _not_ import
+// @material/mwc-list-item directly, because @material/mwc-list already imports
+// it, and this causes a duplicate registration error on unpkg.com because of
+// redirects.
 import '@material/mwc-list';
-import '@material/mwc-list/mwc-list-item.js';
 import '@material/mwc-button';
 import '@material/mwc-textfield';
+import '@material/mwc-menu/mwc-menu-surface.js';
+
 import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
 import {TextField} from '@material/mwc-textfield';
 import {List} from '@material/mwc-list';

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "composite": true,
     "incremental": true,
-    "target": "esnext",
+    "target": "es2019",
     "module": "esnext",
     "lib": ["ES2017", "ES2015.iterable", "DOM"],
     "declaration": true,
