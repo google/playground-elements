@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Playground can now be imported from Skypack.
+
 - Fix regression where `--playground-tab-bar-background` and
   `--playground-tab-bar-foreground-color` did not apply correctly.
 

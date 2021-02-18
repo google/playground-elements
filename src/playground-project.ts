@@ -35,7 +35,11 @@ import {
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
 } from './shared/worker-api.js';
-import {getRandomString, endWithSlash} from './shared/util.js';
+import {
+  getRandomString,
+  endWithSlash,
+  forceSkypackRawMode,
+} from './shared/util.js';
 import {Deferred} from './shared/deferred.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
@@ -50,9 +54,8 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
-const typescriptWorkerScriptUrl = new URL(
-  './playground-typescript-worker.js',
-  import.meta.url
+const typescriptWorkerScriptUrl = forceSkypackRawMode(
+  new URL('./playground-typescript-worker.js', import.meta.url)
 );
 
 /**
@@ -149,7 +152,7 @@ export class PlaygroundProject extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = new URL('.', import.meta.url).href;
+  sandboxBaseUrl = forceSkypackRawMode(new URL('.', import.meta.url)).href;
 
   /**
    * The service worker scope to register on
