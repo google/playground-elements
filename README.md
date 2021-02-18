@@ -88,7 +88,10 @@ Import the `playground-elements` module to register the Playground custom
 elements:
 
 ```html
-<script src="/node_modules/playground-elements/playground-ide.js"></script>
+<script
+  type="module"
+  src="/node_modules/playground-elements/playground-ide.js"
+></script>
 ```
 
 Create a `<playground-ide>` element in your HTML, and specify your project files
