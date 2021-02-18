@@ -78,14 +78,22 @@ each kind of syntax-highlighted token. It comes with lots of preset themes, too.
 
 ## Getting Started
 
-Install Playground from NPM:
+### Install
+
+For a quick start, Playground can be imported from Skypack:
+
+```html
+<script
+  type="module"
+  src="https://cdn.skypack.com/playground-elements"
+></script>
+```
+
+Or to install from NPM:
 
 ```sh
 npm i playground-elements
 ```
-
-Import the `playground-elements` module to register the Playground custom
-elements:
 
 ```html
 <script
@@ -93,6 +101,8 @@ elements:
   src="/node_modules/playground-elements/playground-ide.js"
 ></script>
 ```
+
+### Hello World
 
 Create a `<playground-ide>` element in your HTML, and specify your project files
 inline:
@@ -113,15 +123,21 @@ inline:
 </playground-ide>
 ```
 
-Serve with any HTTP server that supports bare module import resolution, such
-as [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/):
+### Serve
+
+If you imported from Skypack, serve with any HTTP server.
+
+If you installed from NPM, you'll just need to make sure bare module imports are
+resolved. You can use a server like
+[@web/dev-server](https://modern-web.dev/docs/dev-server/overview/) to handle
+this automatically:
 
 ```sh
 npm -i -D @web/dev-server
 npx web-dev-server --node-resolve --watch
 ```
 
-You can also use a tool like [Rollup](https://rollupjs.org/guide/en/) to resolve
+Or, use a tool like [Rollup](https://rollupjs.org/guide/en/) to resolve bare
 module imports to paths at build time. If you need more help with building and
 serving, check out the [Modern Web Guides](https://modern-web.dev/guides/).
 
