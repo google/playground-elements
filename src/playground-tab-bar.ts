@@ -67,6 +67,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       --mdc-typography-button-letter-spacing: normal;
     }
 
+    mwc-icon-button {
+      color: var(--playground-tab-bar-foreground-color);
+    }
+
     .add-file-button {
       margin: 0 4px;
       opacity: 70%;
@@ -331,6 +335,10 @@ class PlaygroundTab extends Tab {
         /* Note we use opacity instead of visibility so that keyboard focus
            works. */
         opacity: 100%;
+      }
+
+      mwc-icon-button {
+        color: var(--playground-tab-bar-foreground-color);
       }
     `,
   ] as unknown) as CSSResult;
