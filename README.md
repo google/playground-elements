@@ -18,6 +18,7 @@
     • <a href="#getting-started">Getting Started</a>
     • <a href="#project-files">Project files</a>
     • <a href="#module-resolution">Module resolution</a>
+    • <a href="#typescript">TypeScript</a>
     • <a href="#custom-layouts">Custom layouts</a>
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
@@ -27,17 +28,19 @@
 
 ## Overview
 
-Playground Elements are a set of components for creating interactive code
-experiences on the web, with live updating previews. You can use Playground to:
+Playground Elements are a set of components for creating interactive editable
+code experiences on the web, with live updating previews. You can use Playground
+to:
 
-- Embed interactive code examples in your documentation.
+- Embed editable code examples in your documentation.
 - Build interactive tutorials and example galleries.
 - Build full-featured coding sandboxes (think Glitch or JSBin).
 
 #### 🤯 No backend required
 
 Unlike other coding environments, Playground never sends code to a backend
-server for compilation or serving. Instead, Playground uses a Service Worker to
+server. Instead, Playground uses a [Service
+Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) to
 create a virtual URL-space that runs 100% within the browser. If you can host
 static files, you can host a Playground.
 
@@ -48,11 +51,11 @@ happens in a Web Worker on a separate thread, so your page stays responsive.
 
 #### 🧩 Web Components
 
-Playground uses Web Components, so it doesn't require a framework. Yet it will
+Playground uses Web Components, so it doesn't require a framework. But it will
 play nicely with any framework you're already using, like React, Vue, and
 Angular.
 
-#### 🍱 Mix-and-match for custom layouts
+#### 🍱 Mix-and-match for flexible layout
 
 Playground is broken up into small components like an editor, file picker, and
 preview. Mix-and-match components to create any layout you want, or just use
@@ -78,16 +81,14 @@ each kind of syntax-highlighted token. It comes with lots of preset themes, too.
 Install Playground from NPM:
 
 ```sh
-npm install --save playground-elements
+npm i playground-elements
 ```
 
 Import the `playground-elements` module to register the Playground custom
 elements:
 
 ```html
-<script type="module">
-  import 'playground-elements';
-</script>
+<script src="/node_modules/playground-elements/playground-ide.js"></script>
 ```
 
 Create a `<playground-ide>` element in your HTML, and specify your project files
@@ -113,7 +114,7 @@ Serve with any HTTP server that supports bare module import resolution, such
 as [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/):
 
 ```sh
-npm install --save-dev @web/dev-server
+npm -i -D @web/dev-server
 npx web-dev-server --node-resolve --watch
 ```
 
@@ -124,7 +125,7 @@ serving, check out the [Modern Web Guides](https://modern-web.dev/guides/).
 ### Compatibility
 
 Playground is supported by all modern browsers. It requires support for custom
-elements, modules, service workers, and web workers.
+elements, JS modules, service workers, and web workers.
 
 &nbsp;&nbsp;&nbsp; **Supported:** &nbsp;&nbsp;<img src="images/check-green.png" width="20px" height="20px" class="check" alt="Supported"> <img src="images/chrome.png" width="20px" height="20px"> Chrome
 &nbsp;&nbsp;&nbsp;
@@ -138,7 +139,8 @@ elements, modules, service workers, and web workers.
 
 ## Project files
 
-There are 3 ways to specify the files of a playground project.
+Playground supports `html`, `css`, `js`, and `ts` files. There are 3 ways to specify the
+files of a playground project.
 
 ### Option 1: Inline scripts
 
@@ -197,9 +199,9 @@ Serve a JSON file containing a `files` object, with relative filenames.
 }
 ```
 
-## Option 3: Files property
+### Option 3: Files property
 
-Directly set the `files` property to an array of files.
+In JavaScript, directly set the `files` property to an array of files.
 
 ```js
 const ide = document.querySelector('playground-ide');
@@ -263,6 +265,32 @@ When using inline project files, you can specify your import map like so:
 If an import map is defined, but does not contain an entry for a bare module,
 then playground defaults to the `unpkg.com` URL.
 
+## TypeScript
+
+Playground automatically compiles `.ts` files using
+[TypeScript](https://www.typescriptlang.org/).
+
+The following compiler settings are used:
+
+| Name                                                                                       | Value    |
+| ------------------------------------------------------------------------------------------ | -------- |
+| [`target`](https://www.typescriptlang.org/tsconfig#target)                                 | `ES2017` |
+| [`module`](https://www.typescriptlang.org/tsconfig#module)                                 | `ESNext` |
+| [`moduleResolution`](https://www.typescriptlang.org/tsconfig#moduleResolution)             | `node`   |
+| [`experimentalDecorators`](https://www.typescriptlang.org/tsconfig#experimentalDecorators) | `true`   |
+
+Note that when you import another project module from a `.ts` file, your import
+statement should use the `.js` extension (the same as you would do when running
+`tsc` locally):
+
+```ts
+import './my-other-module.js';
+```
+
+TypeScript error reporting is coming soon, follow
+[#67](https://github.com/PolymerLabs/playground-elements/issues/67) for
+progress.
+
 ## Custom layouts
 
 `<playground-ide>` provides a complete out-of-the-box experience that's a good
@@ -274,10 +302,10 @@ only one particular file from the project visible — like this:
 
 <img src="./images/example.png">
 
-Import the components you need. The main `playground-elements` import loads all
-Playground elements, but when making a custom layout it's a good idea to only
-load the sub-components you're actually using. This will make your JavaScript
-bundle smaller.
+To do this, first import just the components you need. The main
+`playground-elements` import loads all Playground elements, but when making a
+custom layout it's a good idea to only load the sub-components you're actually
+using. This will make your JavaScript bundle smaller.
 
 ```html
 <script type="module">
@@ -534,8 +562,8 @@ to quickly experiment with themes and other customizations.
 
 The following [CSS shadow
 parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
-into which you can insert additional style rules not covered by the above CSS
-custom properties.
+which you can style with additional rules not covered by the above CSS custom
+properties.
 
 | Part name                                   | Exported by      | Description                                  |
 | ------------------------------------------- | ---------------- | -------------------------------------------- |
