@@ -41,6 +41,15 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 @customElement('playground-file-system-controls')
 export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   static styles = css`
+    mwc-menu-surface {
+      --mdc-theme-primary: var(
+        var(
+          --playground-floating-controls-color,
+          var(--playground-highlight-color, #6200ee)
+        )
+      );
+    }
+
     mwc-menu-surface.menu {
       --mdc-typography-subtitle1-font-size: 13px;
       --mdc-list-item-graphic-margin: 14px;

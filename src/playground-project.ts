@@ -315,7 +315,10 @@ export class PlaygroundProject extends LitElement {
       }
       const fileType = typeAttr.substring('sample/'.length);
       // TODO (justinfagnani): better entity unescaping
-      const content = s.textContent!.trim().replace('&lt;', '<');
+      let content = s.textContent!.replace('&lt;', '<');
+      if (!s.hasAttribute('preserve-whitespace')) {
+        content = outdent(content);
+      }
 
       if (fileType === 'importmap') {
         try {
@@ -629,3 +632,21 @@ declare global {
     'playground-project': PlaygroundProject;
   }
 }
+
+/**
+ * Trim shared leading whitespace from all lines, and remove empty
+ * leading/trailing lines.
+ */
+const outdent = (str: string): string => {
+  // Remove leading/trailing empty lines (we don't use trim() because we don't
+  // want to remove leading whitespace on the first content line).
+  str = str.replace(/(^[\n\s]*\n)|(\n[\n\s]*$)/g, '');
+  let shortestIndent;
+  for (const line of str.split(/\n/g)) {
+    const indent = line.match(/^\s*/)![0].length;
+    if (shortestIndent === undefined || indent < shortestIndent) {
+      shortestIndent = indent;
+    }
+  }
+  return str.replace(RegExp(`^\\s{${shortestIndent ?? 0}}`, 'gm'), '');
+};
