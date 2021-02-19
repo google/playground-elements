@@ -319,7 +319,7 @@ sub-components to make your custom layouts.
 For example, say we need a layout with an editor above, a preview below, and
 only one particular file from the project visible — like this:
 
-<img src="./images/example.png">
+<img src="./images/custom-layout.png" width="450">
 
 To do this, first import just the components you need. The main
 `playground-elements` import loads all Playground elements, but when making a
