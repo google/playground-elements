@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Added
+
+- Added `playground-hide` and `playground-fold` region comments that hide and
+  fold regions of a file, while still compiling and serving them, to help users
+  focus on the relevant code. See
+  https://github.com/PolymerLabs/playground-elements#hiding--folding for
+  details.
+
 ## [0.6.0] - 2021-02-19
 
 ### Changed
