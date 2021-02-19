@@ -35,7 +35,11 @@ import {
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
 } from './shared/worker-api.js';
-import {getRandomString, endWithSlash} from './shared/util.js';
+import {
+  getRandomString,
+  endWithSlash,
+  forceSkypackRawMode,
+} from './shared/util.js';
 import {Deferred} from './shared/deferred.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
@@ -49,11 +53,6 @@ const generateUniqueSessionId = (): string => {
   sessions.add(sessionId);
   return sessionId;
 };
-
-const typescriptWorkerScriptUrl = new URL(
-  './playground-typescript-worker.js',
-  import.meta.url
-);
 
 /**
  * Coordinates <playground-file-editor> and <playground-preview> elements.
@@ -149,7 +148,7 @@ export class PlaygroundProject extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = new URL('.', import.meta.url).href;
+  sandboxBaseUrl = forceSkypackRawMode(new URL('.', import.meta.url)).href;
 
   /**
    * The service worker scope to register on
@@ -225,9 +224,11 @@ export class PlaygroundProject extends LitElement {
 
   private get _serviceWorkerProxyIframeUrl() {
     // We include the session ID as a query parameter so that the service worker
-    // can figure out which proxy client goes with which session.
+    // can figure out which proxy client goes with which session. We use an
+    // #anchor instead of a ?queryParam because unpkg.com strips all
+    // ?queryParams.
     return new URL(
-      `playground-service-worker-proxy.html?playground-session-id=${this._sessionId}`,
+      `playground-service-worker-proxy.html#playground-session-id=${this._sessionId}`,
       this._normalizedSandboxBaseUrl
     ).href;
   }
@@ -347,8 +348,25 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  firstUpdated() {
-    const worker = new Worker(typescriptWorkerScriptUrl);
+  async firstUpdated() {
+    const typescriptWorkerScriptUrl = forceSkypackRawMode(
+      new URL('./playground-typescript-worker.js', import.meta.url)
+    );
+    let worker: Worker;
+    if (typescriptWorkerScriptUrl.origin === window.location.origin) {
+      // Easy case.
+      worker = new Worker(typescriptWorkerScriptUrl);
+    } else {
+      // If the worker script is different-origin, we need to fetch it ourselves
+      // and create a blob URL.
+      const resp = await fetch(typescriptWorkerScriptUrl.href);
+      const text = await resp.text();
+      const blobUrl = URL.createObjectURL(
+        new Blob([text], {type: 'application/javascript'})
+      );
+      worker = new Worker(blobUrl);
+      URL.revokeObjectURL(blobUrl);
+    }
     this._deferredTypeScriptWorkerApi.resolve(
       wrap<TypeScriptWorkerAPI>(worker)
     );

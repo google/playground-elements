@@ -5,7 +5,7 @@
   Serverless code experiences with web components.
   <br>
   <br>
-  <img src="./images/preview.png" width="703" height="319">
+  <img src="./images/preview.png" width="650">
  <br><br>
   <a href="https://www.npmjs.com/package/playground-elements">
     <img height="20" src="https://img.shields.io/npm/v/playground-elements.svg"></img></a>
@@ -78,18 +78,31 @@ each kind of syntax-highlighted token. It comes with lots of preset themes, too.
 
 ## Getting Started
 
-Install Playground from NPM:
+### Install
+
+For a quick start, Playground can be imported from Skypack:
+
+```html
+<script
+  type="module"
+  src="https://cdn.skypack.com/playground-elements"
+></script>
+```
+
+Or to install from NPM:
 
 ```sh
 npm i playground-elements
 ```
 
-Import the `playground-elements` module to register the Playground custom
-elements:
-
 ```html
-<script src="/node_modules/playground-elements/playground-ide.js"></script>
+<script
+  type="module"
+  src="/node_modules/playground-elements/playground-ide.js"
+></script>
 ```
+
+### Hello World
 
 Create a `<playground-ide>` element in your HTML, and specify your project files
 inline:
@@ -110,15 +123,21 @@ inline:
 </playground-ide>
 ```
 
-Serve with any HTTP server that supports bare module import resolution, such
-as [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/):
+### Serve
+
+If you imported from Skypack, serve with any HTTP server.
+
+If you installed from NPM, you'll just need to make sure bare module imports are
+resolved. You can use a server like
+[@web/dev-server](https://modern-web.dev/docs/dev-server/overview/) to handle
+this automatically:
 
 ```sh
 npm -i -D @web/dev-server
 npx web-dev-server --node-resolve --watch
 ```
 
-You can also use a tool like [Rollup](https://rollupjs.org/guide/en/) to resolve
+Or, use a tool like [Rollup](https://rollupjs.org/guide/en/) to resolve bare
 module imports to paths at build time. If you need more help with building and
 serving, check out the [Modern Web Guides](https://modern-web.dev/guides/).
 
@@ -300,7 +319,7 @@ sub-components to make your custom layouts.
 For example, say we need a layout with an editor above, a preview below, and
 only one particular file from the project visible — like this:
 
-<img src="./images/example.png">
+<img src="./images/custom-layout.png" width="450">
 
 To do this, first import just the components you need. The main
 `playground-elements` import loads all Playground elements, but when making a

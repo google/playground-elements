@@ -54,10 +54,9 @@ const findSessionProxyClient = async (
   for (const client of await self.clients.matchAll({
     includeUncontrolled: true,
   })) {
-    if (
-      new URL(client.url).searchParams.get('playground-session-id') ===
-      sessionId
-    ) {
+    const hash = new URL(client.url).hash;
+    const hashParams = new URLSearchParams(hash.slice(1));
+    if (hashParams.get('playground-session-id') === sessionId) {
       return client;
     }
   }
