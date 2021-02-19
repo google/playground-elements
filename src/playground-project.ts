@@ -54,9 +54,38 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
-const typescriptWorkerScriptUrl = forceSkypackRawMode(
-  new URL('./playground-typescript-worker.js', import.meta.url)
-);
+let deferredWorkerBlobUrl: undefined | Deferred<string>;
+
+/**
+ * Return a URL for the TypeScript compiler web worker, with special handling
+ * for the same-origin policy and Skypack.
+ */
+const getTypeScriptWorkerUrl = async (): Promise<string | URL> => {
+  const workerUrl = forceSkypackRawMode(
+    new URL('./playground-typescript-worker.js', import.meta.url)
+  );
+  if (workerUrl.origin === window.location.origin) {
+    // Easy case.
+    return workerUrl;
+  }
+  if (deferredWorkerBlobUrl === undefined) {
+    // If the worker script is different-origin, we need to fetch it ourselves
+    // and create a blob URL.
+    deferredWorkerBlobUrl = new Deferred();
+    const resp = await fetch(workerUrl.href);
+    const text = await resp.text();
+    const blob = new Blob([text], {type: 'application/javascript'});
+    const blobUrl = URL.createObjectURL(blob);
+    deferredWorkerBlobUrl.resolve(blobUrl);
+    setTimeout(() => {
+      // The worker script is 2.7MB. Only cache it for a short while in case a
+      // bunch of playgrounds are starting up at the same time.
+      deferredWorkerBlobUrl = undefined;
+      URL.revokeObjectURL(blobUrl);
+    }, 1000);
+  }
+  return deferredWorkerBlobUrl.promise;
+};
 
 /**
  * Coordinates <playground-file-editor> and <playground-preview> elements.
@@ -352,8 +381,8 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  firstUpdated() {
-    const worker = new Worker(typescriptWorkerScriptUrl);
+  async firstUpdated() {
+    const worker = new Worker(await getTypeScriptWorkerUrl());
     this._deferredTypeScriptWorkerApi.resolve(
       wrap<TypeScriptWorkerAPI>(worker)
     );
