@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added `playground-styles.css` and `playground-styles.js` which can be imported
+  to apply Playground styles to server-side rendered code.
+
 - Added `dialog` CSS shadow part to `code-editor`, `file-editor`, and `ide` for
   styling modal dialogs that appear over the editor (currently just used for the
   keyboard help that shows when the editor is focused using the keyboard).
