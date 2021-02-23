@@ -264,11 +264,15 @@ export class PlaygroundCodeEditor extends LitElement {
       if (this._ignoreValueChange) {
         return;
       }
-      this._applyHideAndFoldRegions();
       this._value = cm.getValue();
-      // Only notify changes from user interaction. External changes are usually
-      // things like the editor switching which file it is displaying.
-      if (!this._valueChangingFromOutside) {
+
+      // External changes are usually things like the editor switching which
+      // file it is displaying.
+      if (this._valueChangingFromOutside) {
+        // Users can't change hide/fold regions.
+        this._applyHideAndFoldRegions();
+      } else {
+        // Change event is only for user input.
         this.dispatchEvent(new Event('change'));
       }
     });
