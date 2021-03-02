@@ -19,6 +19,7 @@
     • <a href="#project-files">Project files</a>
     • <a href="#module-resolution">Module resolution</a>
     • <a href="#typescript">TypeScript</a>
+    • <a href="#hiding--folding">Hiding & Folding</a>
     • <a href="#custom-layouts">Custom layouts</a>
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
@@ -310,6 +311,70 @@ TypeScript error reporting is coming soon, follow
 [#67](https://github.com/PolymerLabs/playground-elements/issues/67) for
 progress.
 
+## Hiding & folding
+
+If a region of code in a Playground project file is surrounded by
+`playground-hide` and `playground-hide-end` comments, then that region won't be
+visible or editable by the user, but it will still be compiled and served.
+
+Similarly, if a region is surrounded by `playground-fold` and
+`playground-fold-end` comments, then the region will be replaced with a `…` that
+expands to reveal the original editable code when clicked.
+
+Use these special regions to help users focus on a particular part of a file, by
+de-emphasizing boilerplate or unrelated code.
+
+#### JavaScript fold example
+
+Note that JavaScript `//` style comments are not supported.
+
+```ts
+/* playground-fold */
+import {html, LitElement} from 'lit-element';
+/* playground-fold-end */
+
+class MyElement extends LitElement {
+  render() {
+    return html`Hello <slot></slot>!`;
+  }
+}
+/* playground-fold */
+
+customElements.define('my-element', MyElement);
+```
+
+Result:
+
+<img src="./images/fold-example.png" width="350">
+
+#### HTML hide example
+
+<!-- prettier-ignore -->
+```html
+<!-- playground-hide -->
+<head>
+  <title>Boring stuff</title>
+  <script type="module" src="./my-element.js"></script>
+</head>
+<body>
+<!-- playground-hide-end -->
+<my-element>World</my-element>
+<!-- playground-hide -->
+</body>
+<!-- playground-hide-end -->
+```
+
+Result:
+
+<img src="./images/hide-example.png" width="350">
+
+#### Disabling
+
+Hiding and folding is enabled by default, but can be disabled by setting the
+`pragmas` property to `"off"` (disabled with comments hidden) or `"off-visible"`
+(disabled with comments visible). The `pragmas` property is available on `ide`,
+`file-editor`, and `code-editor`.
+
 ## Custom layouts
 
 `<playground-ide>` provides a complete out-of-the-box experience that's a good
@@ -423,14 +488,15 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type          | Default                   | Description                                                                 |
-| -------------------- | -------------- | ------------------------- | --------------------------------------------------------------------------- |
-| `projectSrc`         | `string`       | `undefined`               | URL of the [project manifest](#project-manifest) to load                    |
-| `files`              | `SampleFile[]` | `undefined`               | Get or set the array of project files                                       |
-| `lineNumbers`        | `boolean`      | `false`                   | Render a gutter with line numbers in the editor                             |
-| `editableFileSystem` | `boolean`      | `false`                   | Allow adding, removing, and renaming files                                  |
-| `resizable`          | `boolean`      | `false`                   | Allow dragging the line between editor and preview to change relative sizes |
-| `sandboxBaseUrl`     | `string`       | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                |
+| Name                 |  Type                            | Default                   | Description                                                                                   |
+| -------------------- | -------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                      |
+| `files`              | `SampleFile[]`                   | `undefined`               | Get or set the array of project files                                                         |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                               |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                    |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                   |
+| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                                  |
+| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
 
 ### Slots
 
@@ -502,6 +568,7 @@ project element.
 | `filename`    | `string`                          | `undefined` | The name of the project file that is currently being displayed. Set when changing tabs. Does not reflect to attribute.         |
 | `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
 | `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
+| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
 
 ---
 
@@ -511,12 +578,13 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name          |  Type                             | Default       | Description                                     |
-| ------------- | --------------------------------- | ------------- | ----------------------------------------------- |
-| `value`       | `string`                          | `""`          | Code as string                                  |
-| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined`   | Language of the file to syntax highlight        |
-| `readonly`    | `boolean`                         | `false`       | Do not allow edits                              |
-| `lineNumbers` | `boolean`                         | `false`       | Render a gutter with line numbers in the editor |
+| Name          |  Type                             | Default       | Description                                                                                   |
+| ------------- | --------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `value`       | `string`                          | `""`          | Code as string                                                                                |
+| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined`   | Language of the file to syntax highlight                                                      |
+| `readonly`    | `boolean`                         | `false`       | Do not allow edits                                                                            |
+| `lineNumbers` | `boolean`                         | `false`       | Render a gutter with line numbers in the editor                                               |
+| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`        | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
 
 ### Events
 

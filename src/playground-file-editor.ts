@@ -73,6 +73,21 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   @property({type: Boolean, attribute: 'line-numbers'})
   lineNumbers = false;
 
+  /**
+   * How to handle `playground-hide` and `playground-fold` comments.
+   *
+   * See https://github.com/PolymerLabs/playground-elements#hiding--folding for
+   * more details.
+   *
+   * Options:
+   * - on: Hide and fold regions, and hide the special comments.
+   * - off: Don't hide or fold regions, but still hide the special comments.
+   * - off-visible: Don't hide or fold regions, and show the special comments as
+   *   literal text.
+   */
+  @property()
+  pragmas: 'on' | 'off' | 'off-visible' = 'on';
+
   private get _files() {
     return this._project?.files ?? [];
   }
@@ -118,6 +133,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 : undefined}
               .lineNumbers=${this.lineNumbers}
               .readonly=${!this._currentFile}
+              .pragmas=${this.pragmas}
               @change=${this._onEdit}
             >
             </playground-code-editor>

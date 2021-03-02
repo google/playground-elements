@@ -43,13 +43,39 @@ declare function CodeMirror(
     value: CodeMirrorConfiguration[K]
   ): void;
   on(eventName: 'change', handler: () => void): void;
+  getDoc(): CodeMirrorDoc;
+  foldCode(pos: number | CodeMirrorPos, options: CodeMirrorFoldOptions): void;
 };
+
+interface CodeMirrorDoc {
+  posFromIndex(index: number): CodeMirrorPos;
+  markText(
+    from: CodeMirrorPos,
+    to: CodeMirrorPos,
+    options?: CodeMirrorTextMarkerOptions
+  ): void;
+}
+
+interface CodeMirrorPos {
+  ch: number;
+  line: number;
+}
 
 interface CodeMirrorConfiguration {
   value?: string;
   mode?: string | null;
   lineNumbers?: boolean;
   readOnly?: boolean | 'nocursor';
+}
+
+interface CodeMirrorTextMarkerOptions {
+  collapsed?: boolean;
+  className?: string;
+}
+
+interface CodeMirrorFoldOptions {
+  rangeFinder?: () => void;
+  widget?: string | Element;
 }
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
@@ -86,6 +112,15 @@ export class PlaygroundCodeEditor extends LitElement {
         height: 100% !important;
         font-family: inherit !important;
         border-radius: inherit;
+      }
+
+      .CodeMirror-foldmarker {
+        font-family: sans-serif;
+      }
+      .CodeMirror-foldmarker:hover {
+        cursor: pointer;
+        /* Pretty much any color from the theme is good enough. */
+        color: var(--playground-code-keyword-color, #770088);
       }
     `,
     codemirrorStyles,
@@ -128,8 +163,25 @@ export class PlaygroundCodeEditor extends LitElement {
   @property({type: Boolean, reflect: true})
   readonly = false;
 
+  /**
+   * How to handle `playground-hide` and `playground-fold` comments.
+   *
+   * See https://github.com/PolymerLabs/playground-elements#hiding--folding for
+   * more details.
+   *
+   * Options:
+   * - on: Hide and fold regions, and hide the special comments.
+   * - off: Don't hide or fold regions, but still hide the special comments.
+   * - off-visible: Don't hide or fold regions, and show the special comments as
+   *   literal text.
+   */
+  @property()
+  pragmas: 'on' | 'off' | 'off-visible' = 'on';
+
   private _resizeObserver?: ResizeObserver;
   private _valueChangingFromOutside = false;
+  private _ignoreValueChange = false;
+  private _hideOrFoldRegionsActive = false;
 
   update(
     changedProperties: TypedMap<
@@ -155,6 +207,9 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'readonly':
             cm.setOption('readOnly', this.readonly);
+            break;
+          case 'pragmas':
+            this._applyHideAndFoldRegions();
             break;
           default:
             unreachable(prop);
@@ -206,14 +261,120 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     );
     cm.on('change', () => {
+      if (this._ignoreValueChange) {
+        return;
+      }
       this._value = cm.getValue();
-      // Only notify changes from user interaction. External changes are usually
-      // things like the editor switching which file it is displaying.
-      if (!this._valueChangingFromOutside) {
+
+      // External changes are usually things like the editor switching which
+      // file it is displaying.
+      if (this._valueChangingFromOutside) {
+        // Users can't change hide/fold regions.
+        this._applyHideAndFoldRegions();
+      } else {
+        // Change event is only for user input.
         this.dispatchEvent(new Event('change'));
       }
     });
     this._codemirror = cm;
+  }
+
+  /**
+   * Create hidden and folded regions for playground-hide and playground-fold
+   * comments.
+   */
+  private _applyHideAndFoldRegions() {
+    const cm = this._codemirror;
+    if (!cm) {
+      return;
+    }
+
+    const value = cm.getValue();
+    if (this._hideOrFoldRegionsActive) {
+      // We need to reset any existing hide/fold regions. Hacky, but prodding
+      // the value this way works.
+      this._ignoreValueChange = true;
+      cm.setValue('');
+      cm.setValue(value);
+      this._ignoreValueChange = false;
+    }
+    this._hideOrFoldRegionsActive = false;
+
+    if (this.pragmas === 'off-visible') {
+      return;
+    }
+    const pattern = this._maskPatternForLang();
+    if (pattern === undefined) {
+      return;
+    }
+
+    const doc = cm.getDoc();
+
+    const fold = (fromIdx: number, toIdx: number) => {
+      cm.foldCode(/* ignored by our rangeFinder */ 0, {
+        widget: '…',
+        rangeFinder: () => ({
+          from: doc.posFromIndex(fromIdx),
+          to: doc.posFromIndex(toIdx),
+        }),
+      });
+      this._hideOrFoldRegionsActive = true;
+    };
+
+    const hide = (fromIdx: number, toIdx: number) => {
+      doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
+        collapsed: true,
+      });
+      this._hideOrFoldRegionsActive = true;
+    };
+
+    for (const match of value.matchAll(pattern)) {
+      const [, opener, kind, content, closer] = match;
+      const openerStart = match.index;
+      if (openerStart === undefined) {
+        continue;
+      }
+
+      const openerEnd = openerStart + opener.length;
+      hide(openerStart, openerEnd);
+
+      const contentStart = openerEnd;
+      let contentEnd;
+      if (content && closer) {
+        contentEnd = contentStart + content.length;
+        const closerStart = contentEnd;
+        const closerEnd = contentEnd + closer.length;
+        hide(closerStart, closerEnd);
+      } else {
+        // No matching end comment. Include the entire rest of the file.
+        contentEnd = value.length;
+      }
+
+      if (this.pragmas === 'on') {
+        if (kind === 'fold') {
+          fold(contentStart, contentEnd);
+        } else if (kind === 'hide') {
+          hide(contentStart, contentEnd);
+        }
+      }
+    }
+  }
+
+  private _maskPatternForLang(): RegExp | undefined {
+    switch (this.type) {
+      case 'js':
+      case 'ts':
+      case 'css':
+        // We consume all leading whitespace and one trailing newline for each
+        // start/end comment. This lets us put start/end comments on their own
+        // line and indent them like the surrounding without affecting the
+        // selected region.
+        return /( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;
+      case 'html':
+        return /( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;
+      default:
+        return undefined;
+    }
   }
 
   private _getLanguageMode() {

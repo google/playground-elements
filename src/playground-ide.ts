@@ -262,6 +262,21 @@ export class PlaygroundIde extends LitElement {
   @property({type: Boolean})
   resizable = false;
 
+  /**
+   * How to handle `playground-hide` and `playground-fold` comments.
+   *
+   * See https://github.com/PolymerLabs/playground-elements#hiding--folding for
+   * more details.
+   *
+   * Options:
+   * - on: Hide and fold regions, and hide the special comments.
+   * - off: Don't hide or fold regions, but still hide the special comments.
+   * - off-visible: Don't hide or fold regions, and show the special comments as
+   *   literal text.
+   */
+  @property()
+  pragmas: 'on' | 'off' | 'off-visible' = 'on';
+
   @query('playground-project')
   private _project!: PlaygroundProject;
 
@@ -300,6 +315,7 @@ export class PlaygroundIde extends LitElement {
           part="editor"
           .lineNumbers=${this.lineNumbers}
           .project=${projectId}
+          .pragmas=${this.pragmas}
         >
         </playground-file-editor>
       </div>

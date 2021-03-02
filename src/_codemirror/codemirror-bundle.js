@@ -1,6 +1,9 @@
 // The main CodeMirror 5 editor.
 import 'codemirror/lib/codemirror.js';
 
+// Folding.
+import 'codemirror/addon/fold/foldcode.js';
+
 // Runtime dependency for all CodeMirror modes that are generated using
 // https://github.com/codemirror/grammar-mode (i.e. the google_modes).
 import 'codemirror-grammar-mode/src/mode.js';
