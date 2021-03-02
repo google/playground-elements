@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- License headers shortened to concise SPDX style.
+
 ## [0.6.1] - 2021-03-01
 
 ### Added
