@@ -83,9 +83,13 @@ export interface SampleFile {
 }
 
 export interface FileOptions {
-  // This is reserved to indicate if a file is a template, ie it shouldn't be
-  // loaded itself, but copied to create new files. It's currently unused.
-  isTemplate?: boolean;
+  /** Optional file content. If omitted, files are fetched by name. */
+  content?: string;
+  /**
+   * Optional content MIME type. If omitted, type is taken from fetch
+   * Content-Type header if available, otherwise inferred from filename.
+   */
+  contentType?: string;
   /** Optional display label. */
   label?: string;
 }

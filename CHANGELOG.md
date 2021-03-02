@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Added `content` and `contentType` as optional properties of the JSON manifest.
+
 ### Changed
 
 - License headers shortened to concise SPDX style.
