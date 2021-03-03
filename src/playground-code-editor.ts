@@ -275,7 +275,7 @@ export class PlaygroundCodeEditor extends LitElement {
    * Create hidden and folded regions for playground-hide and playground-fold
    * comments.
    */
-  private _applyHideAndFoldRegions() {
+  private async _applyHideAndFoldRegions() {
     const cm = this._codemirror;
     if (!cm) {
       return;
@@ -284,7 +284,13 @@ export class PlaygroundCodeEditor extends LitElement {
     const value = cm.getValue();
     if (this._hideOrFoldRegionsActive) {
       // We need to reset any existing hide/fold regions. Hacky, but prodding
-      // the value this way works.
+      // the value this way works. We need to defer to a microtask though,
+      // because if we're already inside a CodeMirror change event callback
+      // stack, then these setValue calls will queue up two async change events
+      // that would fire later, and throw us for a loop. This way, the change
+      // events fire synchronously, and we can use our loop guard property
+      // correctly.
+      await null;
       this._ignoreValueChange = true;
       cm.setValue('');
       cm.setValue(value);

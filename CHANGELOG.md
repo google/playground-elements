@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - License headers shortened to concise SPDX style.
 
+### Fixed
+
+- Fixed infinite loop that could occur when switching between two files that
+  both contain code folding/hiding regions.
+
 ## [0.6.1] - 2021-03-01
 
 ### Added
