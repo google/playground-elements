@@ -186,41 +186,20 @@ found at http://polymer.github.io/PATENTS.txt
  */(r,a,l.firstChild):l.insertBefore(a,l.firstChild),window.ShadyCSS.prepareTemplateStyles(o,e);const d=l.querySelector("style");if(window.ShadyCSS.nativeShadow&&null!==d)t.insertBefore(d.cloneNode(!0),t.firstChild);else if(r){l.insertBefore(a,l.firstChild);const e=new Set;e.add(a),p(r,e)}})(i,d,e.value instanceof v?e.value.template:void 0),r(t,t.firstChild),t.appendChild(d),N.set(t,e)}!n&&a&&window.ShadyCSS.styleElement(t.host)};const se=Symbol("Comlink.proxy"),ce=Symbol("Comlink.endpoint"),pe=Symbol("Comlink.releaseProxy"),ue=Symbol("Comlink.thrown"),he=e=>"object"==typeof e&&null!==e||"function"==typeof e,ge=new Map([["proxy",{canHandle:e=>he(e)&&e[se],serialize(e){const{port1:t,port2:r}=new MessageChannel;return me(e,t),[r,[r]]},deserialize:e=>(e.start(),be(e))}],["throw",{canHandle:e=>he(e)&&ue in e,serialize({value:e}){let t;return t=e instanceof Error?{isError:!0,value:{message:e.message,name:e.name,stack:e.stack}}:{isError:!1,value:e},[t,[]]},deserialize(e){if(e.isError)throw Object.assign(Error(e.value.message),e.value);throw e.value}}]]);function me(e,t=self){t.addEventListener("message",(function r(o){if(!o||!o.data)return;const{id:i,type:n,path:a}=Object.assign({path:[]},o.data),l=(o.data.argumentList||[]).map(Ce);let d;try{const t=a.slice(0,-1).reduce(((e,t)=>e[t]),e),r=a.reduce(((e,t)=>e[t]),e);switch(n){case 0:d=r;break;case 1:t[a.slice(-1)[0]]=Ce(o.data.value),d=!0;break;case 2:d=r.apply(t,l);break;case 3:d=ke(new r(...l));break;case 4:{const{port1:t,port2:r}=new MessageChannel;me(e,r),d=function(e,t){return we.set(e,t),e}(t,[t])}break;case 5:d=void 0}}catch(e){d={value:e,[ue]:0}}Promise.resolve(d).catch((e=>({value:e,[ue]:0}))).then((e=>{const[o,a]=_e(e);t.postMessage(Object.assign(Object.assign({},o),{id:i}),a),5===n&&(t.removeEventListener("message",r),fe(t))}))})),t.start&&t.start()}function fe(e){(function(e){return"MessagePort"===e.constructor.name})(e)&&e.close()}function be(e,t){return ve(e,[],t)}function ye(e){if(e)throw Error("Proxy has been released and is not useable")}function ve(e,t=[],r=function(){}){let o=!1;const i=new Proxy(r,{get(r,n){if(ye(o),n===pe)return()=>Se(e,{type:5,path:t.map((e=>e.toString()))}).then((()=>{fe(e),o=!0}));if("then"===n){if(0===t.length)return{then:()=>i};const r=Se(e,{type:0,path:t.map((e=>e.toString()))}).then(Ce);return r.then.bind(r)}return ve(e,[...t,n])},set(r,i,n){ye(o);const[a,l]=_e(n);return Se(e,{type:1,path:[...t,i].map((e=>e.toString())),value:a},l).then(Ce)},apply(r,i,n){ye(o);const a=t[t.length-1];if(a===ce)return Se(e,{type:4}).then(Ce);if("bind"===a)return ve(e,t.slice(0,-1));const[l,d]=xe(n);return Se(e,{type:2,path:t.map((e=>e.toString())),argumentList:l},d).then(Ce)},construct(r,i){ye(o);const[n,a]=xe(i);return Se(e,{type:3,path:t.map((e=>e.toString())),argumentList:n},a).then(Ce)}});return i}function xe(e){const t=e.map(_e);return[t.map((e=>e[0])),(r=t.map((e=>e[1])),Array.prototype.concat.apply([],r))];var r}const we=new WeakMap;function ke(e){return Object.assign(e,{[se]:!0})}function _e(e){for(const[t,r]of ge)if(r.canHandle(e)){const[o,i]=r.serialize(e);return[{type:3,name:t,value:o},i]}return[{type:0,value:e},we.get(e)||[]]}function Ce(e){switch(e.type){case 3:return ge.get(e.name).deserialize(e.value);case 0:return e.value}}function Se(e,t,r){return new Promise((o=>{const i=[,,,,].fill(0).map((()=>Math.floor(Math.random()*Number.MAX_SAFE_INTEGER).toString(16))).join("-");e.addEventListener("message",(function t(r){r.data&&r.data.id&&r.data.id===i&&(e.removeEventListener("message",t),o(r.data))})),e.start&&e.start(),e.postMessage(Object.assign({id:i},t),r)}))}
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 const Te=e=>e.endsWith("/")?e:e+"/",Ee=e=>("cdn.skypack.dev"===e.hostname&&(e.pathname=e.pathname.replace(/mode=imports\/(un)?optimized/,"mode=raw")),e);
 /**
  * @license
- * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt The complete set of authors may be found
- * at http://polymer.github.io/AUTHORS.txt The complete set of contributors may
- * be found at http://polymer.github.io/CONTRIBUTORS.txt Code distributed by
- * Google as part of the polymer project is also subject to an additional IP
- * rights grant found at http://polymer.github.io/PATENTS.txt
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 class Oe{constructor(){this.resolved=!1,this.promise=new Promise((e=>{this._resolve=e}))}resolve(e){this.resolved=!0,this._resolve(e)}}
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */const Le=new Set;let Ae=class extends de{constructor(){super(...arguments),this._source={type:"none"},this.sandboxBaseUrl=Ee(new URL(".",import.meta.url)).href,this.sandboxScope="playground-projects/",this._sessionId=(()=>{let e;do{e=crypto.getRandomValues(new Uint32Array(1))[0].toString(32)}while(Le.has(e));return Le.add(e),e})(),this._deferredTypeScriptWorkerApi=new Oe,this._compiledFilesPromise=Promise.resolve(void 0),this._validImportMap={},this._saveTimeoutId=void 0}get projectSrc(){if("url"===this._source.type)return this._source.url}set projectSrc(e){e?"url"===this._source.type&&this._source.url===e||(this._source={type:"url",url:e}):"url"===this._source.type&&(this._source={type:"none"})}get files(){return this._files}set files(e){if(e){for(const t of e)t.contentType||(t.contentType=Ie(t.name));this._source={type:"direct",files:e}}else"direct"===this._source.type&&(this._source={type:"none"})}set _importMap(e){const t=Fe(e);if(t.length>0){for(const e of t)console.error(e);this._validImportMap={}}else this._validImportMap=e}get _importMap(){return this._validImportMap}get _normalizedSandboxBaseUrl(){const e=new URL(this.sandboxBaseUrl,document.location.href);return e.pathname=Te(e.pathname),e}get baseUrl(){if(void 0!==this._serviceWorkerAPI&&void 0!==this._files)return new URL(`${Te(this.sandboxScope)}${this._sessionId}/`,this._normalizedSandboxBaseUrl).href}get _serviceWorkerProxyIframeUrl(){return new URL("playground-service-worker-proxy.html#playground-session-id="+this._sessionId,this._normalizedSandboxBaseUrl).href}async update(e){e.has("_source")&&this._loadProjectFromSource(),(e.has("sandboxScope")||e.has("sandboxBaseUrl")||e.has("_serviceWorkerAPI"))&&this.dispatchEvent(new CustomEvent("urlChanged")),super.update(e)}async _loadProjectFromSource(){const e=this._source;switch(e.type){case"none":this._files=void 0,this._importMap={};break;case"direct":this._files=e.files,this._importMap={};break;case"slot":this._files=e.files,this._importMap=e.importMap;break;case"url":const{files:t,importMap:r}=await Re(e.url);if(e!==this._source)return;this._files=t,this._importMap=r}this.dispatchEvent(new CustomEvent("filesChanged")),this.save()}render(){return B`
       <slot @slotchange=${this._slotChange}></slot>
       <iframe
@@ -231,7 +210,7 @@ class Oe{constructor(){this.resolved=!1,this.promise=new Promise((e=>{this._reso
     iframe {
       display: none;
     }
-  `,e([Y({attribute:"project-src",hasChanged:()=>!1})],Ae.prototype,"projectSrc",null),e([Y({attribute:!1,hasChanged:()=>!1})],Ae.prototype,"files",null),e([Q()],Ae.prototype,"_source",void 0),e([Y({attribute:"sandbox-base-url"})],Ae.prototype,"sandboxBaseUrl",void 0),e([Y({attribute:"sandbox-scope"})],Ae.prototype,"sandboxScope",void 0),e([Q()],Ae.prototype,"_serviceWorkerAPI",void 0),e([X("slot")],Ae.prototype,"_slot",void 0),e([X("iframe")],Ae.prototype,"_iframe",void 0),Ae=e([G("playground-project")],Ae);const Re=async e=>{var t;const r=new URL(e,document.baseURI),o=await fetch(e),i=await o.json(),n=i.files?Object.keys(i.files):[];return{files:await Promise.all(n.map((async e=>{const t=new URL(e,r),o=await fetch(t.href);if(404===o.status)throw Error("Could not find file "+e);const n=o.headers.get("Content-Type")||void 0;return{name:e,label:i.files[e].label,content:await o.text(),contentType:n}}))),importMap:null!==(t=i.importMap)&&void 0!==t?t:{}}},Ie=e=>{const t=e.lastIndexOf(".");if(-1===t||t===e.length-1)return;const r=e.slice(t+1);return Me(r)},Me=e=>{if(void 0!==e)switch(e){case"ts":return"video/mp2t";case"js":return"application/javascript; charset=utf-8";case"html":return"text/html; charset=utf-8";case"css":return"text/css; charset=utf-8"}},Fe=e=>{const t=[];if("object"!=typeof e||null===e)return t.push(`Import map is invalid because it must be an object, but it was ${null===e?"null":typeof e}.`),t;const r=Object.keys(e).filter((e=>"imports"!==e));r.length>0&&t.push(`Invalid import map properties: ${[...r].join(", ")}. Only "imports" are currently supported.`);const o=e.imports;if(void 0===o)return t;if("object"!=typeof o||null===o)return t.push(`Import map "imports" property is invalid because it must be an object, but it was ${null===o?"null":typeof o}.`),t;for(const[e,r]of Object.entries(o))if("string"==typeof r){e.endsWith("/")&&!r.endsWith("/")&&t.push(`Import map key "${e}" is invalid because address "${r}" must end in a forward-slash.`);try{new URL(r)}catch{t.push(`Import map key "${e}" is invalid because address "${r}" is not a valid URL.`)}}else t.push(`Import map key "${e}" is invalid because address must be a string, but was `+(null===r?"null":typeof r));return t},ze=e=>{let t;e=e.replace(/(^[\n\s]*\n)|(\n[\n\s]*$)/g,"");for(const r of e.split(/\n/g)){const e=r.match(/^\s*/)[0].length;(void 0===t||e<t)&&(t=e)}return e.replace(RegExp(`^\\s{${null!=t?t:0}}`,"gm"),"")};
+  `,e([Y({attribute:"project-src",hasChanged:()=>!1})],Ae.prototype,"projectSrc",null),e([Y({attribute:!1,hasChanged:()=>!1})],Ae.prototype,"files",null),e([Q()],Ae.prototype,"_source",void 0),e([Y({attribute:"sandbox-base-url"})],Ae.prototype,"sandboxBaseUrl",void 0),e([Y({attribute:"sandbox-scope"})],Ae.prototype,"sandboxScope",void 0),e([Q()],Ae.prototype,"_serviceWorkerAPI",void 0),e([X("slot")],Ae.prototype,"_slot",void 0),e([X("iframe")],Ae.prototype,"_iframe",void 0),Ae=e([G("playground-project")],Ae);const Re=async e=>{var t,r;const o=new URL(e,document.baseURI),i=await fetch(e),n=await i.json();return{files:await Promise.all(Object.entries(null!==(t=n.files)&&void 0!==t?t:{}).map((async([e,{content:t,contentType:r,label:i}])=>{var n,a;if(void 0===t){const i=new URL(e,o),a=await fetch(i.href);if(404===a.status)throw Error("Could not find file "+e);t=await a.text(),r||(r=null!==(n=a.headers.get("Content-Type"))&&void 0!==n?n:void 0)}return r||(r=null!==(a=Ie(e))&&void 0!==a?a:"text/plain"),{name:e,label:i,content:t,contentType:r}}))),importMap:null!==(r=n.importMap)&&void 0!==r?r:{}}},Ie=e=>{const t=e.lastIndexOf(".");if(-1===t||t===e.length-1)return;const r=e.slice(t+1);return Me(r)},Me=e=>{if(void 0!==e)switch(e){case"ts":return"video/mp2t";case"js":return"application/javascript; charset=utf-8";case"html":return"text/html; charset=utf-8";case"css":return"text/css; charset=utf-8"}},Fe=e=>{const t=[];if("object"!=typeof e||null===e)return t.push(`Import map is invalid because it must be an object, but it was ${null===e?"null":typeof e}.`),t;const r=Object.keys(e).filter((e=>"imports"!==e));r.length>0&&t.push(`Invalid import map properties: ${[...r].join(", ")}. Only "imports" are currently supported.`);const o=e.imports;if(void 0===o)return t;if("object"!=typeof o||null===o)return t.push(`Import map "imports" property is invalid because it must be an object, but it was ${null===o?"null":typeof o}.`),t;for(const[e,r]of Object.entries(o))if("string"==typeof r){e.endsWith("/")&&!r.endsWith("/")&&t.push(`Import map key "${e}" is invalid because address "${r}" must end in a forward-slash.`);try{new URL(r)}catch{t.push(`Import map key "${e}" is invalid because address "${r}" is not a valid URL.`)}}else t.push(`Import map key "${e}" is invalid because address must be a string, but was `+(null===r?"null":typeof r));return t},ze=e=>{let t;e=e.replace(/(^[\n\s]*\n)|(\n[\n\s]*$)/g,"");for(const r of e.split(/\n/g)){const e=r.match(/^\s*/)[0].length;(void 0===t||e<t)&&(t=e)}return e.replace(RegExp(`^\\s{${null!=t?t:0}}`,"gm"),"")};
 /**
  * @license
  * Copyright 2018 Google Inc.
@@ -1104,17 +1083,9 @@ span.CodeMirror-selectedtext {
 `
 /**
  * @license
- * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
- */;let dr=class extends de{constructor(){super(...arguments),this.lineNumbers=!1,this.readonly=!1,this.pragmas="on",this._valueChangingFromOutside=!1,this._ignoreValueChange=!1,this._hideOrFoldRegionsActive=!1}get value(){return this._value}set value(e){const t=this._value;this._value=e,this.requestUpdate("value",t)}update(e){var t;const r=this._codemirror;if(void 0===r)this._createView();else for(const o of e.keys())switch(o){case"value":this._valueChangingFromOutside=!0,r.setValue(null!==(t=this.value)&&void 0!==t?t:""),this._valueChangingFromOutside=!1;break;case"lineNumbers":r.setOption("lineNumbers",this.lineNumbers);break;case"type":r.setOption("mode",this._getLanguageMode());break;case"readonly":r.setOption("readOnly",this.readonly);break;case"pragmas":this._applyHideAndFoldRegions()}super.update(e)}connectedCallback(){"function"==typeof ResizeObserver&&(this._resizeObserver=new ResizeObserver((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh()})),this._resizeObserver.observe(this)),super.connectedCallback()}disconnectedCallback(){var e;null===(e=this._resizeObserver)||void 0===e||e.disconnect(),super.disconnectedCallback()}_createView(){var e;const t=CodeMirror((e=>{this.shadowRoot.innerHTML="",this.shadowRoot.appendChild(e),requestAnimationFrame((()=>{requestAnimationFrame((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh()}))}))}),{value:null!==(e=this.value)&&void 0!==e?e:"",lineNumbers:this.lineNumbers,mode:this._getLanguageMode(),readOnly:this.readonly});t.on("change",(()=>{this._ignoreValueChange||(this._value=t.getValue(),this._valueChangingFromOutside?this._applyHideAndFoldRegions():this.dispatchEvent(new Event("change")))})),this._codemirror=t}_applyHideAndFoldRegions(){const e=this._codemirror;if(!e)return;const t=e.getValue();if(this._hideOrFoldRegionsActive&&(this._ignoreValueChange=!0,e.setValue(""),e.setValue(t),this._ignoreValueChange=!1),this._hideOrFoldRegionsActive=!1,"off-visible"===this.pragmas)return;const r=this._maskPatternForLang();if(void 0===r)return;const o=e.getDoc(),i=(t,r)=>{e.foldCode(0,{widget:"…",rangeFinder:()=>({from:o.posFromIndex(t),to:o.posFromIndex(r)})}),this._hideOrFoldRegionsActive=!0},n=(e,t)=>{o.markText(o.posFromIndex(e),o.posFromIndex(t),{collapsed:!0}),this._hideOrFoldRegionsActive=!0};for(const e of t.matchAll(r)){const[,r,o,a,l]=e,d=e.index;if(void 0===d)continue;const s=d+r.length;n(d,s);const c=s;let p;a&&l?(p=c+a.length,n(p,p+l.length)):p=t.length,"on"===this.pragmas&&("fold"===o?i(c,p):"hide"===o&&n(c,p))}}_maskPatternForLang(){switch(this.type){case"js":case"ts":case"css":return/( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;case"html":return/( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;default:return}}_getLanguageMode(){switch(this.type){case"ts":return"google-typescript";case"js":return"google-javascript";case"html":return"google-html";case"css":return"css"}return null}};dr.styles=[ae`
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */;let dr=class extends de{constructor(){super(...arguments),this.lineNumbers=!1,this.readonly=!1,this.pragmas="on",this._valueChangingFromOutside=!1,this._ignoreValueChange=!1,this._hideOrFoldRegionsActive=!1}get value(){return this._value}set value(e){const t=this._value;this._value=e,this.requestUpdate("value",t)}update(e){var t;const r=this._codemirror;if(void 0===r)this._createView();else for(const o of e.keys())switch(o){case"value":this._valueChangingFromOutside=!0,r.setValue(null!==(t=this.value)&&void 0!==t?t:""),this._valueChangingFromOutside=!1;break;case"lineNumbers":r.setOption("lineNumbers",this.lineNumbers);break;case"type":r.setOption("mode",this._getLanguageMode());break;case"readonly":r.setOption("readOnly",this.readonly);break;case"pragmas":this._applyHideAndFoldRegions()}super.update(e)}connectedCallback(){"function"==typeof ResizeObserver&&(this._resizeObserver=new ResizeObserver((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh()})),this._resizeObserver.observe(this)),super.connectedCallback()}disconnectedCallback(){var e;null===(e=this._resizeObserver)||void 0===e||e.disconnect(),super.disconnectedCallback()}_createView(){var e;const t=CodeMirror((e=>{this.shadowRoot.innerHTML="",this.shadowRoot.appendChild(e),requestAnimationFrame((()=>{requestAnimationFrame((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh()}))}))}),{value:null!==(e=this.value)&&void 0!==e?e:"",lineNumbers:this.lineNumbers,mode:this._getLanguageMode(),readOnly:this.readonly});t.on("change",(()=>{this._ignoreValueChange||(this._value=t.getValue(),this._valueChangingFromOutside?this._applyHideAndFoldRegions():this.dispatchEvent(new Event("change")))})),this._codemirror=t}async _applyHideAndFoldRegions(){const e=this._codemirror;if(!e)return;const t=e.getValue();if(this._hideOrFoldRegionsActive&&(await null,this._ignoreValueChange=!0,e.setValue(""),e.setValue(t),this._ignoreValueChange=!1),this._hideOrFoldRegionsActive=!1,"off-visible"===this.pragmas)return;const r=this._maskPatternForLang();if(void 0===r)return;const o=e.getDoc(),i=(t,r)=>{e.foldCode(0,{widget:"…",rangeFinder:()=>({from:o.posFromIndex(t),to:o.posFromIndex(r)})}),this._hideOrFoldRegionsActive=!0},n=(e,t)=>{o.markText(o.posFromIndex(e),o.posFromIndex(t),{collapsed:!0}),this._hideOrFoldRegionsActive=!0};for(const e of t.matchAll(r)){const[,r,o,a,l]=e,d=e.index;if(void 0===d)continue;const s=d+r.length;n(d,s);const c=s;let p;a&&l?(p=c+a.length,n(p,p+l.length)):p=t.length,"on"===this.pragmas&&("fold"===o?i(c,p):"hide"===o&&n(c,p))}}_maskPatternForLang(){switch(this.type){case"js":case"ts":case"css":return/( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;case"html":return/( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;default:return}}_getLanguageMode(){switch(this.type){case"ts":return"google-typescript";case"js":return"google-javascript";case"html":return"google-html";case"css":return"css"}return null}};dr.styles=[ae`
       :host {
         display: block;
         font-family: var(--playground-code-font-family, monospace);
@@ -1717,30 +1688,14 @@ limitations under the License.
 */;let Ro=class extends Lo{};Ro.styles=Ao,Ro=e([G("mwc-menu-surface")],Ro);
 /**
  * @license
- * Copyright (c) 2021 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 class Io extends de{set project(e){"string"==typeof e?requestAnimationFrame((()=>{var t;const r=this.getRootNode();this._project=null!==(t=r.getElementById(e))&&void 0!==t?t:void 0})):this._project=e}}e([Y()],Io.prototype,"project",null),e([Q()],Io.prototype,"_project",void 0);
 /**
  * @license
- * Copyright (c) 2021 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 let Mo=class extends Io{constructor(){super(...arguments),this.state="closed",this._postStateChangeRenderDone=!1}update(e){e.has("state")&&(this._postStateChangeRenderDone=!1),super.update(e)}render(){return B`<mwc-menu-surface
       fixed
@@ -1854,16 +1809,8 @@ let Mo=class extends Io{constructor(){super(...arguments),this.state="closed",th
   `,e([Y({attribute:!1})],Mo.prototype,"anchorElement",void 0),e([Y()],Mo.prototype,"state",void 0),e([Y()],Mo.prototype,"filename",void 0),e([X("mwc-menu-surface")],Mo.prototype,"_surface",void 0),e([X(".menu-list")],Mo.prototype,"_menuList",void 0),e([X(".filename-input")],Mo.prototype,"_filenameInput",void 0),e([X(".submit-button")],Mo.prototype,"_submitButton",void 0),Mo=e([G("playground-file-system-controls")],Mo);
 /**
  * @license
- * Copyright (c) 2021 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 let Fo=class extends Io{constructor(){super(...arguments),this.editableFileSystem=!1,this._activeFileName="",this._activeFileIndex=0,this._onProjectFilesChanged=()=>{this._setNewActiveFile(),this._editor&&(this._editor.filename=this._activeFileName),this.requestUpdate()}}set editor(e){"string"==typeof e?requestAnimationFrame((()=>{var t;const r=this.getRootNode();this._editor=null!==(t=r.getElementById(e))&&void 0!==t?t:void 0})):this._editor=e}get _files(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.files)&&void 0!==t?t:[]}update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&(this._onProjectFilesChanged(),this._project.addEventListener("filesChanged",this._onProjectFilesChanged))}super.update(e)}render(){return B`
       <mwc-tab-bar activeIndex="1" @MDCTabBar:activated=${this._onTabActivated}>
@@ -1971,16 +1918,8 @@ let Fo=class extends Io{constructor(){super(...arguments),this.editableFileSyste
     `],e([Y({type:Boolean,reflect:!0})],zo.prototype,"showMenuButton",void 0),zo=e([G("playground-tab")],zo);
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 let No=class extends Io{constructor(){super(...arguments),this.lineNumbers=!1,this.pragmas="on",this._onProjectFilesChanged=()=>{var e,t;null!==(e=this.filename)&&void 0!==e||(this.filename=null===(t=this._files[0])||void 0===t?void 0:t.name),this.requestUpdate()}}get _files(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.files)&&void 0!==t?t:[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&t.removeEventListener("filesChanged",this._onProjectFilesChanged),this._project&&this._project.addEventListener("filesChanged",this._onProjectFilesChanged),this._onProjectFilesChanged()}super.update(e)}render(){var e,t;return B`
       ${this._files?B`
@@ -2060,16 +1999,8 @@ limitations under the License.
 const Wo=ae`@keyframes mdc-linear-progress-primary-indeterminate-translate{0%{transform:translateX(0)}20%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(0)}59.15%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(83.67142%);transform:translateX(var(--mdc-linear-progress-primary-half, 83.67142%))}100%{transform:translateX(200.611057%);transform:translateX(var(--mdc-linear-progress-primary-full, 200.611057%))}}@keyframes mdc-linear-progress-primary-indeterminate-scale{0%{transform:scaleX(0.08)}36.65%{animation-timing-function:cubic-bezier(0.334731, 0.12482, 0.785844, 1);transform:scaleX(0.08)}69.15%{animation-timing-function:cubic-bezier(0.06, 0.11, 0.6, 1);transform:scaleX(0.661479)}100%{transform:scaleX(0.08)}}@keyframes mdc-linear-progress-secondary-indeterminate-translate{0%{animation-timing-function:cubic-bezier(0.15, 0, 0.515058, 0.409685);transform:translateX(0)}25%{animation-timing-function:cubic-bezier(0.31033, 0.284058, 0.8, 0.733712);transform:translateX(37.651913%);transform:translateX(var(--mdc-linear-progress-secondary-quarter, 37.651913%))}48.35%{animation-timing-function:cubic-bezier(0.4, 0.627035, 0.6, 0.902026);transform:translateX(84.386165%);transform:translateX(var(--mdc-linear-progress-secondary-half, 84.386165%))}100%{transform:translateX(160.277782%);transform:translateX(var(--mdc-linear-progress-secondary-full, 160.277782%))}}@keyframes mdc-linear-progress-secondary-indeterminate-scale{0%{animation-timing-function:cubic-bezier(0.205028, 0.057051, 0.57661, 0.453971);transform:scaleX(0.08)}19.15%{animation-timing-function:cubic-bezier(0.152313, 0.196432, 0.648374, 1.004315);transform:scaleX(0.457104)}44.15%{animation-timing-function:cubic-bezier(0.257759, -0.003163, 0.211762, 1.38179);transform:scaleX(0.72796)}100%{transform:scaleX(0.08)}}@keyframes mdc-linear-progress-buffering{from{transform:rotate(180deg) translateX(-10px)}}@keyframes mdc-linear-progress-primary-indeterminate-translate-reverse{0%{transform:translateX(0)}20%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(0)}59.15%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(-83.67142%);transform:translateX(var(--mdc-linear-progress-primary-half-neg, -83.67142%))}100%{transform:translateX(-200.611057%);transform:translateX(var(--mdc-linear-progress-primary-full-neg, -200.611057%))}}@keyframes mdc-linear-progress-secondary-indeterminate-translate-reverse{0%{animation-timing-function:cubic-bezier(0.15, 0, 0.515058, 0.409685);transform:translateX(0)}25%{animation-timing-function:cubic-bezier(0.31033, 0.284058, 0.8, 0.733712);transform:translateX(-37.651913%);transform:translateX(var(--mdc-linear-progress-secondary-quarter-neg, -37.651913%))}48.35%{animation-timing-function:cubic-bezier(0.4, 0.627035, 0.6, 0.902026);transform:translateX(-84.386165%);transform:translateX(var(--mdc-linear-progress-secondary-half-neg, -84.386165%))}100%{transform:translateX(-160.277782%);transform:translateX(var(--mdc-linear-progress-secondary-full-neg, -160.277782%))}}@keyframes mdc-linear-progress-buffering-reverse{from{transform:translateX(-10px)}}.mdc-linear-progress{position:relative;width:100%;height:4px;transform:translateZ(0);outline:1px solid transparent;overflow:hidden;transition:opacity 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1)}.mdc-linear-progress__bar{position:absolute;width:100%;height:100%;animation:none;transform-origin:top left;transition:transform 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1)}.mdc-linear-progress__bar-inner{display:inline-block;position:absolute;width:100%;animation:none;border-top:4px solid}.mdc-linear-progress__buffer{display:flex;position:absolute;width:100%;height:100%}.mdc-linear-progress__buffer-dots{background-repeat:repeat-x;background-size:10px 4px;flex:auto;transform:rotate(180deg);animation:mdc-linear-progress-buffering 250ms infinite linear}.mdc-linear-progress__buffer-bar{flex:0 1 100%;transition:flex-basis 250ms 0ms cubic-bezier(0.4, 0, 0.6, 1)}.mdc-linear-progress__primary-bar{transform:scaleX(0)}.mdc-linear-progress__secondary-bar{visibility:hidden}.mdc-linear-progress--indeterminate .mdc-linear-progress__bar{transition:none}.mdc-linear-progress--indeterminate .mdc-linear-progress__primary-bar{left:-145.166611%}.mdc-linear-progress--indeterminate .mdc-linear-progress__secondary-bar{left:-54.888891%;visibility:visible}.mdc-linear-progress--indeterminate.mdc-linear-progress--animation-ready .mdc-linear-progress__primary-bar{animation:mdc-linear-progress-primary-indeterminate-translate 2s infinite linear}.mdc-linear-progress--indeterminate.mdc-linear-progress--animation-ready .mdc-linear-progress__primary-bar>.mdc-linear-progress__bar-inner{animation:mdc-linear-progress-primary-indeterminate-scale 2s infinite linear}.mdc-linear-progress--indeterminate.mdc-linear-progress--animation-ready .mdc-linear-progress__secondary-bar{animation:mdc-linear-progress-secondary-indeterminate-translate 2s infinite linear}.mdc-linear-progress--indeterminate.mdc-linear-progress--animation-ready .mdc-linear-progress__secondary-bar>.mdc-linear-progress__bar-inner{animation:mdc-linear-progress-secondary-indeterminate-scale 2s infinite linear}.mdc-linear-progress--reversed .mdc-linear-progress__bar{right:0;transform-origin:center right}.mdc-linear-progress--reversed.mdc-linear-progress--animation-ready .mdc-linear-progress__primary-bar{animation-name:mdc-linear-progress-primary-indeterminate-translate-reverse}.mdc-linear-progress--reversed.mdc-linear-progress--animation-ready .mdc-linear-progress__secondary-bar{animation-name:mdc-linear-progress-secondary-indeterminate-translate-reverse}.mdc-linear-progress--reversed .mdc-linear-progress__buffer-dots{animation:mdc-linear-progress-buffering-reverse 250ms infinite linear;order:0;transform:rotate(0)}.mdc-linear-progress--reversed .mdc-linear-progress__buffer-bar{order:1}.mdc-linear-progress--closed{opacity:0}.mdc-linear-progress--closed-animation-off .mdc-linear-progress__buffer-dots{animation:none}.mdc-linear-progress--closed-animation-off.mdc-linear-progress--indeterminate .mdc-linear-progress__bar,.mdc-linear-progress--closed-animation-off.mdc-linear-progress--indeterminate .mdc-linear-progress__bar .mdc-linear-progress__bar-inner{animation:none}.mdc-linear-progress__bar-inner{border-color:#6200ee;border-color:var(--mdc-theme-primary, #6200ee)}.mdc-linear-progress__buffer-dots{background-image:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' enable-background='new 0 0 5 2' xml:space='preserve' viewBox='0 0 5 2' preserveAspectRatio='none slice'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23e6e6e6'/%3E%3C/svg%3E")}.mdc-linear-progress__buffer-bar{background-color:#e6e6e6}.mdc-linear-progress--indeterminate.mdc-linear-progress--reversed .mdc-linear-progress__primary-bar{right:-145.166611%;left:auto}.mdc-linear-progress--indeterminate.mdc-linear-progress--reversed .mdc-linear-progress__secondary-bar{right:-54.888891%;left:auto}:host{display:block}.mdc-linear-progress__buffer-bar{background-color:#e6e6e6;background-color:var(--mdc-linear-progress-buffer-color, #e6e6e6)}.mdc-linear-progress__buffer-dots{background-image:url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' enable-background='new 0 0 5 2' xml:space='preserve' viewBox='0 0 5 2' preserveAspectRatio='none slice'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23e6e6e6'/%3E%3C/svg%3E");background-image:var(--mdc-linear-progress-buffering-dots-image, url("data:image/svg+xml,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' enable-background='new 0 0 5 2' xml:space='preserve' viewBox='0 0 5 2' preserveAspectRatio='none slice'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23e6e6e6'/%3E%3C/svg%3E"))}`;let Uo=class extends Bo{};Uo.styles=Wo,Uo=e([G("mwc-linear-progress")],Uo);
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 let Do=class extends Io{constructor(){super(...arguments),this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{this._iframe&&(this._iframe.src="",this._iframe.src=this._indexUrl,this._loading=!0,this._startLoadingBar())},this._startLoadingBarTime=0}update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("urlChanged",this.reload),t.removeEventListener("compileStart",this.reload)),this._project&&(this._project.addEventListener("urlChanged",this.reload),this._project.addEventListener("compileStart",this.reload))}super.update(e)}get _indexUrl(){var e;const t=null===(e=this._project)||void 0===e?void 0:e.baseUrl;return t?new URL("index.html",t).toString():""}render(){return B`
       <div id="toolbar" part="preview-toolbar">
@@ -2175,16 +2106,8 @@ let Do=class extends Io{constructor(){super(...arguments),this.location="Result"
   `,e([Y()],Do.prototype,"location",void 0),e([X("iframe")],Do.prototype,"_iframe",void 0),e([X("slot")],Do.prototype,"_slot",void 0),e([Q()],Do.prototype,"_loading",void 0),e([Q()],Do.prototype,"_showLoadingBar",void 0),e([Q()],Do.prototype,"_loadedAtLeastOnce",void 0),Do=e([G("playground-preview")],Do);
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 let Ho=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=Ee(new URL(".",import.meta.url)).href,this.sandboxScope="playground-projects/",this.editableFileSystem=!1,this.lineNumbers=!1,this.resizable=!1,this.pragmas="on"}get projectSrc(){const e=this._project;return e?e.projectSrc:this._projectSrcSetBeforeRender}set projectSrc(e){const t=this._project;t?t.projectSrc=e:this._projectSrcSetBeforeRender=e}get files(){const e=this._project;return e?e.files:this._filesSetBeforeRender}set files(e){const t=this._project;t?t.files=e:this._filesSetBeforeRender=e}render(){const e="project",t="editor";return B`
       <playground-project
@@ -3988,30 +3911,14 @@ let Ho=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=Ee
 `];
 /**
  * @license
- * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 function Vo(e){return{type:"checkbox",...e}}function jo(e){return{type:"slider",...e}}function Zo(e){return{type:"color",...e}}function Jo(e){return{type:"select",...e}}const Go=e=>e+"px",qo=[Jo({id:"theme",label:"Theme",section:"code editor",options:["default","3024-day","3024-night","abcdef","ambiance","ayu-dark","ayu-mirage","base16-dark","base16-light","bespin","blackboard","cobalt","colorforth","darcula","dracula","duotone-dark","duotone-light","eclipse","elegant","erlang-dark","gruvbox-dark","hopscotch","icecoder","idea","isotope","lesser-dark","liquibyte","lucario","material-darker","material-ocean","material-palenight","material","mbo","mdn-like","midnight","monokai","moxer","neat","neo","night","nord","oceanic-next","panda-syntax","paraiso-dark","paraiso-light","pastel-on-dark","railscasts","rubyblue","seti","shadowfox","solarized","ssms","the-matrix","tomorrow-night-bright","tomorrow-night-eighties","ttcn","twilight","vibrant-ink","xq-dark","xq-light","yeti","yonce","zenburn"],default:"default"}),Jo({id:"fontFamily",label:"Font",section:"code editor",cssProperty:"--playground-code-font-family",options:["monospace","Roboto Mono","Source Code Pro","Ubuntu Mono"],formatCss:e=>"monospace"!==e?e+", monospace":e,default:"monospace"}),jo({id:"fontSize",label:"Font size",section:"code editor",cssProperty:"--playground-code-font-size",formatCss:Go,min:1,max:30,default:14}),Vo({id:"lineNumbers",label:"Line numbers",section:"code editor",default:!1,htmlAttribute:"line-numbers"}),Zo({id:"editorBackground",label:"Background",section:"code editor",cssProperty:"--playground-code-background",formatCss:e=>e+" !important",default:"",unsetLabel:"From theme"}),Zo({id:"tabBarBackground",label:"Background",cssProperty:"--playground-tab-bar-background",default:"#eaeaea",section:"tab bar"}),Zo({id:"tabBarForeground",label:"Foreground",cssProperty:"--playground-tab-bar-foreground-color",default:"#000000",section:"tab bar"}),Zo({id:"previewToolbarBackground",label:"Background",cssProperty:"--playground-preview-toolbar-background",default:"#ffffff",section:"preview toolbar"}),Zo({id:"previewToolbarForeground",label:"Foreground",cssProperty:"--playground-preview-toolbar-foreground-color",default:"#444444",section:"preview toolbar"}),Vo({id:"borders",label:"Borders",cssProperty:"--playground-border",formatCss:e=>e?"1px solid #ddd":"none",default:!0,section:"general"}),Vo({id:"resizable",label:"Resizable",section:"general",default:!1,htmlAttribute:"resizable"}),Vo({id:"editableFileSystem",label:"Editable filesystem",section:"general",default:!1,htmlAttribute:"editable-file-system"}),Zo({id:"highlight",label:"Highlight",cssProperty:"--playground-highlight-color",default:"#6200ee",section:"general"}),jo({id:"previewWidth",label:"Preview width",cssProperty:"--playground-preview-width",formatCss:e=>e+"%",min:0,max:100,default:30,section:"general"}),jo({id:"radius",label:"Radius",cssProperty:"border-radius",formatCss:Go,min:0,max:30,default:0,section:"general"}),jo({id:"barHeight",label:"Bar height",cssProperty:"--playground-bar-height",formatCss:Go,min:10,max:100,default:35,section:"general"}),Zo({id:"pageBackground",label:"Page background",default:"#cccccc",section:"general"})],Yo={},Qo={};for(const e of qo){Yo[e.id]=e;let t=Qo[e.section];void 0===t&&(t=Qo[e.section]=[]),t.push(e)}const Xo=Object.keys(Yo),$o=Object.keys(Qo);class ei{constructor(){this.values=new Map}getValue(e){return this.values.has(e)?this.values.get(e):Yo[e].default}setValue(e,t){this.values.set(e,t)}}
 /**
  * @license
- * Copyright (c) 2020 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2020 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */let ti=class extends de{constructor(){super(...arguments),this.values=new ei}connectedCallback(){super.connectedCallback(),this.readUrlParams(new URL(document.location.href).searchParams)}setValue(e,t){this.values.setValue(e,t),this.setUrlParams(),this.requestUpdate()}readUrlParams(e){for(const t of Xo){let r=e.get(t);if(null===r)continue;const o=Yo[t];switch(o.type){case"checkbox":this.setValue(o.id,"y"===r);break;case"color":this.setValue(o.id,"#"+r);break;case"slider":this.setValue(o.id,Number(r));break;case"select":this.setValue(o.id,r);break;default:ri(0,"Unexpected knob type "+o.type)}}}setUrlParams(){const e=new URLSearchParams;for(const t of qo){let r=this.values.getValue(t.id);if(r!==t.default)switch(t.type){case"checkbox":e.set(t.id,r?"y":"n");break;case"color":e.set(t.id,r.substring(1));break;case"slider":e.set(t.id,r+"");break;case"select":e.set(t.id,r);break;default:ri(0,"Unexpected knob type "+t.type)}}history.replaceState(null,"","?"+e.toString())}render(){return B`
       <style>
         ${this.cssText}
