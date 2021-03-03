@@ -202,7 +202,19 @@ the `preserve-whitespace` attribute is present.
 
 ### Option 2: JSON manifest
 
-Serve a JSON file containing a `files` object, with relative filenames.
+Serve a JSON file containing a `files` object. Keys are filenames relative to
+the manifest URL. Values are objects with any of the following optional
+properties:
+
+- `content`: Optional text content of the file. If omitted, a `fetch` is made to
+  retrieve the file by filename, relative to the manifest URL.
+
+- `contentType`: Optional MIME type of the file. If omitted, type is taken from
+  either the `fetch` response `Content-Type` header, or inferred from the
+  filename extension when `content` is set.
+
+- `label`: Optional label for display in `playground-tab-bar`. If omitted, the
+  filename is displayed.
 
 ```html
 <playground-ide project-src="/path/to/my/project.json"> </playground-ide>
@@ -212,9 +224,15 @@ Serve a JSON file containing a `files` object, with relative filenames.
 {
   "files": {
     "index.html": {},
-    "javascript.js": {},
-    "typescript.ts": {},
-    "styles.css": {}
+    "typescript.ts": {
+      "content": "console.log('hello');"
+    },
+    "javascript.js": {
+      "contentType": "text/javascript"
+    },
+    "styles.css": {
+      "label": "Style"
+    }
   }
 }
 ```

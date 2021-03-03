@@ -1,15 +1,7 @@
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 import {
@@ -531,24 +523,31 @@ const fetchProject = async (url: string) => {
   const manifestFetched = await fetch(url);
   const manifest = (await manifestFetched.json()) as ProjectManifest;
 
-  const filenames = manifest.files ? Object.keys(manifest.files) : [];
   const files = await Promise.all(
-    filenames.map(async (filename) => {
-      const fileUrl = new URL(filename, projectUrl);
-      const response = await fetch(fileUrl.href);
-      if (response.status === 404) {
-        throw new Error(`Could not find file ${filename}`);
+    Object.entries(manifest.files ?? {}).map(
+      async ([name, {content, contentType, label}]) => {
+        if (content === undefined) {
+          const fileUrl = new URL(name, projectUrl);
+          const response = await fetch(fileUrl.href);
+          if (response.status === 404) {
+            throw new Error(`Could not find file ${name}`);
+          }
+          content = await response.text();
+          if (!contentType) {
+            contentType = response.headers.get('Content-Type') ?? undefined;
+          }
+        }
+        if (!contentType) {
+          contentType = typeFromFilename(name) ?? 'text/plain';
+        }
+        return {
+          name,
+          label,
+          content,
+          contentType,
+        };
       }
-
-      // Remember the mime type so that the service worker can set it
-      const contentType = response.headers.get('Content-Type') || undefined;
-      return {
-        name: filename,
-        label: manifest.files![filename].label,
-        content: await response.text(),
-        contentType,
-      };
-    })
+    )
   );
   return {files, importMap: manifest.importMap ?? {}};
 };
@@ -563,7 +562,6 @@ const typeFromFilename = (filename: string) => {
 };
 
 const typeEnumToMimeType = (type?: string) => {
-  // TODO: infer type based on extension too
   if (type === undefined) {
     return;
   }

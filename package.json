@@ -22,7 +22,7 @@
     "format": "prettier src/**/*.ts --write",
     "prepublishOnly": "npm run build"
   },
-  "author": "The Polymer Authors",
+  "author": "Google LLC",
   "license": "BSD-3-Clause",
   "files": [
     "_codemirror/",
