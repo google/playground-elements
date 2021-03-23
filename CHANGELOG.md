@@ -17,6 +17,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Added
+
+- Added optional `hidden` property/attribute which prevents a file from being
+  displayed in the tab bar.
+
+### Fixed
+
+- Fixed bug where editor did not immediately switch to newly created files.
+- Fixed bug where `label` was ignored in tab bar.
+
 ## [0.6.2] - 2021-03-02
 
 ### Added

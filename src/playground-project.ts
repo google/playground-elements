@@ -330,6 +330,7 @@ export class PlaygroundProject extends LitElement {
         files.push({
           name,
           label,
+          hidden: s.hasAttribute('hidden'),
           content,
           contentType,
         });
@@ -525,7 +526,7 @@ const fetchProject = async (url: string) => {
 
   const files = await Promise.all(
     Object.entries(manifest.files ?? {}).map(
-      async ([name, {content, contentType, label}]) => {
+      async ([name, {content, contentType, label, hidden}]) => {
         if (content === undefined) {
           const fileUrl = new URL(name, projectUrl);
           const response = await fetch(fileUrl.href);
@@ -543,6 +544,7 @@ const fetchProject = async (url: string) => {
         return {
           name,
           label,
+          hidden,
           content,
           contentType,
         };

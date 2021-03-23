@@ -159,18 +159,28 @@ elements, JS modules, service workers, and web workers.
 
 ## Project files
 
-Playground supports `html`, `css`, `js`, and `ts` files. There are 3 ways to specify the
-files of a playground project.
+There are 3 ways to specify the files of a playground project.
 
 ### Option 1: Inline scripts
 
 Add one or more `<script type="sample/..." filename="...">` tags as children of
-your `<playground-ide>` or `<playground-project>`.
+your `<playground-ide>` or `<playground-project>`. The following attributes are
+available:
+
+- `type`: Required filetype. Valid options: `sample/html`, `sample/css`,
+  `sample/js`, `sample/ts`, `sample/importmap`.
+
+- `filename`: Required filename.
+
+- `label`: Optional label for display in `playground-tab-bar`. If omitted, the
+  filename is displayed.
+
+- `hidden`: If present, the file won't be visible in `playground-tab-bar`.
+
+- `preserve-whitespace`: Disable the default behavior where leading whitespace
+  that is common to all lines is removed.
 
 Be sure to escape closing `</script>` tags within your source as `<&lt;script>`.
-
-Leading whitespace that is common to all lines is automatically removed unless
-the `preserve-whitespace` attribute is present.
 
 ```html
 <playground-project>
@@ -215,6 +225,8 @@ properties:
 
 - `label`: Optional label for display in `playground-tab-bar`. If omitted, the
   filename is displayed.
+
+- `hidden`: If `true`, the file won't be visible in `playground-tab-bar`.
 
 ```html
 <playground-ide project-src="/path/to/my/project.json"> </playground-ide>
