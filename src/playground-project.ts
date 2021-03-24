@@ -26,6 +26,7 @@ import {
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
+  FileOptions,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -261,7 +262,7 @@ export class PlaygroundProject extends LitElement {
         this._importMap = source.importMap;
         break;
       case 'url':
-        const {files, importMap} = await fetchProject(source.url);
+        const {files, importMap} = await fetchProjectConfig(source.url);
         // Note the source could have changed while fetching, hence the
         // double-check here.
         if (source !== this._source) {
@@ -519,39 +520,76 @@ export class PlaygroundProject extends LitElement {
   }
 }
 
-const fetchProject = async (url: string) => {
-  const projectUrl = new URL(url, document.baseURI);
-  const manifestFetched = await fetch(url);
-  const manifest = (await manifestFetched.json()) as ProjectManifest;
+const fetchProjectConfig = async (
+  url: string
+): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
+  const mergedFilePromises = new Map<string, Promise<FileOptions>>();
+  const mergedImportMap = {imports: {}};
 
-  const files = await Promise.all(
-    Object.entries(manifest.files ?? {}).map(
-      async ([name, {content, contentType, label, hidden}]) => {
-        if (content === undefined) {
-          const fileUrl = new URL(name, projectUrl);
-          const response = await fetch(fileUrl.href);
-          if (response.status === 404) {
-            throw new Error(`Could not find file ${name}`);
-          }
-          content = await response.text();
-          if (!contentType) {
-            contentType = response.headers.get('Content-Type') ?? undefined;
-          }
-        }
-        if (!contentType) {
-          contentType = typeFromFilename(name) ?? 'text/plain';
-        }
-        return {
-          name,
-          label,
-          hidden,
-          content,
-          contentType,
-        };
+  const fetchAndMerge = async (configUrl: string) => {
+    const resp = await fetch(configUrl);
+    if (resp.status !== 200) {
+      throw new Error(
+        `Error ${
+          resp.status
+        } fetching project config from ${configUrl}: ${await resp.text()}`
+      );
+    }
+    let config;
+    try {
+      config = (await resp.json()) as ProjectManifest;
+    } catch (e) {
+      throw new Error(
+        `Error parsing project config JSON from ${configUrl}: ${e.message}`
+      );
+    }
+
+    for (const [filename, info] of Object.entries(config.files ?? {})) {
+      // A higher precedence config is already handling this file.
+      if (mergedFilePromises.has(filename)) {
+        continue;
       }
-    )
-  );
-  return {files, importMap: manifest.importMap ?? {}};
+      if (info.content === undefined) {
+        mergedFilePromises.set(
+          filename,
+          (async () => {
+            const resp = await fetch(new URL(filename, configUrl).href);
+            info.contentType = resp.headers.get('Content-Type') ?? undefined;
+            info.content = await resp.text();
+            return info;
+          })()
+        );
+      } else {
+        info.contentType ??= typeFromFilename(filename) ?? 'text/plain';
+        mergedFilePromises.set(filename, Promise.resolve(info));
+      }
+    }
+
+    mergedImportMap.imports = {
+      ...config.importMap?.imports,
+      // Imports we already have should take precedence, because we are fetching
+      // in priority order.
+      ...mergedImportMap.imports,
+    };
+
+    if (config.extends) {
+      await fetchAndMerge(new URL(config.extends, configUrl).href);
+    }
+  };
+
+  await fetchAndMerge(new URL(url, document.baseURI).href);
+
+  const files = [];
+  for (const [name, promise] of mergedFilePromises) {
+    const file = await promise;
+    files.push({
+      ...file,
+      name,
+      content: file.content ?? '',
+    });
+  }
+
+  return {files, importMap: mergedImportMap};
 };
 
 const typeFromFilename = (filename: string) => {

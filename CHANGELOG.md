@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added support for JSON files with syntax highlighting.
 
+- Added `extends` property to JSON config file, an optional URL of another JSON
+  config file to extend from. Useful for setting side-wide defaults.
+
 ### Fixed
 
 - Fixed bug where editor did not immediately switch to newly created files.
