@@ -98,6 +98,7 @@ suite('playground-code-editor', () => {
     const typeColor = 'rgb(0, 136, 85)';
     const atomColor = 'rgb(34, 17, 153)';
     const keywordColor = 'rgb(119, 0, 136)';
+    const stringColor = 'rgb(170, 17, 17)';
 
     test('html', async () =>
       assertHighlight('html', '<p>foo</p>', '<p>', tagColor));
@@ -122,5 +123,8 @@ suite('playground-code-editor', () => {
 
     test('css-in-ts', async () =>
       assertHighlight('ts', 'css`p { color: blue; }`', 'blue', keywordColor));
+
+    test('json', async () =>
+      assertHighlight('json', '{"foo": 123}', '"foo"', stringColor));
   });
 });

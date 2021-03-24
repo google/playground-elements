@@ -140,7 +140,7 @@ export class PlaygroundCodeEditor extends LitElement {
    * extension.
    */
   @property()
-  type: 'js' | 'ts' | 'html' | 'css' | undefined;
+  type: 'js' | 'ts' | 'html' | 'css' | 'json' | undefined;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
@@ -380,6 +380,13 @@ export class PlaygroundCodeEditor extends LitElement {
       case 'ts':
         return 'google-typescript';
       case 'js':
+      case 'json':
+        // While the stock CodeMirror JavaScript mode has a restricted "json"
+        // mode, the google-javascript mode does not (which we use because it
+        // supports html-in-js highlighting). Adding the CodeMirror JavaScript
+        // mode would add ~50KiB minified + brotli, so let's just put up with
+        // the fact that you'll get highlighting for JS even though it's not
+        // valid JSON.
         return 'google-javascript';
       case 'html':
         return 'google-html';
