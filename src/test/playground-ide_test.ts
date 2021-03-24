@@ -200,7 +200,7 @@ suite('playground-ide', () => {
     const tabBar = await pierce('playground-ide', 'playground-tab-bar');
     const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
     const texts = Array.from(tabs ?? []).map((tab) =>
-      tab.shadowRoot?.textContent?.trim()
+      tab.shadowRoot?.querySelector('button')?.textContent?.trim()
     );
     assert.deepEqual(texts, ['HTML', 'JS']);
   });
