@@ -157,4 +157,51 @@ suite('playground-ide', () => {
     await project.save();
     await assertPreviewContains('Hello HTML 2');
   });
+
+  test('hidden file is not displayed in tab bar', async () => {
+    render(
+      html`
+        <playground-ide>
+          <script type="sample/html" filename="index.html" hidden>
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+          <script type="sample/js" filename="hello.js">
+            document.body.textContent = 'Hello JS';
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    await assertPreviewContains('Hello JS');
+    const tabBar = await pierce('playground-ide', 'playground-tab-bar');
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
+    assert.equal(tabs?.length, 1);
+  });
+
+  test('file label is displayed in tab bar', async () => {
+    render(
+      html`
+        <playground-ide>
+          <script type="sample/html" filename="index.html" label="HTML">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+          <script type="sample/js" filename="hello.js" label="JS">
+            document.body.textContent = 'Hello JS';
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    await assertPreviewContains('Hello JS');
+    const tabBar = await pierce('playground-ide', 'playground-tab-bar');
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
+    const texts = Array.from(tabs ?? []).map((tab) =>
+      tab.shadowRoot?.querySelector('button')?.textContent?.trim()
+    );
+    assert.deepEqual(texts, ['HTML', 'JS']);
+  });
 });

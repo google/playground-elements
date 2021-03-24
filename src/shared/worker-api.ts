@@ -80,6 +80,8 @@ export interface SampleFile {
   content: string;
   /** MIME type. */
   contentType?: string;
+  /** Don't display in tab bar. */
+  hidden?: boolean;
 }
 
 export interface FileOptions {
@@ -92,6 +94,8 @@ export interface FileOptions {
   contentType?: string;
   /** Optional display label. */
   label?: string;
+  /** Don't display in tab bar. */
+  hidden?: boolean;
 }
 
 export interface ProjectManifest {

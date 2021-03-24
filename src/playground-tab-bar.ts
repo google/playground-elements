@@ -122,8 +122,8 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
   }
 
-  private get _files() {
-    return this._project?.files ?? [];
+  private get _visibleFiles() {
+    return (this._project?.files ?? []).filter(({hidden}) => !hidden);
   }
 
   update(changedProperties: PropertyValues) {
@@ -143,18 +143,22 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         );
       }
     }
+    if (changedProperties.has('_activeFileName') && this._editor) {
+      this._editor.filename = this._activeFileName;
+      this._setNewActiveFile();
+    }
     super.update(changedProperties);
   }
 
   render() {
     return html`
       <mwc-tab-bar activeIndex="1" @MDCTabBar:activated=${this._onTabActivated}>
-        ${this._files.map(
-          ({name}, index) =>
+        ${this._visibleFiles.map(
+          ({name, label}, index) =>
             html`<playground-tab
               .isFadingIndicator=${true}
               .index=${index}
-              .label=${name}
+              .label=${label || name}
               .showMenuButton=${this.editableFileSystem}
               @openMenu=${this._onOpenMenu}
             ></playground-tab>`
@@ -197,21 +201,15 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   private _onProjectFilesChanged = () => {
     this._setNewActiveFile();
-    if (this._editor) {
-      this._editor.filename = this._activeFileName;
-    }
     this.requestUpdate();
   };
 
   private _onTabActivated(event: CustomEvent<{index: number}>) {
     const index = event.detail.index;
-    const name = this._files[index].name;
+    const name = this._visibleFiles[index].name;
     if (name !== this._activeFileName) {
       this._activeFileName = name;
       this._activeFileIndex = index;
-      if (this._editor) {
-        this._editor.filename = name;
-      }
     }
   }
 
@@ -223,7 +221,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       return;
     }
     controls.state = 'menu';
-    controls.filename = this._files[event.detail.index].name;
+    controls.filename = this._visibleFiles[event.detail.index].name;
     controls.anchorElement = event.detail.anchor;
   }
 
@@ -247,16 +245,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
    * new active tab should be.
    */
   private _setNewActiveFile() {
-    if (this._files.length === 0) {
-      this._activeFileIndex = 0;
-      this._activeFileName = '';
-      return;
-    }
-
     // Stay on the same filename if it's still around, even though its index
     // might have changed.
     if (this._activeFileName) {
-      const index = this._files.findIndex(
+      const index = this._visibleFiles.findIndex(
         (file) => file.name === this._activeFileName
       );
       if (index >= 0) {
@@ -265,17 +257,19 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       }
     }
 
-    // The active file was deleted, and it was the final tab. Move to the next
-    // tab down.
-    if (this._activeFileIndex > this._files.length - 1) {
-      this._activeFileIndex = this._files.length - 1;
-      this._activeFileName = this._files[this._activeFileIndex].name;
-      return;
+    // Stay on the same index, or the nearest one to the left of where we were
+    // before.
+    for (let i = this._activeFileIndex; i >= 0; i--) {
+      const file = this._visibleFiles[i];
+      if (file && !file.hidden) {
+        this._activeFileName = file.name;
+        return;
+      }
     }
 
-    // The active file was deleted, and another file has now taken the tab
-    // position of the old one. Select that file.
-    this._activeFileName = this._files[this._activeFileIndex].name;
+    // No visible file to display.
+    this._activeFileIndex = 0;
+    this._activeFileName = '';
   }
 }
 
