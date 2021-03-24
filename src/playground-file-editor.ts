@@ -172,6 +172,8 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
     case 'text/javascript':
     case 'application/javascript':
       return 'js';
+    case 'application/json':
+      return 'json';
     case 'text/html':
       return 'html';
     case 'text/css':

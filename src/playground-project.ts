@@ -573,6 +573,8 @@ const typeEnumToMimeType = (type?: string) => {
       return 'video/mp2t';
     case 'js':
       return 'application/javascript; charset=utf-8';
+    case 'json':
+      return 'application/json; charset=utf-8';
     case 'html':
       return 'text/html; charset=utf-8';
     case 'css':

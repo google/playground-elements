@@ -159,7 +159,7 @@ elements, JS modules, service workers, and web workers.
 
 ## Project files
 
-There are 3 ways to specify the files of a playground project.
+There are 3 ways to specify the files of a playground project:
 
 ### Option 1: Inline scripts
 
@@ -168,7 +168,7 @@ your `<playground-ide>` or `<playground-project>`. The following attributes are
 available:
 
 - `type`: Required filetype. Valid options: `sample/html`, `sample/css`,
-  `sample/js`, `sample/ts`, `sample/importmap`.
+  `sample/js`, `sample/ts`, `sample/json`, `sample/importmap`.
 
 - `filename`: Required filename.
 
