@@ -26,7 +26,6 @@ import {
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
-  FileOptions,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -262,7 +261,9 @@ export class PlaygroundProject extends LitElement {
         this._importMap = source.importMap;
         break;
       case 'url':
-        const {files, importMap} = await fetchProjectConfig(source.url);
+        const {files, importMap} = await fetchProjectConfig(
+          new URL(source.url, document.baseURI).href
+        );
         // Note the source could have changed while fetching, hence the
         // double-check here.
         if (source !== this._source) {
@@ -521,75 +522,95 @@ export class PlaygroundProject extends LitElement {
 }
 
 const fetchProjectConfig = async (
-  url: string
+  configUrl: string,
+  alreadyFetchedFilenames = new Set<string>(),
+  alreadyFetchedConfigUrls = new Set<string>()
 ): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
-  const mergedFilePromises = new Map<string, Promise<FileOptions>>();
-  const mergedImportMap = {imports: {}};
+  if (alreadyFetchedConfigUrls.has(configUrl)) {
+    throw new Error(
+      `Circular project config extends: ${[
+        ...alreadyFetchedConfigUrls.values(),
+        configUrl,
+      ].join(' extends ')}`
+    );
+  }
+  alreadyFetchedConfigUrls.add(configUrl);
+  const resp = await fetch(configUrl);
+  if (resp.status !== 200) {
+    throw new Error(
+      `Error ${
+        resp.status
+      } fetching project config from ${configUrl}: ${await resp.text()}`
+    );
+  }
 
-  const fetchAndMerge = async (configUrl: string) => {
-    const resp = await fetch(configUrl);
-    if (resp.status !== 200) {
-      throw new Error(
-        `Error ${
-          resp.status
-        } fetching project config from ${configUrl}: ${await resp.text()}`
-      );
+  let config;
+  try {
+    config = (await resp.json()) as ProjectManifest;
+  } catch (e) {
+    throw new Error(
+      `Error parsing project config JSON from ${configUrl}: ${e.message}`
+    );
+  }
+
+  const filePromises = [];
+  for (const [filename, info] of Object.entries(config.files ?? {})) {
+    // A higher precedence config is already handling this file.
+    if (alreadyFetchedFilenames.has(filename)) {
+      continue;
     }
-    let config;
-    try {
-      config = (await resp.json()) as ProjectManifest;
-    } catch (e) {
-      throw new Error(
-        `Error parsing project config JSON from ${configUrl}: ${e.message}`
-      );
+    alreadyFetchedFilenames.add(filename);
+    if (info.content === undefined) {
+      filePromises.push({
+        filename,
+        infoPromise: (async () => {
+          const resp = await fetch(new URL(filename, configUrl).href);
+          info.contentType = resp.headers.get('Content-Type') ?? undefined;
+          info.content = await resp.text();
+          return info;
+        })(),
+      });
+    } else {
+      info.contentType ??= typeFromFilename(filename) ?? 'text/plain';
+      filePromises.push({
+        filename,
+        infoPromise: Promise.resolve(info),
+      });
     }
+  }
 
-    for (const [filename, info] of Object.entries(config.files ?? {})) {
-      // A higher precedence config is already handling this file.
-      if (mergedFilePromises.has(filename)) {
-        continue;
-      }
-      if (info.content === undefined) {
-        mergedFilePromises.set(
-          filename,
-          (async () => {
-            const resp = await fetch(new URL(filename, configUrl).href);
-            info.contentType = resp.headers.get('Content-Type') ?? undefined;
-            info.content = await resp.text();
-            return info;
-          })()
-        );
-      } else {
-        info.contentType ??= typeFromFilename(filename) ?? 'text/plain';
-        mergedFilePromises.set(filename, Promise.resolve(info));
-      }
-    }
+  // Start parent config fetch before we block on file fetches.
+  const parentConfigPromise = config.extends
+    ? fetchProjectConfig(
+        new URL(config.extends, configUrl).href,
+        alreadyFetchedFilenames,
+        alreadyFetchedConfigUrls
+      )
+    : undefined;
 
-    mergedImportMap.imports = {
-      ...config.importMap?.imports,
-      // Imports we already have should take precedence, because we are fetching
-      // in priority order.
-      ...mergedImportMap.imports,
-    };
-
-    if (config.extends) {
-      await fetchAndMerge(new URL(config.extends, configUrl).href);
-    }
-  };
-
-  await fetchAndMerge(new URL(url, document.baseURI).href);
-
+  const importMap = config.importMap ?? {};
   const files = [];
-  for (const [name, promise] of mergedFilePromises) {
-    const file = await promise;
+  for (const {filename, infoPromise} of filePromises) {
+    const info = await infoPromise;
     files.push({
-      ...file,
-      name,
-      content: file.content ?? '',
+      ...info,
+      name: filename,
+      content: info.content ?? '',
     });
   }
 
-  return {files, importMap: mergedImportMap};
+  if (parentConfigPromise) {
+    const parentConfig = await parentConfigPromise;
+    // Parent files go after our own.
+    files.push(...parentConfig.files);
+    importMap.imports = {
+      ...parentConfig.importMap?.imports,
+      // Our imports take precedence over our parents.
+      ...importMap.imports,
+    };
+  }
+
+  return {files, importMap};
 };
 
 const typeFromFilename = (filename: string) => {

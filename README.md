@@ -215,7 +215,7 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 | `files.contentType` | Optional MIME type of the file. If omitted, type is taken from either the `fetch` response `Content-Type` header, or inferred from the filename extension when `content` is set. |
 | `files.label`       | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                                                                                       |
 | `files.hidden`      | If `true`, the file won't be visible in `playground-tab-bar`.                                                                                                                    |
-| `extends`           | Optional URL to another JSON config file to extend from. Configurations are deeply merged.                                                                                       |
+| `extends`           | Optional URL to another JSON config file to extend from. Configs are deeply merged. URLs are interpreted relative to the URL of each extendee config.                            |
 
 ```html
 <playground-ide project-src="/path/to/my/project.json"> </playground-ide>
