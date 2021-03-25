@@ -99,6 +99,8 @@ export interface FileOptions {
 }
 
 export interface ProjectManifest {
+  /** Optional project manifest URL to extend from */
+  extends?: string;
   files?: {[filename: string]: FileOptions};
   importMap?: ModuleImportMap;
 }

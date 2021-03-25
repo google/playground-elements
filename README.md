@@ -163,22 +163,16 @@ There are 3 ways to specify the files of a playground project:
 
 ### Option 1: Inline scripts
 
-Add one or more `<script type="sample/..." filename="...">` tags as children of
-your `<playground-ide>` or `<playground-project>`. The following attributes are
-available:
+Add one or more `<script>` tags as children of
+your `<playground-ide>` or `<playground-project>`, using the following attributes:
 
-- `type`: Required filetype. Valid options: `sample/html`, `sample/css`,
-  `sample/js`, `sample/ts`, `sample/json`, `sample/importmap`.
-
-- `filename`: Required filename.
-
-- `label`: Optional label for display in `playground-tab-bar`. If omitted, the
-  filename is displayed.
-
-- `hidden`: If present, the file won't be visible in `playground-tab-bar`.
-
-- `preserve-whitespace`: Disable the default behavior where leading whitespace
-  that is common to all lines is removed.
+| Attribute             |  Description                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `type`                | Required filetype. Options: `sample/html`, `sample/css`, `sample/js`, `sample/ts`, `sample/json`, `sample/importmap`. |
+| `filename`            | Required filename.                                                                                                    |
+| `label`               | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                            |
+| `hidden`              | If present, the file won't be visible in `playground-tab-bar`.                                                        |
+| `preserve-whitespace` | Disable the default behavior where leading whitespace that is common to all lines is removed.                         |
 
 Be sure to escape closing `</script>` tags within your source as `<&lt;script>`.
 
@@ -210,23 +204,18 @@ Be sure to escape closing `</script>` tags within your source as `<&lt;script>`.
 </playground-project>
 ```
 
-### Option 2: JSON manifest
+### Option 2: JSON configuration
 
-Serve a JSON file containing a `files` object. Keys are filenames relative to
-the manifest URL. Values are objects with any of the following optional
-properties:
+Set the `project-src` attribute or `projectSrc` property to a JSON file with format:
 
-- `content`: Optional text content of the file. If omitted, a `fetch` is made to
-  retrieve the file by filename, relative to the manifest URL.
-
-- `contentType`: Optional MIME type of the file. If omitted, type is taken from
-  either the `fetch` response `Content-Type` header, or inferred from the
-  filename extension when `content` is set.
-
-- `label`: Optional label for display in `playground-tab-bar`. If omitted, the
-  filename is displayed.
-
-- `hidden`: If `true`, the file won't be visible in `playground-tab-bar`.
+| Property            |  Description                                                                                                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `files`             | An object mapping filenames to file data.                                                                                                                                        |
+| `files.content`     | Optional text content of the file. If omitted, a `fetch` is made to retrieve the file by filename, relative to the manifest URL.                                                 |
+| `files.contentType` | Optional MIME type of the file. If omitted, type is taken from either the `fetch` response `Content-Type` header, or inferred from the filename extension when `content` is set. |
+| `files.label`       | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                                                                                       |
+| `files.hidden`      | If `true`, the file won't be visible in `playground-tab-bar`.                                                                                                                    |
+| `extends`           | Optional URL to another JSON config file to extend from. Configs are deeply merged. URLs are interpreted relative to the URL of each extendee config.                            |
 
 ```html
 <playground-ide project-src="/path/to/my/project.json"> </playground-ide>

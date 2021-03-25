@@ -261,7 +261,9 @@ export class PlaygroundProject extends LitElement {
         this._importMap = source.importMap;
         break;
       case 'url':
-        const {files, importMap} = await fetchProject(source.url);
+        const {files, importMap} = await fetchProjectConfig(
+          new URL(source.url, document.baseURI).href
+        );
         // Note the source could have changed while fetching, hence the
         // double-check here.
         if (source !== this._source) {
@@ -519,39 +521,93 @@ export class PlaygroundProject extends LitElement {
   }
 }
 
-const fetchProject = async (url: string) => {
-  const projectUrl = new URL(url, document.baseURI);
-  const manifestFetched = await fetch(url);
-  const manifest = (await manifestFetched.json()) as ProjectManifest;
+const fetchProjectConfig = async (
+  configUrl: string,
+  alreadyFetchedFilenames = new Set<string>(),
+  alreadyFetchedConfigUrls = new Set<string>()
+): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
+  if (alreadyFetchedConfigUrls.has(configUrl)) {
+    throw new Error(
+      `Circular project config extends: ${[
+        ...alreadyFetchedConfigUrls.values(),
+        configUrl,
+      ].join(' extends ')}`
+    );
+  }
+  alreadyFetchedConfigUrls.add(configUrl);
+  const resp = await fetch(configUrl);
+  if (resp.status !== 200) {
+    throw new Error(
+      `Error ${
+        resp.status
+      } fetching project config from ${configUrl}: ${await resp.text()}`
+    );
+  }
 
-  const files = await Promise.all(
-    Object.entries(manifest.files ?? {}).map(
-      async ([name, {content, contentType, label, hidden}]) => {
-        if (content === undefined) {
-          const fileUrl = new URL(name, projectUrl);
-          const response = await fetch(fileUrl.href);
-          if (response.status === 404) {
-            throw new Error(`Could not find file ${name}`);
-          }
-          content = await response.text();
-          if (!contentType) {
-            contentType = response.headers.get('Content-Type') ?? undefined;
-          }
-        }
-        if (!contentType) {
-          contentType = typeFromFilename(name) ?? 'text/plain';
-        }
-        return {
-          name,
-          label,
-          hidden,
-          content,
-          contentType,
-        };
-      }
-    )
-  );
-  return {files, importMap: manifest.importMap ?? {}};
+  let config;
+  try {
+    config = (await resp.json()) as ProjectManifest;
+  } catch (e) {
+    throw new Error(
+      `Error parsing project config JSON from ${configUrl}: ${e.message}`
+    );
+  }
+
+  const filePromises: Array<Promise<SampleFile>> = [];
+  for (const [filename, info] of Object.entries(config.files ?? {})) {
+    // A higher precedence config is already handling this file.
+    if (alreadyFetchedFilenames.has(filename)) {
+      continue;
+    }
+    alreadyFetchedFilenames.add(filename);
+    if (info.content === undefined) {
+      filePromises.push(
+        (async () => {
+          const resp = await fetch(new URL(filename, configUrl).href);
+          return {
+            ...info,
+            name: filename,
+            content: await resp.text(),
+            contentType: resp.headers.get('Content-Type') ?? undefined,
+          };
+        })()
+      );
+    } else {
+      filePromises.push(
+        Promise.resolve({
+          ...info,
+          name: filename,
+          content: info.content ?? '',
+          contentType: typeFromFilename(filename) ?? 'text/plain',
+        })
+      );
+    }
+  }
+
+  // Start extends config fetch before we block on file fetches.
+  const extendsConfigPromise = config.extends
+    ? fetchProjectConfig(
+        new URL(config.extends, configUrl).href,
+        alreadyFetchedFilenames,
+        alreadyFetchedConfigUrls
+      )
+    : undefined;
+
+  const files = await Promise.all(filePromises);
+  const importMap = config.importMap ?? {};
+
+  if (extendsConfigPromise) {
+    const extendsConfig = await extendsConfigPromise;
+    // Parent files go after our own.
+    files.push(...extendsConfig.files);
+    importMap.imports = {
+      ...extendsConfig.importMap?.imports,
+      // Our imports take precedence over our parents.
+      ...importMap.imports,
+    };
+  }
+
+  return {files, importMap};
 };
 
 const typeFromFilename = (filename: string) => {
