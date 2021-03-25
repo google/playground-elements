@@ -553,7 +553,7 @@ const fetchProjectConfig = async (
     );
   }
 
-  const filePromises = [];
+  const filePromises: Array<Promise<SampleFile>> = [];
   for (const [filename, info] of Object.entries(config.files ?? {})) {
     // A higher precedence config is already handling this file.
     if (alreadyFetchedFilenames.has(filename)) {
@@ -561,26 +561,31 @@ const fetchProjectConfig = async (
     }
     alreadyFetchedFilenames.add(filename);
     if (info.content === undefined) {
-      filePromises.push({
-        filename,
-        infoPromise: (async () => {
+      filePromises.push(
+        (async () => {
           const resp = await fetch(new URL(filename, configUrl).href);
-          info.contentType = resp.headers.get('Content-Type') ?? undefined;
-          info.content = await resp.text();
-          return info;
-        })(),
-      });
+          return {
+            ...info,
+            name: filename,
+            content: await resp.text(),
+            contentType: resp.headers.get('Content-Type') ?? undefined,
+          };
+        })()
+      );
     } else {
-      info.contentType ??= typeFromFilename(filename) ?? 'text/plain';
-      filePromises.push({
-        filename,
-        infoPromise: Promise.resolve(info),
-      });
+      filePromises.push(
+        Promise.resolve({
+          ...info,
+          name: filename,
+          content: info.content ?? '',
+          contentType: typeFromFilename(filename) ?? 'text/plain',
+        })
+      );
     }
   }
 
-  // Start parent config fetch before we block on file fetches.
-  const parentConfigPromise = config.extends
+  // Start extends config fetch before we block on file fetches.
+  const extendsConfigPromise = config.extends
     ? fetchProjectConfig(
         new URL(config.extends, configUrl).href,
         alreadyFetchedFilenames,
@@ -588,23 +593,15 @@ const fetchProjectConfig = async (
       )
     : undefined;
 
+  const files = await Promise.all(filePromises);
   const importMap = config.importMap ?? {};
-  const files = [];
-  for (const {filename, infoPromise} of filePromises) {
-    const info = await infoPromise;
-    files.push({
-      ...info,
-      name: filename,
-      content: info.content ?? '',
-    });
-  }
 
-  if (parentConfigPromise) {
-    const parentConfig = await parentConfigPromise;
+  if (extendsConfigPromise) {
+    const extendsConfig = await extendsConfigPromise;
     // Parent files go after our own.
-    files.push(...parentConfig.files);
+    files.push(...extendsConfig.files);
     importMap.imports = {
-      ...parentConfig.importMap?.imports,
+      ...extendsConfig.importMap?.imports,
       // Our imports take precedence over our parents.
       ...importMap.imports,
     };
