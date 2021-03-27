@@ -5,70 +5,8 @@
  */
 
 import {LitElement, customElement, css, property} from 'lit-element';
-
-// TODO(aomarks) We use CodeMirror v5 instead of v6 only because we want support
-// for nested highlighting of HTML and CSS inside JS/TS. Upgrade back to v6 once
-// support is available. See
-// https://github.com/lezer-parser/javascript/issues/3. This module sets a
-// `CodeMirror` global.
-import './_codemirror/codemirror-bundle.js';
+import {CodeMirror} from './lib/codemirror.js';
 import codemirrorStyles from './_codemirror/codemirror-styles.js';
-
-// TODO(aomarks) @types/codemirror exists, but installing it and referencing
-// global `CodeMirror` errors with:
-//
-//  'CodeMirror' refers to a UMD global, but the current file is a module.
-//  Consider adding an import instead
-//
-// Maybe there's a way to get this working. See
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/codemirror/index.d.ts
-declare function CodeMirror(
-  callback: (host: HTMLElement) => void,
-  options?: CodeMirrorConfiguration
-): {
-  getValue(): string;
-  setValue(content: string): void;
-  setSize(width?: string | number, height?: string | number): void;
-  refresh(): void;
-  setOption<K extends keyof CodeMirrorConfiguration>(
-    option: K,
-    value: CodeMirrorConfiguration[K]
-  ): void;
-  on(eventName: 'change', handler: () => void): void;
-  getDoc(): CodeMirrorDoc;
-  foldCode(pos: number | CodeMirrorPos, options: CodeMirrorFoldOptions): void;
-};
-
-interface CodeMirrorDoc {
-  posFromIndex(index: number): CodeMirrorPos;
-  markText(
-    from: CodeMirrorPos,
-    to: CodeMirrorPos,
-    options?: CodeMirrorTextMarkerOptions
-  ): void;
-}
-
-interface CodeMirrorPos {
-  ch: number;
-  line: number;
-}
-
-interface CodeMirrorConfiguration {
-  value?: string;
-  mode?: string | null;
-  lineNumbers?: boolean;
-  readOnly?: boolean | 'nocursor';
-}
-
-interface CodeMirrorTextMarkerOptions {
-  collapsed?: boolean;
-  className?: string;
-}
-
-interface CodeMirrorFoldOptions {
-  rangeFinder?: () => void;
-  widget?: string | Element;
-}
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
