@@ -82,6 +82,7 @@
     "comlink": "^4.3.0",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1",
-    "tslib": "^2.0.3"
+    "tslib": "^2.0.3",
+    "vscode-languageserver": "^7.0.0"
   }
 }

@@ -8,9 +8,11 @@ import {
   TypeScriptWorkerAPI,
   SampleFile,
   ModuleImportMap,
+  CompileResult,
 } from '../shared/worker-api.js';
 import {expose} from 'comlink';
 import * as ts from 'typescript';
+import type * as lsp from 'vscode-languageserver';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -61,7 +63,10 @@ const workerAPI: TypeScriptWorkerAPI = {
    * multiple <playground-project> instances to save memory and type analysis of
    * common lib files like lit-element, lib.d.ts and dom.d.ts.
    */
-  async compileProject(files: Array<SampleFile>, importMap: ModuleImportMap) {
+  async compileProject(
+    files: Array<SampleFile>,
+    importMap: ModuleImportMap
+  ): Promise<CompileResult> {
     const moduleResolver = new ModuleResolver(importMap);
     const loadedFiles = await loadFiles(files, moduleResolver);
     const languageServiceHost = new WorkerLanguageServiceHost(
@@ -85,10 +90,20 @@ const workerAPI: TypeScriptWorkerAPI = {
         },
       ],
     };
+    const diagnostics = new Map<string, lsp.Diagnostic[]>();
     for (const file of files) {
       if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const url = new URL(file.name, self.origin).href;
         const sourceFile = program!.getSourceFile(url);
+        diagnostics.set(
+          file.name,
+          [
+            ...languageService.getSyntacticDiagnostics(url),
+            ...languageService.getSemanticDiagnostics(url),
+          ]
+            .filter(({code}) => !excludedTypeScriptDiagnosticCodes.has(code))
+            .map(makeLspDiagnostic)
+        );
         program!.emit(
           sourceFile,
           (fileName: string, data: string) => {
@@ -100,7 +115,10 @@ const workerAPI: TypeScriptWorkerAPI = {
         );
       }
     }
-    return emittedFiles;
+    return {
+      files: emittedFiles,
+      diagnostics,
+    };
   },
 };
 expose(workerAPI);
@@ -425,3 +443,62 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     return '__lib.d.ts';
   }
 }
+
+/**
+ * Convert a diagnostic from TypeScript format to Language Server Protocol
+ * format.
+ */
+function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
+  return {
+    code: tsDiagnostic.code,
+    source: tsDiagnostic.source ?? 'typescript',
+    message: ts.flattenDiagnosticMessageText(tsDiagnostic.messageText, '\n'),
+    severity: diagnosticCategoryMapping[tsDiagnostic.category],
+    range: {
+      start:
+        tsDiagnostic.file !== undefined && tsDiagnostic.start !== undefined
+          ? tsDiagnostic.file.getLineAndCharacterOfPosition(tsDiagnostic.start)
+          : {character: 0, line: 0},
+      end:
+        tsDiagnostic.file !== undefined &&
+        tsDiagnostic.start !== undefined &&
+        tsDiagnostic.length !== undefined
+          ? tsDiagnostic.file.getLineAndCharacterOfPosition(
+              tsDiagnostic.start + tsDiagnostic.length
+            )
+          : {character: 0, line: 0},
+    },
+  };
+}
+
+/**
+ * We don't want a runtime import of 'vscode-languageserver' just for the
+ * DiagnosticSeverity constants. We can duplicate the values instead, and assert
+ * we got them right with a type constraint.
+ */
+const diagnosticCategoryMapping: {
+  [ts.DiagnosticCategory.Error]: typeof lsp.DiagnosticSeverity['Error'];
+  [ts.DiagnosticCategory.Warning]: typeof lsp.DiagnosticSeverity['Warning'];
+  [ts.DiagnosticCategory.Message]: typeof lsp.DiagnosticSeverity['Information'];
+  [ts.DiagnosticCategory.Suggestion]: typeof lsp.DiagnosticSeverity['Hint'];
+} = {
+  [ts.DiagnosticCategory.Error]: 1,
+  [ts.DiagnosticCategory.Warning]: 2,
+  [ts.DiagnosticCategory.Message]: 3,
+  [ts.DiagnosticCategory.Suggestion]: 4,
+};
+
+/**
+ * TypeScript error codes that we don't currently display.
+ *
+ * TODO(aomarks) These exceptions are here because we don't currently import
+ * typings of dependencies, or even the standard lib. So imports and standard
+ * symbols are not available. Remove exceptions once we can fetch typings.
+ * https://github.com/PolymerLabs/playground-elements/issues/119
+ */
+const excludedTypeScriptDiagnosticCodes = new Set<number>([
+  // Cannot find name '...'.
+  2304,
+  // Cannot find module '...' or its corresponding type declarations.
+  2307,
+]);

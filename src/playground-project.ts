@@ -26,6 +26,7 @@ import {
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
+  CompileResult,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -33,6 +34,7 @@ import {
   forceSkypackRawMode,
 } from './shared/util.js';
 import {Deferred} from './shared/deferred.js';
+import type {Diagnostic} from 'vscode-languageserver';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -150,6 +152,16 @@ export class PlaygroundProject extends LitElement {
   sandboxScope = 'playground-projects/';
 
   /**
+   * Map from filename to array of Language Server Protocol diagnostics
+   * resulting from the latest compilation.
+   */
+  get diagnostics(): Map<string, Diagnostic[]> | undefined {
+    return this._diagnostics;
+  }
+
+  private _diagnostics?: Map<string, Diagnostic[]>;
+
+  /**
    * A unique identifier for this instance so the service worker can keep an
    * independent cache of files for it.
    */
@@ -164,9 +176,9 @@ export class PlaygroundProject extends LitElement {
     Remote<TypeScriptWorkerAPI>
   >();
 
-  private _compiledFilesPromise = Promise.resolve<
-    Map<string, string> | undefined
-  >(undefined);
+  private _compileResultPromise = Promise.resolve<CompileResult | undefined>(
+    undefined
+  );
   private _compiledFiles?: Map<string, string>;
 
   private _validImportMap: ModuleImportMap = {};
@@ -422,7 +434,7 @@ export class PlaygroundProject extends LitElement {
   }
 
   private async _getFile(name: string): Promise<SampleFile | undefined> {
-    await this._compiledFilesPromise;
+    await this._compileResultPromise;
     const compiledUrl = new URL(name, window.origin).href;
     const compiledContent = this._compiledFiles?.get(compiledUrl);
     if (compiledContent !== undefined) {
@@ -445,13 +457,15 @@ export class PlaygroundProject extends LitElement {
     this.dispatchEvent(new CustomEvent('compileStart'));
     if (this._files !== undefined) {
       const workerApi = await this._deferredTypeScriptWorkerApi.promise;
-      this._compiledFilesPromise = (workerApi.compileProject(
+      this._compileResultPromise = workerApi.compileProject(
         this._files,
         this._importMap
-      ) as any) as Promise<Map<string, string>>;
-      this._compiledFiles = await this._compiledFilesPromise;
+      );
+      const result = await this._compileResultPromise;
+      this._compiledFiles = result?.files;
+      this._diagnostics = result?.diagnostics;
     } else {
-      this._compiledFilesPromise = Promise.resolve(undefined);
+      this._compileResultPromise = Promise.resolve(undefined);
     }
     this.dispatchEvent(new CustomEvent('compileDone'));
   }
