@@ -17,6 +17,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Added
+
+- TypeScript errors are now displayed in the editor with red underlines. A
+  tooltip displaying the error is shown on hover.
+
+  - Note that only basic/syntactic errors are currently shown, because typings
+    of dependencies are not currently available to compilation.
+
+- Added CSS property `--playground-error-border`, the `border-bottom` of code
+  spans with an error (`2px red dashed` by default).
+
+- Added CSS shadow part `diagnostic-tooltip` for styling the tooltip that
+  appears when hovering over an error.
+
 ## [0.6.3] - 2021-03-24
 
 ### Added

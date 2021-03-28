@@ -658,6 +658,7 @@ to quickly experiment with themes and other customizations.
 | `--playground-code-TOKEN-color`                    | *various*                                                                                | Color of each kind of `TOKEN` in syntax highlighted-code. See the [syntax highlighting](#syntax-highlighting) section for details. |
 | `--playground-highlight-color`                     | ![](images/colors/6200EE.png) `#6200EE`                                                  | Color of the active file-picker tab label and indicator, and the preview loading bar                                               |
 | `--playground-code-background`                     | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                  | `background` of the code editor                                                                                                    |
+| `--playground-error-border`                        | `2px red dashed`                                                                         | `border-bottom` of code spans with an error                                                                                        |
 | `--playground-tab-bar-background`                  | ![](images/colors/EAEAEA.png) `#EAEAEA`                                                  | `background` of the editor file-picker tab bar                                                                                     |
 | `--playground-tab-bar-foreground-color`            | ![](images/colors/000000.png) `#000000`                                                  | Text `color` of inactive file-picker tabs                                                                                          |
 | `--playground-preview-toolbar-background`          | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                  | `background` of the preview toolbar                                                                                                |
@@ -672,15 +673,16 @@ parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
 which you can style with additional rules not covered by the above CSS custom
 properties.
 
-| Part name                                   | Exported by      | Description                                  |
-| ------------------------------------------- | ---------------- | -------------------------------------------- |
-| `tab-bar`                                   | `ide`            | Tab bar file switcher                        |
-| `editor`                                    | `ide`            | Editor                                       |
-| `preview`                                   | `ide`            | Preview                                      |
-| `preview-toolbar`                           | `ide`, `preview` | Preview top bar                              |
-| `preview-location`                          | `ide`, `preview` | Preview top bar "Result" heading             |
-| `preview-reload-button`                     | `ide`, `preview` | Preview top bar reload button                |
-| `preview-loading-indicator`                 | `ide`, `preview` | Preview top bar horizontal loading indicator |
+| Part name                                   | Exported by                         | Description                                                               |
+| ------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------- |
+| `tab-bar`                                   | `ide`                               | Tab bar file switcher                                                     |
+| `editor`                                    | `ide`                               | Editor                                                                    |
+| `preview`                                   | `ide`                               | Preview                                                                   |
+| `preview-toolbar`                           | `ide`, `preview`                    | Preview top bar                                                           |
+| `preview-location`                          | `ide`, `preview`                    | Preview top bar "Result" heading                                          |
+| `preview-reload-button`                     | `ide`, `preview`                    | Preview top bar reload button                                             |
+| `preview-loading-indicator`                 | `ide`, `preview`                    | Preview top bar horizontal loading indicator                              |
+| `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error |
 
 # Syntax highlighting
 

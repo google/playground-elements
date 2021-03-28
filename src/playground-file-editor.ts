@@ -98,12 +98,14 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
           'filesChanged',
           this._onProjectFilesChanged
         );
+        oldProject.removeEventListener('compileDone', this._onCompileDone);
       }
       if (this._project) {
         this._project.addEventListener(
           'filesChanged',
           this._onProjectFilesChanged
         );
+        this._project.addEventListener('compileDone', this._onCompileDone);
       }
       this._onProjectFilesChanged();
     }
@@ -115,6 +117,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       ${this._files
         ? html`
             <playground-code-editor
+              exportparts="diagnostic-tooltip"
               .value=${
                 // We need live() because the lit's dirty-checking value for
                 // content is not updated by user edits.
@@ -126,6 +129,9 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .lineNumbers=${this.lineNumbers}
               .readonly=${!this._currentFile}
               .pragmas=${this.pragmas}
+              .diagnostics=${this._project?.diagnostics?.get(
+                this._currentFile?.name ?? ''
+              )}
               @change=${this._onEdit}
             >
             </playground-code-editor>
@@ -136,6 +142,11 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
 
   private _onProjectFilesChanged = () => {
     this.filename ??= this._files[0]?.name;
+    this.requestUpdate();
+  };
+
+  private _onCompileDone = () => {
+    // Propagate diagnostics.
     this.requestUpdate();
   };
 

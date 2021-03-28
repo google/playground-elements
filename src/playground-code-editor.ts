@@ -4,9 +4,19 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, customElement, css, property} from 'lit-element';
+import {
+  LitElement,
+  customElement,
+  css,
+  property,
+  internalProperty,
+  PropertyValues,
+  html,
+} from 'lit-element';
+import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {CodeMirror} from './lib/codemirror.js';
 import codemirrorStyles from './_codemirror/codemirror-styles.js';
+import type {Diagnostic} from 'vscode-languageserver';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -36,6 +46,7 @@ export class PlaygroundCodeEditor extends LitElement {
         code area. However, this can create undesirable stacking effects with
         the rest of the page. Force a new stacking context. */
         isolation: isolate;
+        position: relative;
       }
 
       .CodeMirror {
@@ -51,6 +62,29 @@ export class PlaygroundCodeEditor extends LitElement {
         cursor: pointer;
         /* Pretty much any color from the theme is good enough. */
         color: var(--playground-code-keyword-color, #770088);
+      }
+
+      .diagnostic {
+        /* It would be nice to use "text-decoration: red wavy underline" here,
+           but unfortunately it renders nothing at all for single characters.
+           See https://bugs.chromium.org/p/chromium/issues/detail?id=668042. */
+        border-bottom: var(--playground-error-border, 2px red dashed);
+      }
+
+      #tooltip {
+        position: absolute;
+        padding: 7px;
+        z-index: 4;
+      }
+
+      #tooltip > div {
+        background: var(--playground-code-background, #fff);
+        color: var(--playground-code-default-color, #000);
+        /* Kind of hacky... line number color tends to work out as a good
+           default border, because it's usually visible on top of the
+           background, but slightly muted. */
+        border: 1px solid var(--playground-code-linenumber-color, #ccc);
+        padding: 5px;
       }
     `,
     codemirrorStyles,
@@ -94,6 +128,12 @@ export class PlaygroundCodeEditor extends LitElement {
   readonly = false;
 
   /**
+   * Diagnostics to display on the current file.
+   */
+  @property({attribute: false})
+  diagnostics?: Array<Diagnostic>;
+
+  /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
    * See https://github.com/PolymerLabs/playground-elements#hiding--folding for
@@ -108,21 +148,28 @@ export class PlaygroundCodeEditor extends LitElement {
   @property()
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
+  @internalProperty()
+  private _tooltipDiagnostic?: {
+    diagnostic: Diagnostic;
+    position: string;
+  };
+
   private _resizeObserver?: ResizeObserver;
   private _valueChangingFromOutside = false;
   private _ignoreValueChange = false;
   private _hideOrFoldRegionsActive = false;
+  private _cmDom?: HTMLElement;
+  private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
 
-  update(
-    changedProperties: TypedMap<
-      Omit<PlaygroundCodeEditor, keyof LitElement | 'update'>
-    >
-  ) {
+  update(changedProperties: PropertyValues) {
     const cm = this._codemirror;
     if (cm === undefined) {
       this._createView();
     } else {
-      for (const prop of changedProperties.keys()) {
+      const changedTyped = changedProperties as TypedMap<
+        Omit<PlaygroundCodeEditor, keyof LitElement | 'render' | 'update'>
+      >;
+      for (const prop of changedTyped.keys()) {
         switch (prop) {
           case 'value':
             this._valueChangingFromOutside = true;
@@ -141,12 +188,30 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'pragmas':
             this._applyHideAndFoldRegions();
             break;
+          case 'diagnostics':
+            this._showDiagnostics();
+            break;
           default:
             unreachable(prop);
         }
       }
     }
     super.update(changedProperties);
+  }
+
+  render() {
+    return html`
+      ${this._cmDom}
+      <div
+        id="tooltip"
+        ?hidden=${!this._tooltipDiagnostic}
+        style=${ifDefined(this._tooltipDiagnostic?.position)}
+      >
+        <div part="diagnostic-tooltip">
+          ${this._tooltipDiagnostic?.diagnostic.message}
+        </div>
+      </div>
+    `;
   }
 
   connectedCallback() {
@@ -171,8 +236,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _createView() {
     const cm = CodeMirror(
       (dom) => {
-        this.shadowRoot!.innerHTML = '';
-        this.shadowRoot!.appendChild(dom);
+        this._cmDom = dom;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             // It seems that some dynamic layouts confuse CodeMirror, causing it
@@ -201,6 +265,7 @@ export class PlaygroundCodeEditor extends LitElement {
       if (this._valueChangingFromOutside) {
         // Users can't change hide/fold regions.
         this._applyHideAndFoldRegions();
+        this._showDiagnostics();
       } else {
         // Change event is only for user input.
         this.dispatchEvent(new Event('change'));
@@ -333,6 +398,95 @@ export class PlaygroundCodeEditor extends LitElement {
     }
     return null;
   }
+
+  private _showDiagnostics() {
+    const cm = this._codemirror;
+    if (cm === undefined) {
+      return;
+    }
+    cm.operation(() => {
+      this._tooltipDiagnostic = undefined;
+      while (this._diagnosticMarkers.length > 0) {
+        this._diagnosticMarkers.pop()!.clear();
+      }
+      if (!this.diagnostics?.length) {
+        this._cmDom?.removeEventListener(
+          'mouseover',
+          this._onMouseOverWithDiagnostics
+        );
+        return;
+      }
+      this._cmDom?.addEventListener(
+        'mouseover',
+        this._onMouseOverWithDiagnostics
+      );
+      for (let i = 0; i < this.diagnostics.length; i++) {
+        const diagnostic = this.diagnostics[i];
+        this._diagnosticMarkers.push(
+          cm.markText(
+            {
+              line: diagnostic.range.start.line,
+              ch: diagnostic.range.start.character,
+            },
+            {
+              line: diagnostic.range.end.line,
+              ch: diagnostic.range.end.character,
+            },
+            {
+              className: `diagnostic diagnostic-${i}`,
+            }
+          )
+        );
+      }
+    });
+  }
+
+  // Using property assignment syntax so that it's already bound to `this` for
+  // add/removeEventListener.
+  private _onMouseOverWithDiagnostics = (event: MouseEvent) => {
+    if (!this.diagnostics?.length) {
+      return;
+    }
+    // Find the diagnostic. Note we could use cm.findMarksAt() with the pointer
+    // coordinates (like the built-in linter plugin does), but since we've
+    // encoded the diagnostic index into a class, we can just extract it
+    // directly from the target.
+    const idxMatch = (event.target as Element).className?.match(
+      /diagnostic-(\d+)/
+    );
+    if (idxMatch === null) {
+      this._tooltipDiagnostic = undefined;
+      return;
+    }
+    const idx = Number(idxMatch[1]);
+    const diagnostic = this.diagnostics[idx];
+    if (diagnostic === this._tooltipDiagnostic?.diagnostic) {
+      // Already showing the tooltip for this diagnostic.
+      return;
+    }
+
+    // Position the tooltip relative to the squiggly code span. To maximize
+    // available space, place it above/below and left/right depending on which
+    // quadrant the span is in.
+    let position = '';
+    const hostRect = this.getBoundingClientRect();
+    const spanRect = (event.target as Element).getBoundingClientRect();
+    const hostCenterY = hostRect.y + hostRect.height / 2;
+    if (spanRect.y < hostCenterY) {
+      // Note the rects are viewport relative, so the extra subtractions here
+      // are to convert to host-relative.
+      position += `top:${spanRect.y + spanRect.height - hostRect.y}px;`;
+    } else {
+      position += `bottom:${hostRect.bottom - spanRect.y}px;`;
+    }
+    const hostCenterX = hostRect.x + hostRect.width / 2;
+    if (spanRect.left < hostCenterX) {
+      position += `left:${Math.max(0, spanRect.x - hostRect.x)}px`;
+    } else {
+      position += `right:${Math.max(0, hostRect.right - spanRect.right)}px`;
+    }
+    this._tooltipDiagnostic = {diagnostic, position};
+  };
 }
 
 declare global {

@@ -325,7 +325,8 @@ export class PlaygroundIde extends LitElement {
           exportparts="preview-toolbar,
                        preview-location,
                        preview-reload-button,
-                       preview-loading-indicator"
+                       preview-loading-indicator,
+                       diagnostic-tooltip"
           .project=${projectId}
         ></playground-preview>
       </div>
