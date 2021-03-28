@@ -222,7 +222,13 @@ export class PlaygroundCodeEditor extends LitElement {
     // sometimes be missing, but typing in the editor will fix it.
     if (typeof ResizeObserver === 'function') {
       this._resizeObserver = new ResizeObserver(() => {
+        // Temporarily disconnect to avoid loops, because CodeMirror might
+        // resize itself on refresh.
+        this._resizeObserver?.disconnect();
         this._codemirror?.refresh();
+        requestAnimationFrame(() => {
+          this._resizeObserver?.observe(this);
+        });
       });
       this._resizeObserver.observe(this);
     }
@@ -231,6 +237,7 @@ export class PlaygroundCodeEditor extends LitElement {
 
   disconnectedCallback() {
     this._resizeObserver?.disconnect();
+    this._resizeObserver = undefined;
     super.disconnectedCallback();
   }
 
