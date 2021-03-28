@@ -160,6 +160,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _hideOrFoldRegionsActive = false;
   private _cmDom?: HTMLElement;
   private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
+  private _diagnosticsMouseoverListenerActive = false;
 
   update(changedProperties: PropertyValues) {
     const cm = this._codemirror;
@@ -410,16 +411,22 @@ export class PlaygroundCodeEditor extends LitElement {
         this._diagnosticMarkers.pop()!.clear();
       }
       if (!this.diagnostics?.length) {
-        this._cmDom?.removeEventListener(
+        if (this._diagnosticsMouseoverListenerActive) {
+          this._cmDom?.removeEventListener(
+            'mouseover',
+            this._onMouseOverWithDiagnostics
+          );
+          this._diagnosticsMouseoverListenerActive = false;
+        }
+        return;
+      }
+      if (!this._diagnosticsMouseoverListenerActive) {
+        this._cmDom?.addEventListener(
           'mouseover',
           this._onMouseOverWithDiagnostics
         );
-        return;
+        this._diagnosticsMouseoverListenerActive = true;
       }
-      this._cmDom?.addEventListener(
-        'mouseover',
-        this._onMouseOverWithDiagnostics
-      );
       for (let i = 0; i < this.diagnostics.length; i++) {
         const diagnostic = this.diagnostics[i];
         this._diagnosticMarkers.push(
