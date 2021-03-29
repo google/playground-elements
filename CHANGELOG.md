@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.6.5] - 2021-03-29
+
+### Fixed
+
+- Fixed missing `lib/codemirror.js` file in NPM package.
+
 ## [0.6.4] - 2021-03-29
 
 ### Added

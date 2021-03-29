@@ -1,6 +1,6 @@
 {
   "name": "playground-elements",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "A multi-file code editor component with live preview",
   "homepage": "https://github.com/PolymerLabs/playground-elements#readme",
   "repository": "github:PolymerLabs/playground-elements",
@@ -39,6 +39,7 @@
     "playground-service-worker-proxy.html",
     "playground-service-worker.js",
     "playground-typescript-worker.js",
+    "lib/**/*.{js,d.ts,d.ts.map}",
     "shared/**/*.{js,d.ts,d.ts.map}",
     "src/**/*.{ts,js}",
     "!src/test/**",
