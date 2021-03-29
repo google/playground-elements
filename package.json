@@ -51,6 +51,7 @@
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-replace": "^2.3.3",
+    "@types/codemirror": "^0.0.108",
     "@web/dev-server": "^0.1.4",
     "@web/test-runner": "^0.12.2",
     "@web/test-runner-playwright": "^0.8.0",
@@ -78,11 +79,10 @@
     "@material/mwc-tab": "^0.20.0",
     "@material/mwc-tab-bar": "^0.20.0",
     "@material/mwc-textfield": "^0.20.0",
-    "@types/es-module-lexer": "^0.3.0",
     "comlink": "^4.3.0",
-    "es-module-lexer": "^0.3.26",
     "lit-element": "^2.3.1",
     "lit-html": "^1.2.1",
-    "tslib": "^2.0.3"
+    "tslib": "^2.0.3",
+    "vscode-languageserver": "^7.0.0"
   }
 }

@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+import type {Diagnostic} from 'vscode-languageserver';
+
 /**
  * Sent from the project to the proxy, with configuration and a port for further
  * messages.
@@ -60,11 +62,16 @@ export interface ServiceWorkerAPI {
   setFileAPI(fileAPI: FileAPI, sessionID: string): void;
 }
 
+export interface CompileResult {
+  files: Map<string, string>;
+  diagnostics: Map<string, Array<Diagnostic>>;
+}
+
 export interface TypeScriptWorkerAPI {
   compileProject(
     files: Array<SampleFile>,
     importMap: ModuleImportMap
-  ): Promise<Map<string, string>>;
+  ): Promise<CompileResult>;
 }
 
 export interface FileAPI {
