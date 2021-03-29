@@ -155,6 +155,7 @@ export class PlaygroundCodeEditor extends LitElement {
   };
 
   private _resizeObserver?: ResizeObserver;
+  private _resizing = false;
   private _valueChangingFromOutside = false;
   private _ignoreValueChange = false;
   private _hideOrFoldRegionsActive = false;
@@ -222,13 +223,13 @@ export class PlaygroundCodeEditor extends LitElement {
     // sometimes be missing, but typing in the editor will fix it.
     if (typeof ResizeObserver === 'function') {
       this._resizeObserver = new ResizeObserver(() => {
-        // Temporarily disconnect to avoid loops, because CodeMirror might
-        // resize itself on refresh.
-        this._resizeObserver?.disconnect();
+        if (this._resizing) {
+          // Don't get in a resize loop.
+          return;
+        }
+        this._resizing = true;
         this._codemirror?.refresh();
-        requestAnimationFrame(() => {
-          this._resizeObserver?.observe(this);
-        });
+        this._resizing = false;
       });
       this._resizeObserver.observe(this);
     }
@@ -245,6 +246,7 @@ export class PlaygroundCodeEditor extends LitElement {
     const cm = CodeMirror(
       (dom) => {
         this._cmDom = dom;
+        this._resizing = true;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             // It seems that some dynamic layouts confuse CodeMirror, causing it
@@ -252,6 +254,7 @@ export class PlaygroundCodeEditor extends LitElement {
             // interactions to be interpreted incorrectly. Here we hackily force
             // a refresh after initial layout is usually done.
             this._codemirror?.refresh();
+            this._resizing = false;
           });
         });
       },
