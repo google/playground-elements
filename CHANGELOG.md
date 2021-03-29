@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.6.6] - 2021-03-29
+
+### Fixed
+
+- Fixed missing `@types/codemirror` dependency.
+
 ## [0.6.5] - 2021-03-29
 
 ### Fixed
