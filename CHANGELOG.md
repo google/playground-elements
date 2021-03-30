@@ -17,7 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] Replaced `files` getter/setter on `<playground-project>` and
+  `<playground-ide>` with `config` getter/setter. This property has the same
+  type as the JSON config, and can be used to save/restore the state of all
+  files and other configuration.
 
 ## [0.6.6] - 2021-03-29
 
