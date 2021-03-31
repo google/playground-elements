@@ -28,8 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- TypeScript errors of the form `Property '...' does not exist on type '...'`
-  are now suppressed (temporarily until `d.ts` files are fetched).
+- TypeScript errors of the form `Property '...' does not exist on type` and
+  `Cannot find name '...'` are now suppressed (temporarily until `d.ts` files
+  are fetched).
 
 ## [0.6.6] - 2021-03-29
 
