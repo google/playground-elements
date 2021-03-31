@@ -183,9 +183,9 @@ export class PlaygroundIde extends LitElement {
    * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  // Note this is a @property so that we inherit property values set before
-  // upgrade.
   get config(): ProjectManifest | undefined {
+    // Note this is a @property so that we inherit property values set before
+    // upgrade.
     return this._project?.config ?? this._configSetBeforeRender;
   }
   set config(config: ProjectManifest | undefined) {

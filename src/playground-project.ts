@@ -85,17 +85,9 @@ export class PlaygroundProject extends LitElement {
    * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  set config(config: ProjectManifest | undefined) {
+  get config(): ProjectManifest | undefined {
     // Note this is a @property so that we inherit property values set before
     // upgrade.
-    if (config) {
-      this._source = {type: 'direct', config};
-    } else if (this._source.type === 'direct') {
-      this._source = {type: 'none'};
-    }
-  }
-
-  get config(): ProjectManifest | undefined {
     return {
       files: Object.fromEntries(
         (this._files ?? []).map((file) => [
@@ -108,6 +100,13 @@ export class PlaygroundProject extends LitElement {
       ),
       importMap: this._validImportMap,
     };
+  }
+  set config(config: ProjectManifest | undefined) {
+    if (config) {
+      this._source = {type: 'direct', config};
+    } else if (this._source.type === 'direct') {
+      this._source = {type: 'none'};
+    }
   }
 
   get files(): SampleFile[] | undefined {
