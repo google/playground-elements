@@ -86,8 +86,9 @@ export class PlaygroundProject extends LitElement {
    */
   @property({attribute: false, hasChanged: () => false})
   get config(): ProjectManifest | undefined {
-    // Note this is a @property so that we inherit property values set before
-    // upgrade.
+    // Note this is declared a @property only to capture properties set before
+    // upgrade. Attribute reflection and update lifecycle disabled because they
+    // are not needed in this case.
     return {
       files: Object.fromEntries(
         (this._files ?? []).map((file) => [
