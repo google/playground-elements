@@ -501,4 +501,6 @@ const excludedTypeScriptDiagnosticCodes = new Set<number>([
   2304,
   // Cannot find module '...' or its corresponding type declarations.
   2307,
+  // Property '...' does not exist on type '...'.
+  2339,
 ]);
