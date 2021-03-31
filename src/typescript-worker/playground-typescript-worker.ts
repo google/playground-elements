@@ -503,4 +503,7 @@ const excludedTypeScriptDiagnosticCodes = new Set<number>([
   2307,
   // Property '...' does not exist on type '...'.
   2339,
+  // Cannot find name '...'. Do you need to change your target library? Try
+  // changing the `lib` compiler option to include '...'.
+  2584,
 ]);

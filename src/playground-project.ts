@@ -78,27 +78,40 @@ export class PlaygroundProject extends LitElement {
   }
 
   /**
-   * Get or set the array of project files.
+   * Get or set the project config.
    *
-   * When both `projectSrc` and `files` are set, the one set most recently wins.
-   * Slotted children win only if both `projectSrc` and `files` are undefined
+   * When both `projectSrc` and `config` are set, the one set most recently
+   * wins. Slotted children win only if both `projectSrc` and `config` are
+   * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  get files(): SampleFile[] | undefined {
-    return this._files;
+  get config(): ProjectManifest | undefined {
+    // Note this is declared a @property only to capture properties set before
+    // upgrade. Attribute reflection and update lifecycle disabled because they
+    // are not needed in this case.
+    return {
+      files: Object.fromEntries(
+        (this._files ?? []).map((file) => [
+          file.name,
+          {
+            ...file,
+            name: undefined,
+          },
+        ])
+      ),
+      importMap: this._validImportMap,
+    };
   }
-
-  set files(files: SampleFile[] | undefined) {
-    if (files) {
-      for (const file of files) {
-        if (!file.contentType) {
-          file.contentType = typeFromFilename(file.name);
-        }
-      }
-      this._source = {type: 'direct', files};
+  set config(config: ProjectManifest | undefined) {
+    if (config) {
+      this._source = {type: 'direct', config};
     } else if (this._source.type === 'direct') {
       this._source = {type: 'none'};
     }
+  }
+
+  get files(): SampleFile[] | undefined {
+    return this._files;
   }
 
   /**
@@ -112,7 +125,7 @@ export class PlaygroundProject extends LitElement {
       }
     | {
         type: 'direct';
-        files: SampleFile[];
+        config: ProjectManifest;
       }
     | {
         type: 'url';
@@ -265,24 +278,37 @@ export class PlaygroundProject extends LitElement {
         this._importMap = {};
         break;
       case 'direct':
-        this._files = source.files;
-        this._importMap = {};
+        {
+          const {files, importMap} = await expandProjectConfig(
+            source.config,
+            document.baseURI
+          );
+          // Note the source could have changed while fetching, hence the
+          // double-check here.
+          if (source !== this._source) {
+            return;
+          }
+          this._files = files;
+          this._importMap = importMap;
+        }
         break;
       case 'slot':
         this._files = source.files;
         this._importMap = source.importMap;
         break;
       case 'url':
-        const {files, importMap} = await fetchProjectConfig(
-          new URL(source.url, document.baseURI).href
-        );
-        // Note the source could have changed while fetching, hence the
-        // double-check here.
-        if (source !== this._source) {
-          return;
+        {
+          const {files, importMap} = await fetchProjectConfig(
+            new URL(source.url, document.baseURI).href
+          );
+          // Note the source could have changed while fetching, hence the
+          // double-check here.
+          if (source !== this._source) {
+            return;
+          }
+          this._files = files;
+          this._importMap = importMap;
         }
-        this._files = files;
-        this._importMap = importMap;
         break;
       default:
         source as void; // Exhaustive check.
@@ -535,38 +561,57 @@ export class PlaygroundProject extends LitElement {
   }
 }
 
+/**
+ * Fetches and expands the given JSON project config URL.
+ */
 const fetchProjectConfig = async (
-  configUrl: string,
+  url: string,
   alreadyFetchedFilenames = new Set<string>(),
   alreadyFetchedConfigUrls = new Set<string>()
 ): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
-  if (alreadyFetchedConfigUrls.has(configUrl)) {
+  if (alreadyFetchedConfigUrls.has(url)) {
     throw new Error(
       `Circular project config extends: ${[
         ...alreadyFetchedConfigUrls.values(),
-        configUrl,
+        url,
       ].join(' extends ')}`
     );
   }
-  alreadyFetchedConfigUrls.add(configUrl);
-  const resp = await fetch(configUrl);
+  alreadyFetchedConfigUrls.add(url);
+  const resp = await fetch(url);
   if (resp.status !== 200) {
     throw new Error(
       `Error ${
         resp.status
-      } fetching project config from ${configUrl}: ${await resp.text()}`
+      } fetching project config from ${url}: ${await resp.text()}`
     );
   }
-
-  let config;
+  let config: Partial<ProjectManifest>;
   try {
-    config = (await resp.json()) as ProjectManifest;
+    config = await resp.json();
   } catch (e) {
     throw new Error(
-      `Error parsing project config JSON from ${configUrl}: ${e.message}`
+      `Error parsing project config JSON from ${url}: ${e.message}`
     );
   }
+  return await expandProjectConfig(
+    config,
+    url,
+    alreadyFetchedFilenames,
+    alreadyFetchedConfigUrls
+  );
+};
 
+/**
+ * Expands a partial project config by following its `extends` property, and
+ * fetching the content for all files.
+ */
+const expandProjectConfig = async (
+  config: ProjectManifest,
+  baseUrl: string,
+  alreadyFetchedFilenames = new Set<string>(),
+  alreadyFetchedConfigUrls = new Set<string>()
+): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
   const filePromises: Array<Promise<SampleFile>> = [];
   for (const [filename, info] of Object.entries(config.files ?? {})) {
     // A higher precedence config is already handling this file.
@@ -577,12 +622,12 @@ const fetchProjectConfig = async (
     if (info.content === undefined) {
       filePromises.push(
         (async () => {
-          const resp = await fetch(new URL(filename, configUrl).href);
+          const resp = await fetch(new URL(filename, baseUrl).href);
           return {
             ...info,
             name: filename,
             content: await resp.text(),
-            contentType: resp.headers.get('Content-Type') ?? undefined,
+            contentType: resp.headers.get('Content-Type') ?? 'text/plain',
           };
         })()
       );
@@ -601,7 +646,7 @@ const fetchProjectConfig = async (
   // Start extends config fetch before we block on file fetches.
   const extendsConfigPromise = config.extends
     ? fetchProjectConfig(
-        new URL(config.extends, configUrl).href,
+        new URL(config.extends, baseUrl).href,
         alreadyFetchedFilenames,
         alreadyFetchedConfigUrls
       )

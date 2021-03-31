@@ -19,10 +19,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- [**BREAKING**] Replaced `files` getter/setter on `<playground-project>` and
+  `<playground-ide>` with `config` getter/setter. This property has the same
+  type as the JSON config, and can be used to save/restore the state of all
+  files and other configuration.
+
 ### Fixed
 
-- TypeScript errors of the form `Property '...' does not exist on type '...'`
-  are now suppressed (temporarily until `d.ts` files are fetched).
+- TypeScript errors of the form `Property '...' does not exist on type` and
+  `Cannot find name '...'` are now suppressed (temporarily until `d.ts` files
+  are fetched).
 
 ## [0.6.6] - 2021-03-29
 

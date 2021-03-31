@@ -240,20 +240,22 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 
 ### Option 3: Files property
 
-In JavaScript, directly set the `files` property to an array of files.
+In JavaScript, directly set the `config` property to an object. The format is
+identical to the JSON config file.
 
 ```js
 const ide = document.querySelector('playground-ide');
-ide.files = [
-  {
-    name: "index.html",
-    content: "<p>Hello World!</p>",
+ide.config = {
+  files: {
+    'index.html': {},
+    'typescript.ts': {
+      content: "console.log('hello');",
+    },
   },
-  ...
-],
+};
 ```
 
-If both `project-src` and `files` are set, then the one set most recently has
+If both `project-src` and `config` are set, then the one set most recently has
 precedence. When either are set, inline scripts are ignored.
 
 ## Module resolution

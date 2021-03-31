@@ -20,7 +20,7 @@ import './playground-tab-bar.js';
 import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
-import {SampleFile} from './shared/worker-api.js';
+import {ProjectManifest} from './shared/worker-api.js';
 import {forceSkypackRawMode} from './shared/util.js';
 
 /**
@@ -159,17 +159,11 @@ export class PlaygroundIde extends LitElement {
     //
     // Note we set `hasChanged: () => false` because we don't need to trigger
     // `update` when this property changes. (Why be a lit property at all?
-    // Because we want [1] to respond to atribute changes, and [2] to inherit
+    // Because we want [1] to respond to attribute changes, and [2] to inherit
     // property values set before upgrade).
     //
     // TODO(aomarks) Maybe a "delegate" decorator for this pattern?
-    const project = this._project;
-    if (project) {
-      return project.projectSrc;
-    } else {
-      // We haven't rendered yet.
-      return this._projectSrcSetBeforeRender;
-    }
+    return this._project?.projectSrc ?? this._projectSrcSetBeforeRender;
   }
 
   set projectSrc(src: string | undefined) {
@@ -182,27 +176,25 @@ export class PlaygroundIde extends LitElement {
   }
 
   /**
-   * Get or set the array of project files.
+   * Get or set the project config.
    *
-   * When both `projectSrc` and `files` are set, the one set most recently wins.
-   * Slotted children win only if both `projectSrc` and `files` are undefined.
+   * When both `projectSrc` and `config` are set, the one set most recently
+   * wins. Slotted children win only if both `projectSrc` and `config` are
+   * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  get files(): SampleFile[] | undefined {
-    const project = this._project;
-    if (project) {
-      return project.files;
-    } else {
-      return this._filesSetBeforeRender;
-    }
+  get config(): ProjectManifest | undefined {
+    // Note this is declared a @property only to capture properties set before
+    // upgrade. Attribute reflection and update lifecycle disabled because they
+    // are not needed in this case.
+    return this._project?.config ?? this._configSetBeforeRender;
   }
-
-  set files(files: SampleFile[] | undefined) {
+  set config(config: ProjectManifest | undefined) {
     const project = this._project;
     if (project) {
-      project.files = files;
+      project.config = config;
     } else {
-      this._filesSetBeforeRender = files;
+      this._configSetBeforeRender = config;
     }
   }
 
@@ -270,7 +262,7 @@ export class PlaygroundIde extends LitElement {
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
   @query('playground-project')
-  private _project!: PlaygroundProject;
+  private _project!: PlaygroundProject | null;
 
   @query('#resizeBar')
   private _resizeBar!: HTMLDivElement;
@@ -278,7 +270,7 @@ export class PlaygroundIde extends LitElement {
   @query('#rhs')
   private _rhs!: HTMLDivElement;
 
-  private _filesSetBeforeRender?: SampleFile[];
+  private _configSetBeforeRender?: ProjectManifest;
   private _projectSrcSetBeforeRender?: string;
 
   render() {
@@ -334,12 +326,12 @@ export class PlaygroundIde extends LitElement {
   }
 
   firstUpdated() {
-    if (this._filesSetBeforeRender) {
-      this._project.files = this._filesSetBeforeRender;
-      this._filesSetBeforeRender = undefined;
+    if (this._configSetBeforeRender) {
+      this._project!.config = this._configSetBeforeRender;
+      this._configSetBeforeRender = undefined;
     }
     if (this._projectSrcSetBeforeRender) {
-      this._project.projectSrc = this._projectSrcSetBeforeRender;
+      this._project!.projectSrc = this._projectSrcSetBeforeRender;
       this._projectSrcSetBeforeRender = undefined;
     }
   }
