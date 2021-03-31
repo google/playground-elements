@@ -204,4 +204,17 @@ suite('playground-ide', () => {
     );
     assert.deepEqual(texts, ['HTML', 'JS']);
   });
+
+  test('reads files from config property', async () => {
+    const ide = document.createElement('playground-ide')!;
+    container.appendChild(ide);
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Hello HTML',
+        },
+      },
+    };
+    await assertPreviewContains('Hello HTML');
+  });
 });
