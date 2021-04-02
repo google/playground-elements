@@ -70,7 +70,10 @@ export interface CompileResult {
 export interface TypeScriptWorkerAPI {
   compileProject(
     files: Array<SampleFile>,
-    importMap: ModuleImportMap
+    importMap: ModuleImportMap,
+    slowDiagnosticsCallback?: (
+      diagnostics: Map<string, Array<Diagnostic>>
+    ) => void
   ): Promise<CompileResult>;
 }
 

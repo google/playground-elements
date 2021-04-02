@@ -24,3 +24,7 @@ export const forceSkypackRawMode = (url: URL): URL => {
   }
   return url;
 };
+
+export type Result<V, E> =
+  | {result: V; error?: undefined}
+  | {result?: undefined; error: E};

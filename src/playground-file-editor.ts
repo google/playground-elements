@@ -99,6 +99,10 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
           this._onProjectFilesChanged
         );
         oldProject.removeEventListener('compileDone', this._onCompileDone);
+        oldProject.removeEventListener(
+          'diagnosticsChanged',
+          this._onDiagnosticsChanged
+        );
       }
       if (this._project) {
         this._project.addEventListener(
@@ -106,6 +110,10 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
           this._onProjectFilesChanged
         );
         this._project.addEventListener('compileDone', this._onCompileDone);
+        this._project.addEventListener(
+          'diagnosticsChanged',
+          this._onDiagnosticsChanged
+        );
       }
       this._onProjectFilesChanged();
     }
@@ -146,6 +154,11 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   };
 
   private _onCompileDone = () => {
+    // Propagate diagnostics.
+    this.requestUpdate();
+  };
+
+  private _onDiagnosticsChanged = () => {
     // Propagate diagnostics.
     this.requestUpdate();
   };

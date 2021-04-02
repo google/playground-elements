@@ -48,6 +48,8 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
+let nextCompileId = 0;
+
 /**
  * Coordinates <playground-file-editor> and <playground-preview> elements.
  */
@@ -223,6 +225,8 @@ export class PlaygroundProject extends LitElement {
     url.pathname = endWithSlash(url.pathname);
     return url;
   }
+
+  private _compileId = nextCompileId++;
 
   get baseUrl() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -478,22 +482,43 @@ export class PlaygroundProject extends LitElement {
   async save() {
     // Clear in case a save is explicitly requested while a timer is already
     // running.
+    const compileId = nextCompileId++;
+    this._compileId = compileId;
+    const compileStale = () => compileId !== this._compileId;
+
     this._clearSaveTimeout();
     this._compiledFiles = undefined;
     this.dispatchEvent(new CustomEvent('compileStart'));
     if (this._files !== undefined) {
       const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+      if (compileStale()) {
+        return;
+      }
       this._compileResultPromise = workerApi.compileProject(
         this._files,
-        this._importMap
+        this._importMap,
+        proxy((slowDiagnostics: Map<string, Array<Diagnostic>>) => {
+          if (compileStale() || slowDiagnostics.size === 0) {
+            return;
+          }
+          this._diagnostics =
+            this._diagnostics !== undefined
+              ? mergeArrayMaps(this._diagnostics, slowDiagnostics)
+              : slowDiagnostics;
+          this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
+        })
       );
       const result = await this._compileResultPromise;
+      if (compileStale()) {
+        return;
+      }
       this._compiledFiles = result?.files;
       this._diagnostics = result?.diagnostics;
     } else {
       this._compileResultPromise = Promise.resolve(undefined);
     }
     this.dispatchEvent(new CustomEvent('compileDone'));
+    this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
   }
 
   private _saveTimeoutId?: ReturnType<typeof setTimeout> = undefined;
@@ -784,4 +809,21 @@ const outdent = (str: string): string => {
     }
   }
   return str.replace(RegExp(`^\\s{${shortestIndent ?? 0}}`, 'gm'), '');
+};
+
+const mergeArrayMaps = <K, V>(
+  ...sources: Array<Map<K, Array<V>>>
+): Map<K, Array<V>> => {
+  const target = new Map();
+  for (const source of sources) {
+    for (const [key, vals] of source) {
+      let arr = target.get(key);
+      if (arr === undefined) {
+        arr = [];
+        target.set(key, arr);
+      }
+      arr.push(...vals);
+    }
+  }
+  return target;
 };
