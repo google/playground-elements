@@ -13,6 +13,8 @@ import {
 import {expose} from 'comlink';
 import * as ts from 'typescript';
 import type * as lsp from 'vscode-languageserver';
+import {TypesFetcher} from './types-fetcher.js';
+import {ModuleResolver} from './module-resolver.js';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -24,6 +26,7 @@ const compilerOptions = {
   allowJs: true,
   // Allow emit of js files despite having the same name as input.
   suppressOutputPathCheck: true,
+  lib: ['dom', 'esnext'],
 };
 
 /**
@@ -65,10 +68,35 @@ const workerAPI: TypeScriptWorkerAPI = {
    */
   async compileProject(
     files: Array<SampleFile>,
-    importMap: ModuleImportMap
+    importMap: ModuleImportMap,
+    slowDiagnosticsCallback: (
+      fileDiagnostics: Map<string, Array<lsp.Diagnostic>>
+    ) => void
   ): Promise<CompileResult> {
+    // Immediately resolve local project files, and begin fetching types (but
+    // don't wait for them).
     const moduleResolver = new ModuleResolver(importMap);
-    const loadedFiles = await loadFiles(files, moduleResolver);
+    const loadedFiles = new Map<string, FileRecord>();
+    const typesFetcher = new TypesFetcher(moduleResolver);
+    const inputFiles = files
+      .filter((file) => isTsOrJsFile(file.name))
+      .map((file) => ({
+        file,
+        // TODO: include session/scope id?
+        url: new URL(file.name, self.origin).href,
+      }));
+    for (const {file, url} of inputFiles) {
+      loadedFiles.set(url, {
+        status: 'resolved',
+        content: file.content,
+      });
+      typesFetcher.addBareModuleTypings(file.content);
+    }
+    for (const lib of compilerOptions.lib) {
+      typesFetcher.addLibTypings(lib);
+    }
+
+    // Fast initial compile for JS emit and syntax errors.
     const languageServiceHost = new WorkerLanguageServiceHost(
       loadedFiles,
       self.origin,
@@ -79,7 +107,9 @@ const workerAPI: TypeScriptWorkerAPI = {
       ts.createDocumentRegistry()
     );
     const program = languageService.getProgram();
-    const emittedFiles = new Map<string, string>();
+    if (program === undefined) {
+      throw new Error('Unexpected error: program was undefined');
+    }
     const transformers: ts.CustomTransformers = {
       after: [
         (context: ts.TransformationContext) => <T extends ts.Node>(node: T) => {
@@ -90,34 +120,52 @@ const workerAPI: TypeScriptWorkerAPI = {
         },
       ],
     };
-    const diagnostics = new Map<string, lsp.Diagnostic[]>();
-    for (const file of files) {
-      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
-        const url = new URL(file.name, self.origin).href;
-        const sourceFile = program!.getSourceFile(url);
-        diagnostics.set(
+
+    const emittedFiles = new Map<string, string>();
+    const fastDiagnostics = new Map<string, lsp.Diagnostic[]>();
+    for (const {file, url} of inputFiles) {
+      fastDiagnostics.set(
+        file.name,
+        languageService.getSyntacticDiagnostics(url).map(makeLspDiagnostic)
+      );
+      const sourceFile = program.getSourceFile(url);
+      program!.emit(
+        sourceFile,
+        (fileName: string, data: string) => {
+          emittedFiles.set(fileName, data);
+        },
+        undefined,
+        undefined,
+        transformers
+      );
+    }
+
+    // Wait for all typings to be fetched, and then retrieve slower semantic
+    // diagnostics.
+    (async () => {
+      const slowDiagnostics = new Map<string, lsp.Diagnostic[]>();
+      for (const [specifier, content] of await typesFetcher.getFiles()) {
+        // TypeScript is going to look for these files as paths relative to our
+        // source files, so we need to add them to our filesystem with those
+        // URLs.
+        const url = new URL(`node_modules/${specifier}`, self.origin).href;
+        loadedFiles.set(url, {
+          status: 'resolved',
+          content,
+        });
+      }
+      for (const {file, url} of inputFiles) {
+        slowDiagnostics.set(
           file.name,
-          [
-            ...languageService.getSyntacticDiagnostics(url),
-            ...languageService.getSemanticDiagnostics(url),
-          ]
-            .filter(({code}) => !excludedTypeScriptDiagnosticCodes.has(code))
-            .map(makeLspDiagnostic)
-        );
-        program!.emit(
-          sourceFile,
-          (fileName: string, data: string) => {
-            emittedFiles.set(fileName, data);
-          },
-          undefined,
-          undefined,
-          transformers
+          languageService.getSemanticDiagnostics(url).map(makeLspDiagnostic)
         );
       }
-    }
+      slowDiagnosticsCallback(slowDiagnostics);
+    })();
+
     return {
       files: emittedFiles,
-      diagnostics,
+      diagnostics: fastDiagnostics,
     };
   },
 };
@@ -137,256 +185,6 @@ type PendingFileRecord = {
   status: 'pending';
 };
 type FileRecord = PendingFileRecord | ResolvedFileRecord | RedirectedFileRecord;
-
-/**
- * Loads source files and their imports. Returns a Map of FileRecords, with
- * entries for the given source files and other source files in the module graph.
- *
- * Also includes entries for the expected output of compilation, ie a .ts source
- * file will have entries for the .ts source and a redirect entry for the .js
- * file so that imports of the .js file are mapped back to the .ts file like in
- * tsc.
- *
- * Note that this loader is not recursive yet - it only loads the direct
- * dependencies of the source files, and relies on unpkg.com for transitive
- * dependencies to load in the preview iframe. In order to enable propert type
- * checking we will load the entire module graph here.
- */
-const loadFiles = (
-  files: Array<SampleFile>,
-  moduleResolver: ModuleResolver
-): Promise<Map<string, FileRecord>> => {
-  return new Promise(async (resolve, _reject) => {
-    const fileRecords = new Map<string, FileRecord>();
-
-    // Prime the file map with the sample files so they're marked as already
-    // loaded.
-    for (const file of files) {
-      // TODO: include session/scope id?
-      const url = new URL(file.name, self.origin).href;
-
-      // .ts files are imported with .js extensions. Since we aim to redirect
-      // .js imports to either .ts or .d.ts files when available, we add a
-      // redirect for the .js extension.
-      // TODO (justinfagnani): handle .d.ts files
-      if (url.endsWith('.ts')) {
-        const redirectedUrl = changeExtension(url, 'js');
-
-        // Redirect .js -> .ts
-        fileRecords.set(redirectedUrl, {
-          status: 'redirected',
-          redirectedUrl: url,
-        });
-
-        // .ts has the content
-        fileRecords.set(url, {
-          status: 'resolved',
-          originalUrl: redirectedUrl,
-          content: file.content,
-        });
-      } else {
-        fileRecords.set(url, {
-          status: 'resolved',
-          content: file.content,
-        });
-      }
-    }
-
-    let pendingFileCount = 0;
-
-    // For each file, fetch its imports
-    for (const file of files) {
-      if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
-        const referrerUrl = new URL(file.name, self.origin);
-        const preProcessedFile = ts.preProcessFile(
-          file.content,
-          undefined,
-          true
-        );
-
-        for (const importedFile of preProcessedFile.importedFiles) {
-          const specifier = importedFile.fileName;
-          const {type, url} = moduleResolver.resolve(specifier, referrerUrl);
-
-          if (!fileRecords.has(url)) {
-            pendingFileCount++;
-
-            // Synchronously set the file to pending so subsequent imports don't
-            // trigger another loading task.
-            fileRecords.set(url, {
-              status: 'pending',
-            });
-
-            // Load a file, but don't block
-            (async () => {
-              await loadFile(url, type, fileRecords);
-              pendingFileCount--;
-              if (pendingFileCount === 0) {
-                resolve(fileRecords);
-              }
-            })();
-          }
-        }
-      }
-    }
-    if (pendingFileCount === 0) {
-      resolve(fileRecords);
-    }
-  });
-};
-
-// Async task to load the imported file
-const loadFile = async (
-  url: string,
-  type: ResolvedSpecifier['type'],
-  fileRecords: Map<string, FileRecord>
-) => {
-  const response = await fetch(url);
-
-  if (type === 'bare') {
-    // Fetch any types. Doesn't yet look in package.json
-    const resolvedUrl = new URL(response.url);
-    if (resolvedUrl.pathname.endsWith('.js')) {
-      const typesUrl = new URL(resolvedUrl.href);
-      typesUrl.pathname = changeExtension(resolvedUrl.pathname, 'd.ts');
-      const typesResponse = await fetch(resolvedUrl.href);
-      if (typesResponse.ok) {
-        // TODO: store both .js and .d.ts content?
-        // TODO: store original file and types in same file record?
-        // Redirects .js -> .d.ts
-        fileRecords.set(url, {
-          status: 'redirected',
-          redirectedUrl: typesUrl.href,
-        });
-        fileRecords.set(typesUrl.href, {
-          status: 'resolved',
-          content: await typesResponse.text(),
-        });
-      } else {
-        fileRecords.set(url, {
-          status: 'resolved',
-          content: await response.text(),
-        });
-      }
-    } else {
-      // Dunno what type of file this would be? A CSS import?
-      fileRecords.set(url, {
-        status: 'resolved',
-        content: await response.text(),
-      });
-    }
-  } else {
-    // Presumably this isn't an import of a sample file, because
-    // it would have been pre-loaded in the file map
-    fileRecords.set(url, {
-      status: 'resolved',
-      content: await response.text(),
-    });
-  }
-};
-
-const changeExtension = (path: string, ext: string) => {
-  const lastDotIndex = path.lastIndexOf('.');
-  return path.slice(0, lastDotIndex + 1) + ext;
-};
-
-const isRelativeOrAbsolutePath = (s: string) =>
-  s.match(/^(\.){0,2}\//) !== null;
-
-type ResolvedSpecifier = {
-  type: 'url' | 'relative' | 'bare';
-  url: string;
-};
-
-/**
- * Resolve an import specifier. Uses HTML-spec semantics for URLs and relative
- * paths. Uses import map configuration if provided and matching, otherwise
- * falls back to unpkg.com URL for bare-specifiers.
- */
-class ModuleResolver {
-  private importMap: ModuleImportMap;
-
-  constructor(importMap: ModuleImportMap) {
-    this.importMap = importMap;
-  }
-
-  resolve(specifier: string, referrer: string | URL): ResolvedSpecifier {
-    const importMapUrl = this._resolveUsingImportMap(specifier);
-    if (importMapUrl !== null) {
-      return {type: 'bare' as const, url: importMapUrl};
-    }
-    try {
-      return {
-        type: 'url' as const,
-        url: new URL(specifier).href,
-      };
-    } catch (e) {
-      if (isRelativeOrAbsolutePath(specifier)) {
-        return {
-          type: 'relative' as const,
-          url: new URL(specifier, referrer).href,
-        };
-      }
-      return {
-        type: 'bare' as const,
-        url: `https://unpkg.com/${specifier}?module`,
-      };
-    }
-  }
-
-  private _resolveUsingImportMap(specifier: string): string | null {
-    // For overview, see https://github.com/WICG/import-maps
-    // For algorithm, see https://wicg.github.io/import-maps/#resolving
-    // TODO(aomarks) Add support for `scopes`.
-    for (const [specifierKey, resolutionResult] of Object.entries(
-      this.importMap.imports ?? {}
-    )) {
-      // Note that per spec we shouldn't do a lookup for the exact match case,
-      // because if a trailing-slash mapping also matches and comes first, it
-      // should have precedence.
-      if (specifierKey === specifier) {
-        return resolutionResult;
-      }
-
-      if (specifierKey.endsWith('/') && specifier.startsWith(specifierKey)) {
-        if (!resolutionResult.endsWith('/')) {
-          console.warn(
-            `Could not resolve module specifier "${specifier}"` +
-              ` using import map key "${specifierKey}" because` +
-              ` address "${resolutionResult}" must end in a forward-slash.`
-          );
-          return null;
-        }
-
-        const afterPrefix = specifier.substring(specifierKey.length);
-        let url;
-        try {
-          url = new URL(afterPrefix, resolutionResult);
-        } catch {
-          console.warn(
-            `Could not resolve module specifier "${specifier}"` +
-              ` using import map key "${specifierKey}" because` +
-              ` "${afterPrefix}" could not be parsed` +
-              ` relative to "${resolutionResult}".`
-          );
-          return null;
-        }
-
-        const urlSerialized = url.href;
-        if (!urlSerialized.startsWith(resolutionResult)) {
-          console.warn(
-            `Could not resolve module specifier "${specifier}"` +
-              ` using import map key "${specifierKey}" because` +
-              ` "${afterPrefix}" backtracked above "${resolutionResult}".`
-          );
-          return null;
-        }
-        return urlSerialized;
-      }
-    }
-    return null;
-  }
-}
 
 class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   readonly compilerOptions: ts.CompilerOptions;
@@ -408,7 +206,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   getScriptFileNames(): string[] {
-    return Array.from(this.files.keys());
+    return [...this.files.keys()].filter((name) => isTsOrJsFile(name));
   }
 
   getScriptVersion(_fileName: string) {
@@ -488,22 +286,5 @@ const diagnosticCategoryMapping: {
   [ts.DiagnosticCategory.Suggestion]: 4,
 };
 
-/**
- * TypeScript error codes that we don't currently display.
- *
- * TODO(aomarks) These exceptions are here because we don't currently import
- * typings of dependencies, or even the standard lib. So imports and standard
- * symbols are not available. Remove exceptions once we can fetch typings.
- * https://github.com/PolymerLabs/playground-elements/issues/119
- */
-const excludedTypeScriptDiagnosticCodes = new Set<number>([
-  // Cannot find name '...'.
-  2304,
-  // Cannot find module '...' or its corresponding type declarations.
-  2307,
-  // Property '...' does not exist on type '...'.
-  2339,
-  // Cannot find name '...'. Do you need to change your target library? Try
-  // changing the `lib` compiler option to include '...'.
-  2584,
-]);
+const isTsOrJsFile = (file: string) =>
+  file.endsWith('.ts') || file.endsWith('.js');

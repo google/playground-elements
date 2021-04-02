@@ -65,10 +65,20 @@ export class PlaygroundCodeEditor extends LitElement {
       }
 
       .diagnostic {
+        position: relative;
+      }
+
+      .diagnostic::before {
         /* It would be nice to use "text-decoration: red wavy underline" here,
            but unfortunately it renders nothing at all for single characters.
            See https://bugs.chromium.org/p/chromium/issues/detail?id=668042. */
-        border-bottom: var(--playground-error-border, 2px red dashed);
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==');
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
       }
 
       #tooltip {

@@ -2,5 +2,18 @@
   "files": {
     "my-element.ts": {},
     "index.html": {}
+  },
+  "importMap": {
+    "imports": {
+      "lit": "https://cdn.skypack.dev/lit@2.0.0-pre.2/",
+      "lit/": "https://cdn.skypack.dev/lit@2.0.0-pre.2/",
+      "@lit/reactive-element": "https://cdn.skypack.dev/@lit/reactive-element",
+      "@lit/reactive-element/": "https://cdn.skypack.dev/@lit/reactive-element/",
+      "lit-element": "https://cdn.skypack.dev/lit-element@3.0.0-pre.4",
+      "lit-element/": "https://cdn.skypack.dev/lit-element@3.0.0-pre.4/",
+      "lit-html": "https://cdn.skypack.dev/lit-html@2.0.0-pre.7",
+      "lit-html/": "https://cdn.skypack.dev/lit-html@2.0.0-pre.7/",
+      "typescript/": "https://unpkg.com/typescript@4.2.3/"
+    }
   }
 }

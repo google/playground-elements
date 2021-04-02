@@ -47,8 +47,10 @@ static files, you can host a Playground.
 
 #### <img src="images/typescript.png" width="18" height="18"> TypeScript support
 
-Playground automatically compiles `.ts` files using TypeScript. Compilation
-happens in a Web Worker on a separate thread, so your page stays responsive.
+Playground automatically compiles `.ts` files using TypeScript, and
+automatically fetches typings for your imports in order to display errors.
+Compilation happens in a Web Worker on a separate thread, so your page stays
+responsive.
 
 #### 🧩 Web Components
 
@@ -327,10 +329,6 @@ statement should use the `.js` extension (the same as you would do when running
 ```ts
 import './my-other-module.js';
 ```
-
-TypeScript error reporting is coming soon, follow
-[#67](https://github.com/PolymerLabs/playground-elements/issues/67) for
-progress.
 
 ## Hiding & folding
 
@@ -660,7 +658,6 @@ to quickly experiment with themes and other customizations.
 | `--playground-code-TOKEN-color`                    | *various*                                                                                | Color of each kind of `TOKEN` in syntax highlighted-code. See the [syntax highlighting](#syntax-highlighting) section for details. |
 | `--playground-highlight-color`                     | ![](images/colors/6200EE.png) `#6200EE`                                                  | Color of the active file-picker tab label and indicator, and the preview loading bar                                               |
 | `--playground-code-background`                     | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                  | `background` of the code editor                                                                                                    |
-| `--playground-error-border`                        | `2px red dashed`                                                                         | `border-bottom` of code spans with an error                                                                                        |
 | `--playground-tab-bar-background`                  | ![](images/colors/EAEAEA.png) `#EAEAEA`                                                  | `background` of the editor file-picker tab bar                                                                                     |
 | `--playground-tab-bar-foreground-color`            | ![](images/colors/000000.png) `#000000`                                                  | Text `color` of inactive file-picker tabs                                                                                          |
 | `--playground-preview-toolbar-background`          | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                  | `background` of the preview toolbar                                                                                                |
