@@ -140,6 +140,8 @@ const workerAPI: TypeScriptWorkerAPI = {
       );
     }
 
+    // Wait for all typings to be fetched, and then retrieve slower semantic
+    // diagnostics.
     (async () => {
       const slowDiagnostics = new Map<string, lsp.Diagnostic[]>();
       for (const [specifier, content] of await typesFetcher.getFiles()) {
