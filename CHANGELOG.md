@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   syntax errors, because they require fetching `.d.ts` files and running a more
   expensive compiler pass.
 
+### Changed
+
+- [**BREAKING**] Removed `--playground-error-border` property, and updated
+  inline error style from a dashed border to a red squiggle.
+
 ## [0.7.0] - 2021-03-30
 
 ### Changed
