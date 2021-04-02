@@ -17,7 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- TypeScript type errors are now displayed inline. Previously, only syntax
+  errors were displayed. Type errors may take slightly longer to appear than
+  syntax errors, because they require fetching `.d.ts` files and running a more
+  expensive compiler pass.
 
 ## [0.7.0] - 2021-03-30
 

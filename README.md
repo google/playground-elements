@@ -47,8 +47,10 @@ static files, you can host a Playground.
 
 #### <img src="images/typescript.png" width="18" height="18"> TypeScript support
 
-Playground automatically compiles `.ts` files using TypeScript. Compilation
-happens in a Web Worker on a separate thread, so your page stays responsive.
+Playground automatically compiles `.ts` files using TypeScript, and
+automatically fetches typings for your imports in order to display errors.
+Compilation happens in a Web Worker on a separate thread, so your page stays
+responsive.
 
 #### 🧩 Web Components
 
@@ -327,10 +329,6 @@ statement should use the `.js` extension (the same as you would do when running
 ```ts
 import './my-other-module.js';
 ```
-
-TypeScript error reporting is coming soon, follow
-[#67](https://github.com/PolymerLabs/playground-elements/issues/67) for
-progress.
 
 ## Hiding & folding
 
