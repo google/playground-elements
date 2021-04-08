@@ -223,7 +223,7 @@ suite('playground-ide', () => {
     ide.config = {
       files: {
         'index.html': {
-          content: 'Foo\nBar',
+          content: 'Foo',
         },
       },
     };
@@ -238,5 +238,51 @@ suite('playground-ide', () => {
     );
 
     assert.equal(cmCode.getAttribute('contenteditable'), 'true');
+  });
+
+  test('a11y: line numbers get aria-hidden attribute', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\nBar',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo\nBar');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const queryHiddenLineNumbers = () =>
+      [
+        ...editor.shadowRoot!.querySelectorAll('.CodeMirror-gutter-wrapper'),
+      ].filter((gutter) => gutter.getAttribute('aria-hidden') === 'true');
+
+    // Initial render with line-numbers enabled.
+    assert.equal(queryHiddenLineNumbers().length, 2);
+
+    // Disable line numbers.
+    ide.lineNumbers = false;
+    await new Promise((r) => requestAnimationFrame(r));
+    assert.equal(queryHiddenLineNumbers().length, 0);
+
+    // Re-enable line numbers.
+    ide.lineNumbers = true;
+    await new Promise((r) => requestAnimationFrame(r));
+    assert.equal(queryHiddenLineNumbers().length, 2);
+
+    // Add a line.
+    const editorInternals = (editor as unknown) as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    editorInternals._codemirror!.setValue(editor.value + '\nBaz');
+    await new Promise((r) => requestAnimationFrame(r));
+    assert.equal(queryHiddenLineNumbers().length, 3);
   });
 });

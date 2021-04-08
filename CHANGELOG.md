@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The editor now uses the CodeMirror `contenteditable` input style, which has
   much better screen reader support.
 
+- Line numbers are now annotated with `aria-hidden` so that they are not voiced
+  by screen readers.
+
 ## [0.8.0] - 2021-04-02
 
 ### Added

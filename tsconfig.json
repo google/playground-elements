@@ -4,7 +4,7 @@
     "incremental": true,
     "target": "es2019",
     "module": "esnext",
-    "lib": ["ES2020", "ES2015.iterable", "DOM"],
+    "lib": ["ES2020", "ES2015.iterable", "DOM", "DOM.Iterable"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": false,
