@@ -217,4 +217,26 @@ suite('playground-ide', () => {
     };
     await assertPreviewContains('Hello HTML');
   });
+
+  test('a11y: is contenteditable', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\nBar',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo');
+
+    const cmCode = await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor',
+      '.CodeMirror-code'
+    );
+
+    assert.equal(cmCode.getAttribute('contenteditable'), 'true');
+  });
 });

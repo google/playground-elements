@@ -273,6 +273,7 @@ export class PlaygroundCodeEditor extends LitElement {
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
         readOnly: this.readonly,
+        inputStyle: 'contenteditable',
       }
     );
     cm.on('change', () => {

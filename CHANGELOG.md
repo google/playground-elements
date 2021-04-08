@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- The editor now uses the CodeMirror `contenteditable` input style, which has
+  much better screen reader support.
 
 ## [0.8.0] - 2021-04-02
 
