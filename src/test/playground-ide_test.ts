@@ -31,6 +31,8 @@ suite('playground-ide', () => {
     assert.instanceOf(document.createElement('playground-ide'), PlaygroundIde);
   });
 
+  const raf = async () => new Promise((r) => requestAnimationFrame(r));
+
   const pierce = async (...selectors: string[]) => {
     let node = document.body;
     for (const selector of selectors) {
@@ -269,12 +271,12 @@ suite('playground-ide', () => {
 
     // Disable line numbers.
     ide.lineNumbers = false;
-    await new Promise((r) => requestAnimationFrame(r));
+    await raf();
     assert.equal(queryHiddenLineNumbers().length, 0);
 
     // Re-enable line numbers.
     ide.lineNumbers = true;
-    await new Promise((r) => requestAnimationFrame(r));
+    await raf();
     assert.equal(queryHiddenLineNumbers().length, 2);
 
     // Add a line.
@@ -282,7 +284,63 @@ suite('playground-ide', () => {
       _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     editorInternals._codemirror!.setValue(editor.value + '\nBaz');
-    await new Promise((r) => requestAnimationFrame(r));
+    await raf();
     assert.equal(queryHiddenLineNumbers().length, 3);
+  });
+
+  test('a11y: focusing shows keyboard prompt', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const focusContainer = editor.shadowRoot!.querySelector(
+      '#focusContainer'
+    ) as HTMLElement;
+    const editableRegion = editor.shadowRoot!.querySelector(
+      '.CodeMirror-code'
+    ) as HTMLElement;
+    const keyboardHelp = 'Press Enter';
+
+    // Not focused initially
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
+
+    // When the inner container is focused, show the keyboard prompt
+    focusContainer.focus();
+    await raf();
+    assert.isTrue(focusContainer.matches(':focus'));
+    assert.include(focusContainer.textContent, keyboardHelp);
+
+    // Press Enter to start editing
+    focusContainer.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+    await raf();
+    assert.isTrue(editableRegion.matches(':focus'));
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
+
+    // Press Escape to stop editing
+    editableRegion.dispatchEvent(
+      new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+    );
+    await raf();
+    assert.isTrue(focusContainer.matches(':focus'));
+    assert.include(focusContainer.textContent, keyboardHelp);
+
+    // Focus something else entirely
+    focusContainer.blur();
+    await raf();
+    assert.isFalse(focusContainer.matches(':focus'));
+    assert.isFalse(editableRegion.matches(':focus'));
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
   });
 });
