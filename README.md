@@ -534,12 +534,12 @@ project element.
 ### Properties
 
 | Name             |  Type                         | Default                   | Description                                                                                               |
-| ---------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- | --- |
+| ---------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                       |
 | `files`          | `SampleFile[]`                | `undefined`               | Get or set the array of project files ([details](#option-3-files-property)).                              |
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                  |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                                              |
-| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. | `   |
+| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. |
 
 ### Methods
 
