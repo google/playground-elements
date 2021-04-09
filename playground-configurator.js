@@ -1105,18 +1105,32 @@ span.CodeMirror-selectedtext {
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */;let gr=class extends de{constructor(){super(...arguments),this.lineNumbers=!1,this.readonly=!1,this.pragmas="on",this._resizing=!1,this._valueChangingFromOutside=!1,this._ignoreValueChange=!1,this._hideOrFoldRegionsActive=!1,this._diagnosticMarkers=[],this._diagnosticsMouseoverListenerActive=!1,this._onMouseOverWithDiagnostics=e=>{var t,r,o;if(!(null===(t=this.diagnostics)||void 0===t?void 0:t.length))return;const i=null===(r=e.target.className)||void 0===r?void 0:r.match(/diagnostic-(\d+)/);if(null===i)return void(this._tooltipDiagnostic=void 0);const n=Number(i[1]),a=this.diagnostics[n];if(a===(null===(o=this._tooltipDiagnostic)||void 0===o?void 0:o.diagnostic))return;let l="";const d=this.getBoundingClientRect(),s=e.target.getBoundingClientRect(),c=d.y+d.height/2;s.y<c?l+=`top:${s.y+s.height-d.y}px;`:l+=`bottom:${d.bottom-s.y}px;`;const p=d.x+d.width/2;s.left<p?l+=`left:${Math.max(0,s.x-d.x)}px`:l+=`right:${Math.max(0,d.right-s.right)}px`,this._tooltipDiagnostic={diagnostic:a,position:l}}}get value(){return this._value}set value(e){const t=this._value;this._value=e,this.requestUpdate("value",t)}update(e){var t;const r=this._codemirror;if(void 0===r)this._createView();else{const o=e;for(const e of o.keys())switch(e){case"value":this._valueChangingFromOutside=!0,r.setValue(null!==(t=this.value)&&void 0!==t?t:""),this._valueChangingFromOutside=!1;break;case"lineNumbers":r.setOption("lineNumbers",this.lineNumbers);break;case"type":r.setOption("mode",this._getLanguageMode());break;case"readonly":r.setOption("readOnly",this.readonly);break;case"pragmas":this._applyHideAndFoldRegions();break;case"diagnostics":this._showDiagnostics()}}super.update(e)}render(){var e,t;return B`
-      ${this._cmDom}
+ */;let gr=class extends de{constructor(){super(...arguments),this.lineNumbers=!1,this.readonly=!1,this.pragmas="on",this._showKeyboardHelp=!1,this._resizing=!1,this._valueChangingFromOutside=!1,this._ignoreValueChange=!1,this._hideOrFoldRegionsActive=!1,this._diagnosticMarkers=[],this._diagnosticsMouseoverListenerActive=!1,this._onMouseOverWithDiagnostics=e=>{var t,r,o;if(!(null===(t=this.diagnostics)||void 0===t?void 0:t.length))return;const i=null===(r=e.target.className)||void 0===r?void 0:r.match(/diagnostic-(\d+)/);if(null===i)return void(this._tooltipDiagnostic=void 0);const n=Number(i[1]),a=this.diagnostics[n];if(a===(null===(o=this._tooltipDiagnostic)||void 0===o?void 0:o.diagnostic))return;let l="";const d=this.getBoundingClientRect(),s=e.target.getBoundingClientRect(),c=d.y+d.height/2;s.y<c?l+=`top:${s.y+s.height-d.y}px;`:l+=`bottom:${d.bottom-s.y}px;`;const p=d.x+d.width/2;s.left<p?l+=`left:${Math.max(0,s.x-d.x)}px`:l+=`right:${Math.max(0,d.right-s.right)}px`,this._tooltipDiagnostic={diagnostic:a,position:l}}}get value(){return this._value}set value(e){const t=this._value;this._value=e,this.requestUpdate("value",t)}update(e){var t;const r=this._codemirror;if(void 0===r)this._createView();else{const o=e;for(const e of o.keys())switch(e){case"value":this._valueChangingFromOutside=!0,r.setValue(null!==(t=this.value)&&void 0!==t?t:""),this._valueChangingFromOutside=!1;break;case"lineNumbers":this._enableOrDisableAriaLineNumberObserver(),r.setOption("lineNumbers",this.lineNumbers);break;case"type":r.setOption("mode",this._getLanguageMode());break;case"readonly":r.setOption("readOnly",this.readonly);break;case"pragmas":this._applyHideAndFoldRegions();break;case"diagnostics":this._showDiagnostics()}}super.update(e)}render(){var e,t;return this.readonly?this._cmDom:B`
       <div
-        id="tooltip"
-        ?hidden=${!this._tooltipDiagnostic}
-        style=${ar(null===(e=this._tooltipDiagnostic)||void 0===e?void 0:e.position)}
+        id="focusContainer"
+        tabindex="0"
+        @mousedown=${this._onMousedown}
+        @focus=${this._onFocus}
+        @blur=${this._onBlur}
+        @keydown=${this._onKeyDown}
       >
-        <div part="diagnostic-tooltip">
-          ${null===(t=this._tooltipDiagnostic)||void 0===t?void 0:t.diagnostic.message}
+        ${this._showKeyboardHelp?B`<div id="keyboardHelpScrim">
+              <p id="keyboardHelp">
+                Press Enter to start editing<br />Press Escape to exit editor
+              </p>
+            </div>`:y}
+        ${this._cmDom}
+        <div
+          id="tooltip"
+          ?hidden=${!this._tooltipDiagnostic}
+          style=${ar(null===(e=this._tooltipDiagnostic)||void 0===e?void 0:e.position)}
+        >
+          <div part="diagnostic-tooltip">
+            ${null===(t=this._tooltipDiagnostic)||void 0===t?void 0:t.diagnostic.message}
+          </div>
         </div>
       </div>
-    `}connectedCallback(){"function"==typeof ResizeObserver&&(this._resizeObserver=new ResizeObserver((()=>{var e;this._resizing||(this._resizing=!0,null===(e=this._codemirror)||void 0===e||e.refresh(),this._resizing=!1)})),this._resizeObserver.observe(this)),super.connectedCallback()}disconnectedCallback(){var e;null===(e=this._resizeObserver)||void 0===e||e.disconnect(),this._resizeObserver=void 0,super.disconnectedCallback()}_createView(){var e;const t=ur((e=>{this._cmDom=e,this._resizing=!0,requestAnimationFrame((()=>{requestAnimationFrame((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh(),this._resizing=!1}))}))}),{value:null!==(e=this.value)&&void 0!==e?e:"",lineNumbers:this.lineNumbers,mode:this._getLanguageMode(),readOnly:this.readonly});t.on("change",(()=>{this._ignoreValueChange||(this._value=t.getValue(),this._valueChangingFromOutside?(this._applyHideAndFoldRegions(),this._showDiagnostics()):this.dispatchEvent(new Event("change")))})),this._codemirror=t}async _applyHideAndFoldRegions(){const e=this._codemirror;if(!e)return;const t=e.getValue();if(this._hideOrFoldRegionsActive&&(await null,this._ignoreValueChange=!0,e.setValue(""),e.setValue(t),this._ignoreValueChange=!1),this._hideOrFoldRegionsActive=!1,"off-visible"===this.pragmas)return;const r=this._maskPatternForLang();if(void 0===r)return;const o=e.getDoc(),i=(t,r)=>{e.foldCode(0,{widget:"…",rangeFinder:()=>({from:o.posFromIndex(t),to:o.posFromIndex(r)})}),this._hideOrFoldRegionsActive=!0},n=(e,t)=>{o.markText(o.posFromIndex(e),o.posFromIndex(t),{collapsed:!0}),this._hideOrFoldRegionsActive=!0};for(const e of t.matchAll(r)){const[,r,o,a,l]=e,d=e.index;if(void 0===d)continue;const s=d+r.length;n(d,s);const c=s;let p;a&&l?(p=c+a.length,n(p,p+l.length)):p=t.length,"on"===this.pragmas&&("fold"===o?i(c,p):"hide"===o&&n(c,p))}}_maskPatternForLang(){switch(this.type){case"js":case"ts":case"css":return/( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;case"html":return/( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;default:return}}_getLanguageMode(){switch(this.type){case"ts":return"google-typescript";case"js":case"json":return"google-javascript";case"html":return"google-html";case"css":return"css"}return null}_showDiagnostics(){const e=this._codemirror;void 0!==e&&e.operation((()=>{var t,r,o;for(this._tooltipDiagnostic=void 0;this._diagnosticMarkers.length>0;)this._diagnosticMarkers.pop().clear();if(null===(t=this.diagnostics)||void 0===t?void 0:t.length){this._diagnosticsMouseoverListenerActive||(null===(o=this._cmDom)||void 0===o||o.addEventListener("mouseover",this._onMouseOverWithDiagnostics),this._diagnosticsMouseoverListenerActive=!0);for(let t=0;t<this.diagnostics.length;t++){const r=this.diagnostics[t];this._diagnosticMarkers.push(e.markText({line:r.range.start.line,ch:r.range.start.character},{line:r.range.end.line,ch:r.range.end.character},{className:"diagnostic diagnostic-"+t}))}}else this._diagnosticsMouseoverListenerActive&&(null===(r=this._cmDom)||void 0===r||r.removeEventListener("mouseover",this._onMouseOverWithDiagnostics),this._diagnosticsMouseoverListenerActive=!1)}))}};gr.styles=[ae`
+    `}connectedCallback(){"function"==typeof ResizeObserver&&(this._resizeObserver=new ResizeObserver((()=>{var e;this._resizing||(this._resizing=!0,null===(e=this._codemirror)||void 0===e||e.refresh(),this._resizing=!1)})),this._resizeObserver.observe(this)),super.connectedCallback()}disconnectedCallback(){var e;null===(e=this._resizeObserver)||void 0===e||e.disconnect(),this._resizeObserver=void 0,super.disconnectedCallback()}_createView(){var e;const t=ur((e=>{this._cmDom=e,this._enableOrDisableAriaLineNumberObserver(),this._resizing=!0,requestAnimationFrame((()=>{requestAnimationFrame((()=>{var e;null===(e=this._codemirror)||void 0===e||e.refresh(),this._resizing=!1}))}))}),{value:null!==(e=this.value)&&void 0!==e?e:"",lineNumbers:this.lineNumbers,mode:this._getLanguageMode(),readOnly:this.readonly,inputStyle:"contenteditable",tabindex:-1});t.on("change",(()=>{this._ignoreValueChange||(this._value=t.getValue(),this._valueChangingFromOutside?(this._applyHideAndFoldRegions(),this._showDiagnostics()):this.dispatchEvent(new Event("change")))})),this._codemirror=t}_onMousedown(){var e;null===(e=this._codemirrorEditable)||void 0===e||e.focus()}_onFocus(){this._showKeyboardHelp=!0}_onBlur(){this._showKeyboardHelp=!1}_onKeyDown(e){var t,r;"Enter"===e.key&&e.target===this._focusContainer?(null===(t=this._codemirrorEditable)||void 0===t||t.focus(),e.preventDefault()):"Escape"===e.key&&(null===(r=this._focusContainer)||void 0===r||r.focus())}_enableOrDisableAriaLineNumberObserver(){var e;if(this.lineNumbers&&!this._ariaLineNumberObserver){const t=null===(e=this._cmDom)||void 0===e?void 0:e.querySelector(".CodeMirror-code");if(!t)return void console.error("Internal playground error: .CodeMirror-code missing");this._ariaLineNumberObserver=new MutationObserver((e=>{var t,r,o;for(const i of e)for(const e of i.addedNodes)null===(o=null===(r=(t=e).querySelector)||void 0===r?void 0:r.call(t,".CodeMirror-gutter-wrapper"))||void 0===o||o.setAttribute("aria-hidden","true")})),this._ariaLineNumberObserver.observe(t,{childList:!0})}else!this.lineNumbers&&this._ariaLineNumberObserver&&(this._ariaLineNumberObserver.disconnect(),this._ariaLineNumberObserver=void 0)}async _applyHideAndFoldRegions(){const e=this._codemirror;if(!e)return;const t=e.getValue();if(this._hideOrFoldRegionsActive&&(await null,this._ignoreValueChange=!0,e.setValue(""),e.setValue(t),this._ignoreValueChange=!1),this._hideOrFoldRegionsActive=!1,"off-visible"===this.pragmas)return;const r=this._maskPatternForLang();if(void 0===r)return;const o=e.getDoc(),i=(t,r)=>{e.foldCode(0,{widget:"…",rangeFinder:()=>({from:o.posFromIndex(t),to:o.posFromIndex(r)})}),this._hideOrFoldRegionsActive=!0},n=(e,t)=>{o.markText(o.posFromIndex(e),o.posFromIndex(t),{collapsed:!0}),this._hideOrFoldRegionsActive=!0};for(const e of t.matchAll(r)){const[,r,o,a,l]=e,d=e.index;if(void 0===d)continue;const s=d+r.length;n(d,s);const c=s;let p;a&&l?(p=c+a.length,n(p,p+l.length)):p=t.length,"on"===this.pragmas&&("fold"===o?i(c,p):"hide"===o&&n(c,p))}}_maskPatternForLang(){switch(this.type){case"js":case"ts":case"css":return/( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;case"html":return/( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;default:return}}_getLanguageMode(){switch(this.type){case"ts":return"google-typescript";case"js":case"json":return"google-javascript";case"html":return"google-html";case"css":return"css"}return null}_showDiagnostics(){const e=this._codemirror;void 0!==e&&e.operation((()=>{var t,r,o;for(this._tooltipDiagnostic=void 0;this._diagnosticMarkers.length>0;)this._diagnosticMarkers.pop().clear();if(null===(t=this.diagnostics)||void 0===t?void 0:t.length){this._diagnosticsMouseoverListenerActive||(null===(o=this._cmDom)||void 0===o||o.addEventListener("mouseover",this._onMouseOverWithDiagnostics),this._diagnosticsMouseoverListenerActive=!0);for(let t=0;t<this.diagnostics.length;t++){const r=this.diagnostics[t];this._diagnosticMarkers.push(e.markText({line:r.range.start.line,ch:r.range.start.character},{line:r.range.end.line,ch:r.range.end.character},{className:"diagnostic diagnostic-"+t}))}}else this._diagnosticsMouseoverListenerActive&&(null===(r=this._cmDom)||void 0===r||r.removeEventListener("mouseover",this._onMouseOverWithDiagnostics),this._diagnosticsMouseoverListenerActive=!1)}))}};gr.styles=[ae`
       :host {
         display: block;
         font-family: var(--playground-code-font-family, monospace);
@@ -1128,10 +1142,38 @@ span.CodeMirror-selectedtext {
         position: relative;
       }
 
+      #focusContainer {
+        height: 100%;
+        position: relative;
+      }
+
       .CodeMirror {
         height: 100% !important;
         font-family: inherit !important;
         border-radius: inherit;
+      }
+
+      #keyboardHelpScrim {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        z-index: 999;
+        pointer-events: none;
+      }
+
+      #keyboardHelp {
+        background: #00000099;
+        padding: 20px 80px;
+        border-radius: 10px;
+        color: white;
+        font-family: sans-serif;
+        font-size: 18px;
       }
 
       .CodeMirror-foldmarker {
@@ -1175,7 +1217,7 @@ span.CodeMirror-selectedtext {
         border: 1px solid var(--playground-code-linenumber-color, #ccc);
         padding: 5px;
       }
-    `,hr],e([Y()],gr.prototype,"type",void 0),e([Y({type:Boolean,attribute:"line-numbers",reflect:!0})],gr.prototype,"lineNumbers",void 0),e([Y({type:Boolean,reflect:!0})],gr.prototype,"readonly",void 0),e([Y({attribute:!1})],gr.prototype,"diagnostics",void 0),e([Y()],gr.prototype,"pragmas",void 0),e([Q()],gr.prototype,"_tooltipDiagnostic",void 0),gr=e([G("playground-code-editor")],gr);
+    `,hr],e([Y()],gr.prototype,"type",void 0),e([Y({type:Boolean,attribute:"line-numbers",reflect:!0})],gr.prototype,"lineNumbers",void 0),e([Y({type:Boolean,reflect:!0})],gr.prototype,"readonly",void 0),e([Y({attribute:!1})],gr.prototype,"diagnostics",void 0),e([Y()],gr.prototype,"pragmas",void 0),e([Q()],gr.prototype,"_tooltipDiagnostic",void 0),e([Q()],gr.prototype,"_showKeyboardHelp",void 0),e([X("#focusContainer")],gr.prototype,"_focusContainer",void 0),e([X(".CodeMirror-code")],gr.prototype,"_codemirrorEditable",void 0),gr=e([G("playground-code-editor")],gr);
 /**
  @license
  Copyright 2020 Google Inc. All Rights Reserved.
@@ -2237,6 +2279,7 @@ let Zo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=Ee
 
     playground-file-editor {
       flex: 1;
+      height: calc(100% - var(--playground-bar-height), 35px);
     }
 
     #rhs {
