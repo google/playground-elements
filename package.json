@@ -57,7 +57,7 @@
     "@web/test-runner-playwright": "^0.8.0",
     "@web/test-runner-puppeteer": "^0.9.0",
     "clean-css": "^4.2.3",
-    "codemirror": "^5.58.1",
+    "codemirror": "git+https://github.com/codemirror/CodeMirror.git#770433e79286f42eab1aab81d2e44d05636ccc80",
     "codemirror-grammar-mode": "^0.1.10",
     "google_modes": "git+https://github.com/codemirror/google-modes.git#b78e1c3841a567505c41ad7befa6ca2c289e889e",
     "playwright": "^1.5.1",
