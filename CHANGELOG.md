@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Line numbers are now annotated with `aria-hidden` so that they are not voiced
   by screen readers.
 
+### Added
+
+- Added `dialog` CSS shadow part to `code-editor`, `file-editor`, and `ide` for
+  styling modal dialogs that appear over the editor (currently just used for the
+  keyboard help that shows when the editor is focused using the keyboard).
+
 ## [0.8.0] - 2021-04-02
 
 ### Added

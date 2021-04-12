@@ -125,7 +125,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       ${this._files
         ? html`
             <playground-code-editor
-              exportparts="diagnostic-tooltip"
+              exportparts="diagnostic-tooltip, dialog"
               .value=${
                 // We need live() because the lit's dirty-checking value for
                 // content is not updated by user edits.

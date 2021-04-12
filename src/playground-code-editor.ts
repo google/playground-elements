@@ -55,6 +55,9 @@ export class PlaygroundCodeEditor extends LitElement {
         height: 100%;
         position: relative;
       }
+      #focusContainer:focus {
+        outline: none;
+      }
 
       .CodeMirror {
         height: 100% !important;
@@ -72,17 +75,20 @@ export class PlaygroundCodeEditor extends LitElement {
         align-items: center;
         justify-content: center;
         background: transparent;
-        z-index: 999;
+        z-index: 9;
         pointer-events: none;
+        background: rgba(0, 0, 0, 0.32);
       }
 
       #keyboardHelp {
-        background: #00000099;
-        padding: 20px 80px;
-        border-radius: 10px;
-        color: white;
+        background: #fff;
+        color: #000;
+        padding: 20px 40px;
+        border-radius: 5px;
         font-family: sans-serif;
         font-size: 18px;
+        line-height: 32px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;
       }
 
       .CodeMirror-foldmarker {
@@ -265,8 +271,9 @@ export class PlaygroundCodeEditor extends LitElement {
       >
         ${this._showKeyboardHelp
           ? html`<div id="keyboardHelpScrim">
-              <p id="keyboardHelp">
-                Press Enter to start editing<br />Press Escape to exit editor
+              <p id="keyboardHelp" part="dialog">
+                Press <strong>Enter</strong> to start editing<br />
+                Press <strong>Escape</strong> to exit editor
               </p>
             </div>`
           : nothing}
