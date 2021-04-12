@@ -1115,8 +1115,9 @@ span.CodeMirror-selectedtext {
         @keydown=${this._onKeyDown}
       >
         ${this._showKeyboardHelp?B`<div id="keyboardHelpScrim">
-              <p id="keyboardHelp">
-                Press Enter to start editing<br />Press Escape to exit editor
+              <p id="keyboardHelp" part="dialog">
+                Press <strong>Enter</strong> to start editing<br />
+                Press <strong>Escape</strong> to exit editor
               </p>
             </div>`:y}
         ${this._cmDom}
@@ -1146,6 +1147,9 @@ span.CodeMirror-selectedtext {
         height: 100%;
         position: relative;
       }
+      #focusContainer:focus {
+        outline: none;
+      }
 
       .CodeMirror {
         height: 100% !important;
@@ -1163,17 +1167,20 @@ span.CodeMirror-selectedtext {
         align-items: center;
         justify-content: center;
         background: transparent;
-        z-index: 999;
+        z-index: 9;
         pointer-events: none;
+        background: rgba(0, 0, 0, 0.32);
       }
 
       #keyboardHelp {
-        background: #00000099;
-        padding: 20px 80px;
-        border-radius: 10px;
-        color: white;
+        background: #fff;
+        color: #000;
+        padding: 20px 40px;
+        border-radius: 5px;
         font-family: sans-serif;
         font-size: 18px;
+        line-height: 32px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;
       }
 
       .CodeMirror-foldmarker {
@@ -2017,7 +2024,7 @@ let Bo=class extends No{constructor(){super(...arguments),this.editableFileSyste
 let Do=class extends No{constructor(){super(...arguments),this.lineNumbers=!1,this.pragmas="on",this._onProjectFilesChanged=()=>{var e,t;null!==(e=this.filename)&&void 0!==e||(this.filename=null===(t=this._files[0])||void 0===t?void 0:t.name),this.requestUpdate()},this._onCompileDone=()=>{this.requestUpdate()},this._onDiagnosticsChanged=()=>{this.requestUpdate()}}get _files(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.files)&&void 0!==t?t:[]}get _currentFile(){return this.filename?this._files.find((e=>e.name===this.filename)):void 0}async update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("filesChanged",this._onProjectFilesChanged),t.removeEventListener("compileDone",this._onCompileDone),t.removeEventListener("diagnosticsChanged",this._onDiagnosticsChanged)),this._project&&(this._project.addEventListener("filesChanged",this._onProjectFilesChanged),this._project.addEventListener("compileDone",this._onCompileDone),this._project.addEventListener("diagnosticsChanged",this._onDiagnosticsChanged)),this._onProjectFilesChanged()}super.update(e)}render(){var e,t,r,o,i,n;return B`
       ${this._files?B`
             <playground-code-editor
-              exportparts="diagnostic-tooltip"
+              exportparts="diagnostic-tooltip, dialog"
               .value=${bo(null!==(t=null===(e=this._currentFile)||void 0===e?void 0:e.content)&&void 0!==t?t:"")}
               .type=${this._currentFile?Uo(this._currentFile.contentType):void 0}
               .lineNumbers=${this.lineNumbers}
@@ -2244,7 +2251,8 @@ let Zo=class extends de{constructor(){super(...arguments),this.sandboxBaseUrl=Ee
                        preview-location,
                        preview-reload-button,
                        preview-loading-indicator,
-                       diagnostic-tooltip"
+                       diagnostic-tooltip,
+                       dialog"
           .project=${e}
         ></playground-preview>
       </div>
