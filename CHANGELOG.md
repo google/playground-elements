@@ -17,7 +17,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- [**BREAKING**] Focusing the editor using the Tab key no longer activates edit
+  mode immediately. This prevents the Tab key from being trapped, which was an
+  accessibility problem for keyboard users.
+
+  Instead, when the editor is focused, users can now press Enter to begin
+  editing, and Escape to stop editing. A prompt is displayed with these
+  instructions when focused. Focusing the editor with a mouse click continues to
+  activate edit mode immediately, as before.
+
+- The editor now uses the CodeMirror `contenteditable` input style, which has
+  much better screen reader support.
+
+- Line numbers are now annotated with `aria-hidden` so that they are not voiced
+  by screen readers.
 
 ## [0.8.0] - 2021-04-02
 

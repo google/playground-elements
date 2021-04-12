@@ -31,6 +31,8 @@ suite('playground-ide', () => {
     assert.instanceOf(document.createElement('playground-ide'), PlaygroundIde);
   });
 
+  const raf = async () => new Promise((r) => requestAnimationFrame(r));
+
   const pierce = async (...selectors: string[]) => {
     let node = document.body;
     for (const selector of selectors) {
@@ -216,5 +218,129 @@ suite('playground-ide', () => {
       },
     };
     await assertPreviewContains('Hello HTML');
+  });
+
+  test('a11y: is contenteditable', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo');
+
+    const cmCode = await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor',
+      '.CodeMirror-code'
+    );
+
+    assert.equal(cmCode.getAttribute('contenteditable'), 'true');
+  });
+
+  test('a11y: line numbers get aria-hidden attribute', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\nBar',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo\nBar');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const queryHiddenLineNumbers = () =>
+      [
+        ...editor.shadowRoot!.querySelectorAll('.CodeMirror-gutter-wrapper'),
+      ].filter((gutter) => gutter.getAttribute('aria-hidden') === 'true');
+
+    // Initial render with line-numbers enabled.
+    assert.equal(queryHiddenLineNumbers().length, 2);
+
+    // Disable line numbers.
+    ide.lineNumbers = false;
+    await raf();
+    assert.equal(queryHiddenLineNumbers().length, 0);
+
+    // Re-enable line numbers.
+    ide.lineNumbers = true;
+    await raf();
+    assert.equal(queryHiddenLineNumbers().length, 2);
+
+    // Add a line.
+    const editorInternals = (editor as unknown) as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    editorInternals._codemirror!.setValue(editor.value + '\nBaz');
+    await raf();
+    assert.equal(queryHiddenLineNumbers().length, 3);
+  });
+
+  test('a11y: focusing shows keyboard prompt', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const focusContainer = editor.shadowRoot!.querySelector(
+      '#focusContainer'
+    ) as HTMLElement;
+    const editableRegion = editor.shadowRoot!.querySelector(
+      '.CodeMirror-code'
+    ) as HTMLElement;
+    const keyboardHelp = 'Press Enter';
+
+    // Not focused initially
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
+
+    // When the inner container is focused, show the keyboard prompt
+    focusContainer.focus();
+    await raf();
+    assert.isTrue(focusContainer.matches(':focus'));
+    assert.include(focusContainer.textContent, keyboardHelp);
+
+    // Press Enter to start editing
+    focusContainer.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+    await raf();
+    assert.isTrue(editableRegion.matches(':focus'));
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
+
+    // Press Escape to stop editing
+    editableRegion.dispatchEvent(
+      new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+    );
+    await raf();
+    assert.isTrue(focusContainer.matches(':focus'));
+    assert.include(focusContainer.textContent, keyboardHelp);
+
+    // Focus something else entirely
+    focusContainer.blur();
+    await raf();
+    assert.isFalse(focusContainer.matches(':focus'));
+    assert.isFalse(editableRegion.matches(':focus'));
+    assert.notInclude(focusContainer.textContent, keyboardHelp);
   });
 });

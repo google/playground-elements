@@ -9,10 +9,12 @@ import {
   customElement,
   css,
   property,
+  query,
   internalProperty,
   PropertyValues,
   html,
 } from 'lit-element';
+import {nothing} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined.js';
 import {CodeMirror} from './lib/codemirror.js';
 import codemirrorStyles from './_codemirror/codemirror-styles.js';
@@ -49,10 +51,38 @@ export class PlaygroundCodeEditor extends LitElement {
         position: relative;
       }
 
+      #focusContainer {
+        height: 100%;
+        position: relative;
+      }
+
       .CodeMirror {
         height: 100% !important;
         font-family: inherit !important;
         border-radius: inherit;
+      }
+
+      #keyboardHelpScrim {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        z-index: 999;
+        pointer-events: none;
+      }
+
+      #keyboardHelp {
+        background: #00000099;
+        padding: 20px 80px;
+        border-radius: 10px;
+        color: white;
+        font-family: sans-serif;
+        font-size: 18px;
       }
 
       .CodeMirror-foldmarker {
@@ -164,6 +194,15 @@ export class PlaygroundCodeEditor extends LitElement {
     position: string;
   };
 
+  @internalProperty()
+  private _showKeyboardHelp = false;
+
+  @query('#focusContainer')
+  private _focusContainer?: HTMLDivElement;
+
+  @query('.CodeMirror-code')
+  private _codemirrorEditable?: HTMLDivElement;
+
   private _resizeObserver?: ResizeObserver;
   private _resizing = false;
   private _valueChangingFromOutside = false;
@@ -212,15 +251,34 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   render() {
+    if (this.readonly) {
+      return this._cmDom;
+    }
     return html`
-      ${this._cmDom}
       <div
-        id="tooltip"
-        ?hidden=${!this._tooltipDiagnostic}
-        style=${ifDefined(this._tooltipDiagnostic?.position)}
+        id="focusContainer"
+        tabindex="0"
+        @mousedown=${this._onMousedown}
+        @focus=${this._onFocus}
+        @blur=${this._onBlur}
+        @keydown=${this._onKeyDown}
       >
-        <div part="diagnostic-tooltip">
-          ${this._tooltipDiagnostic?.diagnostic.message}
+        ${this._showKeyboardHelp
+          ? html`<div id="keyboardHelpScrim">
+              <p id="keyboardHelp">
+                Press Enter to start editing<br />Press Escape to exit editor
+              </p>
+            </div>`
+          : nothing}
+        ${this._cmDom}
+        <div
+          id="tooltip"
+          ?hidden=${!this._tooltipDiagnostic}
+          style=${ifDefined(this._tooltipDiagnostic?.position)}
+        >
+          <div part="diagnostic-tooltip">
+            ${this._tooltipDiagnostic?.diagnostic.message}
+          </div>
         </div>
       </div>
     `;
@@ -273,6 +331,11 @@ export class PlaygroundCodeEditor extends LitElement {
         lineNumbers: this.lineNumbers,
         mode: this._getLanguageMode(),
         readOnly: this.readonly,
+        inputStyle: 'contenteditable',
+        // Don't allow naturally tabbing into the editor, because it's a
+        // tab-trap. Instead, the container is focusable, and Enter/Escape are
+        // used to explicitly enter the editable area.
+        tabindex: -1,
       }
     );
     cm.on('change', () => {
@@ -293,6 +356,36 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
     this._codemirror = cm;
+  }
+
+  private _onMousedown() {
+    // Directly focus editable region.
+    this._codemirrorEditable?.focus();
+  }
+
+  private _onFocus() {
+    // Outer container was focused, either by tabbing from outside, or by
+    // pressing Escape.
+    this._showKeyboardHelp = true;
+  }
+
+  private _onBlur() {
+    // Outer container was unfocused, either by tabbing away from it, or by
+    // pressing Enter.
+    this._showKeyboardHelp = false;
+  }
+
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && event.target === this._focusContainer) {
+      this._codemirrorEditable?.focus();
+      // Prevent typing a newline from this same event.
+      event.preventDefault();
+    } else if (event.key === 'Escape') {
+      // Note there is no API for "select the next naturally focusable element",
+      // so instead we just re-focus the outer container, from which point the
+      // user can tab to move focus entirely elsewhere.
+      this._focusContainer?.focus();
+    }
   }
 
   /**
