@@ -228,7 +228,6 @@ export class PlaygroundCodeEditor extends LitElement {
             this._valueChangingFromOutside = false;
             break;
           case 'lineNumbers':
-            this._enableOrDisableAriaLineNumberObserver();
             cm.setOption('lineNumbers', this.lineNumbers);
             break;
           case 'type':
@@ -315,7 +314,6 @@ export class PlaygroundCodeEditor extends LitElement {
     const cm = CodeMirror(
       (dom) => {
         this._cmDom = dom;
-        this._enableOrDisableAriaLineNumberObserver();
         this._resizing = true;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -387,43 +385,6 @@ export class PlaygroundCodeEditor extends LitElement {
       // so instead we just re-focus the outer container, from which point the
       // user can tab to move focus entirely elsewhere.
       this._focusContainer?.focus();
-    }
-  }
-
-  private _ariaLineNumberObserver?: MutationObserver;
-
-  /**
-   * Prevent screen readers from voicing line numbers.
-   *
-   * When line numbers are active, watch for lines inserted into the DOM by
-   * CodeMirror, and add the "aria-hidden" attribute to their line numbers.
-   *
-   * See https://github.com/codemirror/CodeMirror/issues/6578
-   */
-  private _enableOrDisableAriaLineNumberObserver() {
-    if (this.lineNumbers && !this._ariaLineNumberObserver) {
-      // Start observing newly added lines.
-      const linesParent = this._cmDom?.querySelector('.CodeMirror-code');
-      if (!linesParent) {
-        console.error('Internal playground error: .CodeMirror-code missing');
-        return;
-      }
-      this._ariaLineNumberObserver = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          for (const node of mutation.addedNodes) {
-            // Could be e.g. a text node. Cast so we can check for presence of
-            // querySelector with optional chaining instead of a typeof test.
-            (node as Partial<Element>)
-              .querySelector?.('.CodeMirror-gutter-wrapper')
-              ?.setAttribute('aria-hidden', 'true');
-          }
-        }
-      });
-      this._ariaLineNumberObserver.observe(linesParent, {childList: true});
-    } else if (!this.lineNumbers && this._ariaLineNumberObserver) {
-      // Line numbers are no longer rendering.
-      this._ariaLineNumberObserver.disconnect();
-      this._ariaLineNumberObserver = undefined;
     }
   }
 
