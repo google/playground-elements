@@ -672,16 +672,17 @@ parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
 which you can style with additional rules not covered by the above CSS custom
 properties.
 
-| Part name                                   | Exported by                         | Description                                                               |
-| ------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------- |
-| `tab-bar`                                   | `ide`                               | Tab bar file switcher                                                     |
-| `editor`                                    | `ide`                               | Editor                                                                    |
-| `preview`                                   | `ide`                               | Preview                                                                   |
-| `preview-toolbar`                           | `ide`, `preview`                    | Preview top bar                                                           |
-| `preview-location`                          | `ide`, `preview`                    | Preview top bar "Result" heading                                          |
-| `preview-reload-button`                     | `ide`, `preview`                    | Preview top bar reload button                                             |
-| `preview-loading-indicator`                 | `ide`, `preview`                    | Preview top bar horizontal loading indicator                              |
-| `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error |
+| Part name                                   | Exported by                         | Description                                                                                                |
+| ------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `tab-bar`                                   | `ide`                               | Tab bar file switcher                                                                                      |
+| `editor`                                    | `ide`                               | Editor                                                                                                     |
+| `preview`                                   | `ide`                               | Preview                                                                                                    |
+| `preview-toolbar`                           | `ide`, `preview`                    | Preview top bar                                                                                            |
+| `preview-location`                          | `ide`, `preview`                    | Preview top bar "Result" heading                                                                           |
+| `preview-reload-button`                     | `ide`, `preview`                    | Preview top bar reload button                                                                              |
+| `preview-loading-indicator`                 | `ide`, `preview`                    | Preview top bar horizontal loading indicator                                                               |
+| `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
+| `dialog`                                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
 
 # Syntax highlighting
 
