@@ -172,6 +172,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         ? html`
             <mwc-icon-button
               class="add-file-button"
+              label="New file"
               @click=${this._onClickAddFile}
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
@@ -357,6 +358,7 @@ class PlaygroundTab extends Tab {
 
   private get _menuButton() {
     return html`<mwc-icon-button
+      label="File menu"
       class="menu-button"
       @click=${this._onClickMenuButton}
     >

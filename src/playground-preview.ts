@@ -154,6 +154,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
           id="reload-button"
+          label="Reload preview"
           part="preview-reload-button"
           ?disabled=${!this._indexUrl}
           @click=${this.reload}

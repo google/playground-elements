@@ -74,6 +74,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     line (use `transparent` to hide).
   - `--playground-tab-bar-active-background`: `background` of the active file-picker tab.
 
+- Added `aria-label` attribute to reload, new file, and file context menu
+  buttons.
+
 ## [0.8.0] - 2021-04-02
 
 ### Added
