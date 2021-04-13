@@ -65,8 +65,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added CSS custom properties:
   - `--playground-code-line-height`: `line-height` of code in the editor.
-  - `--playground-code-padding-left`: `padding` of code in the editor (does not
-    affect position of line numbers).
   - `--playground-tab-bar-font-size`: `font-size` of tabs in the file picker tab
     bar.
   - `--playground-tab-bar-active-color`: Text `color` of active file-picker tab.

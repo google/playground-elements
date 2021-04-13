@@ -58,6 +58,11 @@
   text-align: right;
   color: var(--playground-code-linenumber-color, #999);
   white-space: nowrap;
+  margin-right: 1em;
+}
+.CodeMirror-code > div > .CodeMirror-line {
+  /* Some extra room between the line number gutter and the line */
+  padding-left: 0.7em;
 }
 
 /* CURSOR */
@@ -267,7 +272,6 @@
   font-family: inherit;
   font-size: inherit;
   margin: 0;
-  padding-left: var(--playground-code-padding-left, 1em);
   white-space: pre;
   word-wrap: normal;
   line-height: inherit;
