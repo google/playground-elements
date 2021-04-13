@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- [**BREAKING**] Focusing the editor using the Tab key no longer activates edit
-  mode immediately. This prevents the Tab key from being trapped, which was an
+- Focusing the editor using the Tab key no longer activates edit mode
+  immediately. This prevents the Tab key from being trapped, which was an
   accessibility problem for keyboard users.
 
   Instead, when the editor is focused, users can now press Enter to begin
@@ -66,6 +66,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   keyboard help that shows when the editor is focused using the keyboard).
 
 - Added CSS custom properties:
+
   - `--playground-code-line-height`: `line-height` of code in the editor.
   - `--playground-tab-bar-font-size`: `font-size` of tabs in the file picker tab
     bar.
