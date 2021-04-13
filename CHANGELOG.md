@@ -80,6 +80,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added `title` attribute to preview `<iframe>` element.
 
+- Added `aria-label` to the preview loading indicator, and set
+  `aria-hidden=true` when the preview is not loading.
+
 ## [0.8.0] - 2021-04-02
 
 ### Added
