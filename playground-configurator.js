@@ -738,7 +738,7 @@ const ur=window.CodeMirror;var hr=ae`/**
   padding: 0 3px 0 5px;
   min-width: 20px;
   text-align: right;
-  color: var(--playground-code-linenumber-color, #999);
+  color: var(--playground-code-linenumber-color, #767676);
   white-space: nowrap;
   margin-right: 1em;
 }
@@ -1886,6 +1886,7 @@ let Bo=class extends No{constructor(){super(...arguments),this.editableFileSyste
       ${this.editableFileSystem?B`
             <mwc-icon-button
               class="add-file-button"
+              label="New file"
               @click=${this._onClickAddFile}
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
@@ -1943,6 +1944,7 @@ let Bo=class extends No{constructor(){super(...arguments),this.editableFileSyste
     }
   `,e([Y({type:Boolean,attribute:"editable-file-system"})],Bo.prototype,"editableFileSystem",void 0),e([Q()],Bo.prototype,"_activeFileName",void 0),e([Q()],Bo.prototype,"_activeFileIndex",void 0),e([X("mwc-tab-bar")],Bo.prototype,"_tabBar",void 0),e([X("playground-file-system-controls")],Bo.prototype,"_fileSystemControls",void 0),e([Q()],Bo.prototype,"_editor",void 0),e([Y()],Bo.prototype,"editor",null),Bo=e([G("playground-tab-bar")],Bo);let Wo=class extends It{constructor(){super(...arguments),this.showMenuButton=!1,this.index=0}render(){return B`${super.render()}
     ${this.showMenuButton?this._menuButton:y} `}get _menuButton(){return B`<mwc-icon-button
+      label="File menu"
       class="menu-button"
       @click=${this._onClickMenuButton}
     >
@@ -2090,6 +2092,7 @@ let jo=class extends No{constructor(){super(...arguments),this.location="Result"
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
           id="reload-button"
+          label="Reload preview"
           part="preview-reload-button"
           ?disabled=${!this._indexUrl}
           @click=${this.reload}
@@ -2111,6 +2114,7 @@ let jo=class extends No{constructor(){super(...arguments),this.location="Result"
 
       <div id="content">
         <mwc-linear-progress
+          aria-hidden=${this._loading?"false":"true"}
           part="preview-loading-indicator"
           indeterminate
           ?closed=${!this._showLoadingBar}
@@ -2119,11 +2123,12 @@ let jo=class extends No{constructor(){super(...arguments),this.location="Result"
         ${this._loadedAtLeastOnce?y:B`<slot></slot>`}
 
         <iframe
+          title="Project preview"
           @load=${this._onIframeLoad}
           ?hidden=${!this._loadedAtLeastOnce}
         ></iframe>
       </div>
-    `}updated(){var e;(null===(e=this._iframe)||void 0===e?void 0:e.src)!==this._indexUrl&&(this._iframe.src=this._indexUrl)}_startLoadingBar(){void 0!==this._stopLoadingBarTimerId&&(clearTimeout(this._stopLoadingBarTimerId),this._stopLoadingBarTimerId=void 0),!1===this._showLoadingBar&&(this._showLoadingBar=!0,this._startLoadingBarTime=performance.now())}_stopLoadingBar(){if(!1===this._showLoadingBar)return;const e=performance.now()-this._startLoadingBarTime,t=Math.max(0,500-e);this._stopLoadingBarTimerId=setTimeout((()=>{this._showLoadingBar=!1,this._stopLoadingBarTimerId=void 0}),t)}firstUpdated(){this._loading&&!this._slotHasAnyVisibleChildren()&&this._startLoadingBar()}_slotHasAnyVisibleChildren(){var e;const t=null===(e=this._slot)||void 0===e?void 0:e.assignedNodes({flatten:!0});if(!t)return!1;for(const e of t)if(e.nodeType!==Node.COMMENT_NODE&&(e.nodeType!==Node.TEXT_NODE||""!==(e.textContent||"").trim()))return!0;return!1}_onIframeLoad(){this._indexUrl&&(this._loading=!1,this._loadedAtLeastOnce=!0,this._stopLoadingBar())}};jo.styles=ae`
+    `}updated(){var e;(null===(e=this._iframe)||void 0===e?void 0:e.src)!==this._indexUrl&&(this._iframe.src=this._indexUrl)}_startLoadingBar(){void 0!==this._stopLoadingBarTimerId&&(clearTimeout(this._stopLoadingBarTimerId),this._stopLoadingBarTimerId=void 0),!1===this._showLoadingBar&&(this._showLoadingBar=!0,this._startLoadingBarTime=performance.now())}_stopLoadingBar(){if(!1===this._showLoadingBar)return;const e=performance.now()-this._startLoadingBarTime,t=Math.max(0,500-e);this._stopLoadingBarTimerId=setTimeout((()=>{this._showLoadingBar=!1,this._stopLoadingBarTimerId=void 0}),t)}async firstUpdated(){var e,t;this._loading&&!this._slotHasAnyVisibleChildren()&&this._startLoadingBar();const r=this.shadowRoot.querySelector("mwc-linear-progress");await r.updateComplete,null===(t=null===(e=r.shadowRoot)||void 0===e?void 0:e.querySelector("[role=progressbar]"))||void 0===t||t.setAttribute("aria-label","Preview is loading")}_slotHasAnyVisibleChildren(){var e;const t=null===(e=this._slot)||void 0===e?void 0:e.assignedNodes({flatten:!0});if(!t)return!1;for(const e of t)if(e.nodeType!==Node.COMMENT_NODE&&(e.nodeType!==Node.TEXT_NODE||""!==(e.textContent||"").trim()))return!0;return!1}_onIframeLoad(){this._indexUrl&&(this._loading=!1,this._loadedAtLeastOnce=!0,this._stopLoadingBar())}};jo.styles=ae`
     :host {
       display: flex;
       flex-direction: column;
