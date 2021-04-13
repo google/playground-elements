@@ -154,6 +154,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
           id="reload-button"
+          label="Reload preview"
           part="preview-reload-button"
           ?disabled=${!this._indexUrl}
           @click=${this.reload}
@@ -175,6 +176,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
 
       <div id="content">
         <mwc-linear-progress
+          aria-hidden=${this._loading ? 'false' : 'true'}
           part="preview-loading-indicator"
           indeterminate
           ?closed=${!this._showLoadingBar}
@@ -183,6 +185,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
 
         <iframe
+          title="Project preview"
           @load=${this._onIframeLoad}
           ?hidden=${!this._loadedAtLeastOnce}
         ></iframe>
@@ -242,13 +245,23 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     }, pending);
   }
 
-  firstUpdated() {
+  async firstUpdated() {
     // Loading should be initially indicated only when we're not pre-rendering,
     // because in that case there should be no visible change once the actual
     // iframe loads, and the indicator is distracting.
     if (this._loading && !this._slotHasAnyVisibleChildren()) {
       this._startLoadingBar();
     }
+
+    // The latest version of MWC forwards the aria-label attribute to the
+    // progressbar role correctly
+    // (https://github.com/material-components/material-components-web-components/pull/2264),
+    // but until 0.21.0 is released we'll need to fix it up ourselves.
+    const progress = this.shadowRoot!.querySelector('mwc-linear-progress')!;
+    await progress.updateComplete;
+    progress.shadowRoot
+      ?.querySelector('[role=progressbar]')
+      ?.setAttribute('aria-label', 'Preview is loading');
   }
 
   private _slotHasAnyVisibleChildren() {

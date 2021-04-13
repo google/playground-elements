@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- [**BREAKING**] Focusing the editor using the Tab key no longer activates edit
-  mode immediately. This prevents the Tab key from being trapped, which was an
+- Focusing the editor using the Tab key no longer activates edit mode
+  immediately. This prevents the Tab key from being trapped, which was an
   accessibility problem for keyboard users.
 
   Instead, when the editor is focused, users can now press Enter to begin
@@ -54,6 +54,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `--playground-code-gutter-margin-right` default changed from `1px solid #ddd` to `none`.
 
+- `--playground-code-linenumber-color` default changed from `#999` to `#767676`.
+
 ### Added
 
 - Added `playground-styles.css` and `playground-styles.js` which can be imported
@@ -64,6 +66,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   keyboard help that shows when the editor is focused using the keyboard).
 
 - Added CSS custom properties:
+
   - `--playground-code-line-height`: `line-height` of code in the editor.
   - `--playground-tab-bar-font-size`: `font-size` of tabs in the file picker tab
     bar.
@@ -71,6 +74,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `--playground-tab-bar-indicator-color`: `color` of the active tab indicator
     line (use `transparent` to hide).
   - `--playground-tab-bar-active-background`: `background` of the active file-picker tab.
+
+- Added `aria-label` attribute to reload, new file, and file context menu
+  buttons.
+
+- Added `title` attribute to preview `<iframe>` element.
+
+- Added `aria-label` to the preview loading indicator, and set
+  `aria-hidden=true` when the preview is not loading.
 
 ## [0.8.0] - 2021-04-02
 
