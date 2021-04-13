@@ -54,6 +54,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `--playground-code-gutter-margin-right` default changed from `1px solid #ddd` to `none`.
 
+- `--playground-code-linenumber-color` default changed from `#999` to `#767676`.
+
 ### Added
 
 - Added `playground-styles.css` and `playground-styles.js` which can be imported

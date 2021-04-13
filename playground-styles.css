@@ -56,7 +56,7 @@
   padding: 0 3px 0 5px;
   min-width: 20px;
   text-align: right;
-  color: var(--playground-code-linenumber-color, #999);
+  color: var(--playground-code-linenumber-color, #767676);
   white-space: nowrap;
   margin-right: 1em;
 }
