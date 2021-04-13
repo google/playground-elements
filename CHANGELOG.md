@@ -78,6 +78,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `aria-label` attribute to reload, new file, and file context menu
   buttons.
 
+- Added `title` attribute to preview `<iframe>` element.
+
 ## [0.8.0] - 2021-04-02
 
 ### Added

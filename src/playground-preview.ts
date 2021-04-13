@@ -184,6 +184,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         ${this._loadedAtLeastOnce ? nothing : html`<slot></slot>`}
 
         <iframe
+          title="Project preview"
           @load=${this._onIframeLoad}
           ?hidden=${!this._loadedAtLeastOnce}
         ></iframe>
