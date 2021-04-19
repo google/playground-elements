@@ -335,6 +335,14 @@ export class PlaygroundCodeEditor extends LitElement {
         // tab-trap. Instead, the container is focusable, and Enter/Escape are
         // used to explicitly enter the editable area.
         tabindex: -1,
+        // Tab key inserts spaces instead of tab character
+        extraKeys: {
+          Tab: () => {
+            cm.replaceSelection(
+              Array(cm.getOption('indentUnit') ?? 2).join(' ')
+            );
+          },
+        },
       }
     );
     cm.on('change', () => {
