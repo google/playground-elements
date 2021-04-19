@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- Tab key now inserts 2 spaces instead of a tab character.
+
 ## [0.9.0] - 2021-04-13
 
 ### Changed
