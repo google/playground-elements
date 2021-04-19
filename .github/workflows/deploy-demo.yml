@@ -3,9 +3,7 @@ name: deploy-demo
 on:
   push:
     branches:
-      - master
-      # TODO temporary
-      - a11y-1
+      - main
 
 jobs:
   deploy:
