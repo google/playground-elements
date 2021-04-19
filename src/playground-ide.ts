@@ -98,7 +98,7 @@ export class PlaygroundIde extends LitElement {
 
     playground-file-editor {
       flex: 1;
-      height: calc(100% - var(--playground-bar-height), 35px);
+      height: calc(100% - var(--playground-bar-height, 40px));
     }
 
     #rhs {
