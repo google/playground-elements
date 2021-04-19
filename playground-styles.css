@@ -38,7 +38,10 @@
 
 .CodeMirror-scrollbar-filler,
 .CodeMirror-gutter-filler {
-  background: transparent; /* The little square between H and V scrollbars */
+  background: var(
+    --playground-code-background,
+    #fff
+  ); /* The little square between H and V scrollbars */
 }
 
 /* GUTTER */

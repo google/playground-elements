@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Fixed
+
+- Fixed transparent region between horizontal and vertical scrollbars.
+
 ## [0.9.0] - 2021-04-13
 
 ### Changed
