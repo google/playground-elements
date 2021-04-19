@@ -37,7 +37,7 @@ import {forceSkypackRawMode} from './shared/util.js';
  * object with properties for each file. The key is the filename, relative to
  * the project manifest.
  *
- * Eample project manifest:
+ * Example project manifest:
  * ```json
  * {
  *   "files": {
