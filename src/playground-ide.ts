@@ -37,7 +37,7 @@ import {forceSkypackRawMode} from './shared/util.js';
  * object with properties for each file. The key is the filename, relative to
  * the project manifest.
  *
- * Eample project manifest:
+ * Example project manifest:
  * ```json
  * {
  *   "files": {
@@ -98,7 +98,7 @@ export class PlaygroundIde extends LitElement {
 
     playground-file-editor {
       flex: 1;
-      height: calc(100% - var(--playground-bar-height), 35px);
+      height: calc(100% - var(--playground-bar-height, 40px));
     }
 
     #rhs {

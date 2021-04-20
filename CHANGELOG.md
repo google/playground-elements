@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Tab key now inserts 2 spaces instead of a tab character.
 
+### Fixed
+
+- Fixed missing vertical scrollbars.
+- Fixed transparent region between horizontal and vertical scrollbars.
+
 ## [0.9.0] - 2021-04-13
 
 ### Changed
