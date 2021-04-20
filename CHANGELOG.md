@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- Tab key now inserts 2 spaces instead of a tab character.
+
 ### Fixed
 
 - Fixed missing vertical scrollbars.
