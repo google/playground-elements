@@ -24,6 +24,7 @@
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
     • <a href="#syntax-highlighting">Syntax highlighting</a>
+    • <a href="#security">Security</a>
     • <a href="#faq">FAQ</a>
 </p>
 
@@ -643,12 +644,12 @@ Floating controls for adding, deleting, and renaming files.
 | ------------- | -------------------- | ---------------------------------------------------------- |
 | `newFile`     | `{filename: string}` | The specified new file was created through these controls. |
 
-# Styling
+## Styling
 
 **TIP:** Use the [configurator](https://polymerlabs.github.io/playground-elements/)
 to quickly experiment with themes and other customizations.
 
-## Custom Properties
+### Custom Properties
 
 | Name                                               | Default                                                                                     | Description                                                                                                                        |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -676,7 +677,7 @@ to quickly experiment with themes and other customizations.
 | `--playground-border`                              | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                                            | Outer and inner border                                                                                                             |
 | `--playground-floating-controls-highlight-color`   | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Highlight color of popup controls buttons and inputs                                                                               |
 
-## Shadow Parts
+### Shadow Parts
 
 The following [CSS shadow
 parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
@@ -695,9 +696,9 @@ properties.
 | `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
 | `dialog`                                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
 
-# Syntax highlighting
+### Syntax highlighting
 
-## Themes
+#### Themes
 
 The `playground-elements` package includes a directory of pre-configured
 syntax-highlighting themes. To load a theme, import its stylesheet, and apply the
@@ -725,7 +726,7 @@ ayuMirageTheme.styleSheet; // CSSStyleSheet
 ayuMirageTheme.cssText; // string
 ```
 
-## Custom syntax highlighting
+#### Custom syntax highlighting
 
 Each kind of language token is controlled by a CSS custom property with the name
 `--playground-code-TOKEN-color`. For example, the `keyword` token is controlled
@@ -755,14 +756,14 @@ by `--playground-code-keyword-color`.
 | `variable-3` | ![](images/colors/008855.png) `#008855` |                                                                                          |                                      | <code>::<b>hover</b></code>                |
 | `local`      | ![](images/colors/0000FF.png) `#0000FF` | <code>(<b>arg</b>) => { }</code>                                                         |                                      |                                            |
 
-#### Notes
+##### Notes
 
 1. In CSS, `string-2` is used for "non-standard" properties, but the
    [list](https://github.com/codemirror/CodeMirror/blob/264022ee4af4abca1c158944dc299a8faf8696d6/mode/css/css.js#L566)
    is outdated.
 2. In JS/TS, `variable-2` is used for function-local variables.
 
-#### Parsers
+##### Parsers
 
 Playground uses the `google_modes` CodeMirror syntax highlighting modes for
 TS/JS/HTML, because they support highlighting of HTML and CSS within JavaScript
@@ -773,6 +774,59 @@ tagged template literals.
 - JSDoc: https://github.com/codemirror/google-modes/blob/master/src/jsdoc.grammar
 - HTML: https://github.com/codemirror/google-modes/blob/master/src/html.grammar
 - CSS: https://github.com/codemirror/CodeMirror/blob/master/mode/css/css.js
+
+## Security
+
+### Sandbox domains
+
+All deployments of Playground should be configured to use a _sandbox domain_,
+because Playground executes arbitrary code which may otherwise be able to
+exploit the privileges of your main domain. A sandbox domain must satisfy all of
+these requirements:
+
+1. Is different from the main domain hosting the Playground. This prevents
+   Playground code from accessing `window.parent` and e.g. changing the "sign
+   in" link to a malicious URL.
+
+2. Has no access to sensitive cookies. This prevents Playground code from e.g.
+   reading a user's authentication token out of a cookie and forwarding it.
+
+3. Has no access to make requests to sensitive URLs or APIs, either through the
+   [`same-origin`](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy)
+   policy or via [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+   headers set on other origins. This prevents Playground code from e.g. calling
+   a `change_password` API.
+
+Using a sandbox domain is _critically_ important in the case of a site that
+allows sharing URLs containing user edited code, because an attacker could
+construct and share a URL that performs one of these dangerous actions.
+
+If you see the following warning in your console, then your deployment of
+Playground is not sandboxed and is vulnerable to these security risks:
+
+> Playground sandbox is executing with the same origin as its parent. This is a
+> security risk.
+
+### How to configure a sandbox domain
+
+There are three common ways to configure a sandbox domain:
+
+1. Simply import Playground components from a CDN like unpkg or Skypack. This is
+   secure by default, because Playground executes code on the same domain it was
+   imported from by default.
+
+2. Host your own sandbox domain which serves the entire Playground package, and
+   import Playground components from there instead of your main domain.
+
+3. Host your own sandbox domain which serves only the
+   `playground-service-worker-proxy.html` and `playground-service-worker.js`
+   files, and set the `sandboxBaseUrl` property or `sandbox-base-url` attribute
+   to this URL.
+
+   This last configuration is optimal for most production sites, because it
+   allows the core Playground component code to be bundled, optimized, and
+   served along with your other JavaScript, while user controlled Playground
+   code will still execute securely.
 
 ## FAQ
 
