@@ -35,6 +35,7 @@ import {
 } from './shared/util.js';
 import {Deferred} from './shared/deferred.js';
 import type {Diagnostic} from 'vscode-languageserver';
+import {version} from './lib/version.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -157,7 +158,7 @@ export class PlaygroundProject extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = forceSkypackRawMode(new URL('.', import.meta.url)).href;
+  sandboxBaseUrl = `https://unpkg.com/playground-elements@${version}/`;
 
   /**
    * The service worker scope to register on
