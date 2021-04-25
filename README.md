@@ -241,7 +241,7 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 }
 ```
 
-### Option 3: Files property
+### Option 3: Config property
 
 In JavaScript, directly set the `config` property to an object. The format is
 identical to the JSON config file.
@@ -538,7 +538,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | Name                 |  Type                            | Default                   | Description                                                                                   |
 | -------------------- | -------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
 | `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                      |
-| `files`              | `SampleFile[]`                   | `undefined`               | Get or set the array of project files                                                         |
+| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).       |
 | `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                               |
 | `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                    |
 | `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                   |
@@ -564,7 +564,7 @@ project element.
 | Name             |  Type                         | Default                   | Description                                                                                               |
 | ---------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                       |
-| `files`          | `SampleFile[]`                | `undefined`               | Get or set the array of project files ([details](#option-3-files-property)).                              |
+| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                   |
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                  |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                                              |
 | `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. |
@@ -806,15 +806,26 @@ tagged template literals.
 
 ### How do I save and share a project?
 
-Use the `files` property of a `<playground-ide>` or `<playground-project>` to
-get or set the current state of the project.
+Use the `config` property of a `<playground-ide>` or `<playground-project>` to
+get or set the current state of the project
+([details](#option-3-config-property)).
 
 How you persist and retrieve serialized project state is up to you. Here are a
 few ideas:
 
-- JSON + base64 encode the files, and save it to the URL hash (see [#102](https://github.com/PolymerLabs/playground-elements/issues/102))
+- JSON + base64url encode the config, and save it to the URL hash.
+
+  Note that built-in `btoa` function is not safe for this purpose because it
+  cannot encode non-latin code points, and the `+` character has a special
+  meaning in URLs. See
+  [here](https://github.com/lit/lit.dev/blob/fd4c34e71b47267f3672a2debe52807042f22cc2/packages/lit-dev-content/src/pages/playground.ts#L31)
+  for an example safe implementation, and
+  [#102](https://github.com/PolymerLabs/playground-elements/issues/102) to track
+  adding this implementation to Playground itself.
+
 - Integrate with a third-party API like [GitHub
   gists](https://docs.github.com/en/rest/reference/gists).
+
 - Write to your own datastore.
 
 ### How do I run custom build steps like JSX or SASS?
