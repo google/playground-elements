@@ -671,12 +671,12 @@ Floating controls for adding, deleting, and renaming files.
 | ------------- | -------------------- | ---------------------------------------------------------- |
 | `newFile`     | `{filename: string}` | The specified new file was created through these controls. |
 
-# Styling
+## Styling
 
 **TIP:** Use the [configurator](https://polymerlabs.github.io/playground-elements/)
 to quickly experiment with themes and other customizations.
 
-## Custom Properties
+### Custom Properties
 
 | Name                                               | Default                                                                                     | Description                                                                                                                        |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -704,7 +704,7 @@ to quickly experiment with themes and other customizations.
 | `--playground-border`                              | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                                            | Outer and inner border                                                                                                             |
 | `--playground-floating-controls-highlight-color`   | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Highlight color of popup controls buttons and inputs                                                                               |
 
-## Shadow Parts
+### Shadow Parts
 
 The following [CSS shadow
 parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
@@ -723,9 +723,9 @@ properties.
 | `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
 | `dialog`                                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
 
-# Syntax highlighting
+## Syntax highlighting
 
-## Themes
+### Themes
 
 The `playground-elements` package includes a directory of pre-configured
 syntax-highlighting themes. To load a theme, import its stylesheet, and apply the
@@ -753,7 +753,7 @@ ayuMirageTheme.styleSheet; // CSSStyleSheet
 ayuMirageTheme.cssText; // string
 ```
 
-## Custom syntax highlighting
+### Custom syntax highlighting
 
 Each kind of language token is controlled by a CSS custom property with the name
 `--playground-code-TOKEN-color`. For example, the `keyword` token is controlled
