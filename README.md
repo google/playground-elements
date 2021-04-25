@@ -21,6 +21,7 @@
     • <a href="#typescript">TypeScript</a>
     • <a href="#hiding--folding">Hiding & Folding</a>
     • <a href="#custom-layouts">Custom layouts</a>
+    • <a href="#bundling">Bundling</a>
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
     • <a href="#syntax-highlighting">Syntax highlighting</a>
@@ -480,6 +481,33 @@ Finally, add a little style:
   }
 </style>
 ```
+
+## Bundling
+
+Playground uses a [Web
+Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+to perform TypeScript compilation. If you are bundling or otherwise modifying
+the layout of the `playground-elements` NPM package, you may need to add special
+handling for this file.
+
+This worker script must exist at `./playground-typescript-worker.js` in the same
+directory as the JavaScript file that contains the definition of
+`<playground-project>`, and is resolved relative to `import.meta.url`.
+
+### Rollup
+
+Use the
+[`@web/rollup-plugin-import-meta-assets`](https://github.com/modernweb-dev/web/tree/master/packages/rollup-plugin-import-meta-assets#readme)
+plugin to automatically copy the worker script into the correct location. See
+[examples/rollup](https://github.com/PolymerLabs/playground-elements/tree/main/examples/rollup)
+for an example configuration.
+
+### Webpack
+
+Webpack 5+ [supports](https://webpack.js.org/guides/web-workers/) loading Web
+Workers with no additional plugins. See
+[examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
+for an example configuration.
 
 ## Components
 
