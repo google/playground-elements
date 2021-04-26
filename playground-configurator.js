@@ -1158,6 +1158,7 @@ span.CodeMirror-selectedtext {
         position: absolute;
         padding: 7px;
         z-index: 4;
+        font-family: var(--playground-code-font-family, monospace);
       }
 
       #tooltip > div {
