@@ -21,6 +21,7 @@
     • <a href="#typescript">TypeScript</a>
     • <a href="#hiding--folding">Hiding & Folding</a>
     • <a href="#custom-layouts">Custom layouts</a>
+    • <a href="#bundling">Bundling</a>
     • <a href="#sandbox-security">Sandbox security</a>
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
@@ -241,7 +242,7 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 }
 ```
 
-### Option 3: Files property
+### Option 3: Config property
 
 In JavaScript, directly set the `config` property to an object. The format is
 identical to the JSON config file.
@@ -482,6 +483,33 @@ Finally, add a little style:
 </style>
 ```
 
+## Bundling
+
+Playground uses a [Web
+Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+to perform TypeScript compilation. If you are bundling or otherwise modifying
+the layout of the `playground-elements` NPM package, you may need to add special
+handling for this file.
+
+This worker script must exist at `./playground-typescript-worker.js` in the same
+directory as the JavaScript file that contains the definition of
+`<playground-project>`, and is resolved relative to `import.meta.url`.
+
+### Rollup
+
+Use the
+[`@web/rollup-plugin-import-meta-assets`](https://github.com/modernweb-dev/web/tree/master/packages/rollup-plugin-import-meta-assets#readme)
+plugin to automatically copy the worker script into the correct location. See
+[examples/rollup](https://github.com/PolymerLabs/playground-elements/tree/main/examples/rollup)
+for an example configuration.
+
+### Webpack
+
+Webpack 5+ [supports](https://webpack.js.org/guides/web-workers/) loading Web
+Workers with no additional plugins. See
+[examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
+for an example configuration.
+
 ## Sandbox security
 
 > ⚠️ Changing the sandbox base URL from the default can create a security
@@ -581,15 +609,15 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type                            | Default                   | Description                                                                                                   |
-| -------------------- | -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                      |
-| `files`              | `SampleFile[]`                   | `undefined`               | Get or set the array of project files                                                                         |
-| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                               |
-| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                    |
-| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                   |
+| Name                 |  Type                            | Default                   | Description                                                                                   |
+| -------------------- | -------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
+| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                      |
+| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).       |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                               |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                    |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                   |
 | `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                 |
+| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
 
 ### Slots
 
@@ -607,13 +635,13 @@ project element.
 
 ### Properties
 
-| Name             |  Type                         | Default                   | Description                                                                                                   |
-| ---------------- | ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                           |
-| `files`          | `SampleFile[]`                | `undefined`               | Get or set the array of project files ([details](#option-3-files-property)).                                  |
-| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                      |
+| Name             |  Type                         | Default                   | Description                                                                                               |
+| ---------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                       |
+| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                   |
+| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                  |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.     |
+| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. |
 
 ### Methods
 
@@ -717,12 +745,12 @@ Floating controls for adding, deleting, and renaming files.
 | ------------- | -------------------- | ---------------------------------------------------------- |
 | `newFile`     | `{filename: string}` | The specified new file was created through these controls. |
 
-# Styling
+## Styling
 
 **TIP:** Use the [configurator](https://polymerlabs.github.io/playground-elements/)
 to quickly experiment with themes and other customizations.
 
-## Custom Properties
+### Custom Properties
 
 | Name                                               | Default                                                                                     | Description                                                                                                                        |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -750,7 +778,7 @@ to quickly experiment with themes and other customizations.
 | `--playground-border`                              | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                                            | Outer and inner border                                                                                                             |
 | `--playground-floating-controls-highlight-color`   | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Highlight color of popup controls buttons and inputs                                                                               |
 
-## Shadow Parts
+### Shadow Parts
 
 The following [CSS shadow
 parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
@@ -769,9 +797,9 @@ properties.
 | `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
 | `dialog`                                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
 
-# Syntax highlighting
+## Syntax highlighting
 
-## Themes
+### Themes
 
 The `playground-elements` package includes a directory of pre-configured
 syntax-highlighting themes. To load a theme, import its stylesheet, and apply the
@@ -799,7 +827,7 @@ ayuMirageTheme.styleSheet; // CSSStyleSheet
 ayuMirageTheme.cssText; // string
 ```
 
-## Custom syntax highlighting
+### Custom syntax highlighting
 
 Each kind of language token is controlled by a CSS custom property with the name
 `--playground-code-TOKEN-color`. For example, the `keyword` token is controlled
@@ -852,15 +880,26 @@ tagged template literals.
 
 ### How do I save and share a project?
 
-Use the `files` property of a `<playground-ide>` or `<playground-project>` to
-get or set the current state of the project.
+Use the `config` property of a `<playground-ide>` or `<playground-project>` to
+get or set the current state of the project
+([details](#option-3-config-property)).
 
 How you persist and retrieve serialized project state is up to you. Here are a
 few ideas:
 
-- JSON + base64 encode the files, and save it to the URL hash (see [#102](https://github.com/PolymerLabs/playground-elements/issues/102))
+- JSON + base64url encode the config, and save it to the URL hash.
+
+  Note that built-in `btoa` function is not safe for this purpose because it
+  cannot encode non-latin code points, and the `+` character has a special
+  meaning in URLs. See
+  [here](https://github.com/lit/lit.dev/blob/fd4c34e71b47267f3672a2debe52807042f22cc2/packages/lit-dev-content/src/pages/playground.ts#L31)
+  for an example safe implementation, and
+  [#102](https://github.com/PolymerLabs/playground-elements/issues/102) to track
+  adding this implementation to Playground itself.
+
 - Integrate with a third-party API like [GitHub
   gists](https://docs.github.com/en/rest/reference/gists).
+
 - Write to your own datastore.
 
 ### How do I run custom build steps like JSX or SASS?
