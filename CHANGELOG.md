@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- Error tooltips now follow `--playground-code-font-family`.
+
 ## [0.9.2] - 2021-04-26
 
 ### Changed
