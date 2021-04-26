@@ -77,7 +77,7 @@ suite('playground-ide', () => {
   test('renders HTML', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <p>Hello HTML</p>
             <script>console.log('hello');&lt;/script>
@@ -92,7 +92,7 @@ suite('playground-ide', () => {
   test('renders JS', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
               <script src="hello.js">&lt;/script>
@@ -111,7 +111,7 @@ suite('playground-ide', () => {
   test('renders TS', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
               <script src="hello.js">&lt;/script>
@@ -131,7 +131,7 @@ suite('playground-ide', () => {
   test('re-renders HTML', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
               <p>Hello HTML 1</p>
@@ -163,7 +163,7 @@ suite('playground-ide', () => {
   test('hidden file is not displayed in tab bar', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html" hidden>
             <body>
               <script src="hello.js">&lt;/script>
@@ -185,7 +185,7 @@ suite('playground-ide', () => {
   test('file label is displayed in tab bar', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html" label="HTML">
             <body>
               <script src="hello.js">&lt;/script>
@@ -209,6 +209,7 @@ suite('playground-ide', () => {
 
   test('reads files from config property', async () => {
     const ide = document.createElement('playground-ide')!;
+    ide.sandboxBaseUrl = '/';
     container.appendChild(ide);
     ide.config = {
       files: {
@@ -222,6 +223,7 @@ suite('playground-ide', () => {
 
   test('a11y: is contenteditable', async () => {
     const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
     ide.config = {
       files: {
         'index.html': {
@@ -244,6 +246,7 @@ suite('playground-ide', () => {
 
   test('a11y: line numbers get aria-hidden attribute', async () => {
     const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
     ide.lineNumbers = true;
     ide.config = {
       files: {
@@ -290,6 +293,7 @@ suite('playground-ide', () => {
 
   test('a11y: focusing shows keyboard prompt', async () => {
     const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
     ide.config = {
       files: {
         'index.html': {
