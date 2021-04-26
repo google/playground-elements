@@ -22,6 +22,7 @@
     • <a href="#hiding--folding">Hiding & Folding</a>
     • <a href="#custom-layouts">Custom layouts</a>
     • <a href="#bundling">Bundling</a>
+    • <a href="#sandbox-security">Sandbox security</a>
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
     • <a href="#syntax-highlighting">Syntax highlighting</a>
@@ -509,6 +510,79 @@ Workers with no additional plugins. See
 [examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
 for an example configuration.
 
+## Sandbox security
+
+> ⚠️ Changing the sandbox base URL from the default can create a security
+> vulnerability for your site if not done carefully. Do not change the default
+> unless you have a specific reason to, and please read this entire section
+> carefully.
+
+The `sandboxBaseUrl` property and `sandbox-base-url` attribute can be used to
+override the origin where untrusted code will execute when displaying Playground
+previews. The default origin is unpkg.com, which is secure because it is
+unprivileged and cannot modify the host window.
+
+You may wish to override this default sandbox base URL if you do not want a
+dependency on `unpkg.com`, e.g. for isolation from outages, or because your
+network does not have access to it. Note that Playground currently also uses
+`unpkg.com` to retrieve imported bare modules that are not otherwise handled by
+an [import map](#module-resolution), so the `unpkg.com` dependency cannot
+currently be completely eliminated.
+
+### Background
+
+Playground previews work by using a [service
+worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API).
+This service worker takes control over requests to a particular URL space,
+allowing it to respond to HTTP requests using the files from your local project,
+instead of from a remote server. The playground preview component contains an
+`<iframe>` pointing to the `index.html` within that URL space.
+
+When JavaScript in this preview `<iframe>` executes, it does so with the full
+privileges of whichever
+[origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin) the service
+worker was registered on. This means it can access cookies on that origin, make
+HTTP requests to sensitive URLs on that origin, and directly access the
+`<iframe>` parent window if it has the same origin.
+
+The JavaScript in Playground project files should always be considered untrusted
+and potentially malicious. This is particularly the case if you implement a
+_share_ feature, because a user can be tricked into executing malicious code
+simply by visiting a URL.
+
+By default, the sandbox base URL is
+`https://unpkg.com/playground-elements@<version>/playground-projects/`. This is
+a secure default because `unpkg.com` is unprivileged and cannot modify the host
+window.
+
+### Requirements
+
+If you change the sandbox base URL from the default, ensure that the new URL
+meets all of the following requirements:
+
+1. Must be a different
+   [origin](https://developer.mozilla.org/en-US/docs/Glossary/Origin) to the
+   origin hosting the Playground components. This prevents untrusted code from
+   modifying the parent window using `window.parent`, e.g. to change your
+   sign-in link to a malicious URL.
+
+2. Must not have access to any sensitive cookies. This prevents untrusted code
+   from e.g. reading and forwarding your user's authentication token.
+
+3. Must not have access to any sensitive resources or APIs, either through the
+   [same-origin
+   policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy),
+   or through [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+   headers that grant the origin access to resources on other origins. This
+   prevents untrusted code from e.g. making a request to your `get_credit_card`
+   or `change_password` APIs.
+
+4. Must serve the following two pre-minified files from the
+   `playground-elements` NPM package _at the same version as your imported
+   components_:
+   - `playground-service-worker.js`
+   - `playground-service-worker-proxy.html`
+
 ## Components
 
 <!--
@@ -542,7 +616,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                               |
 | `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                    |
 | `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                   |
-| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                                  |
+| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
 | `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
 
 ### Slots
@@ -566,7 +640,7 @@ project element.
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                       |
 | `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                   |
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                  |
-| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for script execution sandbox ([details](#sandbox)).                                              |
+| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
 | `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. |
 
 ### Methods

@@ -19,8 +19,8 @@ import {
     // because a redirect could have lead us back to the same origin.
     parent.window.console.warn(
       'Playground sandbox is executing with the same origin as its parent.',
-      'This could be a security risk.',
-      'https://github.com/PolymerLabs/playground-elements#security'
+      'This is a security risk.',
+      'https://github.com/PolymerLabs/playground-elements#sandbox-security'
     );
   } catch {}
 

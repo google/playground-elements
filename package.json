@@ -9,6 +9,7 @@
   "main": "playground-ide.js",
   "scripts": {
     "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
+    "prepack": "node scripts/update-version-module.js && npm run build",
     "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
     "nuke": "rm -rf node_modules package-lock.json && npm install",
     "build": "npm run clean && npm run build:themes && npm run build:lib && npm run bundle && npm run build:configurator",
@@ -19,8 +20,7 @@
     "test": "wtr",
     "watch": "npm run build:lib -- --watch & rollup -c rollup.config.js -w",
     "serve": "web-dev-server --node-resolve --watch --open=configurator/",
-    "format": "prettier src/**/*.ts --write",
-    "prepublishOnly": "npm run build"
+    "format": "prettier src/**/*.ts --write"
   },
   "author": "Google LLC",
   "license": "BSD-3-Clause",
