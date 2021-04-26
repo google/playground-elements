@@ -90,7 +90,7 @@ For a quick start, Playground can be imported from Skypack:
 ```html
 <script
   type="module"
-  src="https://cdn.skypack.com/playground-elements"
+  src="https://cdn.skypack.dev/playground-elements"
 ></script>
 ```
 
