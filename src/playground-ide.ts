@@ -21,7 +21,7 @@ import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
 import {ProjectManifest} from './shared/worker-api.js';
-import {forceSkypackRawMode} from './shared/util.js';
+import {version} from './lib/version.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -217,7 +217,7 @@ export class PlaygroundIde extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = forceSkypackRawMode(new URL('.', import.meta.url)).href;
+  sandboxBaseUrl = `https://unpkg.com/playground-elements@${version}/`;
 
   /**
    * The service worker scope to register on

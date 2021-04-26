@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Changed
+
+- Playground now executes code on the unpkg.com origin by default, meaning user
+  code execution is now sandboxed by default. The sandbox URL can still be
+  changed with the `sandboxBaseUrl` property or `sandbox-base-url` attribute,
+  though it is highly advisable to always use a separate and unprivileged
+  origin.
+
 ## [0.9.1] - 2021-04-19
 
 ### Changed
