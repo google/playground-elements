@@ -33,9 +33,9 @@ import {
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
+import {version} from './lib/version.js';
 import {Deferred} from './shared/deferred.js';
 import type {Diagnostic} from 'vscode-languageserver';
-import {version} from './lib/version.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -531,13 +531,21 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  saveDebounced() {
-    this._clearSaveTimeout();
-    // TODO(aomarks) Consider exposing a property for auto-save timeout, but it
-    // should probably be on the editor or the preview, not the project.
-    this._saveTimeoutId = setTimeout(() => {
-      this.save();
-    }, 300);
+  private lastSave = Promise.resolve();
+  private savePending = false;
+  /**
+   * A simple debouncer that aims for maximal responsiveness when compiles are fast.
+   *
+   * There is no meaning to when the returned promise resolves.
+   */
+  async saveDebounced() {
+    if (this.savePending) {
+      return;
+    }
+    this.savePending = true;
+    await this.lastSave;
+    this.savePending = false;
+    this.lastSave = this.save();
   }
 
   isValidNewFilename(name: string): boolean {
