@@ -212,45 +212,15 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     this._iframe.src = '';
     this._iframe.src = this._indexUrl;
     this._loading = true;
-    this._startLoadingBar();
+    this._showLoadingBar = true;
   };
-
-  private _startLoadingBarTime = 0;
-  private _stopLoadingBarTimerId?: ReturnType<typeof setTimeout>;
-
-  private _startLoadingBar() {
-    if (this._stopLoadingBarTimerId !== undefined) {
-      clearTimeout(this._stopLoadingBarTimerId);
-      this._stopLoadingBarTimerId = undefined;
-    }
-    if (this._showLoadingBar === false) {
-      this._showLoadingBar = true;
-      this._startLoadingBarTime = performance.now();
-    }
-  }
-
-  private _stopLoadingBar() {
-    if (this._showLoadingBar === false) {
-      return;
-    }
-    // We want to ensure the loading indicator is visible for some minimum
-    // amount of time, or else it might not display at all on a fast reload, or
-    // might only display for a brief flash.
-    const elapsed = performance.now() - this._startLoadingBarTime;
-    const minimum = 500;
-    const pending = Math.max(0, minimum - elapsed);
-    this._stopLoadingBarTimerId = setTimeout(() => {
-      this._showLoadingBar = false;
-      this._stopLoadingBarTimerId = undefined;
-    }, pending);
-  }
 
   async firstUpdated() {
     // Loading should be initially indicated only when we're not pre-rendering,
     // because in that case there should be no visible change once the actual
     // iframe loads, and the indicator is distracting.
     if (this._loading && !this._slotHasAnyVisibleChildren()) {
-      this._startLoadingBar();
+      this._showLoadingBar = true;
     }
 
     // The latest version of MWC forwards the aria-label attribute to the
@@ -290,7 +260,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
       // before "src" is set.
       this._loading = false;
       this._loadedAtLeastOnce = true;
-      this._stopLoadingBar();
+      this._showLoadingBar = false;
     }
   }
 }

@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Error tooltips now follow `--playground-code-font-family`.
+- Optimized the UX for fast compile and display by switching to a leading edge
+  debouncer and eliminating the minimum display time for the loading bar.
 
 ## [0.9.2] - 2021-04-26
 
