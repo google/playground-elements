@@ -87,16 +87,7 @@ comes with a number of presets too.
 
 ### Install
 
-For a quick start, Playground can be imported from Skypack:
-
-```html
-<script
-  type="module"
-  src="https://cdn.skypack.dev/playground-elements"
-></script>
-```
-
-Or to install from NPM:
+Install from NPM:
 
 ```sh
 npm i playground-elements
@@ -132,12 +123,9 @@ inline:
 
 ### Serve
 
-If you imported from Skypack, serve with any HTTP server.
-
-If you installed from NPM, you'll just need to make sure bare module imports are
-resolved. You can use a server like
+Use a server like
 [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/) to handle
-this automatically:
+bare module import resolution automatically:
 
 ```sh
 npm -i -D @web/dev-server
