@@ -106,7 +106,7 @@ Create a `<playground-ide>` element in your HTML, and specify your project files
 inline:
 
 ```html
-<playground-ide editable-filesystem line-numbers resizable>
+<playground-ide editable-file-system line-numbers resizable>
   <script type="sample/html" filename="index.html">
     <!doctype html>
     <body>
@@ -128,7 +128,7 @@ Use a server like
 bare module import resolution automatically:
 
 ```sh
-npm -i -D @web/dev-server
+npm i -D @web/dev-server
 npx web-dev-server --node-resolve --watch
 ```
 
