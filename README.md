@@ -26,6 +26,7 @@
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
     • <a href="#syntax-highlighting">Syntax highlighting</a>
+    • <a href="#contributing">Contributing</a>    
     • <a href="#faq">FAQ</a>
 </p>
 
@@ -865,6 +866,34 @@ tagged template literals.
 - JSDoc: https://github.com/codemirror/google-modes/blob/master/src/jsdoc.grammar
 - HTML: https://github.com/codemirror/google-modes/blob/master/src/html.grammar
 - CSS: https://github.com/codemirror/CodeMirror/blob/master/mode/css/css.js
+
+## Contributing
+
+Contributions are very welcome.
+
+For substantial changes, please file an issue first to discuss the changes. For small changes,
+sending a PR immediately is fine.
+
+Initialize the repo:
+
+```sh
+git clone git@github.com:PolymerLabs/playground-elements.git
+cd playground-elements
+npm i
+npm run build
+```
+
+Build continuously:
+
+```sh
+npm run watch
+```
+
+Launch the configurator/demo locally:
+
+```sh
+npm run serve
+```
 
 ## FAQ
 
