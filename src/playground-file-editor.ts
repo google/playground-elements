@@ -80,6 +80,12 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   @property()
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
+  /**
+   * If true, this editor is not editable.
+   */
+  @property({type: Boolean, reflect: true})
+  readonly = false;
+
   private get _files() {
     return this._project?.files ?? [];
   }
@@ -135,7 +141,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
               .lineNumbers=${this.lineNumbers}
-              .readonly=${!this._currentFile}
+              .readonly=${this.readonly || !this._currentFile}
               .pragmas=${this.pragmas}
               .diagnostics=${this._project?.diagnostics?.get(
                 this._currentFile?.name ?? ''
