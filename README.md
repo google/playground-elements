@@ -682,6 +682,7 @@ project element.
 | `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
 | `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
 | `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
+| `readonly`    | `boolean`                         | `false`       | Do not allow edits                                                                            |
 
 ---
 
