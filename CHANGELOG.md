@@ -17,10 +17,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased 
+<!-- ## Unreleased -->
+
+## [0.9.4] - 2021-05-18
+
+### Fixed
+
+- Fixed timeouts when using the default `unpkg.com` service worker origin,
+  caused by `comlink` versions being out-of-sync between local components and
+  remote service worker.
 
 ### Added
-- readonly property for playground-file-editor
+
+- Added `readonly` property to `<playground-file-editor>`.
 
 ## [0.9.3] - 2021-05-05
 
