@@ -518,7 +518,7 @@ export class PlaygroundCodeEditor extends LitElement {
       case 'css':
         return 'css';
     }
-    return null;
+    return undefined;
   }
 
   private _showDiagnostics() {
