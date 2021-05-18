@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- readonly property for playground-file-editor
+- Added `readonly` property to `<playground-file-editor>`.
 
 ## [0.9.3] - 2021-05-05
 
