@@ -178,7 +178,7 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello JS');
     const tabBar = await pierce('playground-ide', 'playground-tab-bar');
-    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-internal-tab');
     assert.equal(tabs?.length, 1);
   });
 
@@ -200,10 +200,8 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello JS');
     const tabBar = await pierce('playground-ide', 'playground-tab-bar');
-    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
-    const texts = Array.from(tabs ?? []).map((tab) =>
-      tab.shadowRoot?.querySelector('button')?.textContent?.trim()
-    );
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-internal-tab');
+    const texts = Array.from(tabs ?? []).map((tab) => tab.textContent?.trim());
     assert.deepEqual(texts, ['HTML', 'JS']);
   });
 

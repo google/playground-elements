@@ -12,22 +12,21 @@ import {
   internalProperty,
   query,
   PropertyValues,
-  CSSResult,
 } from 'lit-element';
 import {nothing} from 'lit-html';
 
-import '@material/mwc-tab-bar';
 import '@material/mwc-icon-button';
-import {TabBar} from '@material/mwc-tab-bar';
-import {Tab} from '@material/mwc-tab';
-import {style as mwcTabStyle} from '@material/mwc-tab/mwc-tab-css.js';
 
-import './playground-code-editor.js';
+import './internal/tab-bar.js';
+import './internal/tab.js';
 import './playground-file-system-controls.js';
-import {PlaygroundFileEditor} from './playground-file-editor.js';
-import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
-import {PlaygroundProject} from './playground-project.js';
+
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
+
+import type {PlaygroundFileEditor} from './playground-file-editor.js';
+import type {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
+import type {PlaygroundProject} from './playground-project.js';
+import type {PlaygroundInternalTab} from './internal/tab';
 
 /**
  * A horizontal bar of tabs for switching between playground files, with
@@ -40,26 +39,51 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       display: flex;
       height: var(--playground-bar-height, 40px);
       background: var(--playground-tab-bar-background, #eaeaea);
-      flex-direction: row;
       align-items: center;
-      --mdc-theme-primary: var(--playground-highlight-color, #6200ee);
     }
 
-    mwc-tab-bar {
-      overflow: hidden;
-      height: 100%;
-      --mdc-tab-height: var(--playground-bar-height, 40px);
-      --mdc-tab-text-label-color-default: var(
-        --playground-tab-bar-foreground-color,
-        #000
+    playground-internal-tab-bar {
+      height: var(--playground-bar-height, 40px);
+    }
+
+    playground-internal-tab::part(button) {
+      box-sizing: border-box;
+      padding: 2px 24px 0 24px;
+    }
+
+    playground-internal-tab {
+      color: var(--playground-tab-bar-foreground-color, #000);
+      font-size: var(--playground-tab-bar-font-size, 0.85em);
+      border-bottom: 2px solid transparent;
+      transition: border 150ms;
+    }
+
+    playground-internal-tab[active] {
+      color: var(
+        --playground-tab-bar-active-color,
+        var(--playground-highlight-color, #6200ee)
       );
-      --mdc-typography-button-text-transform: none;
-      --mdc-typography-button-font-weight: normal;
-      --mdc-typography-button-font-size: var(
-        --playground-tab-bar-font-size,
-        0.85em
+      background: var(--playground-tab-bar-active-background, transparent);
+      border-color: var(
+        --playground-tab-bar-indicator-color,
+        var(--playground-highlight-color, #6200ee)
       );
-      --mdc-typography-button-letter-spacing: normal;
+    }
+
+    :host([editable-file-system]) playground-internal-tab::part(button) {
+      /* The 24px menu button with opacity 0 now serves as padding-right. */
+      padding-right: 0;
+    }
+
+    .menu-button {
+      visibility: hidden;
+      --mdc-icon-button-size: 24px;
+      --mdc-icon-size: 16px;
+    }
+
+    playground-internal-tab:hover > .menu-button,
+    playground-internal-tab:focus-within > .menu-button {
+      visibility: visible;
     }
 
     mwc-icon-button {
@@ -74,7 +98,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
 
     .add-file-button:hover {
-      opacity: 100%;
+      opacity: 1;
     }
   `;
 
@@ -82,7 +106,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
-  @property({type: Boolean, attribute: 'editable-file-system'})
+  @property({type: Boolean, attribute: 'editable-file-system', reflect: true})
   editableFileSystem = false;
 
   @internalProperty()
@@ -90,9 +114,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   @internalProperty()
   private _activeFileIndex = 0;
-
-  @query('mwc-tab-bar')
-  private _tabBar?: TabBar;
 
   @query('playground-file-system-controls')
   private _fileSystemControls?: PlaygroundFileSystemControls;
@@ -155,18 +176,36 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   render() {
     return html`
-      <mwc-tab-bar activeIndex="1" @MDCTabBar:activated=${this._onTabActivated}>
+      <playground-internal-tab-bar @tabchange=${this._onTabchange}>
         ${this._visibleFiles.map(
-          ({name, label}, index) =>
-            html`<playground-tab
-              .isFadingIndicator=${true}
-              .index=${index}
-              .label=${label || name}
-              .showMenuButton=${this.editableFileSystem}
-              @openMenu=${this._onOpenMenu}
-            ></playground-tab>`
+          ({name, label}) =>
+            html`<playground-internal-tab
+              .active=${name === this._activeFileName}
+              data-filename=${name}
+            >
+              ${label || name}
+              ${this.editableFileSystem
+                ? html`<mwc-icon-button
+                    label="File menu"
+                    class="menu-button"
+                    @click=${this._onOpenMenu}
+                  >
+                    <!-- Source: https://material.io/resources/icons/?icon=menu&style=baseline -->
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentcolor"
+                    >
+                      <path
+                        d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+                      />
+                    </svg>
+                  </mwc-icon-button>`
+                : nothing}
+            </playground-internal-tab>`
         )}
-      </mwc-tab-bar>
+      </playground-internal-tab-bar>
 
       ${this.editableFileSystem
         ? html`
@@ -176,7 +215,13 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
               @click=${this._onClickAddFile}
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
-              <svg fill="currentcolor">
+              <svg
+                fill="currentcolor"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                shape-rendering="crispEdges"
+              >
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
               </svg>
             </mwc-icon-button>
@@ -191,26 +236,23 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     `;
   }
 
-  async updated() {
-    // TODO(aomarks) There still seems to be a timing bug where the mwc-tab-bar
-    // activeIndex property doesn't initially take. This hack pokes the bar
-    // after render to make sure the active tab is really selected.
-    if (!this._tabBar) {
-      return;
-    }
-    await this._tabBar.updateComplete;
-    this._tabBar.activeIndex = -1;
-    this._tabBar.activeIndex = this._activeFileIndex;
-  }
-
   private _onProjectFilesChanged = () => {
     this._setNewActiveFile();
     this.requestUpdate();
   };
 
-  private _onTabActivated(event: CustomEvent<{index: number}>) {
-    const index = event.detail.index;
-    const name = this._visibleFiles[index].name;
+  private _onTabchange(
+    event: CustomEvent<{
+      tab?: PlaygroundInternalTab;
+      previous?: PlaygroundInternalTab;
+    }>
+  ) {
+    const tab = event.detail.tab;
+    if (!tab) {
+      return;
+    }
+    const name = tab.dataset.filename!;
+    const index = tab.index!;
     if (name !== this._activeFileName) {
       this._activeFileName = name;
       this._activeFileIndex = index;
@@ -225,8 +267,11 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       return;
     }
     controls.state = 'menu';
-    controls.filename = this._visibleFiles[event.detail.index].name;
-    controls.anchorElement = event.detail.anchor;
+    controls.filename = (
+      event.target as HTMLElement
+    ).parentElement!.dataset.filename;
+    controls.anchorElement = event.target as HTMLElement;
+    event.stopPropagation();
   }
 
   private _onClickAddFile(event: Event) {
@@ -277,116 +322,8 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   }
 }
 
-/**
- * Internal element for tabs within <playground-tab-bar>.
- *
- * This is a subclass of <mwc-tab>. We subclass because <mwc-tab> only supports
- * text labels, and has no way to slot in our menu button.
- *
- * Note we can't subclass TabBase, because <mwc-tab-bar> relies on an instanceof
- * check for Tab.
- */
-@customElement('playground-tab')
-class PlaygroundTab extends Tab {
-  /**
-   * Whether to show the 3-dots menu button.
-   */
-  @property({type: Boolean, reflect: true})
-  showMenuButton = false;
-
-  /**
-   * 0-indexed position of this tab in the tab list.
-   *
-   * Note this could be parsed from the 1-indexed `id` that <mwc-tab-bar> sets
-   * on each instance after slotting, but taking a property here is simpler.
-   */
-  index = 0;
-
-  static styles = ([
-    mwcTabStyle,
-    css`
-      :host {
-        /* Vertically center the menu button. */
-        display: flex;
-        align-items: center;
-      }
-
-      .menu-button {
-        /* Shift the menu button to be inside the tab itself. */
-        margin-left: -24px;
-        z-index: 1;
-        opacity: 0;
-        --mdc-icon-button-size: 24px;
-        --mdc-icon-size: 16px;
-      }
-
-      :host(:hover) .menu-button,
-      :host(:focus) .menu-button {
-        /* Note we use opacity instead of visibility so that keyboard focus
-           works. */
-        opacity: 100%;
-      }
-
-      mwc-icon-button {
-        color: var(--playground-tab-bar-foreground-color);
-      }
-
-      .mdc-tab--active .mdc-tab__text-label {
-        color: var(
-          --playground-tab-bar-active-color,
-          var(--playground-highlight-color, #6200ee)
-        ) !important;
-      }
-
-      .mdc-tab--active {
-        background: var(--playground-tab-bar-active-background, transparent);
-      }
-
-      mwc-tab-indicator {
-        --mdc-theme-primary: var(
-          --playground-tab-bar-indicator-color,
-          var(--playground-highlight-color, #6200ee)
-        );
-      }
-    `,
-  ] as unknown) as CSSResult;
-
-  render() {
-    return html`${super.render()}
-    ${this.showMenuButton ? this._menuButton : nothing} `;
-  }
-
-  private get _menuButton() {
-    return html`<mwc-icon-button
-      label="File menu"
-      class="menu-button"
-      @click=${this._onClickMenuButton}
-    >
-      <!-- Source: https://material.io/resources/icons/?icon=menu&style=baseline -->
-      <svg viewBox="0 0 24 24" fill="currentcolor">
-        <path
-          d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-        />
-      </svg>
-    </mwc-icon-button>`;
-  }
-
-  private _onClickMenuButton(event: Event) {
-    this.dispatchEvent(
-      new CustomEvent<{index: number; anchor: HTMLElement}>('openMenu', {
-        composed: true,
-        detail: {
-          index: this.index,
-          anchor: event.target as HTMLElement,
-        },
-      })
-    );
-  }
-}
-
 declare global {
   interface HTMLElementTagNameMap {
     'playground-tab-bar': PlaygroundTabBar;
-    'playground-tab': PlaygroundTab;
   }
 }
