@@ -22,7 +22,6 @@ import {
 } from 'lit-element';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
-import '@material/mwc-tab-bar';
 import {tokens} from './highlight-tokens.js';
 
 @customElement('playground-theme-detector')
