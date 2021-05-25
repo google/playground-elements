@@ -52,7 +52,7 @@ suite('playground-code-editor', () => {
     await editor.updateComplete;
     await new Promise<void>((resolve) => {
       editor.addEventListener('change', () => resolve());
-      const editorInternals = (editor as unknown) as {
+      const editorInternals = editor as unknown as {
         _codemirror: PlaygroundCodeEditor['_codemirror'];
       };
       editorInternals._codemirror!.setValue('bar');

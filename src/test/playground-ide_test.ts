@@ -148,7 +148,7 @@ suite('playground-ide', () => {
       'playground-file-editor',
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
-    const codemirrorInternals = (codemirror as unknown) as {
+    const codemirrorInternals = codemirror as unknown as {
       _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     codemirrorInternals._codemirror!.setValue('Hello HTML 2');
@@ -283,7 +283,7 @@ suite('playground-ide', () => {
     assert.equal(queryHiddenLineNumbers().length, 2);
 
     // Add a line.
-    const editorInternals = (editor as unknown) as {
+    const editorInternals = editor as unknown as {
       _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     editorInternals._codemirror!.setValue(editor.value + '\nBaz');
