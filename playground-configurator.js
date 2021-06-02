@@ -1028,6 +1028,7 @@ const ao=window.CodeMirror;var lo=se`/**
   /* Set height, width, borders, and global font properties here */
   font-family: var(--playground-code-font-family, monospace);
   font-size: var(--playground-code-font-size, 14px);
+  padding: var(--playground-code-padding, 0);
   height: 350px;
   color: var(--playground-code-default-color, #000);
   background: var(--playground-code-background, #fff);
@@ -1046,7 +1047,7 @@ const ao=window.CodeMirror;var lo=se`/**
 }
 .CodeMirror pre.CodeMirror-line,
 .CodeMirror pre.CodeMirror-line-like {
-  padding: 0 4px; /* Horizontal padding of content */
+  padding: var(--playground-code-line-padding, '0 4px'); /* Horizontal padding of content */
 }
 
 .CodeMirror-scrollbar-filler,
