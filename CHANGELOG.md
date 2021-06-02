@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+- Adds `--playground-code-padding` and `--playground-code-line-padding` for configuring code editor padding.
 
 ## [0.9.4] - 2021-05-18
 
