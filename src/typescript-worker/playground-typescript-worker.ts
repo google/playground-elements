@@ -5,10 +5,10 @@
  */
 
 import {expose} from 'comlink';
-import {compileProject} from './typescript.js';
+import {build} from './build.js';
 import type {TypeScriptWorkerAPI} from '../shared/worker-api.js';
 
 const workerAPI: TypeScriptWorkerAPI = {
-  compileProject,
+  compileProject: build,
 };
 expose(workerAPI);

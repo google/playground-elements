@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  SampleFile,
-  ModuleImportMap,
-  CompileResult,
-} from '../shared/worker-api.js';
 import * as ts from 'typescript';
-import type * as lsp from 'vscode-languageserver';
 import {TypesFetcher} from './types-fetcher.js';
 import {ModuleResolver} from './module-resolver.js';
+
+import type * as lsp from 'vscode-languageserver';
+import type {SampleFile, BuildOutput} from '../shared/worker-api.js';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -65,85 +62,100 @@ const makeBareSpecifierTransformVisitor = (
  * multiple <playground-project> instances to save memory and type analysis of
  * common lib files like lit-element, lib.d.ts and dom.d.ts.
  */
-export const compileProject = async (
-  files: Array<SampleFile>,
-  importMap: ModuleImportMap,
-  slowDiagnosticsCallback: (
-    fileDiagnostics: Map<string, Array<lsp.Diagnostic>>
-  ) => void
-): Promise<CompileResult> => {
-  // Immediately resolve local project files, and begin fetching types (but
-  // don't wait for them).
-  const moduleResolver = new ModuleResolver(importMap);
-  const loadedFiles = new Map<string, FileRecord>();
-  const typesFetcher = new TypesFetcher(moduleResolver);
-  const inputFiles = files
-    .filter((file) => isTsOrJsFile(file.name))
-    .map((file) => ({
+export class TypeScriptBuilder {
+  private _moduleResolver: ModuleResolver;
+
+  constructor(moduleResolver: ModuleResolver) {
+    this._moduleResolver = moduleResolver;
+  }
+
+  async *process(
+    results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
+  ): AsyncIterable<BuildOutput> {
+    const compilerInputs = [];
+    for await (const result of results) {
+      if (result.kind === 'file' && isTsOrJsFile(result.file.name)) {
+        compilerInputs.push(result.file);
+      } else {
+        yield result;
+      }
+    }
+
+    // Immediately resolve local project files, and begin fetching types (but
+    // don't wait for them).
+    const loadedFiles = new Map<string, FileRecord>();
+    const typesFetcher = new TypesFetcher(this._moduleResolver);
+    const inputFiles = compilerInputs.map((file) => ({
       file,
-      // TODO: include session/scope id?
       url: new URL(file.name, self.origin).href,
     }));
-  for (const {file, url} of inputFiles) {
-    loadedFiles.set(url, {
-      status: 'resolved',
-      content: file.content,
-    });
-    typesFetcher.addBareModuleTypings(file.content);
-  }
-  for (const lib of compilerOptions.lib) {
-    typesFetcher.addLibTypings(lib);
-  }
+    for (const {file, url} of inputFiles) {
+      loadedFiles.set(url, {
+        status: 'resolved',
+        content: file.content,
+      });
+      typesFetcher.addBareModuleTypings(file.content);
+    }
+    for (const lib of compilerOptions.lib) {
+      typesFetcher.addLibTypings(lib);
+    }
 
-  // Fast initial compile for JS emit and syntax errors.
-  const languageServiceHost = new WorkerLanguageServiceHost(
-    loadedFiles,
-    self.origin,
-    compilerOptions
-  );
-  const languageService = ts.createLanguageService(
-    languageServiceHost,
-    ts.createDocumentRegistry()
-  );
-  const program = languageService.getProgram();
-  if (program === undefined) {
-    throw new Error('Unexpected error: program was undefined');
-  }
-  const transformers: ts.CustomTransformers = {
-    after: [
-      (context: ts.TransformationContext) =>
-        <T extends ts.Node>(node: T) => {
-          return ts.visitNode(
-            node,
-            makeBareSpecifierTransformVisitor(context, moduleResolver)
-          );
+    // Fast initial compile for JS emit and syntax errors.
+    const languageServiceHost = new WorkerLanguageServiceHost(
+      loadedFiles,
+      self.origin,
+      compilerOptions
+    );
+    const languageService = ts.createLanguageService(
+      languageServiceHost,
+      ts.createDocumentRegistry()
+    );
+    const program = languageService.getProgram();
+    if (program === undefined) {
+      throw new Error('Unexpected error: program was undefined');
+    }
+    const transformers: ts.CustomTransformers = {
+      after: [
+        (context: ts.TransformationContext) =>
+          <T extends ts.Node>(node: T) => {
+            return ts.visitNode(
+              node,
+              makeBareSpecifierTransformVisitor(context, this._moduleResolver)
+            );
+          },
+      ],
+    };
+
+    for (const {file, url} of inputFiles) {
+      for (const tsDiagnostic of languageService.getSyntacticDiagnostics(url)) {
+        yield {
+          kind: 'diagnostic',
+          filename: file.name,
+          diagnostic: makeLspDiagnostic(tsDiagnostic),
+        };
+      }
+      const sourceFile = program.getSourceFile(url);
+      let compiled: SampleFile | undefined = undefined;
+      program!.emit(
+        sourceFile,
+        (url, content) => {
+          compiled = {
+            name: new URL(url).pathname.slice(1),
+            content,
+            contentType: 'text/javascript',
+          };
         },
-    ],
-  };
+        undefined,
+        undefined,
+        transformers
+      );
+      if (compiled !== undefined) {
+        yield {kind: 'file', file: compiled};
+      }
+    }
 
-  const emittedFiles = new Map<string, string>();
-  const fastDiagnostics = new Map<string, lsp.Diagnostic[]>();
-  for (const {file, url} of inputFiles) {
-    fastDiagnostics.set(
-      file.name,
-      languageService.getSyntacticDiagnostics(url).map(makeLspDiagnostic)
-    );
-    const sourceFile = program.getSourceFile(url);
-    program!.emit(
-      sourceFile,
-      (fileName: string, data: string) => {
-        emittedFiles.set(fileName, data);
-      },
-      undefined,
-      undefined,
-      transformers
-    );
-  }
-
-  // Wait for all typings to be fetched, and then retrieve slower semantic
-  // diagnostics.
-  (async () => {
-    const slowDiagnostics = new Map<string, lsp.Diagnostic[]>();
+    // Wait for all typings to be fetched, and then retrieve slower semantic
+    // diagnostics.
     for (const [specifier, content] of await typesFetcher.getFiles()) {
       // TypeScript is going to look for these files as paths relative to our
       // source files, so we need to add them to our filesystem with those
@@ -155,19 +167,16 @@ export const compileProject = async (
       });
     }
     for (const {file, url} of inputFiles) {
-      slowDiagnostics.set(
-        file.name,
-        languageService.getSemanticDiagnostics(url).map(makeLspDiagnostic)
-      );
+      for (const tsDiagnostic of languageService.getSemanticDiagnostics(url)) {
+        yield {
+          kind: 'diagnostic',
+          filename: file.name,
+          diagnostic: makeLspDiagnostic(tsDiagnostic),
+        };
+      }
     }
-    slowDiagnosticsCallback(slowDiagnostics);
-  })();
-
-  return {
-    files: emittedFiles,
-    diagnostics: fastDiagnostics,
-  };
-};
+  }
+}
 
 type ResolvedFileRecord = {
   status: 'resolved';
