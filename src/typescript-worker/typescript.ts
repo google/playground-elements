@@ -83,17 +83,14 @@ export class TypeScriptBuilder {
 
     // Immediately resolve local project files, and begin fetching types (but
     // don't wait for them).
-    const loadedFiles = new Map<string, FileRecord>();
+    const loadedFiles = new Map<string, string>();
     const typesFetcher = new TypesFetcher(this._moduleResolver);
     const inputFiles = compilerInputs.map((file) => ({
       file,
       url: new URL(file.name, self.origin).href,
     }));
     for (const {file, url} of inputFiles) {
-      loadedFiles.set(url, {
-        status: 'resolved',
-        content: file.content,
-      });
+      loadedFiles.set(url, file.content);
       typesFetcher.addBareModuleTypings(file.content);
     }
     for (const lib of compilerOptions.lib) {
@@ -161,10 +158,7 @@ export class TypeScriptBuilder {
       // source files, so we need to add them to our filesystem with those
       // URLs.
       const url = new URL(`node_modules/${specifier}`, self.origin).href;
-      loadedFiles.set(url, {
-        status: 'resolved',
-        content,
-      });
+      loadedFiles.set(url, content);
     }
     for (const {file, url} of inputFiles) {
       for (const tsDiagnostic of languageService.getSemanticDiagnostics(url)) {
@@ -178,28 +172,13 @@ export class TypeScriptBuilder {
   }
 }
 
-type ResolvedFileRecord = {
-  status: 'resolved';
-  originalUrl?: string;
-  content: string;
-  // contentType: string;
-};
-type RedirectedFileRecord = {
-  status: 'redirected';
-  redirectedUrl: string;
-};
-type PendingFileRecord = {
-  status: 'pending';
-};
-type FileRecord = PendingFileRecord | ResolvedFileRecord | RedirectedFileRecord;
-
 class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   readonly compilerOptions: ts.CompilerOptions;
   readonly packageRoot: string;
-  readonly files: Map<string, FileRecord>;
+  readonly files: Map<string, string>;
 
   constructor(
-    files: Map<string, FileRecord>,
+    files: Map<string, string>,
     packageRoot: string,
     compilerOptions: ts.CompilerOptions
   ) {
@@ -221,16 +200,11 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   fileExists(fileName: string): boolean {
-    const file = this.files.get(fileName);
-    return file !== undefined && file.status === 'resolved';
+    return this.files.has(fileName);
   }
 
   readFile(fileName: string): string | undefined {
-    const file = this.files.get(fileName);
-    if (file !== undefined && file.status === 'resolved') {
-      return file.content;
-    }
-    return undefined;
+    return this.files.get(fileName);
   }
 
   getScriptSnapshot(fileName: string): ts.IScriptSnapshot | undefined {
