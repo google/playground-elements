@@ -24,11 +24,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Adds `--playground-code-padding` and `--playground-code-line-padding` for
   configuring code editor padding.
 
+- Bare module specifiers are now transformed in dynamic `import()` statements.
+
 ### Changed
 
 - Previews will now begin loading immediately, instead of waiting for
   compilation to completely finish, and each `.js` file is served as it
   compiles.
+
+- **BREAKING** `.js` files are no longer compiled by TypeScript, so they cannot
+  contain types, decorators, or other TypeScript-specific syntax.
 
 ## [0.9.4] - 2021-05-18
 
