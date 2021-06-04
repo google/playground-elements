@@ -1,5 +1,4 @@
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
 import {terser} from 'rollup-plugin-terser';
 import summary from 'rollup-plugin-summary';
 
@@ -121,12 +120,6 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       format: 'iife',
       exports: 'none',
     },
-    plugins: [
-      commonjs({
-        ignore: (id) => true,
-      }),
-      resolve(),
-      terser(terserOptions),
-    ],
+    plugins: [resolve(), terser(terserOptions)],
   },
 ];

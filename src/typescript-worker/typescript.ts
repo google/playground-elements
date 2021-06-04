@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import * as ts from 'typescript';
+import ts from '../lib/typescript.js';
 import {TypesFetcher} from './types-fetcher.js';
 import {ModuleResolver} from './module-resolver.js';
 
