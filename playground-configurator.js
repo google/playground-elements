@@ -1047,7 +1047,10 @@ const ao=window.CodeMirror;var lo=se`/**
 }
 .CodeMirror pre.CodeMirror-line,
 .CodeMirror pre.CodeMirror-line-like {
-  padding: var(--playground-code-line-padding, '0 4px'); /* Horizontal padding of content */
+  padding: var(
+    --playground-code-line-padding,
+    0 4px
+  ); /* Horizontal padding of content */
 }
 
 .CodeMirror-scrollbar-filler,
