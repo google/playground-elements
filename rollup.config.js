@@ -120,6 +120,17 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       format: 'iife',
       exports: 'none',
     },
-    plugins: [resolve(), terser(terserOptions)],
+    plugins: [
+      simpleReplace([
+        // TODO(aomarks) Remove when
+        // https://github.com/guybedford/es-module-lexer/pull/70 is released,
+        // see PR for explanation. Note this matches minified code in
+        // es-module-lexer/dist, so we're currently pinned to a particular
+        // version to be safe. Be sure to remove the version pinning, too.
+        ['"undefined"!=typeof window&&', ''],
+      ]),
+      resolve(),
+      terser(terserOptions),
+    ],
   },
 ];
