@@ -44,9 +44,11 @@ const makeBareSpecifierTransformVisitor = (
       const {type, url} = moduleResolver.resolve(specifier, self.origin);
       if (type === 'bare') {
         const newNode = ts.getMutableClone(node);
-        (newNode as {
-          moduleSpecifier: ts.ImportDeclaration['moduleSpecifier'];
-        }).moduleSpecifier = ts.createStringLiteral(url);
+        (
+          newNode as {
+            moduleSpecifier: ts.ImportDeclaration['moduleSpecifier'];
+          }
+        ).moduleSpecifier = ts.createStringLiteral(url);
         return newNode;
       }
     }
@@ -112,12 +114,13 @@ const workerAPI: TypeScriptWorkerAPI = {
     }
     const transformers: ts.CustomTransformers = {
       after: [
-        (context: ts.TransformationContext) => <T extends ts.Node>(node: T) => {
-          return ts.visitNode(
-            node,
-            makeBareSpecifierTransformVisitor(context, moduleResolver)
-          );
-        },
+        (context: ts.TransformationContext) =>
+          <T extends ts.Node>(node: T) => {
+            return ts.visitNode(
+              node,
+              makeBareSpecifierTransformVisitor(context, moduleResolver)
+            );
+          },
       ],
     };
 

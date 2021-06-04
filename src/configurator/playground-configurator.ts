@@ -184,9 +184,7 @@ export class PlaygroundConfigurator extends LitElement {
   }
 
   private async setValue<T extends KnobId>(id: T, value: KnobValueType<T>) {
-    await this.setValues(
-      new Map<KnobId, unknown>([[id, value]])
-    );
+    await this.setValues(new Map<KnobId, unknown>([[id, value]]));
   }
 
   private async setValues(values: Map<KnobId, unknown>) {
