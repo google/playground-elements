@@ -50,6 +50,10 @@ export class TypeScriptBuilder {
       }
     }
 
+    if (compilerInputs.length === 0) {
+      return;
+    }
+
     // Immediately resolve local project files, and begin fetching types (but
     // don't wait for them).
     const loadedFiles = new Map<string, string>();
