@@ -77,8 +77,13 @@ export interface TypeScriptWorkerAPI {
   ): Promise<CompileResult>;
 }
 
+export interface HttpError {
+  status: number;
+  body: string;
+}
+
 export interface FileAPI {
-  getFile(name: string): Promise<SampleFile | undefined>;
+  getFile(name: string): Promise<SampleFile | HttpError>;
 }
 
 export interface SampleFile {

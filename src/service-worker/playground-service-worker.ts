@@ -80,21 +80,19 @@ const getFileApi = async (sessionId: string): Promise<FileAPI | undefined> => {
 
 const getFile = async (_e: FetchEvent, path: string, sessionId: SessionID) => {
   const fileAPI = await getFileApi(sessionId);
-  if (fileAPI) {
-    const file = await fileAPI.getFile(path);
-    if (file) {
-      const headers = file.contentType
-        ? {'Content-Type': file.contentType}
-        : undefined;
-      return new Response(file.content, {headers});
-    }
-  } else {
-    console.warn(`No FileAPI for session ${sessionId}`);
+  if (fileAPI === undefined) {
+    return new Response('Playground project not available', {
+      status: /* Service Unavailable */ 503,
+    });
   }
-  // Don't delegate to a server fetch. We know this request was within our
-  // scope, so it's in our virtual filesystem, and we're within our rights to
-  // force a 404 here. Who knows what the server would respond with.
-  return new Response('404 playground file not found', {status: 404});
+  const fileOrError = await fileAPI.getFile(path);
+  if ('status' in fileOrError) {
+    const {body, status} = fileOrError;
+    return new Response(body, {status});
+  }
+  const {content, contentType} = fileOrError;
+  const headers = contentType ? {'Content-Type': contentType} : undefined;
+  return new Response(content, {headers});
 };
 
 const onFetch = (e: FetchEvent) => {

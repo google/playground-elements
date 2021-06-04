@@ -27,6 +27,7 @@ import {
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
   CompileResult,
+  HttpError,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -192,9 +193,8 @@ export class PlaygroundProject extends LitElement {
     Remote<TypeScriptWorkerAPI>
   >();
 
-  private _compileResultPromise = Promise.resolve<CompileResult | undefined>(
-    undefined
-  );
+  private _compileResultPromise =
+    Promise.resolve<CompileResult | undefined>(undefined);
   private _compiledFiles?: Map<string, string>;
 
   private _validImportMap: ModuleImportMap = {};
@@ -464,7 +464,7 @@ export class PlaygroundProject extends LitElement {
     port.start();
   }
 
-  private async _getFile(name: string): Promise<SampleFile | undefined> {
+  private async _getFile(name: string): Promise<SampleFile | HttpError> {
     await this._compileResultPromise;
     const compiledUrl = new URL(name, window.origin).href;
     const compiledContent = this._compiledFiles?.get(compiledUrl);
@@ -476,7 +476,11 @@ export class PlaygroundProject extends LitElement {
         contentType: 'application/javascript',
       };
     } else {
-      return this._files?.find((f) => f.name === name);
+      const file = this._files?.find((f) => f.name === name);
+      if (file === undefined) {
+        return {status: 404, body: 'Playground file not found'};
+      }
+      return file;
     }
   }
 
