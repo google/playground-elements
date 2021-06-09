@@ -81,20 +81,6 @@ export class PlaygroundInternalTab extends LitElement {
    */
   index = 0;
 
-  update(changes: PropertyValues) {
-    if (changes.has('active')) {
-      if (this.active) {
-        this.dispatchEvent(
-          new CustomEvent<{tab?: PlaygroundInternalTab}>('tabchange', {
-            detail: {tab: this},
-            bubbles: true,
-          })
-        );
-      }
-    }
-    super.update(changes);
-  }
-
   render() {
     return html`<button
       role="tab"
@@ -104,6 +90,17 @@ export class PlaygroundInternalTab extends LitElement {
     >
       <slot></slot>
     </button>`;
+  }
+
+  updated(changes: PropertyValues) {
+    if (changes.has('active') && this.active) {
+      this.dispatchEvent(
+        new CustomEvent<{tab?: PlaygroundInternalTab}>('tabchange', {
+          detail: {tab: this},
+          bubbles: true,
+        })
+      );
+    }
   }
 
   focus() {
