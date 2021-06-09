@@ -124,11 +124,39 @@ export class PlaygroundInternalTabBar extends LitElement {
 
   private _activateTab(event: Event) {
     const tab = this._findEventTab(event);
-    if (tab === undefined || tab === this.active) {
+    if (tab === undefined) {
       return;
     }
     this.active = tab;
-    tab?.scrollIntoView({behavior: 'smooth'});
+    this._scrollTabIntoViewIfNeeded(tab);
+  }
+
+  /**
+   * If the given tab is not visible, or if not enough of its adjacent tabs are
+   * visible, scroll so that the tab is centered.
+   */
+  private _scrollTabIntoViewIfNeeded(tab: PlaygroundInternalTab) {
+    // Note we don't want to use tab.scrollIntoView() because that would also
+    // scroll the viewport to show the tab bar.
+    const barRect = this.getBoundingClientRect();
+    const tabRect = tab.getBoundingClientRect();
+    // Add a margin so that we'll also scroll if not enough of an adjacent tab
+    // is visible, so that it's clickable. 48px is the recommended minimum touch
+    // target size from the Material Accessibility guidelines
+    // (https://material.io/design/usability/accessibility.html#layout-and-typography)
+    const margin = 48;
+    if (
+      tabRect.left - margin < barRect.left ||
+      tabRect.right + margin > barRect.right
+    ) {
+      const centered =
+        tabRect.left -
+        barRect.left +
+        this.scrollLeft -
+        barRect.width / 2 +
+        tabRect.width / 2;
+      this.scroll({left: centered, behavior: 'smooth'});
+    }
   }
 
   private async _onKeydown(event: KeyboardEvent) {
