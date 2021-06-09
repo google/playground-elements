@@ -161,17 +161,37 @@ export class PlaygroundInternalTabBar extends LitElement {
 
   private async _onKeydown(event: KeyboardEvent) {
     const oldIdx = this.active?.index ?? 0;
+    const endIdx = this._tabs.length - 1;
     let newIdx = oldIdx;
-    if (event.key === 'ArrowLeft') {
-      if (oldIdx > 0) {
-        newIdx--;
+    switch (event.key) {
+      case 'ArrowLeft': {
+        if (oldIdx === 0) {
+          newIdx = endIdx; // Wrap around.
+        } else {
+          newIdx--;
+        }
+        break;
       }
-    } else if (event.key === 'ArrowRight') {
-      if (oldIdx < this._tabs.length - 1) {
-        newIdx++;
+      case 'ArrowRight': {
+        if (oldIdx === endIdx) {
+          newIdx = 0; // Wrap around.
+        } else {
+          newIdx++;
+        }
+        break;
+      }
+      case 'Home': {
+        newIdx = 0;
+        break;
+      }
+      case 'End': {
+        newIdx = endIdx;
+        break;
       }
     }
     if (newIdx !== oldIdx) {
+      // Prevent default scrolling behavior.
+      event.preventDefault();
       const tab = this._tabs[newIdx];
       this.active = tab;
       // Wait for tabindex to update so we can call focus.

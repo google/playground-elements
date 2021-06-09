@@ -1,6 +1,17 @@
 {
   "files": {
     "my-element.ts": {},
+    "1my-element.ts": {},
+    "2my-element.ts": {},
+    "3my-element.ts": {},
+    "4my-element.ts": {},
+    "5my-element.ts": {},
+    "6my-element.ts": {},
+    "7my-element.ts": {},
+    "8my-element.ts": {},
+    "9my-element.ts": {},
+    "10my-element.ts": {},
+    "11my-element.ts": {},
     "index.html": {}
   },
   "importMap": {
