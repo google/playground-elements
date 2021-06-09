@@ -14,8 +14,6 @@ import {
 } from 'lit-element';
 import {live} from 'lit-html/directives/live.js';
 
-import '@material/mwc-icon-button';
-
 import './playground-code-editor.js';
 import {PlaygroundProject} from './playground-project.js';
 import {PlaygroundCodeEditor} from './playground-code-editor.js';

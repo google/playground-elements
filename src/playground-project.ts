@@ -33,7 +33,7 @@ import {
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
-import {version} from './lib/version.js';
+import {version} from './internal/version.js';
 import {Deferred} from './shared/deferred.js';
 import type {Diagnostic} from 'vscode-languageserver';
 

@@ -18,6 +18,8 @@ import type CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
  * This function is defined as window.CodeMirror, but @types/codemirror doesn't
  * declare that.
  */
-export const CodeMirror = (window as {
-  CodeMirror: typeof CodeMirrorCore & typeof CoreMirrorFolding;
-}).CodeMirror;
+export const CodeMirror = (
+  window as {
+    CodeMirror: typeof CodeMirrorCore & typeof CoreMirrorFolding;
+  }
+).CodeMirror;
