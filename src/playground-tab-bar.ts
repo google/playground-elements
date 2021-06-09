@@ -176,7 +176,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   render() {
     return html`
-      <playground-internal-tab-bar @tabchange=${this._onTabchange}>
+      <playground-internal-tab-bar
+        @tabchange=${this._onTabchange}
+        label="File selector"
+      >
         ${this._visibleFiles.map(
           ({name, label}) =>
             html`<playground-internal-tab

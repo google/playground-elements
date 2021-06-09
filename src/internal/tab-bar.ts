@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {html, css, LitElement, customElement} from 'lit-element';
+import {html, css, LitElement, customElement, property} from 'lit-element';
+import {ifDefined} from 'lit-html/directives/if-defined.js';
 
 import type {PlaygroundInternalTab} from './tab.js';
 
@@ -30,6 +31,12 @@ export class PlaygroundInternalTabBar extends LitElement {
       display: flex;
     }
   `;
+
+  /**
+   * Aria label of the tab list.
+   */
+  @property()
+  label?: string;
 
   /**
    * Get or set the active tab.
@@ -82,7 +89,7 @@ export class PlaygroundInternalTabBar extends LitElement {
 
   render() {
     return html`
-      <div role="tablist">
+      <div role="tablist" aria-label=${ifDefined(this.label)}>
         <slot
           @slotchange=${this._onSlotchange}
           @click=${this._activateTab}
