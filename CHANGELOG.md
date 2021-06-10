@@ -20,7 +20,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 ### Added
-- Adds `--playground-code-padding` and `--playground-code-line-padding` for configuring code editor padding.
+
+- Adds `--playground-code-padding` and `--playground-code-line-padding` for
+  configuring code editor padding.
+
+### Changed
+
+- **BREAKING** The `src/` directory is no longer published to NPM.
 
 ## [0.9.4] - 2021-05-18
 

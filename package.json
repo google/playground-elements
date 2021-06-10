@@ -42,9 +42,6 @@
     "playground-styles.{css,js,d.ts,d.ts.map}",
     "lib/**/*.{js,d.ts,d.ts.map}",
     "shared/**/*.{js,d.ts,d.ts.map}",
-    "src/**/*.{ts,js}",
-    "!src/test/**",
-    "!src/configurator/**",
     "themes/*.css",
     "themes/*.css.{js,d.ts,d.ts.map}"
   ],
