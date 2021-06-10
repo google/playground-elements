@@ -26,7 +26,7 @@
     • <a href="#components">Components</a>
     • <a href="#styling">Styling</a>
     • <a href="#syntax-highlighting">Syntax highlighting</a>
-    • <a href="#contributing">Contributing</a>    
+    • <a href="#contributing">Contributing</a>
     • <a href="#faq">FAQ</a>
 </p>
 
@@ -482,13 +482,9 @@ to perform TypeScript compilation. If you are bundling or otherwise modifying
 the layout of the `playground-elements` NPM package, you may need to add special
 handling for this file.
 
-This worker script must exist at `./playground-typescript-worker.js` in the same
-directory as the JavaScript file that contains the definition of
-`<playground-project>`, and is resolved relative to `import.meta.url`.
-
 ### Rollup
 
-Use the
+Use the Rollup
 [`@web/rollup-plugin-import-meta-assets`](https://github.com/modernweb-dev/web/tree/master/packages/rollup-plugin-import-meta-assets#readme)
 plugin to automatically copy the worker script into the correct location. See
 [examples/rollup](https://github.com/PolymerLabs/playground-elements/tree/main/examples/rollup)
@@ -496,10 +492,19 @@ for an example configuration.
 
 ### Webpack
 
-Webpack 5+ [supports](https://webpack.js.org/guides/web-workers/) loading Web
-Workers with no additional plugins. See
+Webpack 5+ automatically [supports](https://webpack.js.org/guides/web-workers/)
+loading Web Workers with no additional plugins. See
 [examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
 for an example configuration.
+
+### Other
+
+If you are bundling in another way, you'll need to configure your build so that
+the file `node_modules/playground-elements/playground-typescript-worker.js` is
+copied into the same directory as your bundle.
+
+For example, if you bundled playground elements into `./js/app.js`, then you
+should copy the worker module to `./js/playground-typescript-worker.js`.
 
 ## Sandbox security
 
@@ -600,15 +605,15 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type                            | Default                   | Description                                                                                   |
-| -------------------- | -------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------- |
-| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                      |
-| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).       |
-| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                               |
-| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                    |
-| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                   |
+| Name                 |  Type                            | Default                   | Description                                                                                                   |
+| -------------------- | -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                      |
+| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                               |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                    |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                   |
 | `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
+| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                 |
 
 ### Slots
 
@@ -626,13 +631,13 @@ project element.
 
 ### Properties
 
-| Name             |  Type                         | Default                   | Description                                                                                               |
-| ---------------- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                       |
-| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                   |
-| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                  |
+| Name             |  Type                         | Default                   | Description                                                                                                   |
+| ---------------- | ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                           |
+| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
+| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                      |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation. |
+| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.     |
 
 ### Methods
 
@@ -682,7 +687,7 @@ project element.
 | `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
 | `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
 | `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
-| `readonly`    | `boolean`                         | `false`       | Do not allow edits                                                                            |
+| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
 
 ---
 
@@ -759,8 +764,8 @@ to quickly experiment with themes and other customizations.
 | `--playground-code-linenumber-color`               | ![](images/colors/767676.png) `#767676`                                                     | `color` of line-numbers                                                                                                            |
 | `--playground-code-cursor-color`                   | ![](images/colors/000000.png) `var(--playground-code-default-color, #000000)`               | `color` of the cursor                                                                                                              |
 | `--playground-code-selection-background`           | ![](images/colors/D7D4F0.png) `#D7D4F0`                                                     | `background` of selected text                                                                                                      |
-| `--playground-code-padding`                        | `0`                                                     | `padding` around the editor code block                                                                                                     |
-| `--playground-code-line-padding`                   | `0 4px`                                                    | `padding` around each line of code                                                                                                 |
+| `--playground-code-padding`                        | `0`                                                                                         | `padding` around the editor code block                                                                                             |
+| `--playground-code-line-padding`                   | `0 4px`                                                                                     | `padding` around each line of code                                                                                                 |
 | `--playground-tab-bar-background`                  | ![](images/colors/EAEAEA.png) `#EAEAEA`                                                     | `background` of the file-picker tab bar                                                                                            |
 | `--playground-tab-bar-active-background`           | ![](images/colors/EAEAEA.png) `transparent`                                                 | `background` of the active file-picker tab                                                                                         |
 | `--playground-tab-bar-foreground-color`            | ![](images/colors/000000.png) `#000000`                                                     | Text `color` of inactive file-picker tabs                                                                                          |
