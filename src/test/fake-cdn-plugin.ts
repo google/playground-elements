@@ -29,14 +29,16 @@ import semver from 'semver';
  *        }
  *      }
  *    };
- *    const cdnBaseUrl = await executeServerCommand('set-fake-cdn-data', cdnData);
+ *    const {cdnBaseUrl, id} = await executeServerCommand('set-fake-cdn-data', cdnData);
  *    // Redirects to <cdnBaseUrl>/foo@1.2.3/lib/index.js and serves its content.
  *    const result = await fetch(new URL("foo@^1.0.0", cdnBaseUrl).href);
+ *    await executeServerCommand('delete-fake-cdn-data', id);
  */
 export function fakeCdnPlugin(): TestRunnerPlugin {
   const pathPrefix = '/fake-cdn/';
   let baseUrl: string | undefined;
-  let data: CdnData = {};
+  const dataMap = new Map<string, CdnData>();
+  let _nextId = 0;
 
   return {
     name: 'fake-cdn',
@@ -47,8 +49,19 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
 
     executeCommand({command, payload}) {
       if (command === 'set-fake-cdn-data') {
-        data = payload as CdnData;
-        return baseUrl;
+        // Create a separate data store for each configuration, so that we can
+        // support concurrent tests.
+        let id = String(_nextId++);
+        dataMap.set(id, payload as CdnData);
+        return {
+          id,
+          cdnBaseUrl: `${baseUrl}${id}/`,
+        };
+      } else if (command === 'delete-fake-cdn-data') {
+        // Allow deleting test data so that memory doesn't grow unbounded,
+        // especially for when we're in a long running --watch mode session.
+        const id = payload as string;
+        dataMap.delete(id);
       }
       return false;
     },
@@ -57,7 +70,18 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       if (!ctx.path.startsWith(pathPrefix)) {
         return undefined;
       }
-      const specifier = decodeURIComponent(ctx.path.slice(pathPrefix.length));
+      const urlMatch = ctx.path.slice(pathPrefix.length).match(/^(\d+)\/(.*)/);
+      if (urlMatch === null) {
+        ctx.response.status = 404;
+        return undefined;
+      }
+      const id = urlMatch[1];
+      const data = dataMap.get(id);
+      if (data === undefined) {
+        ctx.response.status = 404;
+        return undefined;
+      }
+      const specifier = decodeURIComponent(urlMatch[2]);
       const parsed = parseNpmModuleSpecifier(specifier);
       if (!parsed) {
         ctx.response.status = 404;
@@ -83,7 +107,7 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       }
       if (version !== semverRange) {
         ctx.response.status = 302;
-        ctx.response.redirect(`${pathPrefix}${pkg}@${version}/${path}`);
+        ctx.response.redirect(`${pathPrefix}${id}/${pkg}@${version}/${path}`);
         return undefined;
       }
       const versionData = packageData.versions[version];
@@ -94,7 +118,9 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       if (path === '') {
         ctx.response.status = 302;
         ctx.response.redirect(
-          `${pathPrefix}${pkg}@${version}/${versionData.main ?? 'index.js'}`
+          `${pathPrefix}${id}/${pkg}@${version}/${
+            versionData.main ?? 'index.js'
+          }`
         );
         return undefined;
       }
