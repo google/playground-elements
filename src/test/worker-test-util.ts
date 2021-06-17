@@ -6,32 +6,58 @@
 
 import {assert} from '@esm-bundle/chai';
 import {build} from '../typescript-worker/build.js';
+import {executeServerCommand} from '@web/test-runner-commands';
+
 import type {
   BuildOutput,
   ModuleImportMap,
   SampleFile,
 } from '../shared/worker-api.js';
+import type {CdnData} from './fake-cdn-plugin.js';
+
+const configureFakeCdn = async (
+  data: CdnData
+): Promise<{cdnBaseUrl: string; deleteCdnData: () => Promise<void>}> => {
+  const {cdnBaseUrl, id} = (await executeServerCommand(
+    'set-fake-cdn-data',
+    data
+  )) as {cdnBaseUrl: string; id: number};
+  const deleteCdnData = async () => {
+    await executeServerCommand('delete-fake-cdn-data', id);
+  };
+  return {
+    cdnBaseUrl,
+    deleteCdnData,
+  };
+};
 
 export const checkTransform = async (
   files: SampleFile[],
   expected: BuildOutput[],
-  importMap: ModuleImportMap = {}
+  importMap: ModuleImportMap = {},
+  cdnData: CdnData = {}
 ) => {
-  const results: BuildOutput[] = [];
-  await new Promise<void>((resolve) => {
-    const emit = (result: BuildOutput) => {
-      if (result.kind === 'done') {
-        resolve();
-      } else {
-        results.push(result);
-      }
-    };
-    build(files, importMap, emit);
-  });
-  assert.deepEqual(
-    results.sort(sortBuildOutput),
-    expected.sort(sortBuildOutput)
-  );
+  const {deleteCdnData} = await configureFakeCdn(cdnData);
+  try {
+    const results: BuildOutput[] = [];
+    await new Promise<void>((resolve) => {
+      const emit = (result: BuildOutput) => {
+        if (result.kind === 'done') {
+          resolve();
+        } else {
+          results.push(result);
+        }
+      };
+      build(files, importMap, emit);
+    });
+
+    assert.deepEqual(
+      results.sort(sortBuildOutput),
+      expected.sort(sortBuildOutput)
+    );
+  } finally {
+    await deleteCdnData();
+  }
 };
 
 const sortBuildOutput = (a: BuildOutput, b: BuildOutput) => {
