@@ -9,6 +9,7 @@ import {
   MergedAsyncIterables,
   relativeUrlPath,
   resolveUrlPath,
+  classifySpecifier,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -198,6 +199,46 @@ suite('resolveUrlPath', () => {
   for (const {a, b, expected} of cases) {
     test(`"${a}" -> "${b}"`, () => {
       const actual = resolveUrlPath(a, b);
+      assert.equal(actual, expected);
+    });
+  }
+});
+
+suite('classifySpecifier', () => {
+  const cases: Array<{specifier: string; expected: string}> = [
+    {
+      specifier: 'foo',
+      expected: 'bare',
+    },
+    {
+      specifier: 'foo.js',
+      expected: 'bare',
+    },
+    {
+      specifier: './foo.js',
+      expected: 'relative',
+    },
+    {
+      specifier: '../foo.js',
+      expected: 'relative',
+    },
+    {
+      specifier: '../../foo/bar.js',
+      expected: 'relative',
+    },
+    {
+      specifier: '/foo.js',
+      expected: 'relative',
+    },
+    {
+      specifier: 'http://example.com/foo.js',
+      expected: 'url',
+    },
+  ];
+
+  for (const {specifier, expected} of cases) {
+    test(specifier, () => {
+      const actual = classifySpecifier(specifier);
       assert.equal(actual, expected);
     });
   }

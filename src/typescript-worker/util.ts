@@ -73,3 +73,20 @@ export const relativeUrlPath = (from: string, to: string): string => {
 export const resolveUrlPath = (a: string, b: string) =>
   // The base URL is arbitrary and "ws://_" is very short.
   new URL(b, new URL(a, 'ws://_')).pathname;
+
+/**
+ * Return whether the given module import specifier is bare, a relative URL, or
+ * a fully qualified URL.
+ */
+export const classifySpecifier = (
+  specifier: string
+): 'bare' | 'relative' | 'url' => {
+  try {
+    new URL(specifier).href;
+    return 'url';
+  } catch {}
+  if (specifier.match(/^(\.){0,2}\//) !== null) {
+    return 'relative';
+  }
+  return 'bare';
+};
