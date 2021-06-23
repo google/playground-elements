@@ -118,3 +118,15 @@ export const parseNpmStyleSpecifier = (
   ];
   return {pkg, version: version ?? '', path};
 };
+
+/**
+ * Return the file extension of the given URL path. Does not include the leading
+ * ".".
+ */
+export const fileExtension = (path: string): string => {
+  const lastSlashIdx = path.lastIndexOf('/');
+  const lastDotIdx = path.lastIndexOf('.');
+  return lastDotIdx === -1 || lastDotIdx < lastSlashIdx
+    ? ''
+    : path.slice(lastDotIdx + 1);
+};

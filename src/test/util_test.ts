@@ -11,6 +11,7 @@ import {
   resolveUrlPath,
   classifySpecifier,
   parseNpmStyleSpecifier,
+  fileExtension,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -292,6 +293,37 @@ suite('parseNpmStyleSpecifier', () => {
     test(specifier, () => {
       const actual = parseNpmStyleSpecifier(specifier);
       assert.deepEqual(actual, expected);
+    });
+  }
+});
+
+suite('fileExtension', () => {
+  const cases: Array<{
+    path: string;
+    expected: string;
+  }> = [
+    {
+      path: 'foo',
+      expected: '',
+    },
+    {
+      path: 'foo.js',
+      expected: 'js',
+    },
+    {
+      path: 'foo.ts',
+      expected: 'ts',
+    },
+    {
+      path: 'foo.ts/bar.js',
+      expected: 'js',
+    },
+  ];
+
+  for (const {path, expected} of cases) {
+    test(path, () => {
+      const actual = fileExtension(path);
+      assert.equal(actual, expected);
     });
   }
 });
