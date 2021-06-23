@@ -12,6 +12,7 @@ import {
   classifySpecifier,
   parseNpmStyleSpecifier,
   fileExtension,
+  changeFileExtension,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -323,6 +324,32 @@ suite('fileExtension', () => {
   for (const {path, expected} of cases) {
     test(path, () => {
       const actual = fileExtension(path);
+      assert.equal(actual, expected);
+    });
+  }
+});
+
+suite('changeFileExtension', () => {
+  const cases: Array<{
+    path: string;
+    newExt: string;
+    expected: string;
+  }> = [
+    {
+      path: 'foo',
+      newExt: 'd.ts',
+      expected: 'foo.d.ts',
+    },
+    {
+      path: 'foo.js',
+      newExt: 'd.ts',
+      expected: 'foo.d.ts',
+    },
+  ];
+
+  for (const {path, newExt, expected} of cases) {
+    test(`"${path}" -> "${newExt}"`, () => {
+      const actual = changeFileExtension(path, newExt);
       assert.equal(actual, expected);
     });
   }

@@ -130,3 +130,15 @@ export const fileExtension = (path: string): string => {
     ? ''
     : path.slice(lastDotIdx + 1);
 };
+
+/**
+ * Change the given URL path's file extension to a different one. `newExt`
+ * should not include the leading ".".
+ */
+export const changeFileExtension = (path: string, newExt: string): string => {
+  const oldExt = fileExtension(path);
+  if (oldExt === '') {
+    return path + '.' + newExt;
+  }
+  return path.slice(0, -oldExt.length) + newExt;
+};
