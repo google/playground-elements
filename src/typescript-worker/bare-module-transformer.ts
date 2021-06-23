@@ -24,11 +24,7 @@ export class BareModuleTransformer {
     results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
   ): AsyncIterable<BuildOutput> {
     for await (const result of results) {
-      if (
-        result.kind === 'file' &&
-        result.file.name.endsWith('.js') &&
-        result.file.content.includes('import')
-      ) {
+      if (result.kind === 'file' && result.file.name.endsWith('.js')) {
         yield* this._transformBareModuleSpecifiers(result);
       } else {
         yield result;
