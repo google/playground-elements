@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- **BREAKING** The `src/` directory is no longer published to NPM.
+
 - Previews will now begin loading immediately, instead of waiting for
   compilation to completely finish, and each `.js` file is served as it
   compiles.
