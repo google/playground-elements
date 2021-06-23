@@ -20,11 +20,15 @@ import semver from 'semver';
  *    const cdnData = {
  *      "foo": {
  *        "1.2.3": {
- *          "main": "lib/index.js",
  *          "files": {
+ *            "package.json": {
+ *              "content": `{
+ *                "main": "lib/index.js"
+ *              }`
+ *            },
  *            "lib/index.js": {
  *              "content": "console.log('hello');"
- *            }
+ *            },
  *          }
  *        }
  *      }
@@ -116,27 +120,43 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
         return undefined;
       }
       if (path === '') {
+        const packageJson = JSON.parse(
+          versionData.files['package.json']?.content ?? '{}'
+        ) as {main?: string};
+        // Only look at the "main" field, not "module", because that's how
+        // unpkg.com works when it's not in ?module mode, which is how we're
+        // using it (so that we get raw bare module specifiers).
+        const main = packageJson.main ?? 'index.js';
         ctx.response.status = 302;
-        ctx.response.redirect(
-          `${pathPrefix}${id}/${pkg}@${version}/${
-            versionData.main ?? 'index.js'
-          }`
-        );
+        ctx.response.redirect(`${pathPrefix}${id}/${pkg}@${version}/${main}`);
         return undefined;
       }
       const file = versionData.files[path];
-      if (!file) {
-        ctx.response.status = 404;
+      if (file !== undefined) {
+        return {
+          body: file.content,
+          type: path.endsWith('.js')
+            ? 'text/javascript'
+            : path.endsWith('.json')
+            ? 'application/json'
+            : 'text/plain',
+        };
+      }
+      if (path === 'package.json') {
+        // You can't publish to NPM without a package.json; for convenience in
+        // testing, just make an empty one if the test data didn't contain one.
+        return {
+          body: '{}',
+          type: 'application/json',
+        };
+      }
+      if (versionData.files[path + '.js']) {
+        ctx.response.status = 302;
+        ctx.response.redirect(ctx.path + '.js');
         return undefined;
       }
-      return {
-        body: file.content,
-        type: path.endsWith('.js')
-          ? 'text/javascript'
-          : path.endsWith('.json')
-          ? 'application/json'
-          : 'text/plain',
-      };
+      ctx.response.status = 404;
+      return undefined;
     },
   };
 }
@@ -145,7 +165,6 @@ export type CdnData = {
   [pkg: string]: {
     versions: {
       [version: string]: {
-        main?: string;
         files: {
           [path: string]: {
             content: string;
