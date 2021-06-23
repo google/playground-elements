@@ -5,6 +5,7 @@
  */
 
 import {TypeScriptBuilder} from './typescript.js';
+import {BareModuleTransformer} from './bare-module-transformer.js';
 import {ModuleResolver} from './module-resolver.js';
 
 import type {
@@ -20,8 +21,9 @@ export const build = async (
 ): Promise<void> => {
   const moduleResolver = new ModuleResolver(importMap);
   const tsBuilder = new TypeScriptBuilder(moduleResolver);
-  const results = tsBuilder.process(
-    files.map((file) => ({kind: 'file', file}))
+  const bareModuleBuilder = new BareModuleTransformer(moduleResolver);
+  const results = bareModuleBuilder.process(
+    tsBuilder.process(files.map((file) => ({kind: 'file', file})))
   );
   for await (const result of results) {
     emit(result);

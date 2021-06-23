@@ -4,45 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {assert} from '@esm-bundle/chai';
-import {build} from '../typescript-worker/build.js';
-import type {
-  BuildOutput,
-  ModuleImportMap,
-  SampleFile,
-} from '../shared/worker-api.js';
+import type {BuildOutput, SampleFile} from '../shared/worker-api.js';
 
-const checkTransform = async (
-  files: SampleFile[],
-  expected: BuildOutput[],
-  importMap: ModuleImportMap = {}
-) => {
-  const results: BuildOutput[] = [];
-  await new Promise<void>((resolve) => {
-    const emit = (result: BuildOutput) => {
-      if (result.kind === 'done') {
-        resolve();
-      } else {
-        results.push(result);
-      }
-    };
-    build(files, importMap, emit);
-  });
-  assert.deepEqual(
-    results.sort(sortBuildOutput),
-    expected.sort(sortBuildOutput)
-  );
-};
-
-const sortBuildOutput = (a: BuildOutput, b: BuildOutput) => {
-  if (a.kind === 'file' && b.kind === 'file') {
-    return a.file.name.localeCompare(b.file.name);
-  }
-  if (a.kind === 'diagnostic' && b.kind === 'diagnostic') {
-    return a.diagnostic.message.localeCompare(b.diagnostic.message);
-  }
-  return a.kind.localeCompare(b.kind);
-};
+import {checkTransform} from './worker-test-util.js';
 
 suite('typescript builder', () => {
   test('empty project', async () => {
@@ -65,6 +29,25 @@ suite('typescript builder', () => {
           name: 'index.js',
           content: 'export const foo = 3;\r\n',
           contentType: 'text/javascript',
+        },
+      },
+    ];
+    await checkTransform(files, expected);
+  });
+
+  test('ignores js file', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.js',
+        content: 'export const foo: number = 3;',
+      },
+    ];
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: 'export const foo: number = 3;',
         },
       },
     ];
@@ -154,57 +137,6 @@ suite('typescript builder', () => {
       },
     ];
     await checkTransform(files, expected);
-  });
-
-  test('transforms bare modules to unpkg', async () => {
-    const files: SampleFile[] = [
-      {
-        name: 'index.ts',
-        content: 'import "lit-html";',
-      },
-    ];
-    const expected: BuildOutput[] = [
-      {
-        kind: 'file',
-        file: {
-          name: 'index.js',
-          content: 'import "https://unpkg.com/lit-html?module";\r\n',
-          contentType: 'text/javascript',
-        },
-      },
-    ];
-    await checkTransform(files, expected);
-  });
-
-  test('follows import map', async () => {
-    const files: SampleFile[] = [
-      {
-        name: 'index.ts',
-        content: `
-          import "lit-html";
-          import "lit-html/directives/repeat.js";
-        `,
-      },
-    ];
-    const importMap: ModuleImportMap = {
-      imports: {
-        'lit-html': 'https://cdn.skypack.dev/lit-html@2.0.0-pre.7',
-        'lit-html/': 'https://cdn.skypack.dev/lit-html@2.0.0-pre.7/',
-      },
-    };
-    const expected: BuildOutput[] = [
-      {
-        kind: 'file',
-        file: {
-          name: 'index.js',
-          content:
-            'import "https://cdn.skypack.dev/lit-html@2.0.0-pre.7";\r\n' +
-            'import "https://cdn.skypack.dev/lit-html@2.0.0-pre.7/directives/repeat.js";\r\n',
-          contentType: 'text/javascript',
-        },
-      },
-    ];
-    await checkTransform(files, expected, importMap);
   });
 
   test('emits semantic error from bare module', async () => {

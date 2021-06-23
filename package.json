@@ -59,6 +59,7 @@
     "clean-css": "^5.1.2",
     "codemirror": "git+https://github.com/codemirror/CodeMirror.git#2997167571787db3da8a15e5ac65c8ddaf316f0a",
     "codemirror-grammar-mode": "^0.1.10",
+    "es-module-lexer": "^0.6.0",
     "google_modes": "git+https://github.com/codemirror/google-modes.git#b78e1c3841a567505c41ad7befa6ca2c289e889e",
     "playwright": "^1.5.1",
     "prettier": "^2.0.5",

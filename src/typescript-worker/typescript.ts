@@ -18,38 +18,7 @@ const compilerOptions = {
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
-  allowJs: true,
-  // Allow emit of js files despite having the same name as input.
-  suppressOutputPathCheck: true,
   lib: ['dom', 'esnext'],
-};
-
-/**
- * Rewrites bare module specifiers to unpkg.com URLs. For now, uses unpkg.com
- * module resolution from there on. We might want to change this and do all
- * rewrites ourselves to ensure less module duplication.
- */
-const makeBareSpecifierTransformVisitor = (
-  context: ts.TransformationContext,
-  moduleResolver: ModuleResolver
-): ts.Visitor => {
-  const visitor: ts.Visitor = (node) => {
-    if (ts.isImportDeclaration(node)) {
-      const specifier = (node.moduleSpecifier as ts.StringLiteral).text;
-      const {type, url} = moduleResolver.resolve(specifier, self.origin);
-      if (type === 'bare') {
-        const newNode = ts.getMutableClone(node);
-        (
-          newNode as {
-            moduleSpecifier: ts.ImportDeclaration['moduleSpecifier'];
-          }
-        ).moduleSpecifier = ts.createStringLiteral(url);
-        return newNode;
-      }
-    }
-    return ts.visitEachChild(node, visitor, context);
-  };
-  return visitor;
 };
 
 /**
@@ -74,11 +43,15 @@ export class TypeScriptBuilder {
   ): AsyncIterable<BuildOutput> {
     const compilerInputs = [];
     for await (const result of results) {
-      if (result.kind === 'file' && isTsOrJsFile(result.file.name)) {
+      if (result.kind === 'file' && result.file.name.endsWith('.ts')) {
         compilerInputs.push(result.file);
       } else {
         yield result;
       }
+    }
+
+    if (compilerInputs.length === 0) {
+      return;
     }
 
     // Immediately resolve local project files, and begin fetching types (but
@@ -111,17 +84,6 @@ export class TypeScriptBuilder {
     if (program === undefined) {
       throw new Error('Unexpected error: program was undefined');
     }
-    const transformers: ts.CustomTransformers = {
-      after: [
-        (context: ts.TransformationContext) =>
-          <T extends ts.Node>(node: T) => {
-            return ts.visitNode(
-              node,
-              makeBareSpecifierTransformVisitor(context, this._moduleResolver)
-            );
-          },
-      ],
-    };
 
     for (const {file, url} of inputFiles) {
       for (const tsDiagnostic of languageService.getSyntacticDiagnostics(url)) {
@@ -133,19 +95,13 @@ export class TypeScriptBuilder {
       }
       const sourceFile = program.getSourceFile(url);
       let compiled: SampleFile | undefined = undefined;
-      program!.emit(
-        sourceFile,
-        (url, content) => {
-          compiled = {
-            name: new URL(url).pathname.slice(1),
-            content,
-            contentType: 'text/javascript',
-          };
-        },
-        undefined,
-        undefined,
-        transformers
-      );
+      program!.emit(sourceFile, (url, content) => {
+        compiled = {
+          name: new URL(url).pathname.slice(1),
+          content,
+          contentType: 'text/javascript',
+        };
+      });
       if (compiled !== undefined) {
         yield {kind: 'file', file: compiled};
       }
@@ -192,7 +148,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   getScriptFileNames(): string[] {
-    return [...this.files.keys()].filter((name) => isTsOrJsFile(name));
+    return [...this.files.keys()];
   }
 
   getScriptVersion(_fileName: string) {
@@ -266,6 +222,3 @@ const diagnosticCategoryMapping: {
   [ts.DiagnosticCategory.Message]: 3,
   [ts.DiagnosticCategory.Suggestion]: 4,
 };
-
-const isTsOrJsFile = (file: string) =>
-  file.endsWith('.ts') || file.endsWith('.js');
