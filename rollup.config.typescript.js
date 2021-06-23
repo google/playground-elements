@@ -31,7 +31,7 @@ export default [
   {
     input: 'node_modules/typescript/lib/typescript.js',
     output: {
-      file: 'lib/typescript.js',
+      file: 'internal/typescript.js',
       format: 'esm',
     },
     plugins: [

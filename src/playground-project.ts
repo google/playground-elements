@@ -33,10 +33,11 @@ import {
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
-import {version} from './lib/version.js';
+import {version} from './internal/version.js';
 import {Deferred} from './shared/deferred.js';
+import {PlaygroundBuild} from './internal/build.js';
+
 import type {Diagnostic} from 'vscode-languageserver';
-import {PlaygroundBuild} from './lib/build.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.

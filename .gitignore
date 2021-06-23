@@ -1,6 +1,6 @@
 /packages/*/node_modules
 /node_modules
-/lib/
+/internal/
 /service-worker/
 /shared/
 /configurator/*.js
