@@ -90,3 +90,31 @@ export const classifySpecifier = (
   }
   return 'bare';
 };
+
+/**
+ * Parse the given module import specifier using format
+ * "<pkg>[@<version>][/<path>]".
+ *
+ * E.g. given "foo@^1.2.3/bar.js" return {
+ *   pkg: "foo",
+ *   range: "^1.2.3",
+ *   path: "bar.js"
+ * }
+ */
+export const parseNpmStyleSpecifier = (
+  specifier: string
+): {pkg: string; version: string; path: string} | undefined => {
+  const match = specifier.match(
+    /^((?:@[^\/@]+\/)?[^\/\@]+)(?:@([^\/]+))?\/?(.*)$/
+  );
+  if (match === null) {
+    return undefined;
+  }
+  const [, pkg, version, path] = match as [
+    unknown,
+    string,
+    string | undefined,
+    string
+  ];
+  return {pkg, version: version ?? '', path};
+};

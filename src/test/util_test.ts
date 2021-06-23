@@ -10,6 +10,7 @@ import {
   relativeUrlPath,
   resolveUrlPath,
   classifySpecifier,
+  parseNpmStyleSpecifier,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -240,6 +241,57 @@ suite('classifySpecifier', () => {
     test(specifier, () => {
       const actual = classifySpecifier(specifier);
       assert.equal(actual, expected);
+    });
+  }
+});
+
+suite('parseNpmStyleSpecifier', () => {
+  const cases: Array<{
+    specifier: string;
+    expected: ReturnType<typeof parseNpmStyleSpecifier>;
+  }> = [
+    {
+      specifier: 'foo',
+      expected: {pkg: 'foo', version: '', path: ''},
+    },
+    {
+      specifier: 'foo@^1.2.3',
+      expected: {pkg: 'foo', version: '^1.2.3', path: ''},
+    },
+    {
+      specifier: 'foo/bar.js',
+      expected: {pkg: 'foo', version: '', path: 'bar.js'},
+    },
+    {
+      specifier: 'foo@^1.2.3/bar.js',
+      expected: {pkg: 'foo', version: '^1.2.3', path: 'bar.js'},
+    },
+    {
+      specifier: '@ns/foo',
+      expected: {pkg: '@ns/foo', version: '', path: ''},
+    },
+    {
+      specifier: '@ns/foo@^1.2.3',
+      expected: {pkg: '@ns/foo', version: '^1.2.3', path: ''},
+    },
+    {
+      specifier: '@ns/foo/bar.js',
+      expected: {pkg: '@ns/foo', version: '', path: 'bar.js'},
+    },
+    {
+      specifier: '@ns/foo@^1.2.3/bar.js',
+      expected: {pkg: '@ns/foo', version: '^1.2.3', path: 'bar.js'},
+    },
+    {
+      specifier: '',
+      expected: undefined,
+    },
+  ];
+
+  for (const {specifier, expected} of cases) {
+    test(specifier, () => {
+      const actual = parseNpmStyleSpecifier(specifier);
+      assert.deepEqual(actual, expected);
     });
   }
 });
