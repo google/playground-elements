@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import ts from '../lib/typescript.js';
+import ts from '../internal/typescript.js';
 import {ModuleResolver, isRelativeOrAbsolutePath} from './module-resolver.js';
 import {Deferred} from '../shared/deferred.js';
 import {Result} from '../shared/util.js';

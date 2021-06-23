@@ -16,7 +16,7 @@ import {
 } from 'lit-element';
 import {nothing} from 'lit-html';
 import {ifDefined} from 'lit-html/directives/if-defined.js';
-import {CodeMirror} from './lib/codemirror.js';
+import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import type {Diagnostic} from 'vscode-languageserver';
 

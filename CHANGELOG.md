@@ -28,12 +28,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Previews will now begin loading immediately, instead of waiting for
-  compilation to completely finish, and each `.js` file is served as it
-  compiles.
+- **BREAKING** The `src/` directory is no longer published to NPM.
 
 - **BREAKING** `.js` files are no longer compiled by TypeScript, so they cannot
   contain types, decorators, or other TypeScript-specific syntax.
+
+- Previews will now begin loading immediately, instead of waiting for
+  compilation to completely finish, and each `.js` file is served as it
+  compiles.
 
 ## [0.9.4] - 2021-05-18
 
