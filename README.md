@@ -492,8 +492,9 @@ for an example configuration.
 
 ### Webpack
 
-Webpack 5+ automatically [supports](https://webpack.js.org/guides/web-workers/)
-loading Web Workers with no additional plugins. See
+Webpack 5+ [automatically supports loading Web
+Workers](https://webpack.js.org/guides/web-workers/) with no additional plugins.
+See
 [examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
 for an example configuration.
 
