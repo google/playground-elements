@@ -5,7 +5,10 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import {MergedAsyncIterables} from '../typescript-worker/util.js';
+import {
+  MergedAsyncIterables,
+  relativeUrlPath,
+} from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
   const flush = async <T>(iterable: AsyncIterable<T>): Promise<T[]> => {
@@ -113,4 +116,46 @@ suite('MergedAsyncIterables', () => {
     const actual = await flush(merged);
     assert.deepEqual(actual, expected);
   });
+});
+
+suite('relativeUrlPath', () => {
+  const cases: Array<{from: string; to: string; expected: string}> = [
+    {
+      from: 'index.js',
+      to: 'my-element.js',
+      expected: './my-element.js',
+    },
+    {
+      from: 'index.js',
+      to: 'node_modules/foo/foo.js',
+      expected: './node_modules/foo/foo.js',
+    },
+    {
+      from: 'node_modules/foo/foo.js',
+      to: 'node_modules/foo/foo2.js',
+      expected: './foo2.js',
+    },
+    {
+      from: 'node_modules/foo/foo.js',
+      to: 'node_modules/bar/bar.js',
+      expected: '../bar/bar.js',
+    },
+    {
+      from: 'node_modules/foo/a/b/c.js',
+      to: 'node_modules/bar/a/b/c.js',
+      expected: '../../../bar/a/b/c.js',
+    },
+    {
+      from: 'index.js',
+      to: 'index.js',
+      expected: '',
+    },
+  ];
+
+  for (const {from, to, expected} of cases) {
+    test(`"${from}" -> "${to}"`, () => {
+      const actual = relativeUrlPath(from, to);
+      assert.equal(actual, expected);
+    });
+  }
 });

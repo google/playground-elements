@@ -41,3 +41,26 @@ export class MergedAsyncIterables<T> {
     }
   }
 }
+
+/**
+ * Return the relative path from two URL pathnames.
+ *
+ * E.g. given "a/b/c.js" and "a/d.js" return "../d.js".
+ */
+export const relativeUrlPath = (from: string, to: string): string => {
+  const fromParts = from.split('/');
+  const toParts = to.split('/');
+  let numCommon = 0;
+  while (
+    numCommon < fromParts.length &&
+    numCommon < toParts.length &&
+    fromParts[numCommon] === toParts[numCommon]
+  ) {
+    numCommon++;
+  }
+  const numUp = fromParts.length - numCommon - 1;
+  return (
+    (numUp === 0 ? './' : new Array(numUp + 1).join('../')) +
+    toParts.slice(numCommon).join('/')
+  );
+};
