@@ -8,6 +8,7 @@ import {assert} from '@esm-bundle/chai';
 import {
   MergedAsyncIterables,
   relativeUrlPath,
+  resolveUrlPath,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -155,6 +156,48 @@ suite('relativeUrlPath', () => {
   for (const {from, to, expected} of cases) {
     test(`"${from}" -> "${to}"`, () => {
       const actual = relativeUrlPath(from, to);
+      assert.equal(actual, expected);
+    });
+  }
+});
+
+suite('resolveUrlPath', () => {
+  const cases: Array<{a: string; b: string; expected: string}> = [
+    {
+      a: 'index.js',
+      b: './my-element.js',
+      expected: '/my-element.js',
+    },
+    {
+      a: 'index.js',
+      b: './node_modules/foo/foo.js',
+      expected: '/node_modules/foo/foo.js',
+    },
+    {
+      a: 'node_modules/foo/foo.js',
+      b: './foo2.js',
+      expected: '/node_modules/foo/foo2.js',
+    },
+    {
+      a: 'node_modules/foo/foo.js',
+      b: '../bar/bar.js',
+      expected: '/node_modules/bar/bar.js',
+    },
+    {
+      a: 'node_modules/foo/a/b/c.js',
+      b: '../../../bar/a/b/c.js',
+      expected: '/node_modules/bar/a/b/c.js',
+    },
+    {
+      a: 'index.js',
+      b: '',
+      expected: '/index.js',
+    },
+  ];
+
+  for (const {a, b, expected} of cases) {
+    test(`"${a}" -> "${b}"`, () => {
+      const actual = resolveUrlPath(a, b);
       assert.equal(actual, expected);
     });
   }

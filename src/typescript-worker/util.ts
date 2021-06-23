@@ -64,3 +64,12 @@ export const relativeUrlPath = (from: string, to: string): string => {
     toParts.slice(numCommon).join('/')
   );
 };
+
+/**
+ * Resolve two URL pathnames into an absolute path.
+ *
+ * E.g. given "a/b/c.js" and "../d.js" return "a/d.js".
+ */
+export const resolveUrlPath = (a: string, b: string) =>
+  // The base URL is arbitrary and "ws://_" is very short.
+  new URL(b, new URL(a, 'ws://_')).pathname;
