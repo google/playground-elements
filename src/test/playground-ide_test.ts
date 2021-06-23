@@ -156,7 +156,11 @@ suite('playground-ide', () => {
       'playground-ide',
       'playground-project'
     )) as PlaygroundProject;
-    await project.save();
+    // Note we shouldn't await the save(), because assertPreviewContains waits
+    // for an iframe load event, and we can legitimately get an iframe load
+    // before the full compile is done since we serve each asset as soon as it
+    // is ready.
+    project.save();
     await assertPreviewContains('Hello HTML 2');
   });
 

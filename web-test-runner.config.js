@@ -36,7 +36,7 @@ export default {
     // https://mochajs.org/api/mocha
     config: {
       ui: 'tdd',
-      timeout: '10000', // default 2000
+      timeout: '30000', // default 2000
     },
   },
 };

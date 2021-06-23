@@ -62,23 +62,21 @@ export interface ServiceWorkerAPI {
   setFileAPI(fileAPI: FileAPI, sessionID: string): void;
 }
 
-export interface CompileResult {
-  files: Map<string, string>;
-  diagnostics: Map<string, Array<Diagnostic>>;
-}
-
 export interface TypeScriptWorkerAPI {
   compileProject(
     files: Array<SampleFile>,
     importMap: ModuleImportMap,
-    slowDiagnosticsCallback?: (
-      diagnostics: Map<string, Array<Diagnostic>>
-    ) => void
-  ): Promise<CompileResult>;
+    emit: (result: BuildOutput) => void
+  ): Promise<void>;
+}
+
+export interface HttpError {
+  status: number;
+  body: string;
 }
 
 export interface FileAPI {
-  getFile(name: string): Promise<SampleFile | undefined>;
+  getFile(name: string): Promise<SampleFile | HttpError>;
 }
 
 export interface SampleFile {
@@ -119,3 +117,20 @@ export interface ModuleImportMap {
   imports?: {[name: string]: string};
   // No scopes for now.
 }
+
+export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
+
+export type FileBuildOutput = {
+  kind: 'file';
+  file: SampleFile;
+};
+
+export type DiagnosticBuildOutput = {
+  kind: 'diagnostic';
+  filename: string;
+  diagnostic: Diagnostic;
+};
+
+export type DoneOutput = {
+  kind: 'done';
+};
