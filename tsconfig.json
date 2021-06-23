@@ -24,7 +24,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true
   },
-  "include": ["src/**/*.ts", "src/lib/worker-api.ts", "src/shared/util.ts"],
+  "include": ["src/**/*.ts", "src/internal/worker-api.ts", "src/shared/util.ts"],
   "exclude": ["src/service-worker", "src/shared", "src/typescript-worker"],
   "references": [
     {

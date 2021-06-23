@@ -22,7 +22,6 @@ import {
 } from 'lit-element';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
-import '@material/mwc-tab-bar';
 import {tokens} from './highlight-tokens.js';
 
 @customElement('playground-theme-detector')
@@ -309,8 +308,9 @@ export class PlaygroundThemeDetector extends LitElement {
         }
       } else if (!foundBackground && node.nodeType === Node.ELEMENT_NODE) {
         // Use the first non-transparent background (depth first).
-        const background = window.getComputedStyle(node as Element)
-          .backgroundColor;
+        const background = window.getComputedStyle(
+          node as Element
+        ).backgroundColor;
         if (background !== 'rgba(0, 0, 0, 0)') {
           foundBackground = true;
           this._propertyValues.set('--playground-code-background', background);

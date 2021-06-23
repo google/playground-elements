@@ -148,7 +148,7 @@ suite('playground-ide', () => {
       'playground-file-editor',
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
-    const codemirrorInternals = (codemirror as unknown) as {
+    const codemirrorInternals = codemirror as unknown as {
       _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     codemirrorInternals._codemirror!.setValue('Hello HTML 2');
@@ -156,7 +156,11 @@ suite('playground-ide', () => {
       'playground-ide',
       'playground-project'
     )) as PlaygroundProject;
-    await project.save();
+    // Note we shouldn't await the save(), because assertPreviewContains waits
+    // for an iframe load event, and we can legitimately get an iframe load
+    // before the full compile is done since we serve each asset as soon as it
+    // is ready.
+    project.save();
     await assertPreviewContains('Hello HTML 2');
   });
 
@@ -178,7 +182,7 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello JS');
     const tabBar = await pierce('playground-ide', 'playground-tab-bar');
-    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-internal-tab');
     assert.equal(tabs?.length, 1);
   });
 
@@ -200,10 +204,8 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello JS');
     const tabBar = await pierce('playground-ide', 'playground-tab-bar');
-    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-tab');
-    const texts = Array.from(tabs ?? []).map((tab) =>
-      tab.shadowRoot?.querySelector('button')?.textContent?.trim()
-    );
+    const tabs = tabBar.shadowRoot?.querySelectorAll('playground-internal-tab');
+    const texts = Array.from(tabs ?? []).map((tab) => tab.textContent?.trim());
     assert.deepEqual(texts, ['HTML', 'JS']);
   });
 
@@ -283,7 +285,7 @@ suite('playground-ide', () => {
     assert.equal(queryHiddenLineNumbers().length, 2);
 
     // Add a line.
-    const editorInternals = (editor as unknown) as {
+    const editorInternals = editor as unknown as {
       _codemirror: PlaygroundCodeEditor['_codemirror'];
     };
     editorInternals._codemirror!.setValue(editor.value + '\nBaz');

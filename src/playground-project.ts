@@ -26,15 +26,17 @@ import {
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
-  CompileResult,
+  HttpError,
 } from './shared/worker-api.js';
 import {
   getRandomString,
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
-import {version} from './lib/version.js';
+import {version} from './internal/version.js';
 import {Deferred} from './shared/deferred.js';
+import {PlaygroundBuild} from './internal/build.js';
+
 import type {Diagnostic} from 'vscode-languageserver';
 
 // Each <playground-project> has a unique session ID used to scope requests from
@@ -48,8 +50,6 @@ const generateUniqueSessionId = (): string => {
   sessions.add(sessionId);
   return sessionId;
 };
-
-let nextCompileId = 0;
 
 /**
  * Coordinates <playground-file-editor> and <playground-preview> elements.
@@ -167,15 +167,15 @@ export class PlaygroundProject extends LitElement {
   @property({attribute: 'sandbox-scope'})
   sandboxScope = 'playground-projects/';
 
+  private _build?: PlaygroundBuild;
+
   /**
    * Map from filename to array of Language Server Protocol diagnostics
    * resulting from the latest compilation.
    */
   get diagnostics(): Map<string, Diagnostic[]> | undefined {
-    return this._diagnostics;
+    return this._build?.diagnostics;
   }
-
-  private _diagnostics?: Map<string, Diagnostic[]>;
 
   /**
    * A unique identifier for this instance so the service worker can keep an
@@ -191,11 +191,6 @@ export class PlaygroundProject extends LitElement {
   private _deferredTypeScriptWorkerApi = new Deferred<
     Remote<TypeScriptWorkerAPI>
   >();
-
-  private _compileResultPromise = Promise.resolve<CompileResult | undefined>(
-    undefined
-  );
-  private _compiledFiles?: Map<string, string>;
 
   private _validImportMap: ModuleImportMap = {};
 
@@ -226,8 +221,6 @@ export class PlaygroundProject extends LitElement {
     url.pathname = endWithSlash(url.pathname);
     return url;
   }
-
-  private _compileId = nextCompileId++;
 
   get baseUrl() {
     // Make sure that we've connected to the Service Worker and loaded the
@@ -464,71 +457,40 @@ export class PlaygroundProject extends LitElement {
     port.start();
   }
 
-  private async _getFile(name: string): Promise<SampleFile | undefined> {
-    await this._compileResultPromise;
-    const compiledUrl = new URL(name, window.origin).href;
-    const compiledContent = this._compiledFiles?.get(compiledUrl);
-    if (compiledContent !== undefined) {
+  private async _getFile(name: string): Promise<SampleFile | HttpError> {
+    if (this._build === undefined) {
       return {
-        name,
-        label: this._files?.find((f) => f.name === name)?.label,
-        content: compiledContent,
-        contentType: 'application/javascript',
+        status: /* Service Unavailable */ 503,
+        body: 'Playground build not started',
       };
-    } else {
-      return this._files?.find((f) => f.name === name);
     }
+    return this._build.getFile(name);
   }
 
+  /**
+   * Build this project immediately, cancelling any previous build.
+   */
   async save() {
-    // Clear in case a save is explicitly requested while a timer is already
-    // running.
-    const compileId = nextCompileId++;
-    this._compileId = compileId;
-    const compileStale = () => compileId !== this._compileId;
-
-    this._clearSaveTimeout();
-    this._compiledFiles = undefined;
+    this._build?.cancel();
+    const build = new PlaygroundBuild(() => {
+      this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
+    });
+    this._build = build;
     this.dispatchEvent(new CustomEvent('compileStart'));
-    if (this._files !== undefined) {
-      const workerApi = await this._deferredTypeScriptWorkerApi.promise;
-      if (compileStale()) {
-        return;
-      }
-      this._compileResultPromise = workerApi.compileProject(
-        this._files,
-        this._importMap,
-        proxy((slowDiagnostics: Map<string, Array<Diagnostic>>) => {
-          if (compileStale() || slowDiagnostics.size === 0) {
-            return;
-          }
-          this._diagnostics =
-            this._diagnostics !== undefined
-              ? mergeArrayMaps(this._diagnostics, slowDiagnostics)
-              : slowDiagnostics;
-          this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
-        })
-      );
-      const result = await this._compileResultPromise;
-      if (compileStale()) {
-        return;
-      }
-      this._compiledFiles = result?.files;
-      this._diagnostics = result?.diagnostics;
-    } else {
-      this._compileResultPromise = Promise.resolve(undefined);
+    const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+    if (build.state() !== 'active') {
+      return;
+    }
+    workerApi.compileProject(
+      this._files ?? [],
+      this._importMap,
+      proxy((result) => build.onOutput(result))
+    );
+    await build.stateChange;
+    if (build.state() !== 'done') {
+      return;
     }
     this.dispatchEvent(new CustomEvent('compileDone'));
-    this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
-  }
-
-  private _saveTimeoutId?: ReturnType<typeof setTimeout> = undefined;
-
-  private _clearSaveTimeout() {
-    if (this._saveTimeoutId !== undefined) {
-      clearTimeout(this._saveTimeoutId);
-      this._saveTimeoutId = undefined;
-    }
   }
 
   private lastSave = Promise.resolve();
@@ -818,21 +780,4 @@ const outdent = (str: string): string => {
     }
   }
   return str.replace(RegExp(`^\\s{${shortestIndent ?? 0}}`, 'gm'), '');
-};
-
-const mergeArrayMaps = <K, V>(
-  ...sources: Array<Map<K, Array<V>>>
-): Map<K, Array<V>> => {
-  const target = new Map();
-  for (const source of sources) {
-    for (const [key, vals] of source) {
-      let arr = target.get(key);
-      if (arr === undefined) {
-        arr = [];
-        target.set(key, arr);
-      }
-      arr.push(...vals);
-    }
-  }
-  return target;
 };
