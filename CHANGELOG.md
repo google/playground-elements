@@ -37,6 +37,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   compilation to completely finish, and each `.js` file is served as it
   compiles.
 
+### Fixed
+
+- Query parameters are now ignored when serving files from the virtual file
+  system.
+
 ## [0.9.4] - 2021-05-18
 
 ### Fixed

@@ -107,9 +107,10 @@ const onFetch = (e: FetchEvent) => {
 
 const parseScopedUrl = (url: string) => {
   const scope = self.registration.scope;
-  // URLs in scope will be of the form: {scope}{sessionId}/{filePath}
-  // scope is always a full URL prefix, including a trailing slash
-  const sessionAndPath = url.substring(scope.length);
+  // URLs in scope will be of the form: {scope}{sessionId}/{filePath}. Scope is
+  // always a full URL prefix, including a trailing slash. Strip query params or
+  // else the filename won't match.
+  const sessionAndPath = url.substring(scope.length).split('?')[0];
   const slashIndex = sessionAndPath.indexOf('/');
   let sessionId, filePath: string | undefined;
   if (slashIndex === -1) {

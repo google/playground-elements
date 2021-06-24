@@ -349,4 +349,21 @@ suite('playground-ide', () => {
     assert.isFalse(editableRegion.matches(':focus'));
     assert.notInclude(focusContainer.textContent, keyboardHelp);
   });
+
+  test('ignores query params when serving files', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.html': {
+          content: '<script>location.assign("./foo.html?xyz");</script>',
+        },
+        'foo.html': {
+          content: 'foo.html loaded',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('foo.html loaded');
+  });
 });
