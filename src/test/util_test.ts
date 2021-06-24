@@ -13,6 +13,7 @@ import {
   parseNpmStyleSpecifier,
   fileExtension,
   changeFileExtension,
+  charToLineAndChar,
 } from '../typescript-worker/util.js';
 
 suite('MergedAsyncIterables', () => {
@@ -351,6 +352,46 @@ suite('changeFileExtension', () => {
     test(`"${path}" -> "${newExt}"`, () => {
       const actual = changeFileExtension(path, newExt);
       assert.equal(actual, expected);
+    });
+  }
+});
+
+suite('charToLineAndChar', () => {
+  const cases: Array<{
+    str: string;
+    char: number;
+    expected: ReturnType<typeof charToLineAndChar>;
+  }> = [
+    {
+      str: 'foo\nbar\nbaz',
+      //    ^
+      char: 0,
+      expected: {line: 0, character: 0},
+    },
+    {
+      str: 'foo\nbar\nbaz',
+      //       ^^
+      char: 3,
+      expected: {line: 0, character: 3},
+    },
+    {
+      str: 'foo\nbar\nbaz',
+      //         ^
+      char: 4,
+      expected: {line: 1, character: 0},
+    },
+    {
+      str: 'foo\nbar\nbaz',
+      //                ^
+      char: 10,
+      expected: {line: 2, character: 2},
+    },
+  ];
+
+  for (const {str, char, expected} of cases) {
+    test(`${char} in ${JSON.stringify(str)}`, () => {
+      const actual = charToLineAndChar(str, char);
+      assert.deepEqual(actual, expected);
     });
   }
 });

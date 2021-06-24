@@ -142,3 +142,24 @@ export const changeFileExtension = (path: string, newExt: string): string => {
   }
   return path.slice(0, -oldExt.length) + newExt;
 };
+
+/**
+ * Given a string and string-relative character index, return the equivalent
+ * line number and line-relative character index.
+ */
+export const charToLineAndChar = (
+  str: string,
+  char: number
+): {line: number; character: number} => {
+  let line = 0;
+  let character = 0;
+  for (let i = 0; i < char && i < str.length; i++) {
+    if (str[i] === '\n') {
+      line++;
+      character = 0;
+    } else {
+      character++;
+    }
+  }
+  return {line, character};
+};
