@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
-## [0.10.0] - 2021-06-30
+## [0.10.0] - 2021-07-01
 
 ### Added
 
