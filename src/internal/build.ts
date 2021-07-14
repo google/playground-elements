@@ -154,7 +154,7 @@ export class PlaygroundBuild {
 
   private _errorPendingFileRequests(error: HttpError) {
     for (const file of this._files.values()) {
-      if (!file.resolved) {
+      if (!file.settled) {
         file.resolve(error);
       }
     }
