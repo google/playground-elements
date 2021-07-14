@@ -91,19 +91,25 @@ export const classifySpecifier = (
   return 'bare';
 };
 
+export interface NpmFileLocation {
+  pkg: string;
+  version: string;
+  path: string;
+}
+
 /**
  * Parse the given module import specifier using format
  * "<pkg>[@<version>][/<path>]".
  *
  * E.g. given "foo@^1.2.3/bar.js" return {
  *   pkg: "foo",
- *   range: "^1.2.3",
+ *   version: "^1.2.3",
  *   path: "bar.js"
  * }
  */
 export const parseNpmStyleSpecifier = (
   specifier: string
-): {pkg: string; version: string; path: string} | undefined => {
+): NpmFileLocation | undefined => {
   const match = specifier.match(
     /^((?:@[^\/@]+\/)?[^\/\@]+)(?:@([^\/]+))?\/?(.*)$/
   );
@@ -163,3 +169,22 @@ export const charToLineAndChar = (
   }
   return {line, character};
 };
+
+export interface PackageJson {
+  version?: string;
+  main?: string;
+  module?: string;
+  types?: string;
+  typings?: string;
+  dependencies?: {[key: string]: string};
+}
+
+/**
+ * Return whether the given string is an exact semver version, as opposed to a
+ * range or tag.
+ */
+export const isExactSemverVersion = (s: string) =>
+  s.match(
+    // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  ) !== null;
