@@ -9,9 +9,9 @@ import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
 
 // This script is automatically run before pack/publish to ensure that the
-// src/lib/version.ts module contains the current package version number. We use
-// this version number at runtime to ensure that the default unpkg.com sandbox
-// base URL matches the version number of the components.
+// src/internal/version.ts module contains the current package version number.
+// We use this version number at runtime to ensure that the default unpkg.com
+// sandbox base URL matches the version number of the components.
 
 (async function main() {
   const thisDir = dirname(fileURLToPath(import.meta.url));
@@ -34,11 +34,17 @@ import {fileURLToPath} from 'url';
 export const version = '${version}';
 `;
 
-  const versionModulePath = join(thisDir, '..', 'src', 'lib', 'version.ts');
+  const versionModulePath = join(
+    thisDir,
+    '..',
+    'src',
+    'internal',
+    'version.ts'
+  );
   const oldVersionModuleCode = await fs.readFile(versionModulePath, 'utf8');
   if (oldVersionModuleCode !== newVersionModuleCode) {
     await fs.writeFile(versionModulePath, newVersionModuleCode, 'utf8');
-    console.log('Updated src/lib/version.ts, please commit this change.');
+    console.log('Updated src/internal/version.ts, please commit this change.');
     // Fail to help the publisher remember to commit.
     process.exit(1);
   }

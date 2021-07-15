@@ -19,16 +19,18 @@ import semver from 'semver';
  *
  *    const cdnData = {
  *      "foo": {
- *        "1.2.3": {
- *          "files": {
- *            "package.json": {
- *              "content": `{
- *                "main": "lib/index.js"
- *              }`
- *            },
- *            "lib/index.js": {
- *              "content": "console.log('hello');"
- *            },
+ *        "versions": {
+ *          "1.2.3": {
+ *            "files": {
+ *              "package.json": {
+ *                "content": `{
+ *                  "main": "lib/index.js"
+ *                }`
+ *              },
+ *              "lib/index.js": {
+ *                "content": "console.log('hello');"
+ *              },
+ *            }
  *          }
  *        }
  *      }
@@ -110,6 +112,11 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
         return undefined;
       }
       if (version !== semverRange) {
+        // The version in the URL was a range, rather than a concrete version.
+        // Redirect to the concrete version's URL. Note that redirecting here,
+        // rather than just serving the resolved file directly, is an important
+        // behavior of unpkg that we want to preserve in tests, because we rely
+        // on being able to extract resolved versions from redirect URLs.
         ctx.response.status = 302;
         ctx.response.redirect(`${pathPrefix}${id}/${pkg}@${version}/${path}`);
         return undefined;
