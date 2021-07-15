@@ -27,14 +27,14 @@ suite('MergedAsyncIterables', () => {
 
   const raf = () => new Promise((resolve) => requestAnimationFrame(resolve));
 
-  test('empty', async () => {
+  test('zero iterables', async () => {
     const expected: unknown[] = [];
     const merged = new MergedAsyncIterables();
     const actual = await flush(merged);
     assert.deepEqual(actual, expected);
   });
 
-  test('one', async () => {
+  test('one iterable', async () => {
     const a = (async function* () {
       yield 'a0';
       yield 'a1';
@@ -46,7 +46,7 @@ suite('MergedAsyncIterables', () => {
     assert.deepEqual(actual, expected);
   });
 
-  test('two', async () => {
+  test('two iterables', async () => {
     const a = (async function* () {
       await raf();
       yield 'a0';
@@ -64,7 +64,7 @@ suite('MergedAsyncIterables', () => {
     assert.deepEqual(actual, expected);
   });
 
-  test('three', async () => {
+  test('three iterables', async () => {
     const a = (async function* () {
       await raf(); // 0
       await raf(); // 1
@@ -156,6 +156,21 @@ suite('relativeUrlPath', () => {
       to: 'index.js',
       expected: '',
     },
+    {
+      from: '',
+      to: 'index.js',
+      expected: './index.js',
+    },
+    {
+      from: 'index.js',
+      to: '',
+      expected: './',
+    },
+    {
+      from: '',
+      to: '',
+      expected: '',
+    },
   ];
 
   for (const {from, to, expected} of cases) {
@@ -197,6 +212,21 @@ suite('resolveUrlPath', () => {
       a: 'index.js',
       b: '',
       expected: '/index.js',
+    },
+    {
+      a: 'node_modules/index.js',
+      b: '.',
+      expected: '/node_modules/',
+    },
+    {
+      a: 'node_modules/index.js',
+      b: './',
+      expected: '/node_modules/',
+    },
+    {
+      a: 'node_modules/index.js',
+      b: '../',
+      expected: '/',
     },
   ];
 
@@ -346,6 +376,16 @@ suite('changeFileExtension', () => {
       newExt: 'd.ts',
       expected: 'foo.d.ts',
     },
+    {
+      path: '',
+      newExt: 'd.ts',
+      expected: '.d.ts',
+    },
+    {
+      path: 'foo.js',
+      newExt: '',
+      expected: 'foo.',
+    },
   ];
 
   for (const {path, newExt, expected} of cases) {
@@ -378,6 +418,24 @@ suite('charToLineAndChar', () => {
       str: 'foo\nbar\nbaz',
       //         ^
       char: 4,
+      expected: {line: 1, character: 0},
+    },
+    {
+      str: 'foo\r\nbar\r\nbaz',
+      //       ^^
+      char: 3,
+      expected: {line: 0, character: 3},
+    },
+    {
+      str: 'foo\r\nbar\r\nbaz',
+      //         ^^
+      char: 4,
+      expected: {line: 0, character: 4},
+    },
+    {
+      str: 'foo\r\nbar\r\nbaz',
+      //           ^
+      char: 5,
       expected: {line: 1, character: 0},
     },
     {

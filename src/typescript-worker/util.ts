@@ -82,6 +82,9 @@ export const classifySpecifier = (
   specifier: string
 ): 'bare' | 'relative' | 'url' => {
   try {
+    // Note a specifier like "te:st.js" would be classified as a URL. This is
+    // ok, because we can assume bare specifiers are always prefixed with a NPM
+    // package name, which cannot contain ":" characters.
     new URL(specifier).href;
     return 'url';
   } catch {}
@@ -127,7 +130,8 @@ export const parseNpmStyleSpecifier = (
 
 /**
  * Return the file extension of the given URL path. Does not include the leading
- * ".".
+ * ".". Note this only considers the final ".", so e.g. given "foo.d.ts" this
+ * will return "ts".
  */
 export const fileExtension = (path: string): string => {
   const lastSlashIdx = path.lastIndexOf('/');
@@ -139,7 +143,8 @@ export const fileExtension = (path: string): string => {
 
 /**
  * Change the given URL path's file extension to a different one. `newExt`
- * should not include the leading ".".
+ * should not include the leading ".". Note this only considers the final ".",
+ * so e.g. given "foo.d.ts" and ".js" this will return "foo.d.js".
  */
 export const changeFileExtension = (path: string, newExt: string): string => {
   const oldExt = fileExtension(path);
