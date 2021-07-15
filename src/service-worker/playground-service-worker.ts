@@ -32,7 +32,7 @@ const fileAPIs = new Map<string, Deferred<FileAPI>>();
 const workerAPI: ServiceWorkerAPI = {
   setFileAPI(fileAPI: FileAPI, sessionID: SessionID) {
     let deferred = fileAPIs.get(sessionID);
-    if (deferred === undefined || deferred.resolved) {
+    if (deferred === undefined || deferred.settled) {
       deferred = new Deferred();
       fileAPIs.set(sessionID, deferred);
     }
