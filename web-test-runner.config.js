@@ -6,6 +6,7 @@
 
 import {playwrightLauncher} from '@web/test-runner-playwright';
 import {puppeteerLauncher} from '@web/test-runner-puppeteer';
+import {fakeCdnPlugin} from './test/fake-cdn-plugin.js';
 
 // https://modern-web.dev/docs/test-runner/cli-and-configuration/
 export default {
@@ -39,4 +40,5 @@ export default {
       timeout: '30000', // default 2000
     },
   },
+  plugins: [fakeCdnPlugin()],
 };
