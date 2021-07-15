@@ -5,9 +5,17 @@
  */
 
 import ts from '../internal/typescript.js';
-import {ModuleResolver, isRelativeOrAbsolutePath} from './module-resolver.js';
+import {ModuleResolver} from './module-resolver.js';
 import {Deferred} from '../shared/deferred.js';
-import {Result} from '../shared/util.js';
+import {
+  parseNpmStyleSpecifier,
+  fileExtension,
+  changeFileExtension,
+  classifySpecifier,
+  relativeUrlPath,
+} from './util.js';
+
+import type {Result} from '../shared/util.js';
 
 /**
  * Fetches typings for TypeScript imports and their transitive dependencies, and
@@ -38,7 +46,7 @@ export class TypesFetcher {
   addBareModuleTypings(sourceText: string): void {
     const fileInfo = ts.preProcessFile(sourceText, undefined, true);
     for (const {fileName: specifier} of fileInfo.importedFiles) {
-      if (moduleSpecifierKind(specifier) === 'bare') {
+      if (classifySpecifier(specifier) === 'bare') {
         this._entrypointTasks.push(this._handleBareSpecifier(specifier));
       }
     }
@@ -97,7 +105,7 @@ export class TypesFetcher {
     const fileInfo = ts.preProcessFile(sourceText, undefined, true);
     const promises = [];
     for (const {fileName: specifier} of fileInfo.importedFiles) {
-      const kind = moduleSpecifierKind(specifier);
+      const kind = classifySpecifier(specifier);
       if (kind === 'bare') {
         promises.push(this._handleBareSpecifier(specifier));
       } else if (kind === 'relative') {
@@ -117,7 +125,7 @@ export class TypesFetcher {
       return;
     }
     this._handledSpecifiers.add(bare);
-    const npm = parseModuleSpecifierAsNodeModule(bare);
+    const npm = parseNpmStyleSpecifier(bare);
     if (npm === undefined) {
       return;
     }
@@ -177,10 +185,7 @@ export class TypesFetcher {
     }
     // Note the base URL doesn't matter here, we're just using the URL API to
     // perform path resolution.
-    const jsPath = new URL(
-      relative,
-      new URL(referrerSpecifier.path, 'https://example.com')
-    ).pathname.slice(1); // Remove the leading '/'.
+    const jsPath = relativeUrlPath(referrerSpecifier.path, relative).slice(1); // Remove the leading '/'.
     const dtsPath = changeFileExtension(jsPath, 'd.ts');
     const dtsSpecifier = `${referrerSpecifier.pkg}/${dtsPath}`;
     if (this._handledSpecifiers.has(dtsSpecifier)) {
@@ -243,49 +248,7 @@ interface PackageJson {
   main?: string;
 }
 
-const moduleSpecifierKind = (
-  specifier: string
-): 'url' | 'relative' | 'bare' => {
-  try {
-    new URL(specifier);
-    return 'url';
-  } catch {}
-  if (isRelativeOrAbsolutePath(specifier)) {
-    return 'relative';
-  }
-  return 'bare';
-};
-
 interface NodePackage {
   pkg: string;
   path: string;
 }
-
-const parseModuleSpecifierAsNodeModule = (
-  specifier: string
-): NodePackage | undefined => {
-  const match = specifier.match(
-    /^((?:@[^\/@]+\/)?[^\/\@]+)(?:@([^\/]+))?\/?(.*)$/
-  );
-  if (match === null) {
-    return undefined;
-  }
-  const [, pkg, _semver, path] = match;
-  return {pkg, path};
-};
-
-const changeFileExtension = (path: string, newExt: string): string => {
-  const oldExt = fileExtension(path);
-  if (oldExt === '') {
-    return path + '.' + newExt;
-  }
-  return path.slice(0, -oldExt.length) + newExt;
-};
-
-const fileExtension = (path: string): string => {
-  const lastSlashIdx = path.lastIndexOf('/');
-  const lastDotIdx = path.lastIndexOf('.');
-  return lastDotIdx === -1 || lastDotIdx < lastSlashIdx
-    ? ''
-    : path.slice(lastDotIdx + 1);
-};
