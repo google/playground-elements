@@ -337,6 +337,7 @@ export class PlaygroundConfigurator extends LitElement {
             .resizable=${this.values.getValue('resizable')}
             .editableFileSystem=${this.values.getValue('editableFileSystem')}
             project-src="./project/project.json"
+            sandbox-base-url="."
           >
           </playground-ide>
 
