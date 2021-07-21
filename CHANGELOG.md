@@ -17,7 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Fixed
+
+- Playgrounds now ensure that the service worker they are connected to have a
+  matching version. Fixes issues relating to playgrounds being broken for some
+  time after an upgrade.
 
 ## [0.10.1] - 2021-07-14
 
