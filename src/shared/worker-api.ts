@@ -36,6 +36,12 @@ export const ACKNOWLEDGE_SW_CONNECTION = 4;
  */
 export const MISSING_FILE_API = 5;
 
+/**
+ * Sent from the project to the service worker proxy when there is a version
+ * mismatch to request a call to ServiceWorkerRegistration.update().
+ */
+export const UPDATE_SERVICE_WORKER = 6;
+
 export type PlaygroundMessage =
   | {
       type: typeof CONFIGURE_PROXY;
@@ -53,9 +59,13 @@ export type PlaygroundMessage =
     }
   | {
       type: typeof ACKNOWLEDGE_SW_CONNECTION;
+      version: string;
     }
   | {
       type: typeof MISSING_FILE_API;
+    }
+  | {
+      type: typeof UPDATE_SERVICE_WORKER;
     };
 
 export interface ServiceWorkerAPI {

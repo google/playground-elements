@@ -27,13 +27,14 @@ import {
   ACKNOWLEDGE_SW_CONNECTION,
   ModuleImportMap,
   HttpError,
+  UPDATE_SERVICE_WORKER,
 } from './shared/worker-api.js';
 import {
   getRandomString,
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
-import {version} from './internal/version.js';
+import {version} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
@@ -404,17 +405,7 @@ export class PlaygroundProject extends LitElement {
   }
 
   private _onServiceWorkerProxyIframeLoad() {
-    // This iframe exists to proxy messages between this project and the service
-    // worker, because the service worker may be running on a different origin
-    // for security.
-    const iframeWindow = this._iframe.contentWindow;
-    if (!iframeWindow) {
-      throw new Error(
-        'Unexpected internal error: ' +
-          '<playground-project> service worker proxy iframe had no contentWindow'
-      );
-    }
-    // This channel is persistent, and is only used to receieve new service
+    // This channel is persistent, and is only used to receive new service
     // worker channel ports from the proxy iframe. Note we can get new service
     // worker ports at any time from the proxy, when the service worker updates.
     const {port1, port2} = new MessageChannel();
@@ -427,34 +418,65 @@ export class PlaygroundProject extends LitElement {
       }
     );
     port1.start();
-    const configureMessage: PlaygroundMessage = {
-      type: CONFIGURE_PROXY,
-      url: 'playground-service-worker.js',
-      scope: this.sandboxScope,
-      port: port2,
-    };
-    // We could constrain targetOrigin to
-    // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
-    // security benefit, and would add the limitation that the sandboxBaseUrl
-    // can't redirect to another origin.
-    iframeWindow.postMessage(configureMessage, '*', [configureMessage.port]);
+    this._postMessageToServiceWorkerProxy(
+      {
+        type: CONFIGURE_PROXY,
+        url: 'playground-service-worker.js',
+        scope: this.sandboxScope,
+        port: port2,
+      },
+      [port2]
+    );
   }
 
   private _onNewServiceWorkerPort(port: MessagePort) {
     const onMessage = (e: MessageEvent<PlaygroundMessage>) => {
       if (e.data.type === ACKNOWLEDGE_SW_CONNECTION) {
         port.removeEventListener('message', onMessage);
-        this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
-        this._serviceWorkerAPI.setFileAPI(
-          proxy({
-            getFile: (name: string) => this._getFile(name),
-          }),
-          this._sessionId
-        );
+        if (e.data.version === version) {
+          this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
+          this._serviceWorkerAPI.setFileAPI(
+            proxy({
+              getFile: (name: string) => this._getFile(name),
+            }),
+            this._sessionId
+          );
+        } else {
+          // Version mismatch. Request the service worker be updated
+          // immediately. We'll get back here again after it updates via a
+          // CONNECT_PROJECT_TO_SW message from the proxy.
+          console.info(
+            'Playground service worker is outdated, waiting for update.'
+          );
+          this._postMessageToServiceWorkerProxy({
+            type: UPDATE_SERVICE_WORKER,
+          });
+        }
       }
     };
     port.addEventListener('message', onMessage);
     port.start();
+  }
+
+  private _postMessageToServiceWorkerProxy(
+    message: PlaygroundMessage,
+    transfer?: Transferable[]
+  ) {
+    // This iframe exists to proxy messages between this project and the service
+    // worker, because the service worker may be running on a different origin
+    // for security.
+    const iframeWindow = this._iframe.contentWindow;
+    if (!iframeWindow) {
+      throw new Error(
+        'Unexpected internal error: ' +
+          '<playground-project> service worker proxy iframe had no contentWindow'
+      );
+    }
+    // We could constrain targetOrigin to
+    // `this._normalizedSandboxBaseUrl.origin`, but unclear if that provides any
+    // security benefit, and would add the limitation that the sandboxBaseUrl
+    // can't redirect to another origin.
+    iframeWindow.postMessage(message, '*', transfer);
   }
 
   private async _getFile(name: string): Promise<SampleFile | HttpError> {

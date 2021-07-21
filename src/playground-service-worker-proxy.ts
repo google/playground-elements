@@ -10,6 +10,7 @@ import {
   CONNECT_PROJECT_TO_SW,
   CONFIGURE_PROXY,
   MISSING_FILE_API,
+  UPDATE_SERVICE_WORKER,
 } from './shared/worker-api.js';
 
 (async () => {
@@ -27,7 +28,11 @@ import {
   // Wait for our parent to send us:
   // 1. The URL and scope of the Service Worker to register.
   // 2. A MessagePort, on which we'll forward up new Service Worker ports.
-  const {url, scope, port: parentPort} = await new Promise<{
+  const {
+    url,
+    scope,
+    port: parentPort,
+  } = await new Promise<{
     url: string;
     scope: string;
     port: MessagePort;
@@ -44,6 +49,19 @@ import {
   const registration = await navigator.serviceWorker.register(
     new URL(url, import.meta.url).href,
     {scope}
+  );
+
+  window.addEventListener(
+    'message',
+    (event: MessageEvent<PlaygroundMessage>) => {
+      if (event.data.type === UPDATE_SERVICE_WORKER) {
+        // When the project handshakes with the service worker, it may notice a
+        // version mismatch, in which case it will send this message to request
+        // the service worker update. Note that service workers eventually
+        // update automatically, but not necessarily right away.
+        registration.update();
+      }
+    }
   );
 
   const connect = (sw: ServiceWorker) => {

@@ -14,6 +14,7 @@ import {
 } from '../shared/worker-api.js';
 import {expose} from 'comlink';
 import {Deferred} from '../shared/deferred.js';
+import {version} from '../shared/version.js';
 
 declare var self: ServiceWorkerGlobalScope;
 
@@ -142,7 +143,10 @@ const onMessage = (
 ) => {
   // Receive a handshake message from a page and setup Comlink.
   if (e.data.type === CONNECT_SW_TO_PROJECT) {
-    const ack: PlaygroundMessage = {type: ACKNOWLEDGE_SW_CONNECTION};
+    const ack: PlaygroundMessage = {
+      type: ACKNOWLEDGE_SW_CONNECTION,
+      version,
+    };
     e.data.port.postMessage(ack);
     expose(workerAPI, e.data.port);
   }
