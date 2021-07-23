@@ -91,7 +91,28 @@ const getFile = async (_e: FetchEvent, path: string, sessionId: SessionID) => {
     return new Response(body, {status});
   }
   const {content, contentType} = fileOrError;
-  const headers = contentType ? {'Content-Type': contentType} : undefined;
+  const headers = new Headers();
+  // By default, a browser is only able to allocate a separate process or thread
+  // for the Playground preview iframe if it is hosted on a different _site_
+  // (protocol + top-level domain) from the parent window. For example, lit.dev
+  // and playground.lit.dev are the same site, but different origins. By setting
+  // this Origin-Agent-Cluster header, we additionally allow process isolation
+  // for different origins even if they are same-site.
+  //
+  // Note that _all_ responses from the sandbox origin must include this header
+  // in order isolation to be possible, because the browser persists the setting
+  // based on the first response it gets from that origin, so users will also
+  // need to configure their HTTP server's response headers, since this line
+  // only affects responses handled by the the service worker, and not e.g. the
+  // service worker script itself.
+  //
+  // See:
+  // https://web.dev/origin-agent-cluster/
+  // https://html.spec.whatwg.org/multipage/origin.html#origin-keyed-agent-clusters
+  headers.set('Origin-Agent-Cluster', '?1');
+  if (contentType) {
+    headers.set('Content-Type', contentType);
+  }
   return new Response(content, {headers});
 };
 
