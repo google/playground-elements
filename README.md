@@ -563,6 +563,11 @@ meets all of the following requirements:
    modifying the parent window using `window.parent`, e.g. to change your
    sign-in link to a malicious URL.
 
+   > NOTE: It is highly recommended to furthermore use either an entirely
+   > different _site_, or to use the `Origin-Agent-Cluster` header, to improve
+   > performance and prevent lockups. See [Process
+   > isolation](#process-isolation) for more information.
+
 2. Must not have access to any sensitive cookies. This prevents untrusted code
    from e.g. reading and forwarding your user's authentication token.
 
@@ -579,6 +584,29 @@ meets all of the following requirements:
    components_:
    - `playground-service-worker.js`
    - `playground-service-worker-proxy.html`
+
+#### Process isolation
+
+Some browsers such as Chrome are sometimes able to allocate a separate process
+or thread for iframes. This is highly desirable for Playground, because it
+improves responsiveness and prevents full lockups (resulting from e.g. an
+infinite loop accidentally written by a user).
+
+By default, this iframe process isolation can only occur if the iframe and the
+parent window are _different sites_. While an _origin_ is defined by (protocol +
+subdomain + top-level domain + port), a _site_ is defined only by (protocol +
+top-level domain). For example, `example.com` and `foo.example.com` are
+different-origin but same-site, whereas `example.com` and `example.net` are
+different-origin and different-site.
+
+Alternatively, if the `Origin-Agent-Cluster: ?1` header is set on all server
+responses from one or the other origins, then iframe process isolation can also
+occur with different-origin but same-site configurations. Note that this header
+must truly be set on _all_ responses from the origin, because the browser will
+remember the setting based on the _first response_ it gets from that origin. See
+_["Requesting performance isolation with the Origin-Agent-Cluster
+header"](https://web.dev/origin-agent-cluster/)_ for more information about this
+header.
 
 ## Components
 
