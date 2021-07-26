@@ -57,8 +57,18 @@ import {
       if (event.data.type === UPDATE_SERVICE_WORKER) {
         // When the project handshakes with the service worker, it may notice a
         // version mismatch, in which case it will send this message to request
-        // the service worker update. Note that service workers eventually
-        // update automatically, but not necessarily right away.
+        // the service worker update.
+        //
+        // Calling update triggers a fetch of the service worker. If the scripts
+        // are byte-different, then it will be installed + activated, and we'll
+        // receive the "updatefound" even there. Note this is exactly the normal
+        // Service Worker update lifecycle, it's just that calling update()
+        // forces it to happen immediately, as opposed to at some unknown
+        // opportunistic time in the future.
+        //
+        // TODO(aomarks) It would be good to show an error to the user somehow
+        // if we never end up getting a new version here. That would indicate
+        // that the SW and project are out of date *on the server*.
         registration.update();
       }
     }

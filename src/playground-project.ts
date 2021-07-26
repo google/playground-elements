@@ -215,7 +215,7 @@ export class PlaygroundProject extends LitElement {
   private _slot!: HTMLSlotElement;
 
   @query('iframe')
-  private _iframe!: HTMLIFrameElement;
+  private _serviceWorkerProxyIframe!: HTMLIFrameElement;
 
   private get _normalizedSandboxBaseUrl() {
     const url = new URL(this.sandboxBaseUrl, document.location.href);
@@ -418,7 +418,7 @@ export class PlaygroundProject extends LitElement {
       }
     );
     port1.start();
-    this._postMessageToServiceWorkerProxy(
+    this._postMessageToServiceWorkerProxyIframe(
       {
         type: CONFIGURE_PROXY,
         url: 'playground-service-worker.js',
@@ -448,7 +448,7 @@ export class PlaygroundProject extends LitElement {
           console.info(
             'Playground service worker is outdated, waiting for update.'
           );
-          this._postMessageToServiceWorkerProxy({
+          this._postMessageToServiceWorkerProxyIframe({
             type: UPDATE_SERVICE_WORKER,
           });
         }
@@ -458,14 +458,14 @@ export class PlaygroundProject extends LitElement {
     port.start();
   }
 
-  private _postMessageToServiceWorkerProxy(
+  private _postMessageToServiceWorkerProxyIframe(
     message: PlaygroundMessage,
     transfer?: Transferable[]
   ) {
     // This iframe exists to proxy messages between this project and the service
     // worker, because the service worker may be running on a different origin
     // for security.
-    const iframeWindow = this._iframe.contentWindow;
+    const iframeWindow = this._serviceWorkerProxyIframe.contentWindow;
     if (!iframeWindow) {
       throw new Error(
         'Unexpected internal error: ' +
