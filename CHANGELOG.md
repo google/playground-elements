@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   matching version. Fixes issues relating to playgrounds being broken for some
   time after an upgrade.
 
+### Changed
+
+- The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
+  responses, to encourage browsers to allocate a separate process or thread for
+  Playground preview iframe under certain conditions. See the [Process
+  isolation](https://github.com/PolymerLabs/playground-elements#process-isolation)
+  section of the README for more details.
+
 ## [0.10.1] - 2021-07-14
 
 ### Changed
