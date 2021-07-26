@@ -10,6 +10,7 @@ import {
   CONNECT_PROJECT_TO_SW,
   CONFIGURE_PROXY,
   MISSING_FILE_API,
+  UPDATE_SERVICE_WORKER,
 } from './shared/worker-api.js';
 
 (async () => {
@@ -27,7 +28,11 @@ import {
   // Wait for our parent to send us:
   // 1. The URL and scope of the Service Worker to register.
   // 2. A MessagePort, on which we'll forward up new Service Worker ports.
-  const {url, scope, port: parentPort} = await new Promise<{
+  const {
+    url,
+    scope,
+    port: parentPort,
+  } = await new Promise<{
     url: string;
     scope: string;
     port: MessagePort;
@@ -44,6 +49,29 @@ import {
   const registration = await navigator.serviceWorker.register(
     new URL(url, import.meta.url).href,
     {scope}
+  );
+
+  window.addEventListener(
+    'message',
+    (event: MessageEvent<PlaygroundMessage>) => {
+      if (event.data.type === UPDATE_SERVICE_WORKER) {
+        // When the project handshakes with the service worker, it may notice a
+        // version mismatch, in which case it will send this message to request
+        // the service worker update.
+        //
+        // Calling update triggers a fetch of the service worker. If the scripts
+        // are byte-different, then it will be installed + activated, and we'll
+        // receive the "updatefound" even there. Note this is exactly the normal
+        // Service Worker update lifecycle, it's just that calling update()
+        // forces it to happen immediately, as opposed to at some unknown
+        // opportunistic time in the future.
+        //
+        // TODO(aomarks) It would be good to show an error to the user somehow
+        // if we never end up getting a new version here. That would indicate
+        // that the SW and project are out of date *on the server*.
+        registration.update();
+      }
+    }
   );
 
   const connect = (sw: ServiceWorker) => {

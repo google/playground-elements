@@ -21,7 +21,7 @@ import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
 import {ProjectManifest} from './shared/worker-api.js';
-import {version} from './internal/version.js';
+import {version} from './shared/version.js';
 
 /**
  * A multi-file code editor component with live preview that works without a

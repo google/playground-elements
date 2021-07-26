@@ -4,6 +4,7 @@
 /service-worker/
 /shared/
 /configurator/*.js
+!/configurator/playground-service-worker.js
 /configurator/*.d.ts
 /configurator/*.d.ts.map
 /configurator/deploy/

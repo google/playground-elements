@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Fixed
+
+- Playgrounds now ensure that the service worker they are connected to have a
+  matching version. Fixes issues relating to playgrounds being broken for some
+  time after an upgrade.
+
 ### Changed
 
 - The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
