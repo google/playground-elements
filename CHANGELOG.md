@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `--playground-tab-bar-font-size` CSS custom property now behaves as
   documented.
 
+- Fix missing `.js` extension from import in `build.js` that may have broken
+  Webpack and other builds.
+
 ### Changed
 
 - **BREAKING** `playground-base-url` is now resolved relative to the
