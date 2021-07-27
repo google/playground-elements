@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `--playground-tab-bar-font-size` CSS custom property now behaves as
   documented.
 
+- The `--playground-floating-controls-color` CSS custom property now behaves as
+  documented.
+
 - Fix missing `.js` extension from import in `build.js` that may have broken
   Webpack and other builds.
 
