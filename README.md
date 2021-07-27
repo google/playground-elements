@@ -634,15 +634,15 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type                            | Default                   | Description                                                                                                   |
-| -------------------- | -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                      |
-| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
-| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                               |
-| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                    |
-| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                   |
-| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                 |
+| Name                 |  Type                            | Default                   | Description                                                                                                                                                                                        |
+| -------------------- | -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                                                                                                           |
+| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                                                                                                         |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                                                                                                        |
+| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
+| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
 
 ### Slots
 
@@ -660,13 +660,13 @@ project element.
 
 ### Properties
 
-| Name             |  Type                         | Default                   | Description                                                                                                   |
-| ---------------- | ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                           |
-| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
-| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                      |
-| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.     |
+| Name             |  Type                         | Default                   | Description                                                                                                                                                                                        |
+| ---------------- | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                                                                                                                |
+| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                                                                                                           |
+| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
+| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.                                                                                          |
 
 ### Methods
 

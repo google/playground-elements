@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- **BREAKING** `playground-base-url` is now resolved relative to the
+  `import.meta.url` of the module containing the definition of
+  `<playground-project>`, instead of relative to `document.location.href` as
+  before. This means that `.` can now be used to refer to the local playground
+  installation directory.
+
 - The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
   responses, to encourage browsers to allocate a separate process or thread for
   Playground preview iframe under certain conditions. See the [Process

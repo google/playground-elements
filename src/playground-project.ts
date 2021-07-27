@@ -218,7 +218,7 @@ export class PlaygroundProject extends LitElement {
   private _serviceWorkerProxyIframe!: HTMLIFrameElement;
 
   private get _normalizedSandboxBaseUrl() {
-    const url = new URL(this.sandboxBaseUrl, document.location.href);
+    const url = new URL(this.sandboxBaseUrl, import.meta.url);
     url.pathname = endWithSlash(url.pathname);
     return url;
   }
