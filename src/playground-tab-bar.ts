@@ -37,6 +37,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   static styles = css`
     :host {
       display: flex;
+      font-size: var(--playground-tab-bar-font-size, 14px);
       height: var(--playground-bar-height, 40px);
       background: var(--playground-tab-bar-background, #eaeaea);
       align-items: center;
@@ -53,7 +54,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
     playground-internal-tab {
       color: var(--playground-tab-bar-foreground-color, #000);
-      font-size: var(--playground-tab-bar-font-size, 0.85em);
       border-bottom: 2px solid transparent;
       transition: border 150ms;
     }

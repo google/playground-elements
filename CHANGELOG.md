@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   matching version. Fixes issues relating to playgrounds being broken for some
   time after an upgrade.
 
+- The `--playground-tab-bar-font-size` CSS custom property now behaves as
+  documented.
+
 ### Changed
 
 - The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
@@ -32,6 +35,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Playground preview iframe under certain conditions. See the [Process
   isolation](https://github.com/PolymerLabs/playground-elements#process-isolation)
   section of the README for more details.
+
+- It is now possible to change the `font-family` of the tab-bar using a
+  `::part(tab-bar)` selector.
 
 ## [0.10.1] - 2021-07-14
 

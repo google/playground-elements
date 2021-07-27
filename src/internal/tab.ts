@@ -33,6 +33,8 @@ export class PlaygroundInternalTab extends LitElement {
     button {
       flex: 1;
       border: none;
+      font-size: inherit;
+      font-family: inherit;
       color: inherit;
       background: transparent;
       display: flex;
