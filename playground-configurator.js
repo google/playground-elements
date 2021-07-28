@@ -205,13 +205,13 @@ class Fe{constructor(){this.settled=!1,this.promise=new Promise(((e,t)=>{this._r
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */const Be=new Set;let Ue=class extends fe{constructor(){super(...arguments),this._source={type:"none"},this.sandboxBaseUrl="https://unpkg.com/playground-elements@0.10.1/",this.sandboxScope="playground-projects/",this._sessionId=(()=>{let e;do{e=crypto.getRandomValues(new Uint32Array(1))[0].toString(32)}while(Be.has(e));return Be.add(e),e})(),this._deferredTypeScriptWorkerApi=new Fe,this._validImportMap={},this.lastSave=Promise.resolve(),this.savePending=!1}get projectSrc(){if("url"===this._source.type)return this._source.url}set projectSrc(e){e?"url"===this._source.type&&this._source.url===e||(this._source={type:"url",url:e}):"url"===this._source.type&&(this._source={type:"none"})}get config(){var e;return{files:Object.fromEntries((null!==(e=this._files)&&void 0!==e?e:[]).map((e=>[e.name,{...e,name:void 0}]))),importMap:this._validImportMap}}set config(e){e?this._source={type:"direct",config:e}:"direct"===this._source.type&&(this._source={type:"none"})}get files(){return this._files}get diagnostics(){var e;return null===(e=this._build)||void 0===e?void 0:e.diagnostics}set _importMap(e){const t=je(e);if(t.length>0){for(const e of t)console.error(e);this._validImportMap={}}else this._validImportMap=e}get _importMap(){return this._validImportMap}get _normalizedSandboxBaseUrl(){const e=new URL(this.sandboxBaseUrl,document.location.href);return e.pathname=Ne(e.pathname),e}get baseUrl(){if(void 0!==this._serviceWorkerAPI&&void 0!==this._files)return new URL(`${Ne(this.sandboxScope)}${this._sessionId}/`,this._normalizedSandboxBaseUrl).href}get _serviceWorkerProxyIframeUrl(){return new URL("playground-service-worker-proxy.html#playground-session-id="+this._sessionId,this._normalizedSandboxBaseUrl).href}async update(e){e.has("_source")&&this._loadProjectFromSource(),(e.has("sandboxScope")||e.has("sandboxBaseUrl")||e.has("_serviceWorkerAPI"))&&this.dispatchEvent(new CustomEvent("urlChanged")),super.update(e)}async _loadProjectFromSource(){const e=this._source;switch(e.type){case"none":this._files=void 0,this._importMap={};break;case"direct":{const{files:t,importMap:r}=await We(e.config,document.baseURI);if(e!==this._source)return;this._files=t,this._importMap=r}break;case"slot":this._files=e.files,this._importMap=e.importMap;break;case"url":{const{files:t,importMap:r}=await He(new URL(e.url,document.baseURI).href);if(e!==this._source)return;this._files=t,this._importMap=r}}this.dispatchEvent(new CustomEvent("filesChanged")),this.save()}render(){return W`
+ */const Be=new Set;let Ue=class extends fe{constructor(){super(...arguments),this._source={type:"none"},this.sandboxBaseUrl="https://unpkg.com/playground-elements@0.10.1/",this.sandboxScope="playground-projects/",this._sessionId=(()=>{let e;do{e=crypto.getRandomValues(new Uint32Array(1))[0].toString(32)}while(Be.has(e));return Be.add(e),e})(),this._deferredTypeScriptWorkerApi=new Fe,this._validImportMap={},this.lastSave=Promise.resolve(),this.savePending=!1}get projectSrc(){if("url"===this._source.type)return this._source.url}set projectSrc(e){e?"url"===this._source.type&&this._source.url===e||(this._source={type:"url",url:e}):"url"===this._source.type&&(this._source={type:"none"})}get config(){var e;return{files:Object.fromEntries((null!==(e=this._files)&&void 0!==e?e:[]).map((e=>[e.name,{...e,name:void 0}]))),importMap:this._validImportMap}}set config(e){e?this._source={type:"direct",config:e}:"direct"===this._source.type&&(this._source={type:"none"})}get files(){return this._files}get diagnostics(){var e;return null===(e=this._build)||void 0===e?void 0:e.diagnostics}set _importMap(e){const t=je(e);if(t.length>0){for(const e of t)console.error(e);this._validImportMap={}}else this._validImportMap=e}get _importMap(){return this._validImportMap}get _normalizedSandboxBaseUrl(){const e=new URL(this.sandboxBaseUrl,import.meta.url);return e.pathname=Ne(e.pathname),e}get baseUrl(){if(void 0!==this._serviceWorkerAPI&&void 0!==this._files)return new URL(`${Ne(this.sandboxScope)}${this._sessionId}/`,this._normalizedSandboxBaseUrl).href}get _serviceWorkerProxyIframeUrl(){return new URL("playground-service-worker-proxy.html#playground-session-id="+this._sessionId,this._normalizedSandboxBaseUrl).href}async update(e){e.has("_source")&&this._loadProjectFromSource(),(e.has("sandboxScope")||e.has("sandboxBaseUrl")||e.has("_serviceWorkerAPI"))&&this.dispatchEvent(new CustomEvent("urlChanged")),super.update(e)}async _loadProjectFromSource(){const e=this._source;switch(e.type){case"none":this._files=void 0,this._importMap={};break;case"direct":{const{files:t,importMap:r}=await We(e.config,document.baseURI);if(e!==this._source)return;this._files=t,this._importMap=r}break;case"slot":this._files=e.files,this._importMap=e.importMap;break;case"url":{const{files:t,importMap:r}=await He(new URL(e.url,document.baseURI).href);if(e!==this._source)return;this._files=t,this._importMap=r}}this.dispatchEvent(new CustomEvent("filesChanged")),this.save()}render(){return W`
       <slot @slotchange=${this._slotChange}></slot>
       <iframe
         src=${this._serviceWorkerProxyIframeUrl}
         @load=${this._onServiceWorkerProxyIframeLoad}
       ></iframe>
-    `}_slotChange(e){const{type:t}=this._source;if("none"!==t&&"slot"!==t)return;const r=[];let o;for(const e of this._slot.assignedElements({flatten:!0})){const t=e.getAttribute("type");if(!(null==t?void 0:t.startsWith("sample/")))continue;const i=t.substring(7);let n=e.textContent.replace("&lt;","<");if(e.hasAttribute("preserve-whitespace")||(n=Ze(n)),"importmap"===i)try{o=JSON.parse(n)}catch{console.error("Invalid import map JSON",e)}else{const t=e.getAttribute("filename");if(!t)continue;const o=e.getAttribute("label")||void 0,a=Ke(i);r.push({name:t,label:o,hidden:e.hasAttribute("hidden"),content:n,contentType:a})}}(r.length>0||void 0!==o)&&(this._source={type:"slot",files:r,importMap:null!=o?o:{}})}async firstUpdated(){const e=("cdn.skypack.dev"===(t=new URL("./playground-typescript-worker.js",import.meta.url)).hostname&&(t.pathname=t.pathname.replace(/mode=imports\/(un)?optimized/,"mode=raw")),t);var t;let r;if(e.origin===window.location.origin)r=new Worker(e);else{const t=await fetch(e.href),o=await t.text(),i=URL.createObjectURL(new Blob([o],{type:"application/javascript"}));r=new Worker(i),URL.revokeObjectURL(i)}this._deferredTypeScriptWorkerApi.resolve(Se(r))}_onServiceWorkerProxyIframeLoad(){const{port1:e,port2:t}=new MessageChannel;e.addEventListener("message",(e=>{3===e.data.type&&this._onNewServiceWorkerPort(e.data.port)})),e.start(),this._postMessageToServiceWorkerProxyIframe({type:1,url:"playground-service-worker.js",scope:this.sandboxScope,port:t},[t])}_onNewServiceWorkerPort(e){const t=r=>{4===r.data.type&&(e.removeEventListener("message",t),"0.10.1"===r.data.version?(this._serviceWorkerAPI=Se(e),this._serviceWorkerAPI.setFileAPI(Ae({getFile:e=>this._getFile(e)}),this._sessionId)):(console.info("Playground service worker is outdated, waiting for update."),this._postMessageToServiceWorkerProxyIframe({type:6})))};e.addEventListener("message",t),e.start()}_postMessageToServiceWorkerProxyIframe(e,t){const r=this._serviceWorkerProxyIframe.contentWindow;if(!r)throw Error("Unexpected internal error: <playground-project> service worker proxy iframe had no contentWindow");r.postMessage(e,"*",t)}async _getFile(e){return void 0===this._build?{status:503,body:"Playground build not started"}:this._build.getFile(e)}async save(){var e,t;null===(e=this._build)||void 0===e||e.cancel();const r=new De((()=>{this.dispatchEvent(new CustomEvent("diagnosticsChanged"))}));this._build=r,this.dispatchEvent(new CustomEvent("compileStart"));const o=await this._deferredTypeScriptWorkerApi.promise;"active"===r.state()&&(o.compileProject(null!==(t=this._files)&&void 0!==t?t:[],this._importMap,Ae((e=>r.onOutput(e)))),await r.stateChange,"done"===r.state()&&this.dispatchEvent(new CustomEvent("compileDone")))}async saveDebounced(){this.savePending||(this.savePending=!0,await this.lastSave,this.savePending=!1,this.lastSave=this.save())}isValidNewFilename(e){return!!e&&!!this._files&&!this._files.some((t=>t.name===e))}addFile(e){this._files&&this.isValidNewFilename(e)&&(this._files=[...this._files,{name:e,content:"",contentType:Ve(e)}],this.dispatchEvent(new CustomEvent("filesChanged")),this.save())}deleteFile(e){var t;this._files=null===(t=this._files)||void 0===t?void 0:t.filter((t=>t.name!==e)),this.dispatchEvent(new CustomEvent("filesChanged")),this.save()}renameFile(e,t){if(!e||!this._files)return;if(!this.isValidNewFilename(t))return;const r=this._files.find((t=>t.name===e));r&&(r.name=t,r.contentType=Ve(t),this._files=[...this._files],this.dispatchEvent(new CustomEvent("filesChanged")),this.save())}};Ue.styles=ge`
+    `}_slotChange(){const{type:e}=this._source;if("none"!==e&&"slot"!==e)return;const t=[];let r;for(const e of this._slot.assignedElements({flatten:!0})){const o=e.getAttribute("type");if(!(null==o?void 0:o.startsWith("sample/")))continue;const i=o.substring(7);let n=e.textContent.replace("&lt;","<");if(e.hasAttribute("preserve-whitespace")||(n=Ze(n)),"importmap"===i)try{r=JSON.parse(n)}catch{console.error("Invalid import map JSON",e)}else{const r=e.getAttribute("filename");if(!r)continue;const o=e.getAttribute("label")||void 0,a=Ke(i);t.push({name:r,label:o,hidden:e.hasAttribute("hidden"),content:n,contentType:a})}}(t.length>0||void 0!==r)&&(this._source={type:"slot",files:t,importMap:null!=r?r:{}})}async firstUpdated(){const e=("cdn.skypack.dev"===(t=new URL("./playground-typescript-worker.js",import.meta.url)).hostname&&(t.pathname=t.pathname.replace(/mode=imports\/(un)?optimized/,"mode=raw")),t);var t;let r;if(e.origin===window.location.origin)r=new Worker(e);else{const t=await fetch(e.href),o=await t.text(),i=URL.createObjectURL(new Blob([o],{type:"application/javascript"}));r=new Worker(i),URL.revokeObjectURL(i)}this._deferredTypeScriptWorkerApi.resolve(Se(r))}_onServiceWorkerProxyIframeLoad(){const{port1:e,port2:t}=new MessageChannel;e.addEventListener("message",(e=>{3===e.data.type&&this._onNewServiceWorkerPort(e.data.port)})),e.start(),this._postMessageToServiceWorkerProxyIframe({type:1,url:"playground-service-worker.js",scope:this.sandboxScope,port:t},[t])}_onNewServiceWorkerPort(e){const t=r=>{4===r.data.type&&(e.removeEventListener("message",t),"0.10.1"===r.data.version?(this._serviceWorkerAPI=Se(e),this._serviceWorkerAPI.setFileAPI(Ae({getFile:e=>this._getFile(e)}),this._sessionId)):(console.info("Playground service worker is outdated, waiting for update."),this._postMessageToServiceWorkerProxyIframe({type:6})))};e.addEventListener("message",t),e.start()}_postMessageToServiceWorkerProxyIframe(e,t){const r=this._serviceWorkerProxyIframe.contentWindow;if(!r)throw Error("Unexpected internal error: <playground-project> service worker proxy iframe had no contentWindow");r.postMessage(e,"*",t)}async _getFile(e){return void 0===this._build?{status:503,body:"Playground build not started"}:this._build.getFile(e)}async save(){var e,t;null===(e=this._build)||void 0===e||e.cancel();const r=new De((()=>{this.dispatchEvent(new CustomEvent("diagnosticsChanged"))}));this._build=r,this.dispatchEvent(new CustomEvent("compileStart"));const o=await this._deferredTypeScriptWorkerApi.promise;"active"===r.state()&&(o.compileProject(null!==(t=this._files)&&void 0!==t?t:[],this._importMap,Ae((e=>r.onOutput(e)))),await r.stateChange,"done"===r.state()&&this.dispatchEvent(new CustomEvent("compileDone")))}async saveDebounced(){this.savePending||(this.savePending=!0,await this.lastSave,this.savePending=!1,this.lastSave=this.save())}isValidNewFilename(e){return!!e&&!!this._files&&!this._files.some((t=>t.name===e))}addFile(e){this._files&&this.isValidNewFilename(e)&&(this._files=[...this._files,{name:e,content:"",contentType:Ve(e)}],this.dispatchEvent(new CustomEvent("filesChanged")),this.save())}deleteFile(e){var t;this._files=null===(t=this._files)||void 0===t?void 0:t.filter((t=>t.name!==e)),this.dispatchEvent(new CustomEvent("filesChanged")),this.save()}renameFile(e,t){if(!e||!this._files)return;if(!this.isValidNewFilename(t))return;const r=this._files.find((t=>t.name===e));r&&(r.name=t,r.contentType=Ve(t),this._files=[...this._files],this.dispatchEvent(new CustomEvent("filesChanged")),this.save())}};Ue.styles=ge`
     iframe {
       display: none;
     }
@@ -420,6 +420,8 @@ let Ct=class extends fe{constructor(){super(...arguments),this.active=!1,this.in
     button {
       flex: 1;
       border: none;
+      font-size: inherit;
+      font-family: inherit;
       color: inherit;
       background: transparent;
       display: flex;
@@ -448,6 +450,19 @@ let Ct=class extends fe{constructor(){super(...arguments),this.active=!1,this.in
 
     button:active::before {
       opacity: 20%;
+    }
+
+    :host([active]) > button::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: var(
+        --playground-tab-bar-indicator-color,
+        var(--playground-highlight-color, #6200ee)
+      );
     }
   `,o([ee({type:Boolean,reflect:!0})],Ct.prototype,"active",void 0),o([oe("button")],Ct.prototype,"_button",void 0),Ct=o([X("playground-internal-tab")],Ct);
 /**
@@ -1011,10 +1026,8 @@ let jr=class extends Kr{constructor(){super(...arguments),this.state="closed",th
     `}_onSurfaceClosed(){this.state="closed"}_onClickCancel(){this._surface.close()}_onMenuAction(e){switch(e.detail.index){case 0:return this._onMenuSelectRename();case 1:return this._onMenuSelectDelete()}}_onMenuSelectRename(){this.state="rename"}_onMenuSelectDelete(){this._surface.close(),this._project&&this.filename&&this._project.deleteFile(this.filename)}_onFilenameInputChange(){this.requestUpdate()}get _filenameInputValid(){return!!(this._project&&this._filenameInput&&this._project.isValidNewFilename(this._filenameInput.value))}_onFilenameInputKeydown(e){var t;"Enter"===e.key&&!1===(null===(t=this._submitButton)||void 0===t?void 0:t.disabled)&&(e.preventDefault(),this._submitButton.click())}_onSubmitRename(){var e;this._surface.close();const t=this.filename,r=null===(e=this._filenameInput)||void 0===e?void 0:e.value;this._project&&t&&r&&this._project.renameFile(t,r)}_onSubmitNewFile(){var e;this._surface.close();const t=null===(e=this._filenameInput)||void 0===e?void 0:e.value;this._project&&t&&(this._project.addFile(t),this.dispatchEvent(new CustomEvent("newFile",{detail:{filename:t}})))}};jr.styles=ge`
     mwc-menu-surface {
       --mdc-theme-primary: var(
-        var(
-          --playground-floating-controls-color,
-          var(--playground-highlight-color, #6200ee)
-        )
+        --playground-floating-controls-color,
+        var(--playground-highlight-color, #6200ee)
       );
     }
 
@@ -1108,6 +1121,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
 var Gr;function Jr(e,t,r,o,i,n){this.name=e,this.tokenType=t,this.depth=r,this.parent=o,this.startLine=i,this.startPos=n}function qr(){this.stream=null,this.line=this.startPos=0,this.string=this.startLine="",this.copyInstance=null}Zr.styles=ge`
     :host {
       display: flex;
+      font-size: var(--playground-tab-bar-font-size, 14px);
       height: var(--playground-bar-height, 40px);
       background: var(--playground-tab-bar-background, #eaeaea);
       align-items: center;
@@ -1124,9 +1138,6 @@ var Gr;function Jr(e,t,r,o,i,n){this.name=e,this.tokenType=t,this.depth=r,this.p
 
     playground-internal-tab {
       color: var(--playground-tab-bar-foreground-color, #000);
-      font-size: var(--playground-tab-bar-font-size, 0.85em);
-      border-bottom: 2px solid transparent;
-      transition: border 150ms;
     }
 
     playground-internal-tab[active] {
@@ -1135,10 +1146,6 @@ var Gr;function Jr(e,t,r,o,i,n){this.name=e,this.tokenType=t,this.depth=r,this.p
         var(--playground-highlight-color, #6200ee)
       );
       background: var(--playground-tab-bar-active-background, transparent);
-      border-color: var(
-        --playground-tab-bar-indicator-color,
-        var(--playground-highlight-color, #6200ee)
-      );
     }
 
     :host([editable-file-system]) playground-internal-tab::part(button) {
@@ -3952,7 +3959,7 @@ let Fo=class extends fe{constructor(){super(...arguments),this._filetype="ts",th
  * @license
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */let Po=class extends fe{constructor(){super(...arguments),this.values=new wo,this._themeDetectorOpen=!1}connectedCallback(){super.connectedCallback(),this.readUrlParams(new URL(document.location.href).searchParams)}async setValue(e,t){await this.setValues(new Map([[e,t]]))}async setValues(e){const t=e.get("theme");t&&await this._applyTheme(t);for(const[t,r]of e)this.values.setValue(t,r);this.setUrlParams(),this.requestUpdate()}async _applyTheme(e){if(this.values.setValue("theme",e),"default"===e){for(const e of co){const t=bo[e.id];t.originalDefault&&(t.default=t.originalDefault),this.values.setValue(t.id,t.default)}return this.setUrlParams(),void this.requestUpdate()}for(const e of co){const t=bo[e.id];this.values.setValue(t.id,t.default)}this.requestUpdate(),await this.updateComplete;const t=window.getComputedStyle(this._ide);for(const e of co){const r=bo[e.id];if(!r.cssProperty)continue;const o=t.getPropertyValue(r.cssProperty),i=Uo(o);this.values.setValue(r.id,i),r.default=i}}readUrlParams(e){const t=new Map;for(const r of vo){let o=e.get(r);if(null===o)continue;const i=bo[r];switch(i.type){case"checkbox":t.set(i.id,"y"===o);break;case"color":t.set(i.id,"#"+o);break;case"slider":t.set(i.id,Number(o));break;case"select":t.set(i.id,o);break;default:Do(0,"Unexpected knob type "+i.type)}}this.setValues(t)}setUrlParams(){const e=new URLSearchParams;for(const t of fo){let r=this.values.getValue(t.id);if(r!==t.default)switch(t.type){case"checkbox":e.set(t.id,r?"y":"n");break;case"color":e.set(t.id,r.substring(1));break;case"slider":e.set(t.id,r+"");break;case"select":e.set(t.id,r);break;default:Do(0,"Unexpected knob type "+t.type)}}history.replaceState(null,"","?"+e.toString())}render(){return W`
+ */let Po=class extends fe{constructor(){super(...arguments),this.values=new wo,this._themeDetectorOpen=!1}connectedCallback(){super.connectedCallback(),this.readUrlParams(new URL(document.location.href).searchParams)}async setValue(e,t){await this.setValues(new Map([[e,t]]))}async setValues(e){const t=e.get("theme");t&&await this._applyTheme(t);for(const[t,r]of e)this.values.setValue(t,r);this.setUrlParams(),this.requestUpdate()}async _applyTheme(e){if(this.values.setValue("theme",e),"default"===e){for(const e of co){const t=bo[e.id];t.originalDefault&&(t.default=t.originalDefault),this.values.setValue(t.id,t.default)}return this.setUrlParams(),void this.requestUpdate()}for(const e of co){const t=bo[e.id];this.values.setValue(t.id,t.default)}this.requestUpdate(),await this.updateComplete;const t=window.getComputedStyle(this._ide);for(const e of co){const r=bo[e.id];if(!r.cssProperty)continue;const o=t.getPropertyValue(r.cssProperty),i=Uo(o);this.values.setValue(r.id,i),r.default=i}}readUrlParams(e){const t=new Map;for(const r of vo){const o=e.get(r);if(null===o)continue;const i=bo[r];switch(i.type){case"checkbox":t.set(i.id,"y"===o);break;case"color":t.set(i.id,"#"+o);break;case"slider":t.set(i.id,Number(o));break;case"select":t.set(i.id,o);break;default:Do(0,"Unexpected knob type "+i.type)}}this.setValues(t)}setUrlParams(){const e=new URLSearchParams;for(const t of fo){const r=this.values.getValue(t.id);if(r!==t.default)switch(t.type){case"checkbox":e.set(t.id,r?"y":"n");break;case"color":e.set(t.id,r.substring(1));break;case"slider":e.set(t.id,r+"");break;case"select":e.set(t.id,r);break;default:Do(0,"Unexpected knob type "+t.type)}}history.replaceState(null,"","?"+e.toString())}render(){return W`
       <style>
         ${this.cssText}
       </style>
@@ -4060,7 +4067,7 @@ let Fo=class extends fe{constructor(){super(...arguments),this._filetype="ts",th
         .value=${""===t?"#ffffff":t+""}
         @input=${t=>{this.setValue(e.id,t.target.value)}}
       />
-    `}checkboxKnob(e){let t=this.values.getValue(e.id);return W`
+    `}checkboxKnob(e){const t=this.values.getValue(e.id);return W`
       <input
         id=${e.id}
         type="checkbox"
