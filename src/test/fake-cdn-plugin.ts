@@ -57,7 +57,7 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       if (command === 'set-fake-cdn-data') {
         // Create a separate data store for each configuration, so that we can
         // support concurrent tests.
-        let id = String(_nextId++);
+        const id = String(_nextId++);
         dataMap.set(id, payload as CdnData);
         return {
           id,
@@ -185,9 +185,7 @@ export type CdnData = {
 const parseNpmModuleSpecifier = (
   specifier: string
 ): {pkg: string; semverRangeOrTag: string; path: string} | undefined => {
-  const match = specifier.match(
-    /^((?:@[^\/@]+\/)?[^\/\@]+)(?:@([^\/]+))?\/?(.*)$/
-  );
+  const match = specifier.match(/^((?:@[^/@]+\/)?[^/@]+)(?:@([^/]+))?\/?(.*)$/);
   if (match === null) {
     return undefined;
   }

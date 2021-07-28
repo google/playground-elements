@@ -23,6 +23,7 @@ import {
       'This is a security risk.',
       'https://github.com/PolymerLabs/playground-elements#sandbox-security'
     );
+    // eslint-disable-next-line no-empty
   } catch {}
 
   // Wait for our parent to send us:

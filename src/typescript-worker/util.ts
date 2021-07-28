@@ -87,6 +87,7 @@ export const classifySpecifier = (
     // package name, which cannot contain ":" characters.
     new URL(specifier).href;
     return 'url';
+    // eslint-disable-next-line no-empty
   } catch {}
   if (specifier.match(/^(\.){0,2}\//) !== null) {
     return 'relative';
@@ -113,9 +114,7 @@ export interface NpmFileLocation {
 export const parseNpmStyleSpecifier = (
   specifier: string
 ): NpmFileLocation | undefined => {
-  const match = specifier.match(
-    /^((?:@[^\/@]+\/)?[^\/\@]+)(?:@([^\/]+))?\/?(.*)$/
-  );
+  const match = specifier.match(/^((?:@[^/@]+\/)?[^/@]+)(?:@([^/]+))?\/?(.*)$/);
   if (match === null) {
     return undefined;
   }

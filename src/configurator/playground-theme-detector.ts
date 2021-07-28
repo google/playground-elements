@@ -82,15 +82,16 @@ export class PlaygroundThemeDetector extends LitElement {
   private _filetype: 'ts' | 'html' | 'css' = 'ts';
 
   @internalProperty()
-  private _iframeSrcdoc: string = '';
+  private _iframeSrcdoc = '';
 
   @internalProperty()
-  private _codeText: string = '';
+  private _codeText = '';
 
   @internalProperty()
   private _propertyValues = new Map<string, string | null>([
     ['--playground-code-background', null],
     ...tokens.map(({cssProperty}) => [cssProperty, null]),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ] as any);
 
   @query('iframe')
@@ -193,6 +194,7 @@ export class PlaygroundThemeDetector extends LitElement {
     // CodeMirror only renders visible lines plus some margin. Force it to
     // render everything so we can query it.
     await this._playgroundWithUserText.updateComplete;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this._playgroundWithUserText as any)._codemirror.setOption(
       'viewportMargin',
       Infinity
@@ -218,6 +220,7 @@ export class PlaygroundThemeDetector extends LitElement {
   private async _readClipboard(): Promise<{html: string; text: string}> {
     let html = '';
     let text = '';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items = await (navigator.clipboard as any).read();
     for (const item of items) {
       for (const type of item.types) {
