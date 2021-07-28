@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The hover effect and touch area for tabs in the tab bar are no longer offset
   by the height of the active tab indicator.
 
+- Fix bug that caused failures to load `d.ts` files and "Could not resolve
+  module specifier" console errors when using import maps.
+
 ### Changed
 
 - **BREAKING** `playground-base-url` is now resolved relative to the

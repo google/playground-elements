@@ -12,7 +12,7 @@ import {
   fileExtension,
   changeFileExtension,
   classifySpecifier,
-  relativeUrlPath,
+  resolveUrlPath,
 } from './util.js';
 
 import type {Result} from '../shared/util.js';
@@ -183,9 +183,7 @@ export class TypesFetcher {
       // Unhandled kind of import.
       return;
     }
-    // Note the base URL doesn't matter here, we're just using the URL API to
-    // perform path resolution.
-    const jsPath = relativeUrlPath(referrerSpecifier.path, relative).slice(1); // Remove the leading '/'.
+    const jsPath = resolveUrlPath(referrerSpecifier.path, relative).slice(1); // Remove the leading '/'.
     const dtsPath = changeFileExtension(jsPath, 'd.ts');
     const dtsSpecifier = `${referrerSpecifier.pkg}/${dtsPath}`;
     if (this._handledSpecifiers.has(dtsSpecifier)) {
