@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fix missing `.js` extension from import in `build.js` that may have broken
   Webpack and other builds.
 
+- The hover effect and touch area for tabs in the tab bar are no longer offset
+  by the height of the active tab indicator.
+
 ### Changed
 
 - **BREAKING** `playground-base-url` is now resolved relative to the

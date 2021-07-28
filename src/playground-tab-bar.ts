@@ -54,8 +54,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
     playground-internal-tab {
       color: var(--playground-tab-bar-foreground-color, #000);
-      border-bottom: 2px solid transparent;
-      transition: border 150ms;
     }
 
     playground-internal-tab[active] {
@@ -64,10 +62,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         var(--playground-highlight-color, #6200ee)
       );
       background: var(--playground-tab-bar-active-background, transparent);
-      border-color: var(
-        --playground-tab-bar-indicator-color,
-        var(--playground-highlight-color, #6200ee)
-      );
     }
 
     :host([editable-file-system]) playground-internal-tab::part(button) {

@@ -64,6 +64,19 @@ export class PlaygroundInternalTab extends LitElement {
     button:active::before {
       opacity: 20%;
     }
+
+    :host([active]) > button::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: var(
+        --playground-tab-bar-indicator-color,
+        var(--playground-highlight-color, #6200ee)
+      );
+    }
   `;
 
   /**
