@@ -195,6 +195,7 @@ export class PlaygroundConfigurator extends LitElement {
       await this._applyTheme(theme as KnobValueType<'theme'>);
     }
     for (const [id, value] of values) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.values.setValue(id, value as any);
     }
     this.setUrlParams();
@@ -251,7 +252,7 @@ export class PlaygroundConfigurator extends LitElement {
   private readUrlParams(params: URLSearchParams) {
     const values = new Map<KnobId, unknown>();
     for (const id of knobIds) {
-      let urlValue = params.get(id);
+      const urlValue = params.get(id);
       if (urlValue === null) {
         continue;
       }
@@ -279,7 +280,7 @@ export class PlaygroundConfigurator extends LitElement {
   private setUrlParams() {
     const params = new URLSearchParams();
     for (const knob of knobs) {
-      let value = this.values.getValue(knob.id);
+      const value = this.values.getValue(knob.id);
       if (value === knob.default) {
         continue;
       }
@@ -431,6 +432,7 @@ export class PlaygroundConfigurator extends LitElement {
       }
       const value = this.values.getValue(id);
       let line = `${knob.cssProperty}: ${
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         knob.formatCss ? (knob as any).formatCss(value) : value
       };`;
       if (value === knob.default) {
@@ -484,6 +486,7 @@ ${props.join('\n')}
       <select
         id=${knob.id}
         @input=${(event: Event & {target: HTMLSelectElement}) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           this.setValue(knob.id, event.target.value as any);
         }}
       >
@@ -550,7 +553,7 @@ ${props.join('\n')}
   }
 
   private checkboxKnob(knob: KnobsOfType<'checkbox'>) {
-    let value = this.values.getValue(knob.id);
+    const value = this.values.getValue(knob.id);
     return html`
       <input
         id=${knob.id}
@@ -574,6 +577,7 @@ ${props.join('\n')}
   private async _onThemeDetectorApply(
     event: CustomEvent<{properties: Map<string, string | null>}>
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const values = new Map<KnobId, any>();
     values.set('theme', 'default');
 

@@ -16,6 +16,7 @@ import {expose} from 'comlink';
 import {Deferred} from '../shared/deferred.js';
 import {version} from '../shared/version.js';
 
+// eslint-disable-next-line no-var
 declare var self: ServiceWorkerGlobalScope;
 
 type SessionID = string;

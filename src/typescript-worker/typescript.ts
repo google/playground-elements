@@ -151,7 +151,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     return [...this.files.keys()];
   }
 
-  getScriptVersion(_fileName: string) {
+  getScriptVersion() {
     return '-1';
   }
 
@@ -174,7 +174,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     return this.packageRoot;
   }
 
-  getDefaultLibFileName(_options: ts.CompilerOptions): string {
+  getDefaultLibFileName(): string {
     return '__lib.d.ts';
   }
 }

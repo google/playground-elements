@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {Deferred} from '../shared/deferred';
+import {Deferred} from '../shared/deferred.js';
 
 import type {
   SampleFile,

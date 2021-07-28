@@ -25,13 +25,37 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   matching version. Fixes issues relating to playgrounds being broken for some
   time after an upgrade.
 
+- The `--playground-tab-bar-font-size` CSS custom property now behaves as
+  documented, and defaults to `14px`.
+
+- The `--playground-floating-controls-color` CSS custom property now behaves as
+  documented.
+
+- Fix missing `.js` extension from import in `build.js` that may have broken
+  Webpack and other builds.
+
+- The hover effect and touch area for tabs in the tab bar are no longer offset
+  by the height of the active tab indicator.
+
+- Fix bug that caused failures to load `d.ts` files and "Could not resolve
+  module specifier" console errors when using import maps.
+
 ### Changed
+
+- **BREAKING** `playground-base-url` is now resolved relative to the
+  `import.meta.url` of the module containing the definition of
+  `<playground-project>`, instead of relative to `document.location.href` as
+  before. This means that `.` can now be used to refer to the local playground
+  installation directory.
 
 - The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
   responses, to encourage browsers to allocate a separate process or thread for
   Playground preview iframe under certain conditions. See the [Process
   isolation](https://github.com/PolymerLabs/playground-elements#process-isolation)
   section of the README for more details.
+
+- It is now possible to change the `font-family` of the tab-bar using a
+  `::part(tab-bar)` selector.
 
 ## [0.10.1] - 2021-07-14
 

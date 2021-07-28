@@ -7,7 +7,7 @@
 export class Deferred<T> {
   readonly promise: Promise<T>;
   private _resolve!: (value: T) => void;
-  private _reject!: (reason?: any) => void;
+  private _reject!: (reason?: unknown) => void;
   settled = false;
 
   constructor() {
@@ -22,7 +22,7 @@ export class Deferred<T> {
     this._resolve(value);
   }
 
-  reject(reason: any) {
+  reject(reason: unknown) {
     this.settled = true;
     this._reject(reason);
   }

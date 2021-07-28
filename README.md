@@ -634,15 +634,15 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type                            | Default                   | Description                                                                                                   |
-| -------------------- | -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                      |
-| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
-| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                               |
-| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                    |
-| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                   |
-| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                 |
+| Name                 |  Type                            | Default                   | Description                                                                                                                                                                                        |
+| -------------------- | -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                                                                                                           |
+| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                                                                                                         |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                                                                                                        |
+| `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
+| `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
 
 ### Slots
 
@@ -660,13 +660,13 @@ project element.
 
 ### Properties
 
-| Name             |  Type                         | Default                   | Description                                                                                                   |
-| ---------------- | ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                           |
-| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                       |
-| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                      |
-| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). |
-| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.     |
+| Name             |  Type                         | Default                   | Description                                                                                                                                                                                        |
+| ---------------- | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                                                                                                                |
+| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                                                                                                           |
+| `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
+| `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.                                                                                          |
 
 ### Methods
 
@@ -800,7 +800,7 @@ to quickly experiment with themes and other customizations.
 | `--playground-tab-bar-foreground-color`            | ![](images/colors/000000.png) `#000000`                                                     | Text `color` of inactive file-picker tabs                                                                                          |
 | `--playground-tab-bar-active-color`                | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Text `color` of active file-picker tab                                                                                             |
 | `--playground-tab-bar-indicator-color`             | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | `color` of active file-picker tab indicator (use `transparent` to hide)                                                            |
-| `--playground-tab-bar-font-size`                   | `0.85em`                                                                                    | `font-size` of tab titles in the file-picker tab bar                                                                               |
+| `--playground-tab-bar-font-size`                   | `14px`                                                                                      | `font-size` of tab titles in the file-picker tab bar                                                                               |
 | `--playground-preview-toolbar-background`          | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                     | `background` of the preview toolbar                                                                                                |
 | `--playground-preview-toolbar-foreground-color`    | ![](images/colors/444444.png) `#444444`                                                     | Text `color` of the preview toolbar                                                                                                |
 | `--playground-border`                              | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                                            | Outer and inner border                                                                                                             |

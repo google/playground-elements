@@ -218,7 +218,7 @@ export class PlaygroundProject extends LitElement {
   private _serviceWorkerProxyIframe!: HTMLIFrameElement;
 
   private get _normalizedSandboxBaseUrl() {
-    const url = new URL(this.sandboxBaseUrl, document.location.href);
+    const url = new URL(this.sandboxBaseUrl, import.meta.url);
     url.pathname = endWithSlash(url.pathname);
     return url;
   }
@@ -327,7 +327,7 @@ export class PlaygroundProject extends LitElement {
     `;
   }
 
-  private _slotChange(_e: Event) {
+  private _slotChange() {
     const {type} = this._source;
     if (type !== 'none' && type !== 'slot') {
       // It's a little tricky to do "most recent wins" with slots, because the

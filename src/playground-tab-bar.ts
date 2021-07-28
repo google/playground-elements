@@ -26,7 +26,7 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 import type {PlaygroundFileEditor} from './playground-file-editor.js';
 import type {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
 import type {PlaygroundProject} from './playground-project.js';
-import type {PlaygroundInternalTab} from './internal/tab';
+import type {PlaygroundInternalTab} from './internal/tab.js';
 
 /**
  * A horizontal bar of tabs for switching between playground files, with
@@ -37,6 +37,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   static styles = css`
     :host {
       display: flex;
+      font-size: var(--playground-tab-bar-font-size, 14px);
       height: var(--playground-bar-height, 40px);
       background: var(--playground-tab-bar-background, #eaeaea);
       align-items: center;
@@ -53,9 +54,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
     playground-internal-tab {
       color: var(--playground-tab-bar-foreground-color, #000);
-      font-size: var(--playground-tab-bar-font-size, 0.85em);
-      border-bottom: 2px solid transparent;
-      transition: border 150ms;
     }
 
     playground-internal-tab[active] {
@@ -64,10 +62,6 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         var(--playground-highlight-color, #6200ee)
       );
       background: var(--playground-tab-bar-active-background, transparent);
-      border-color: var(
-        --playground-tab-bar-indicator-color,
-        var(--playground-highlight-color, #6200ee)
-      );
     }
 
     :host([editable-file-system]) playground-internal-tab::part(button) {

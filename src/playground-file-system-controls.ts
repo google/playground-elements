@@ -39,10 +39,8 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   static styles = css`
     mwc-menu-surface {
       --mdc-theme-primary: var(
-        var(
-          --playground-floating-controls-color,
-          var(--playground-highlight-color, #6200ee)
-        )
+        --playground-floating-controls-color,
+        var(--playground-highlight-color, #6200ee)
       );
     }
 

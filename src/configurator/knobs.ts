@@ -263,8 +263,10 @@ export class KnobValues {
 
   getValue<T extends KnobId>(id: T): KnobValueType<T> {
     if (this.values.has(id)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return this.values.get(id) as any;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return knobsById[id].default as any;
   }
 

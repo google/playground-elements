@@ -110,7 +110,7 @@ export class CachingCdn {
         exact = true;
       }
     }
-    let pvp = pkgVersionPath(location);
+    const pvp = pkgVersionPath(location);
     const cached = this._fetchCache.get(pvp);
     if (cached !== undefined) {
       return cached.promise;
