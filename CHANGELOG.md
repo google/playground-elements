@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   time after an upgrade.
 
 - The `--playground-tab-bar-font-size` CSS custom property now behaves as
-  documented.
+  documented, and defaults to `14px`.
 
 - The `--playground-floating-controls-color` CSS custom property now behaves as
   documented.
