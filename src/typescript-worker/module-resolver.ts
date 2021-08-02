@@ -24,7 +24,7 @@ export class ModuleResolver {
   }
 
   resolve(specifier: string, referrer: string | URL): ResolvedSpecifier {
-    const importMapUrl = this._resolveUsingImportMap(specifier);
+    const importMapUrl = this.resolveUsingImportMap(specifier);
     if (importMapUrl !== null) {
       return {type: 'bare' as const, url: importMapUrl};
     }
@@ -47,7 +47,7 @@ export class ModuleResolver {
     }
   }
 
-  private _resolveUsingImportMap(specifier: string): string | null {
+  resolveUsingImportMap(specifier: string): string | null {
     // For overview, see https://github.com/WICG/import-maps
     // For algorithm, see https://wicg.github.io/import-maps/#resolving
     // TODO(aomarks) Add support for `scopes`.
