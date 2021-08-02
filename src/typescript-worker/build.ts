@@ -16,7 +16,10 @@ import type {
 
 export const build = async (
   files: Array<SampleFile>,
-  importMap: ModuleImportMap,
+  config: {
+    importMap: ModuleImportMap;
+    cdnBaseUrl?: string;
+  },
   emit: (result: BuildOutput) => void
 ): Promise<void> => {
   const moduleResolver = new ModuleResolver(importMap);

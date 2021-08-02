@@ -37,7 +37,7 @@ export const checkTransform = async (
   importMap: ModuleImportMap = {},
   cdnData: CdnData = {}
 ) => {
-  const {deleteCdnData} = await configureFakeCdn(cdnData);
+  const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
   try {
     const results: BuildOutput[] = [];
     await new Promise<void>((resolve) => {
@@ -48,7 +48,7 @@ export const checkTransform = async (
           results.push(result);
         }
       };
-      build(files, importMap, emit);
+      build(files, {importMap, cdnBaseUrl}, emit);
     });
 
     assert.deepEqual(
