@@ -23,6 +23,9 @@ export class ModuleResolver {
     this.importMap = importMap;
   }
 
+  // TODO(aomarks) Remove this method and rename this class to ImportMapResolver
+  // once TypeFetcher has been updated to the new dependency handling approach
+  // that won't need this method.
   resolve(specifier: string, referrer: string | URL): ResolvedSpecifier {
     const importMapUrl = this.resolveUsingImportMap(specifier);
     if (importMapUrl !== null) {
