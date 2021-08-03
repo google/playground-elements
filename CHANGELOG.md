@@ -17,7 +17,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Fixed
+
+- Fixes duplicate module errors by canonicalizing all import specifiers. Import
+  specifiers are now canonicalized by version number and default module. This
+  applies both to local project files, and throughout the entire external
+  dependency tree.
+
+- Import maps now apply to modules in external dependencies, not just to local
+  project files.
+
+### Changed
+
+- If the project contains a `package.json` file, then its
+  [`dependencies`](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#dependencies)
+  field will be used to determine the version of dependencies (just like how NPM
+  works locally).
+
+- Dependencies are now served from the special
+  "<service-worker-scope>/node_modules/..." path, instead of directly from
+  `https://unpkg.com/...?module` URLs. Behind-the-scenes, dependencies are still
+  fetched from unpkg, but they are now themselves transformed to ensure correct
+  specifier canonicalization.
 
 ## [0.11.0] - 2021-07-28
 
