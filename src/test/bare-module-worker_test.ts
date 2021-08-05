@@ -35,7 +35,7 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  test('one simple import', async () => {
+  test('one simple static import', async () => {
     const files: SampleFile[] = [
       {
         name: 'index.js',
@@ -75,14 +75,15 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  test('multiple simple imports', async () => {
+  test('multiple static and dynamic imports', async () => {
     const files: SampleFile[] = [
       {
         name: 'index.js',
         content: `
            import {a} from "foo/index.js";
-           import {b} from "foo/index.js";
+           const {b} = import("foo/index.js");
            import {c} from "foo/index.js";
+           const {d} = import("foo/index.js");
          `,
       },
     ];
@@ -96,6 +97,7 @@ suite('bare module worker', () => {
                    export const a = 'a';
                    export const b = 'b';
                    export const c = 'c';
+                   export const d = 'd';
                    `,
               },
             },
@@ -110,8 +112,9 @@ suite('bare module worker', () => {
           name: 'index.js',
           content: `
            import {a} from "./node_modules/foo@1.0.0/index.js";
-           import {b} from "./node_modules/foo@1.0.0/index.js";
+           const {b} = import('./node_modules/foo@1.0.0/index.js');
            import {c} from "./node_modules/foo@1.0.0/index.js";
+           const {d} = import('./node_modules/foo@1.0.0/index.js');
          `,
         },
       },
@@ -123,6 +126,7 @@ suite('bare module worker', () => {
                    export const a = 'a';
                    export const b = 'b';
                    export const c = 'c';
+                   export const d = 'd';
                    `,
           contentType: 'text/javascript; charset=utf-8',
         },
@@ -171,7 +175,7 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  test('"module" field is 1st choice for default module', async () => {
+  test('default module uses package.json "module" field as 1st choice', async () => {
     const files: SampleFile[] = [
       {
         name: 'index.js',
@@ -223,7 +227,7 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  test('"main" field is 2nd choice for default module', async () => {
+  test('default module uses package.json "main" field as 2nd choice', async () => {
     const files: SampleFile[] = [
       {
         name: 'index.js',
@@ -274,7 +278,7 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  test('"index.js" is 3rd choice for default module', async () => {
+  test('default module uses "index.js" field as 3rd choice', async () => {
     const files: SampleFile[] = [
       {
         name: 'index.js',

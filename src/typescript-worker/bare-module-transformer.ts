@@ -62,9 +62,8 @@ export class BareModuleTransformer {
   async *process(
     results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
   ): AsyncIterable<BuildOutput> {
-    // We're going to asynchronously walk the entire dependency graph. This
-    // "output" object helps us merge the output of each dependency module into
-    // a single combined output async iterator.
+    // This "output" iterable helps us emit all build outputs as soon as they
+    // are available as we asynchronously walk the dependency tree.
     const output = new MergedAsyncIterables<BuildOutput>();
     output.add(this._handleProjectFiles(results, output));
     yield* output;
