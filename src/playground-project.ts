@@ -505,7 +505,7 @@ export class PlaygroundProject extends LitElement {
     }
     workerApi.compileProject(
       this._files ?? [],
-      this._importMap,
+      {importMap: this._importMap},
       proxy((result) => build.onOutput(result))
     );
     await build.stateChange;

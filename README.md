@@ -256,19 +256,45 @@ precedence. When either are set, inline scripts are ignored.
 ## Module resolution
 
 By default, bare module specifiers in JavaScript and TypeScript files are
-transformed to `unpkg.com` URLs:
+transformed to special `./node_modules/` URLs, and fetched behind-the-scenes
+from unpkg.com at the latest version.
 
 ```js
-// What you write
+// What you write:
 import {html} from 'lit-html';
 
-// What playground serves
-import {html} from 'https://unpkg.com/lit-html?module';
+// What playground serves:
+import {html} from './node_modules/lit-html@1.4.1/lit-html.js';
+
+// What playground fetches behind-the-scenes:
+// https://unpkg.com/lit-html@latest/lit-html.js
 ```
 
-To customize module resolution you can configure an _import map_. You may want
-to do this to pin a specific version, change CDNs, or point to a locally served
-copy of a module:
+### `package.json`
+
+To customize the version of a module you import, create a file called
+`package.json` in your project containing a
+[`dependencies`](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#dependencies)
+map. This works exactly like it does when using NPM locally.
+
+```json
+{
+  "dependencies": {
+    "lit-html": "^2.0.0-rc.3"
+  }
+}
+```
+
+> TIP: Use the `hidden` [attribute](#option-1-inline-scripts) or
+> [property](#option-2-json-configuration) to hide the `package.json` file from
+> being displayed in the list of project files, if you don't want the end-user
+> to be able to see or modify it.
+
+### Import maps
+
+For full control over module resolution, you can configure an _import map_. You
+may want to do this to change CDNs or point to a locally served copy of a
+module:
 
 ```js
 {

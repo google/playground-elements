@@ -5,6 +5,7 @@
  */
 
 import type {BuildOutput, SampleFile} from '../shared/worker-api.js';
+import type {CdnData} from './fake-cdn-plugin.js';
 
 import {checkTransform} from './worker-test-util.js';
 
@@ -149,6 +150,19 @@ suite('typescript builder', () => {
         `,
       },
     ];
+    const cdn: CdnData = {
+      'lit-html': {
+        versions: {
+          '1.4.1': {
+            files: {
+              'lit-html.js': {
+                content: '// TODO',
+              },
+            },
+          },
+        },
+      },
+    };
     const expected: BuildOutput[] = [
       {
         diagnostic: {
@@ -175,12 +189,12 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import { render } from "https://unpkg.com/lit-html?module";\r\n' +
+            'import { render } from "./node_modules/lit-html@1.4.1/index.js";\r\n' +
             'render("hello");\r\n',
           contentType: 'text/javascript',
         },
       },
     ];
-    await checkTransform(files, expected);
+    await checkTransform(files, expected, {}, cdn);
   });
 });

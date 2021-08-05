@@ -37,7 +37,7 @@ export const checkTransform = async (
   importMap: ModuleImportMap = {},
   cdnData: CdnData = {}
 ) => {
-  const {deleteCdnData} = await configureFakeCdn(cdnData);
+  const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
   try {
     const results: BuildOutput[] = [];
     await new Promise<void>((resolve) => {
@@ -48,8 +48,23 @@ export const checkTransform = async (
           results.push(result);
         }
       };
-      build(files, importMap, emit);
+      build(files, {importMap, cdnBaseUrl}, emit);
     });
+
+    for (const result of results) {
+      if (result.kind === 'diagnostic') {
+        // Sometimes diagnostics contain a CDN URL to help with debugging
+        // (usually the unpkg.com URL). But that will be a local dynamic URL in
+        // testing, so we'll substitute a static string so that we can do a
+        // simple equality test.
+        while (result.diagnostic.message.includes(cdnBaseUrl)) {
+          result.diagnostic.message = result.diagnostic.message.replace(
+            cdnBaseUrl,
+            '<CDN-BASE-URL>/'
+          );
+        }
+      }
+    }
 
     assert.deepEqual(
       results.sort(sortBuildOutput),

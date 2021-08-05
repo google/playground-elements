@@ -13,15 +13,20 @@ import type {
   ModuleImportMap,
   BuildOutput,
 } from '../shared/worker-api.js';
+import {CachingCdn} from './caching-cdn.js';
 
 export const build = async (
   files: Array<SampleFile>,
-  importMap: ModuleImportMap,
+  config: {
+    importMap: ModuleImportMap;
+    cdnBaseUrl?: string;
+  },
   emit: (result: BuildOutput) => void
 ): Promise<void> => {
-  const moduleResolver = new ModuleResolver(importMap);
+  const moduleResolver = new ModuleResolver(config.importMap);
+  const cdn = new CachingCdn(config.cdnBaseUrl ?? 'https://unpkg.com/');
   const tsBuilder = new TypeScriptBuilder(moduleResolver);
-  const bareModuleBuilder = new BareModuleTransformer(moduleResolver);
+  const bareModuleBuilder = new BareModuleTransformer(cdn, moduleResolver);
   const results = bareModuleBuilder.process(
     tsBuilder.process(files.map((file) => ({kind: 'file', file})))
   );
