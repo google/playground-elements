@@ -718,6 +718,8 @@ const typeEnumToMimeType = (type?: string) => {
       return 'image/svg+xml';
     case 'png':
       return 'image/png';
+    case 'gif':
+      return 'image/gif';
     case 'jpeg':
     case 'jpg':
       return 'image/jpeg';
