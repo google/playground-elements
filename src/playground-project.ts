@@ -721,33 +721,12 @@ const typeEnumToMimeType = (type?: string) => {
     case 'jpeg':
     case 'jpg':
       return 'image/jpeg';
-    case 'bmp':
-      return 'image/bmp';
-    case 'gif':
-      return 'image/gif';
     case 'ico':
       return 'image/vnd.microsoft.icon';
-    case 'tif':
-    case 'tiff':
-      return 'image/tiff';
     case 'webp':
       return 'image/webp';
-    case 'avi':
-      return 'video/x-msvideo';
-    case 'mp4':
-      return 'video/mp4';
-    case 'mpeg':
-      return 'video/mpeg';
-    case 'ogv':
-      return 'video/ogg';
     case 'webm':
       return 'video/webm';
-    case '3gp':
-      return 'video/3gpp';
-    case '3g2':
-      return 'video/3gpp2';
-    case 'aac':
-      return 'audio/aac';
     case 'mid':
     case 'midi':
       return 'audio/midi';
@@ -755,12 +734,6 @@ const typeEnumToMimeType = (type?: string) => {
       return 'audio/webp';
     case 'mp3':
       return 'audio/mpeg';
-    case 'oga':
-      return 'audio/ogg';
-    case 'opus':
-      return 'audio/opus';
-    case 'wav':
-      return 'audio/wav';
     case 'weba':
       return 'audio/webm';
   }
