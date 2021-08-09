@@ -712,6 +712,30 @@ const typeEnumToMimeType = (type?: string) => {
       return 'text/html; charset=utf-8';
     case 'css':
       return 'text/css; charset=utf-8';
+    // taken from MDN's common MIME types
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+    case 'svg':
+      return 'image/svg+xml';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg';
+    case 'ico':
+      return 'image/vnd.microsoft.icon';
+    case 'webp':
+      return 'image/webp';
+    case 'webm':
+      return 'video/webm';
+    case 'mid':
+    case 'midi':
+      return 'audio/midi';
+    case 'mp3':
+      return 'audio/mpeg';
+    case 'weba':
+      return 'audio/webm';
   }
   return undefined;
 };
