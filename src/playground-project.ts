@@ -730,8 +730,6 @@ const typeEnumToMimeType = (type?: string) => {
     case 'mid':
     case 'midi':
       return 'audio/midi';
-    case 'webp':
-      return 'audio/webp';
     case 'mp3':
       return 'audio/mpeg';
     case 'weba':
