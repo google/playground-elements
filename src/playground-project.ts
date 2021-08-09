@@ -740,8 +740,6 @@ const typeEnumToMimeType = (type?: string) => {
       return 'video/mpeg';
     case 'ogv':
       return 'video/ogg';
-    case 'ts':
-      return 'video/mp2t';
     case 'webm':
       return 'video/webm';
     case '3gp':
