@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.11.1] - 2021-08-09
+
+- Added MIME-type detection for the following project file extensions: `gif`,
+  `ico`, `jpeg`, `jpg`, `mid`, `midi`, `mp3`, `png`, `svg`, `weba`, `webm`,
+  `webp`.
+
 ## [0.11.0] - 2021-07-28
 
 ### Fixed
