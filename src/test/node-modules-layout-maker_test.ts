@@ -23,7 +23,7 @@ suite('NodeModulesLayoutMaker', () => {
     assert.deepEqual(actual, expected);
   };
 
-  test('no dependencies', async () => {
+  test('no dependencies', () => {
     // ROOT
     const rootDeps: PackageDependencies = {};
     const depGraph: DependencyGraph = {};
@@ -31,7 +31,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('only direct dependencies', async () => {
+  test('only direct dependencies', () => {
     //    ROOT
     //     /\
     //    /  \
@@ -52,7 +52,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('simple chain', async () => {
+  test('simple chain', () => {
     //  ROOT
     //    |
     //    v
@@ -82,7 +82,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('version conflict between root and branch', async () => {
+  test('version conflict between root and branch', () => {
     //   ROOT
     //    /\
     //   v  v
@@ -113,7 +113,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('version conflict between root and longer branch', async () => {
+  test('version conflict between root and longer branch', () => {
     //       ROOT
     //        /\
     //       /  \
@@ -154,7 +154,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('version conflict between two branches', async () => {
+  test('version conflict between two branches', () => {
     //     ROOT
     //      /\
     //     /  \
@@ -189,7 +189,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('version conflict requiring directory duplication', async () => {
+  test('version conflict requiring directory duplication', () => {
     //      ROOT
     //       /|\
     //      / | \
@@ -242,7 +242,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('short loop', async () => {
+  test('short loop', () => {
     //   ROOT --> A1 --> B1
     //             ^     |
     //             |     |
@@ -264,7 +264,7 @@ suite('NodeModulesLayoutMaker', () => {
     checkLayout(rootDeps, depGraph, expected);
   });
 
-  test('longer loop on a branch', async () => {
+  test('longer loop on a branch', () => {
     //       ROOT
     //        /\
     //       /  \
