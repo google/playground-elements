@@ -18,8 +18,8 @@ suite('NodeModulesLayoutMaker', () => {
     depGraph: DependencyGraph,
     expected: NodeModulesDirectory
   ) => {
-    const layouter = new NodeModulesLayoutMaker();
-    const actual = layouter.layout(rootDeps, depGraph);
+    const layoutMaker = new NodeModulesLayoutMaker();
+    const actual = layoutMaker.layout(rootDeps, depGraph);
     assert.deepEqual(actual, expected);
   };
 
