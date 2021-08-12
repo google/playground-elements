@@ -5,7 +5,7 @@
  */
 
 import {TypesFetcher} from '../typescript-worker/types-fetcher.js';
-import {ModuleResolver} from '../typescript-worker/module-resolver.js';
+import {ImportMapResolver} from '../typescript-worker/import-map-resolver.js';
 import {configureFakeCdn} from './worker-test-util.js';
 import {assert} from '@esm-bundle/chai';
 import {CachingCdn} from '../typescript-worker/caching-cdn.js';
@@ -59,7 +59,7 @@ const checkTypesFetcherImpl = async (
   expectedLayout?: NodeModulesDirectory
 ) => {
   const cdn = new CachingCdn(cdnBaseUrl);
-  const importMapResolver = new ModuleResolver(importMap);
+  const importMapResolver = new ImportMapResolver(importMap);
   const typesFetcher = new TypesFetcher(cdn, importMapResolver, packageJson);
   const actual = await typesFetcher.fetchTypes(sourceTexts, []);
   if (expectedDependencyGraph !== undefined) {

@@ -23,7 +23,7 @@ import type {
   FileBuildOutput,
   SampleFile,
 } from '../shared/worker-api.js';
-import type {ModuleResolver} from './module-resolver.js';
+import type {ImportMapResolver} from './import-map-resolver.js';
 import type {CachingCdn} from './caching-cdn.js';
 import type {NpmFileLocation, PackageJson} from './util.js';
 
@@ -51,10 +51,10 @@ import type {NpmFileLocation, PackageJson} from './util.js';
  */
 export class BareModuleTransformer {
   private _cdn: CachingCdn;
-  private _importMapResolver: ModuleResolver;
+  private _importMapResolver: ImportMapResolver;
   private _emittedExternalDependencies = new Set<string>();
 
-  constructor(cdn: CachingCdn, importMapResolver: ModuleResolver) {
+  constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
   }
@@ -193,8 +193,7 @@ export class BareModuleTransformer {
     getPackageJson: () => Promise<PackageJson | undefined>,
     output: MergedAsyncIterables<BuildOutput>
   ): Promise<string> {
-    const fromImportMap =
-      this._importMapResolver.resolveUsingImportMap(specifier);
+    const fromImportMap = this._importMapResolver.resolve(specifier);
     if (fromImportMap !== null) {
       return fromImportMap;
     }

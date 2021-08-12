@@ -5,7 +5,7 @@
  */
 
 import ts from '../internal/typescript.js';
-import {ModuleResolver} from './module-resolver.js';
+import {ImportMapResolver} from './import-map-resolver.js';
 import {Deferred} from '../shared/deferred.js';
 import {
   parseNpmStyleSpecifier,
@@ -41,7 +41,7 @@ const root = Symbol();
  */
 export class TypesFetcher {
   private readonly _cdn: CachingCdn;
-  private readonly _importMapResolver: ModuleResolver;
+  private readonly _importMapResolver: ImportMapResolver;
   private readonly _rootPackageJson: PackageJson | undefined;
 
   private readonly _rootDependencies: PackageDependencies = {};
@@ -53,7 +53,7 @@ export class TypesFetcher {
 
   constructor(
     cdn: CachingCdn,
-    importMapResolver: ModuleResolver,
+    importMapResolver: ImportMapResolver,
     rootPackageJson: PackageJson | undefined
   ) {
     this._cdn = cdn;
@@ -271,7 +271,7 @@ export class TypesFetcher {
   private async _fetchAndAddToOutputFiles(
     location: NpmFileLocation
   ): Promise<Result<string, number>> {
-    const importMapUrl = this._importMapResolver.resolveUsingImportMap(
+    const importMapUrl = this._importMapResolver.resolve(
       trimTrailingSlash(`${location.pkg}/${location.path}`)
     );
     if (importMapUrl === null) {

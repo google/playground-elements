@@ -6,7 +6,7 @@
 
 import ts from '../internal/typescript.js';
 import {TypesFetcher} from './types-fetcher.js';
-import {ModuleResolver} from './module-resolver.js';
+import {ImportMapResolver} from './import-map-resolver.js';
 
 import type * as lsp from 'vscode-languageserver';
 import type {SampleFile, BuildOutput} from '../shared/worker-api.js';
@@ -35,9 +35,9 @@ const compilerOptions = {
  */
 export class TypeScriptBuilder {
   private readonly _cdn: CachingCdn;
-  private readonly _importMapResolver: ModuleResolver;
+  private readonly _importMapResolver: ImportMapResolver;
 
-  constructor(cdn: CachingCdn, importMapResolver: ModuleResolver) {
+  constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
   }
