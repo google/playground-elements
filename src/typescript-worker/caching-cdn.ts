@@ -128,7 +128,7 @@ export class CachingCdn {
         `CDN HTTP ${res.status} error (${url}): ${content}`
       );
       deferred.reject(err);
-      throw err;
+      return deferred.promise;
     }
     if (!exact) {
       const canonical = this._parseUnpkgUrl(res.url);
@@ -143,7 +143,7 @@ export class CachingCdn {
       },
     };
     deferred.resolve(result);
-    return result;
+    return deferred.promise;
   }
 
   private _parseUnpkgUrl(url: string): NpmFileLocation {
