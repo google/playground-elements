@@ -5,8 +5,9 @@
     "outDir": "../../typescript-worker",
     "rootDir": ".",
     "tsBuildInfoFile": "../../typescript-worker/.tsbuildinfo",
+    "target": "es2019",
     "lib": [
-      "ES2017",
+      "ES2020",
       "WebWorker"
     ],
     "skipLibCheck": true,
