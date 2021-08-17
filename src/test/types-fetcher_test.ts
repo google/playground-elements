@@ -349,6 +349,76 @@ suite('types fetcher', () => {
     );
   });
 
+  test('short loop', async () => {
+    //   ROOT --> A1 --> B1
+    //             ^     |
+    //             |     |
+    //             +-----+
+    const sourceTexts: string[] = [`import 'a';`];
+    const packageJson: PackageJson = {};
+    const cdnData: CdnData = {
+      a: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: `declare export * from 'b';`,
+              },
+            },
+          },
+        },
+      },
+      b: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: `declare export * from 'a';`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expectedDependencyGraph: ExpectedDependencyGraph = {
+      root: {a: '1.0.0'},
+      deps: {
+        a: {
+          '1.0.0': {
+            b: '1.0.0',
+          },
+        },
+        b: {
+          '1.0.0': {
+            a: '1.0.0',
+          },
+        },
+      },
+    };
+    // ROOT
+    // ├── A1
+    // └── B1
+    const expectedLayout: NodeModulesDirectory = {
+      a: {version: '1.0.0', nodeModules: {}},
+      b: {version: '1.0.0', nodeModules: {}},
+    };
+    const expectedFiles = new Map([
+      ['a/package.json', '{}'],
+      ['a/index.d.ts', `declare export * from 'b';`],
+      ['b/package.json', '{}'],
+      ['b/index.d.ts', `declare export * from 'a';`],
+    ]);
+    await checkTypesFetcher(
+      sourceTexts,
+      packageJson,
+      cdnData,
+      {},
+      expectedFiles,
+      expectedDependencyGraph,
+      expectedLayout
+    );
+  });
+
   test('bare -> relative -> bare', async () => {
     // ROOT
     //  |
