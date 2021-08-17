@@ -13,6 +13,7 @@ import {
   classifySpecifier,
   resolveUrlPath,
   trimTrailingSlash,
+  trimLeadingSlash,
 } from './util.js';
 
 import type {Result} from '../shared/util.js';
@@ -204,7 +205,7 @@ export class TypesFetcher {
       pkg: referrer.pkg,
       version: referrer.version,
       // Make the path package-root relative, instead of referrer-path relative.
-      path: resolveUrlPath(referrer.path, relative).slice(1), // Remove the leading '/'.
+      path: trimLeadingSlash(resolveUrlPath(referrer.path, relative).slice(1)),
     };
     location.path = changeFileExtension(location.path, 'd.ts');
     // Stop early if we've already handled this specifier.
