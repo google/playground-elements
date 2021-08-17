@@ -47,6 +47,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   fetched from unpkg, but they are now themselves transformed to ensure correct
   specifier canonicalization.
 
+- **BREAKING** Due to large changes to the way dependencies are handled, there
+  is some risk of breakage due to subtle behavior changes that existing
+  configurations may be relying on. Therefore, this release is versioned with a
+  major increment.
+
 ## [0.11.1] - 2021-08-09
 
 ### Added
