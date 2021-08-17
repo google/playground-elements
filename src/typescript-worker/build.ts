@@ -6,7 +6,7 @@
 
 import {TypeScriptBuilder} from './typescript.js';
 import {BareModuleTransformer} from './bare-module-transformer.js';
-import {ModuleResolver} from './module-resolver.js';
+import {ImportMapResolver} from './import-map-resolver.js';
 
 import type {
   SampleFile,
@@ -23,9 +23,9 @@ export const build = async (
   },
   emit: (result: BuildOutput) => void
 ): Promise<void> => {
-  const moduleResolver = new ModuleResolver(config.importMap);
+  const moduleResolver = new ImportMapResolver(config.importMap);
   const cdn = new CachingCdn(config.cdnBaseUrl ?? 'https://unpkg.com/');
-  const tsBuilder = new TypeScriptBuilder(moduleResolver);
+  const tsBuilder = new TypeScriptBuilder(cdn, moduleResolver);
   const bareModuleBuilder = new BareModuleTransformer(cdn, moduleResolver);
   const results = bareModuleBuilder.process(
     tsBuilder.process(files.map((file) => ({kind: 'file', file})))

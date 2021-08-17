@@ -6,10 +6,12 @@
 
 import ts from '../internal/typescript.js';
 import {TypesFetcher} from './types-fetcher.js';
-import {ModuleResolver} from './module-resolver.js';
+import {ImportMapResolver} from './import-map-resolver.js';
 
 import type * as lsp from 'vscode-languageserver';
 import type {SampleFile, BuildOutput} from '../shared/worker-api.js';
+import type {PackageJson} from './util.js';
+import type {CachingCdn} from './caching-cdn.js';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -32,21 +34,32 @@ const compilerOptions = {
  * common lib files like lit-element, lib.d.ts and dom.d.ts.
  */
 export class TypeScriptBuilder {
-  private _moduleResolver: ModuleResolver;
+  private readonly _cdn: CachingCdn;
+  private readonly _importMapResolver: ImportMapResolver;
 
-  constructor(moduleResolver: ModuleResolver) {
-    this._moduleResolver = moduleResolver;
+  constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
+    this._cdn = cdn;
+    this._importMapResolver = importMapResolver;
   }
 
   async *process(
     results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
   ): AsyncIterable<BuildOutput> {
+    let packageJson: PackageJson | undefined;
     const compilerInputs = [];
     for await (const result of results) {
       if (result.kind === 'file' && result.file.name.endsWith('.ts')) {
         compilerInputs.push(result.file);
       } else {
         yield result;
+        if (result.kind === 'file' && result.file.name === 'package.json') {
+          try {
+            packageJson = JSON.parse(result.file.content) as PackageJson;
+          } catch (e) {
+            // A bit hacky, but BareModuleTransformer already emits a diagnostic
+            // for this case, so we don't need another one.
+          }
+        }
       }
     }
 
@@ -57,17 +70,13 @@ export class TypeScriptBuilder {
     // Immediately resolve local project files, and begin fetching types (but
     // don't wait for them).
     const loadedFiles = new Map<string, string>();
-    const typesFetcher = new TypesFetcher(this._moduleResolver);
     const inputFiles = compilerInputs.map((file) => ({
       file,
       url: new URL(file.name, self.origin).href,
     }));
+
     for (const {file, url} of inputFiles) {
       loadedFiles.set(url, file.content);
-      typesFetcher.addBareModuleTypings(file.content);
-    }
-    for (const lib of compilerOptions.lib) {
-      typesFetcher.addLibTypings(lib);
     }
 
     // Fast initial compile for JS emit and syntax errors.
@@ -109,12 +118,20 @@ export class TypeScriptBuilder {
 
     // Wait for all typings to be fetched, and then retrieve slower semantic
     // diagnostics.
-    for (const [specifier, content] of await typesFetcher.getFiles()) {
+    const typings = await TypesFetcher.fetchTypes(
+      this._cdn,
+      this._importMapResolver,
+      packageJson,
+      inputFiles.map((file) => file.file.content),
+      compilerOptions.lib
+    );
+    for (const [path, content] of typings.files) {
       // TypeScript is going to look for these files as paths relative to our
-      // source files, so we need to add them to our filesystem with those
-      // URLs.
-      const url = new URL(`node_modules/${specifier}`, self.origin).href;
-      loadedFiles.set(url, content);
+      // source files, so we need to add them to our filesystem with those URLs.
+      const url = new URL(`node_modules/${path}`, self.origin).href;
+      if (!loadedFiles.has(url)) {
+        loadedFiles.set(url, content);
+      }
     }
     for (const {file, url} of inputFiles) {
       for (const tsDiagnostic of languageService.getSemanticDiagnostics(url)) {

@@ -192,3 +192,15 @@ export const isExactSemverVersion = (s: string) =>
     // https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
   ) !== null;
+
+export const pkgVersion = ({pkg, version}: {pkg: string; version: string}) =>
+  `${pkg}@${version || 'latest'}`;
+
+export const pkgVersionPath = ({pkg, version, path}: NpmFileLocation) =>
+  trimTrailingSlash(`${pkgVersion({pkg, version})}/${trimLeadingSlash(path)}`);
+
+export const trimLeadingSlash = (s: string) =>
+  s.startsWith('/') ? s.slice(1) : s;
+
+export const trimTrailingSlash = (s: string) =>
+  s.endsWith('/') ? s.slice(0, -1) : s;

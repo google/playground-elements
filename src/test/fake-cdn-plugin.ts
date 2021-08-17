@@ -140,14 +140,14 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       }
       const file = versionData.files[path];
       if (file !== undefined) {
-        return {
-          body: file.content,
-          type: path.endsWith('.js')
-            ? 'text/javascript'
-            : path.endsWith('.json')
-            ? 'application/json'
-            : 'text/plain',
-        };
+        ctx.response.status = file.status ?? 200;
+        ctx.response.body = file.content;
+        ctx.response.type = path.endsWith('.js')
+          ? 'text/javascript'
+          : path.endsWith('.json')
+          ? 'application/json'
+          : 'text/plain';
+        return undefined;
       }
       if (path === 'package.json') {
         // You can't publish to NPM without a package.json; for convenience in
@@ -175,6 +175,7 @@ export type CdnData = {
         files: {
           [path: string]: {
             content: string;
+            status?: number;
           };
         };
       };

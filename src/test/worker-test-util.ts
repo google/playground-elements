@@ -15,7 +15,7 @@ import type {
 } from '../shared/worker-api.js';
 import type {CdnData} from './fake-cdn-plugin.js';
 
-const configureFakeCdn = async (
+export const configureFakeCdn = async (
   data: CdnData
 ): Promise<{cdnBaseUrl: string; deleteCdnData: () => Promise<void>}> => {
   const {cdnBaseUrl, id} = (await executeServerCommand(

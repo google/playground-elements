@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Import maps now apply to modules in external dependencies, not just to local
   project files.
 
+- The TypeScript compiler can now deal with multiple versions of the same
+  dependency. Previously, if the import graph included two versions of the same
+  package, only one arbitrary version of the types would be compiled. This
+  caused various errors and missing type issues.
+
 ### Changed
 
 - If the project contains a `package.json` file, then its
@@ -42,7 +47,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   fetched from unpkg, but they are now themselves transformed to ensure correct
   specifier canonicalization.
 
+- **BREAKING** Due to large changes to the way dependencies are handled, there
+  is some risk of breakage due to subtle behavior changes that existing
+  configurations may be relying on. Therefore, this release is versioned with a
+  major increment.
+
 ## [0.11.1] - 2021-08-09
+
+### Added
 
 - Added MIME-type detection for the following project file extensions: `gif`,
   `ico`, `jpeg`, `jpg`, `mid`, `midi`, `mp3`, `png`, `svg`, `weba`, `webm`,

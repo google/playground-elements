@@ -41,4 +41,8 @@ export default {
     },
   },
   plugins: [fakeCdnPlugin()],
+  filterBrowserLogs: ({args}) =>
+    // This warning will always happen because we use the same local server for
+    // the elements and the service worker, and that's fine.
+    !args.join('').includes('executing with the same origin as its parent'),
 };

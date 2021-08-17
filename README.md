@@ -995,12 +995,7 @@ but are not yet available. Follow and comment on
 There are currently some missing features in module resolution that you might be
 hitting. Please comment on the issue if it affects you:
 
-- Imports are only transformed in project source files, not in transitive
-  imports
-  ([#104](https://github.com/PolymerLabs/playground-elements/issues/104))
 - Imports in HTML files are not transformed
   ([#93](https://github.com/PolymerLabs/playground-elements/issues/93))
-- Dynamic imports are not transformed
-  ([#27](https://github.com/PolymerLabs/playground-elements/issues/27))
 - The import map `scopes` field is not supported
   ([#103](https://github.com/PolymerLabs/playground-elements/issues/103))

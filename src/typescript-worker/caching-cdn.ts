@@ -8,6 +8,8 @@ import {
   fileExtension,
   parseNpmStyleSpecifier,
   isExactSemverVersion,
+  pkgVersion,
+  pkgVersionPath,
 } from './util.js';
 import {Deferred} from '../shared/deferred.js';
 
@@ -128,7 +130,7 @@ export class CachingCdn {
         `CDN HTTP ${res.status} error (${url}): ${content}`
       );
       deferred.reject(err);
-      throw err;
+      return deferred.promise;
     }
     if (!exact) {
       const canonical = this._parseUnpkgUrl(res.url);
@@ -143,7 +145,7 @@ export class CachingCdn {
       },
     };
     deferred.resolve(result);
-    return result;
+    return deferred.promise;
   }
 
   private _parseUnpkgUrl(url: string): NpmFileLocation {
@@ -156,13 +158,3 @@ export class CachingCdn {
     throw new Error(`Unexpected CDN URL format: ${url}`);
   }
 }
-
-const pkgVersion = ({pkg, version}: {pkg: string; version: string}) =>
-  `${pkg}@${version || 'latest'}`;
-
-const pkgVersionPath = ({pkg, version, path}: NpmFileLocation) =>
-  trimTrailingSlash(`${pkgVersion({pkg, version})}/${trimLeadingSlash(path)}`);
-
-const trimLeadingSlash = (s: string) => (s.startsWith('/') ? s.slice(1) : s);
-
-const trimTrailingSlash = (s: string) => (s.endsWith('/') ? s.slice(0, -1) : s);
