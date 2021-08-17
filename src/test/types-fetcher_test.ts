@@ -869,4 +869,114 @@ suite('types fetcher', () => {
       await deleteCdnData();
     }
   });
+
+  test('CDN HTTP errors', async () => {
+    // a/b/c should still resolve, even though there are 404 and 500 errors
+    // served by other imports.
+    const sourceTexts: string[] = [
+      `import 'a';
+       import 'missing';
+       import 'b';
+       import 'broken';
+       import 'c';`,
+    ];
+    const packageJson: PackageJson = {
+      dependencies: {
+        a: '^1.0.0',
+        b: '^1.0.0',
+        c: '^1.0.0',
+        broken: '^1.0.0',
+      },
+    };
+    const cdnData: CdnData = {
+      a: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: `declare export const a: 1;`,
+              },
+            },
+          },
+        },
+      },
+      b: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: `declare export const b: 1;`,
+              },
+            },
+          },
+        },
+      },
+      c: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: `declare export const c: 1;`,
+              },
+            },
+          },
+        },
+      },
+      broken: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'package.json': {
+                status: 500,
+                content: 'Internal error',
+              },
+              'index.d.ts': {
+                status: 500,
+                content: 'Internal error',
+              },
+            },
+          },
+        },
+      },
+    };
+    const expectedDependencyGraph: ExpectedDependencyGraph = {
+      root: {
+        a: '1.0.0',
+        b: '1.0.0',
+        c: '1.0.0',
+      },
+      deps: {},
+    };
+    const expectedLayout: NodeModulesDirectory = {
+      a: {
+        version: '1.0.0',
+        nodeModules: {},
+      },
+      b: {
+        version: '1.0.0',
+        nodeModules: {},
+      },
+      c: {
+        version: '1.0.0',
+        nodeModules: {},
+      },
+    };
+    const expectedFiles = new Map([
+      ['a/package.json', '{}'],
+      ['a/index.d.ts', 'declare export const a: 1;'],
+      ['b/package.json', '{}'],
+      ['b/index.d.ts', 'declare export const b: 1;'],
+      ['c/package.json', '{}'],
+      ['c/index.d.ts', 'declare export const c: 1;'],
+    ]);
+    await checkTypesFetcher(
+      sourceTexts,
+      packageJson,
+      cdnData,
+      {},
+      expectedFiles,
+      expectedDependencyGraph,
+      expectedLayout
+    );
+  });
 });
