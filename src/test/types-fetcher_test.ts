@@ -573,6 +573,65 @@ suite('types fetcher', () => {
     });
   });
 
+  test('tslibs', async () => {
+    const sourceTexts: string[] = [];
+    const tsLibs = ['es2020', 'DOM'];
+    const packageJson: PackageJson = {};
+    const cdnData: CdnData = {
+      typescript: {
+        versions: {
+          '4.3.5': {
+            files: {
+              'lib/lib.es2020.d.ts': {
+                // References are the same as imports from our perspective.
+                content: `/// <reference lib="es2020.promise" />`,
+              },
+              'lib/lib.es2020.promise.d.ts': {
+                content: `interface PromiseConstructor { }`,
+              },
+              // Note standard lib files are always lower-case.
+              'lib/lib.dom.d.ts': {
+                content: `interface HTMLElement { }`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expectedDependencyGraph: ExpectedDependencyGraph = {
+      root: {
+        typescript: '4.3.5',
+      },
+      deps: {},
+    };
+    const expectedLayout: NodeModulesDirectory = {
+      typescript: {
+        version: '4.3.5',
+        nodeModules: {},
+      },
+    };
+    const expectedFiles = new Map([
+      [
+        'typescript/lib/lib.es2020.d.ts',
+        `/// <reference lib="es2020.promise" />`,
+      ],
+      [
+        'typescript/lib/lib.es2020.promise.d.ts',
+        `interface PromiseConstructor { }`,
+      ],
+      ['typescript/lib/lib.dom.d.ts', `interface HTMLElement { }`],
+    ]);
+    await checkTypesFetcher({
+      sourceTexts,
+      tsLibs,
+      packageJson,
+      cdnData,
+      expectedFiles,
+      expectedDependencyGraph,
+      expectedLayout,
+    });
+  });
+
   test('declare module', async () => {
     // Declaring a module should not count as an import, but anything imported
     // from within the declare module block should.
