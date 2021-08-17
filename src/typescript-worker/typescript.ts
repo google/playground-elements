@@ -118,12 +118,10 @@ export class TypeScriptBuilder {
 
     // Wait for all typings to be fetched, and then retrieve slower semantic
     // diagnostics.
-    const typesFetcher = new TypesFetcher(
+    const typings = await TypesFetcher.fetchTypes(
       this._cdn,
       this._importMapResolver,
-      packageJson
-    );
-    const typings = await typesFetcher.fetchTypes(
+      packageJson,
       inputFiles.map((file) => file.file.content),
       compilerOptions.lib
     );

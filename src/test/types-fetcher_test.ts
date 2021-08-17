@@ -48,12 +48,10 @@ const checkTypesFetcherImpl = async (
 ) => {
   const cdn = new CachingCdn(cdnBaseUrl);
   const importMapResolver = new ImportMapResolver(opts.importMap ?? {});
-  const typesFetcher = new TypesFetcher(
+  const actual = await TypesFetcher.fetchTypes(
     cdn,
     importMapResolver,
-    opts.packageJson
-  );
-  const actual = await typesFetcher.fetchTypes(
+    opts.packageJson,
     opts.sourceTexts,
     opts.tsLibs ?? []
   );

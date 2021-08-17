@@ -52,26 +52,25 @@ export class TypesFetcher {
     Map<PackageVersion, Map<FilePath, Promise<Result<FileContent, number>>>>
   >();
 
-  constructor(
-    cdn: CachingCdn,
-    importMapResolver: ImportMapResolver,
-    rootPackageJson: PackageJson | undefined
-  ) {
-    this._cdn = cdn;
-    this._importMapResolver = importMapResolver;
-    this._rootPackageJson = rootPackageJson;
-  }
-
   /**
    * Fetch all ".d.ts" typing files for the full transitive dependency tree of
    * the given project source files and standard libs.
    *
+   * @param cdn Interface to unpkg.com or similar CDN service for fetching
+   * assets.
+   * @param importMapResolver Resolves bare modules to custom URLs, for
+   * optionally overriding the CDN.
+   * @param rootPackageJson The parsed package.json file for the root project,
+   * or undefined if there isn't one.
    * @param sources Project TypeScript source file contents. All bare module
    * imports in these sources will be followed.
-   * @param tsLibs TypeScript standard libraries to fetch, e.g. "es2020", "DOM".
-   * Case-insensitive.
+   * @param tsLibs Case-insensitive TypeScript standard libraries to fetch, e.g.
+   * "es2020", "DOM".
    */
-  async fetchTypes(
+  static async fetchTypes(
+    cdn: CachingCdn,
+    importMapResolver: ImportMapResolver,
+    rootPackageJson: PackageJson | undefined,
     sources: string[],
     tsLibs: string[]
   ): Promise<{
@@ -82,6 +81,7 @@ export class TypesFetcher {
       deps: DependencyGraph;
     };
   }> {
+    const fetcher = new TypesFetcher(cdn, importMapResolver, rootPackageJson);
     // Note we use Promise.allSettled instead of Promise.all because we really
     // do want to ignore exceptions due to 404s etc., and don't want one error
     // to fail the entire tree. If the .d.ts files for an import fail to load
@@ -91,26 +91,36 @@ export class TypesFetcher {
     // especially for non-404 errors.
     await Promise.allSettled([
       ...sources.map((source) =>
-        this._handleBareAndRelativeSpecifiers(source, root)
+        fetcher._handleBareAndRelativeSpecifiers(source, root)
       ),
-      ...tsLibs.map((lib) => this._addTypeScriptStandardLib(lib)),
+      ...tsLibs.map((lib) => fetcher._addTypeScriptStandardLib(lib)),
     ]);
     const layout = new NodeModulesLayoutMaker().layout(
-      this._rootDependencies,
-      this._dependencyGraph
+      fetcher._rootDependencies,
+      fetcher._dependencyGraph
     );
     const files = new Map();
-    await this._materializeNodeModulesTree(layout, files, '');
+    await fetcher._materializeNodeModulesTree(layout, files, '');
     // Note in practice we only really need "files", but it's useful to also
     // return the dependency graph and layout for testing.
     return {
       files,
       layout,
       dependencyGraph: {
-        root: this._rootDependencies,
-        deps: this._dependencyGraph,
+        root: fetcher._rootDependencies,
+        deps: fetcher._dependencyGraph,
       },
     };
+  }
+
+  private constructor(
+    cdn: CachingCdn,
+    importMapResolver: ImportMapResolver,
+    rootPackageJson: PackageJson | undefined
+  ) {
+    this._cdn = cdn;
+    this._importMapResolver = importMapResolver;
+    this._rootPackageJson = rootPackageJson;
   }
 
   private async _addTypeScriptStandardLib(lib: string): Promise<void> {
