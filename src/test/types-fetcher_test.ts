@@ -945,7 +945,10 @@ suite('types fetcher', () => {
   });
 
   test('import map: reads "typings" from package.json', async () => {
-    const sourceTexts: string[] = [`import {foo} from 'foo';`];
+    const sourceTexts: string[] = [
+      `import {foo} from 'foo';
+       import {foo as alsofoo} from 'alsofoo';`,
+    ];
     const packageJson: PackageJson = {};
     const cdnData: CdnData = {
       foo: {
@@ -971,11 +974,17 @@ suite('types fetcher', () => {
       imports: {
         foo: `${cdnBaseUrl}foo@1.2.3`,
         'foo/': `${cdnBaseUrl}foo@1.2.3/`,
+        // Two packages can be mapped to the same URL. The typings will be
+        // duplicated into both node_modules/ directories.
+        alsofoo: `${cdnBaseUrl}foo@1.2.3`,
+        'alsofoo/': `${cdnBaseUrl}foo@1.2.3/`,
       },
     };
     const expectedFiles = new Map([
       ['foo/package.json', '{"typings": "typings.d.ts"}'],
       ['foo/typings.d.ts', 'declare export const foo: string;'],
+      ['alsofoo/package.json', '{"typings": "typings.d.ts"}'],
+      ['alsofoo/typings.d.ts', 'declare export const foo: string;'],
     ]);
     try {
       await checkTypesFetcherImpl(
