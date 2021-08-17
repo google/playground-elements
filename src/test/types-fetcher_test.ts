@@ -24,55 +24,50 @@ interface ExpectedDependencyGraph {
   deps: DependencyGraph;
 }
 
-const checkTypesFetcher = async (
-  sourceTexts: string[],
-  packageJson: PackageJson,
-  cdnData: CdnData,
-  importMap: ModuleImportMap,
-  expectedFiles: Map<string, string>,
-  expectedDependencyGraph?: ExpectedDependencyGraph,
-  expectedLayout?: NodeModulesDirectory
-) => {
-  const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
+const checkTypesFetcher = async (opts: {
+  sourceTexts: string[];
+  packageJson: PackageJson;
+  cdnData: CdnData;
+  tsLibs?: string[];
+  importMap?: ModuleImportMap;
+  expectedFiles: Map<string, string>;
+  expectedDependencyGraph?: ExpectedDependencyGraph;
+  expectedLayout?: NodeModulesDirectory;
+}) => {
+  const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(opts.cdnData);
   try {
-    await checkTypesFetcherImpl(
-      sourceTexts,
-      packageJson,
-      cdnBaseUrl,
-      importMap,
-      expectedFiles,
-      expectedDependencyGraph,
-      expectedLayout
-    );
+    await checkTypesFetcherImpl(opts, cdnBaseUrl);
   } finally {
     await deleteCdnData();
   }
 };
 
 const checkTypesFetcherImpl = async (
-  sourceTexts: string[],
-  packageJson: PackageJson,
-  cdnBaseUrl: string,
-  importMap: ModuleImportMap = {},
-  expectedFiles: Map<string, string>,
-  expectedDependencyGraph?: ExpectedDependencyGraph,
-  expectedLayout?: NodeModulesDirectory
+  opts: Parameters<typeof checkTypesFetcher>[0],
+  cdnBaseUrl: string
 ) => {
   const cdn = new CachingCdn(cdnBaseUrl);
-  const importMapResolver = new ImportMapResolver(importMap);
-  const typesFetcher = new TypesFetcher(cdn, importMapResolver, packageJson);
-  const actual = await typesFetcher.fetchTypes(sourceTexts, []);
-  if (expectedDependencyGraph !== undefined) {
-    assert.deepEqual(actual.dependencyGraph, expectedDependencyGraph);
+  const importMapResolver = new ImportMapResolver(opts.importMap ?? {});
+  const typesFetcher = new TypesFetcher(
+    cdn,
+    importMapResolver,
+    opts.packageJson
+  );
+  const actual = await typesFetcher.fetchTypes(
+    opts.sourceTexts,
+    opts.tsLibs ?? []
+  );
+  if (opts.expectedDependencyGraph !== undefined) {
+    assert.deepEqual(actual.dependencyGraph, opts.expectedDependencyGraph);
   }
-  if (expectedLayout !== undefined) {
-    assert.deepEqual(actual.layout, expectedLayout);
+  if (opts.expectedLayout !== undefined) {
+    assert.deepEqual(actual.layout, opts.expectedLayout);
   }
   // Note assert.deepEqual does compare Maps correctly, but it always displays
   // "{}" as the difference in the error message, hence this conversion :(
   assert.deepEqual(
     [...actual.files].sort(([keyA], [keyB]) => keyA.localeCompare(keyB)),
-    [...expectedFiles].sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+    [...opts.expectedFiles].sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
   );
 };
 
@@ -87,15 +82,14 @@ suite('types fetcher', () => {
       deps: {},
     };
     const expectedLayout: NodeModulesDirectory = {};
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
-      expectedFiles,
+      expectedLayout,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedFiles,
+    });
   });
 
   test('no dependencies', async () => {
@@ -108,15 +102,14 @@ suite('types fetcher', () => {
       deps: {},
     };
     const expectedLayout: NodeModulesDirectory = {};
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('only direct dependencies', async () => {
@@ -173,15 +166,14 @@ suite('types fetcher', () => {
       ['b/package.json', '{}'],
       ['b/index.d.ts', 'declare export const b: 1;'],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('dependency shared between root and branch', async () => {
@@ -247,15 +239,14 @@ suite('types fetcher', () => {
       ['b/package.json', '{}'],
       ['b/index.d.ts', 'declare export const b: 1;'],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('simple chain', async () => {
@@ -338,15 +329,14 @@ suite('types fetcher', () => {
       ['c/package.json', '{}'],
       ['c/index.d.ts', `declare export const c: 3;`],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('short loop', async () => {
@@ -408,15 +398,14 @@ suite('types fetcher', () => {
       ['b/package.json', '{}'],
       ['b/index.d.ts', `declare export * from 'a';`],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('bare -> relative -> bare', async () => {
@@ -484,15 +473,14 @@ suite('types fetcher', () => {
       ['b/package.json', '{}'],
       ['b/index.d.ts', `declare export const b: 2;`],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('version conflict between root and branch', async () => {
@@ -575,15 +563,14 @@ suite('types fetcher', () => {
       ['b/package.json', '{}'],
       ['b/index.d.ts', `declare export const b: 1;`],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('declare module', async () => {
@@ -653,15 +640,14 @@ suite('types fetcher', () => {
       ],
       ['a/internal.d.ts', 'declare export const a: 1;'],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('version conflict requiring directory duplication', async () => {
@@ -793,15 +779,14 @@ suite('types fetcher', () => {
       ['c/node_modules/a/package.json', `{}`],
       ['c/node_modules/a/index.d.ts', `declare export const: 2;`],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 
   test('import map: specifier includes filename', async () => {
@@ -837,11 +822,14 @@ suite('types fetcher', () => {
     ]);
     try {
       await checkTypesFetcherImpl(
-        sourceTexts,
-        packageJson,
-        cdnBaseUrl,
-        importMap,
-        expectedFiles
+        {
+          sourceTexts,
+          packageJson,
+          cdnData,
+          importMap,
+          expectedFiles,
+        },
+        cdnBaseUrl
       );
     } finally {
       await deleteCdnData();
@@ -883,11 +871,14 @@ suite('types fetcher', () => {
     ]);
     try {
       await checkTypesFetcherImpl(
-        sourceTexts,
-        packageJson,
-        cdnBaseUrl,
-        importMap,
-        expectedFiles
+        {
+          sourceTexts,
+          packageJson,
+          cdnData,
+          importMap,
+          expectedFiles,
+        },
+        cdnBaseUrl
       );
     } finally {
       await deleteCdnData();
@@ -929,11 +920,14 @@ suite('types fetcher', () => {
     ]);
     try {
       await checkTypesFetcherImpl(
-        sourceTexts,
-        packageJson,
-        cdnBaseUrl,
-        importMap,
-        expectedFiles
+        {
+          sourceTexts,
+          packageJson,
+          cdnData,
+          importMap,
+          expectedFiles,
+        },
+        cdnBaseUrl
       );
     } finally {
       await deleteCdnData();
@@ -1039,14 +1033,13 @@ suite('types fetcher', () => {
       ['c/package.json', '{}'],
       ['c/index.d.ts', 'declare export const c: 1;'],
     ]);
-    await checkTypesFetcher(
+    await checkTypesFetcher({
       sourceTexts,
       packageJson,
       cdnData,
-      {},
       expectedFiles,
       expectedDependencyGraph,
-      expectedLayout
-    );
+      expectedLayout,
+    });
   });
 });
