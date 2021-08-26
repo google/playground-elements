@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- If a file is marked `hidden`, and the user creates a new file by that name,
+  the file will become visible and editable.
 
 ## [0.12.0] - 2021-08-17
 

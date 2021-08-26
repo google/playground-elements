@@ -5,12 +5,13 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import '../playground-ide.js';
-import {PlaygroundIde} from '../playground-ide.js';
 import {html, render} from 'lit-html';
-import {UpdatingElement} from 'lit-element';
-import {PlaygroundCodeEditor} from '../playground-code-editor.js';
-import {PlaygroundProject} from '../playground-project.js';
+import {PlaygroundIde} from '../playground-ide.js';
+import '../playground-ide.js';
+
+import type {UpdatingElement} from 'lit-element';
+import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
+import type {PlaygroundProject} from '../playground-project.js';
 
 suite('playground-ide', () => {
   let container: HTMLDivElement;
@@ -365,5 +366,47 @@ suite('playground-ide', () => {
     };
     container.appendChild(ide);
     await assertPreviewContains('foo.html loaded');
+  });
+
+  test('create new files', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Hello',
+        },
+        'package.json': {
+          content: '{"dependencies":{}}',
+          hidden: true,
+        },
+      },
+    };
+    container.appendChild(ide);
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+    // Need to defer another microtask for the config to initialize.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    // Already exists.
+    assert.isFalse(project.isValidNewFilename('index.html'));
+
+    // Does not exist.
+    assert.isTrue(project.isValidNewFilename('newfile.ts'));
+    project.addFile('newfile.ts');
+    assert.isFalse(project.isValidNewFilename('newfile.ts'));
+
+    // Exists but is hidden. Creating it unhides it and reveals the existing
+    // content.
+    assert.isTrue(project.isValidNewFilename('package.json'));
+    project.addFile('package.json');
+    assert.isFalse(project.isValidNewFilename('package.json'));
+    const packageJson = project.files?.find(
+      (file) => file.name === 'package.json'
+    );
+    assert.isFalse(packageJson?.hidden);
+    assert.equal(packageJson?.content, '{"dependencies":{}}');
   });
 });
