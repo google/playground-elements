@@ -533,22 +533,33 @@ export class PlaygroundProject extends LitElement {
   }
 
   isValidNewFilename(name: string): boolean {
-    return (
-      !!name && !!this._files && !this._files.some((file) => file.name === name)
-    );
+    if (!name) {
+      return false;
+    }
+    const existing = this._files?.find((file) => file.name === name);
+    if (existing !== undefined) {
+      return existing.hidden === true;
+    }
+    return true;
   }
 
   addFile(name: string) {
-    if (!this._files) {
+    if (!this._files || !this.isValidNewFilename(name)) {
       return;
     }
-    if (!this.isValidNewFilename(name)) {
-      return;
+    const existing = this._files?.find((file) => file.name === name);
+    if (existing?.hidden === true) {
+      // If a file already exists but is hidden, then we allow the user to
+      // "create" it, which is actually unhiding it.
+      existing.hidden = false;
+    } else {
+      this._files.push({
+        name,
+        content: '',
+        contentType: typeFromFilename(name),
+      });
     }
-    this._files = [
-      ...this._files,
-      {name, content: '', contentType: typeFromFilename(name)},
-    ];
+    this.requestUpdate();
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
