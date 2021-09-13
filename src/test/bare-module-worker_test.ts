@@ -744,7 +744,7 @@ suite('bare module worker', () => {
       {
         diagnostic: {
           message:
-            'Could not resolve module "non-existent/index.js": CDN HTTP 404 error (<CDN-BASE-URL>/non-existent@latest/index.js): Not Found',
+            'Could not resolve module "non-existent/index.js": CDN HTTP 404 error (<CDN-BASE-URL>/non-existent@latest/package.json): Not Found',
           range: {
             end: {
               character: 29,
@@ -875,5 +875,233 @@ suite('bare module worker', () => {
       },
     ];
     await checkTransform(files, expected, importMap, cdn);
+  });
+
+  test('prefers "import" condition exports', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.js',
+        content: `
+          import 'foo';
+          import 'foo/bar.js';
+        `,
+      },
+    ];
+    const cdn: CdnData = {
+      foo: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'esm/index.js': {
+                content: 'ESM',
+              },
+              'esm/bar.js': {
+                content: 'ESM',
+              },
+              'cjs/index.js': {
+                content: 'CJS',
+              },
+              'cjs/bar.js': {
+                content: 'CJS',
+              },
+              'index.js': {
+                content: 'NONE',
+              },
+              'bar.js': {
+                content: 'NONE',
+              },
+              'package.json': {
+                content: `{
+                  "exports": {
+                    ".": {
+                      "cjs": "./cjs/index.js",
+                      "import": "./esm/index.js",
+                      "default": "./index.js"
+                    },
+                    "./bar.js": {
+                      "cjs": "./cjs/bar.js",
+                      "import": "./esm/bar.js",
+                      "default": "./bar.js"
+                    }
+                  }
+                }`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: `
+          import './node_modules/foo@1.0.0/esm/index.js';
+          import './node_modules/foo@1.0.0/esm/bar.js';
+        `,
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/esm/index.js',
+          content: 'ESM',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/esm/bar.js',
+          content: 'ESM',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+    ];
+    await checkTransform(files, expected, {}, cdn);
+  });
+
+  test('prefers "development" condition exports', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.js',
+        content: `
+          import 'foo';
+          import 'foo/bar.js';
+        `,
+      },
+    ];
+    const cdn: CdnData = {
+      foo: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.js': {
+                content: 'PROD',
+              },
+              'bar.js': {
+                content: 'PROD',
+              },
+              'development/index.js': {
+                content: 'DEV',
+              },
+              'development/bar.js': {
+                content: 'DEV',
+              },
+              'package.json': {
+                content: `{
+                  "exports": {
+                    ".": {
+                      "development": "./development/index.js",
+                      "default": "./index.js"
+                    },
+                    "./bar.js": {
+                      "development": "./development/bar.js",
+                      "default": "./bar.js"
+                    }
+                  }
+                }`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: `
+          import './node_modules/foo@1.0.0/development/index.js';
+          import './node_modules/foo@1.0.0/development/bar.js';
+        `,
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/development/index.js',
+          content: 'DEV',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/development/bar.js',
+          content: 'DEV',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+    ];
+    await checkTransform(files, expected, {}, cdn);
+  });
+
+  test('@lion/button style import', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.js',
+        content: `
+          import '@lion/button/define';
+        `,
+      },
+    ];
+    const cdn: CdnData = {
+      '@lion/button': {
+        versions: {
+          '0.14.3': {
+            files: {
+              'define.js': {
+                // Note this is a bare module specifier referring to its own
+                // package, so package exports must be consulted again; there is
+                // no file called "define-button.js".
+                content: "import '@lion/button/define-button';",
+              },
+              'lion-button.js': {
+                content: 'customElements.define(...);',
+              },
+              'package.json': {
+                content: `{
+                  "exports": {
+                    "./define-button": "./lion-button.js",
+                    "./define": "./define.js"
+                  }
+                }`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: `
+          import './node_modules/@lion/button@0.14.3/define.js';
+        `,
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/@lion/button@0.14.3/define.js',
+          content: "import './lion-button.js';",
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/@lion/button@0.14.3/lion-button.js',
+          content: 'customElements.define(...);',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+    ];
+    await checkTransform(files, expected, {}, cdn);
   });
 });

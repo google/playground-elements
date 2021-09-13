@@ -11,11 +11,11 @@ import {
   resolveUrlPath,
   charToLineAndChar,
   fileExtension,
-  isExactSemverVersion,
   classifySpecifier,
   relativeUrlPath,
 } from './util.js';
 import {Deferred} from '../shared/deferred.js';
+import {NodeModuleResolver} from './node-module-resolver.js';
 
 import type {
   BuildOutput,
@@ -53,6 +53,9 @@ export class BareModuleTransformer {
   private _cdn: CachingCdn;
   private _importMapResolver: ImportMapResolver;
   private _emittedExternalDependencies = new Set<string>();
+  private _nodeResolver = new NodeModuleResolver({
+    conditions: ['module', 'import', 'development'],
+  });
 
   constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
     this._cdn = cdn;
@@ -266,14 +269,17 @@ export class BareModuleTransformer {
       location.version =
         (await getPackageJson())?.dependencies?.[location.pkg] ?? 'latest';
     }
-    if (location.path === '') {
-      const packageJson = await this._cdn.fetchPackageJson(location);
-      location.path = packageJson.module ?? packageJson.main ?? 'index.js';
-    }
-    if (
-      !fileExtension(location.path) ||
-      !isExactSemverVersion(location.version)
-    ) {
+    location.version = await this._cdn.resolveVersion(location);
+    const packageJson = await this._cdn.fetchPackageJson(location);
+    location.path = this._nodeResolver.resolve(location, packageJson, referrer);
+    if (!fileExtension(location.path)) {
+      // TODO(aomarks) It's safe to use unpkg's redirection-based
+      // canonicalization for this final file-extension-adding step ("./foo" ->
+      // "./foo.js"), because we've already applied package exports remappings
+      // (if we did this in reverse order, unpkg could give us a 404 for a file
+      // that only exists as a package export). However, it would be safer and a
+      // better separation of concerns to move this final file-extension-adding
+      // step directly into the NodeResolver class.
       location = await this._cdn.canonicalize(location);
     }
     output.add(this._fetchExternalDependency(location, output));
