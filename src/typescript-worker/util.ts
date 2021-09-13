@@ -174,13 +174,38 @@ export const charToLineAndChar = (
   return {line, character};
 };
 
+export type PackageExports =
+  | PackageExportsTarget
+  | PackageExportsPathOrConditionMap;
+
+export type PackageExportsTarget =
+  | PackageExportsTargetPath
+  | PackageExportsConditionMap
+  | PackageExportsTarget[]
+  | null;
+
+export type PackageExportsPathOrConditionMap = {
+  [PathOrCondition: string]: PackageExportsTarget;
+};
+
+export type PackageExportsTargetPath = string;
+
+export type PackageExportsConditionMap = {
+  [Condition: string]: PackageExportsTarget;
+};
+
 export interface PackageJson {
   version?: string;
   main?: string;
+  exports?: PackageExports;
   module?: string;
   types?: string;
   typings?: string;
   dependencies?: {[key: string]: string};
+}
+
+export interface PackageJsonWithExports extends PackageJson {
+  exports: PackageExports;
 }
 
 /**
