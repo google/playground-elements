@@ -18,13 +18,14 @@
 function emitFolderMapDeprecation(match, pjsonUrl, isExports, base) {
   const pjsonPath = fileURLToPath(pjsonUrl);
 
-  if (emittedPackageWarnings.has(pjsonPath + '|' + match))
-    return;
+  if (emittedPackageWarnings.has(pjsonPath + '|' + match)) return;
   emittedPackageWarnings.add(pjsonPath + '|' + match);
   process.emitWarning(
-    `Use of deprecated folder mapping "${match}" in the ${isExports ?
-      '"exports"' : '"imports"'} field module resolution of the package at ${
-      pjsonPath}${base ? ` imported from ${fileURLToPath(base)}` : ''}.\n` +
+    `Use of deprecated folder mapping "${match}" in the ${
+      isExports ? '"exports"' : '"imports"'
+    } field module resolution of the package at ${pjsonPath}${
+      base ? ` imported from ${fileURLToPath(base)}` : ''
+    }.\n` +
       `Update this package.json to use a subpath pattern like "${match}*".`,
     'DeprecationWarning',
     'DEP0148'
@@ -38,8 +39,10 @@ function emitFolderMapDeprecation(match, pjsonUrl, isExports, base) {
  */
 function throwExportsNotFound(subpath, packageJSONUrl, base) {
   throw new ERR_PACKAGE_PATH_NOT_EXPORTED(
-    fileURLToPath(new URL('.', packageJSONUrl)), subpath,
-    base && fileURLToPath(base));
+    fileURLToPath(new URL('.', packageJSONUrl)),
+    subpath,
+    base && fileURLToPath(base)
+  );
 }
 
 /**
@@ -50,29 +53,50 @@ function throwExportsNotFound(subpath, packageJSONUrl, base) {
  * @param {string | URL | undefined} base
  */
 function throwInvalidSubpath(subpath, packageJSONUrl, internal, base) {
-  const reason = `request is not a valid subpath for the "${internal ?
-    'imports' : 'exports'}" resolution of ${fileURLToPath(packageJSONUrl)}`;
-  throw new ERR_INVALID_MODULE_SPECIFIER(subpath, reason,
-                                         base && fileURLToPath(base));
+  const reason = `request is not a valid subpath for the "${
+    internal ? 'imports' : 'exports'
+  }" resolution of ${fileURLToPath(packageJSONUrl)}`;
+  throw new ERR_INVALID_MODULE_SPECIFIER(
+    subpath,
+    reason,
+    base && fileURLToPath(base)
+  );
 }
 
 function throwInvalidPackageTarget(
-  subpath, target, packageJSONUrl, internal, base) {
+  subpath,
+  target,
+  packageJSONUrl,
+  internal,
+  base
+) {
   if (typeof target === 'object' && target !== null) {
     target = JSONStringify(target, null, '');
   } else {
     target = `${target}`;
   }
   throw new ERR_INVALID_PACKAGE_TARGET(
-    fileURLToPath(new URL('.', packageJSONUrl)), subpath, target,
-    internal, base && fileURLToPath(base));
+    fileURLToPath(new URL('.', packageJSONUrl)),
+    subpath,
+    target,
+    internal,
+    base && fileURLToPath(base)
+  );
 }
 
 const invalidSegmentRegEx = /(^|\\|\/)(\.\.?|node_modules)(\\|\/|$)/;
 const patternRegEx = /\*/g;
 
 function resolvePackageTargetString(
-  target, subpath, match, packageJSONUrl, base, pattern, internal, conditions) {
+  target,
+  subpath,
+  match,
+  packageJSONUrl,
+  base,
+  pattern,
+  internal,
+  conditions
+) {
   if (subpath !== '' && !pattern && target[target.length - 1] !== '/')
     throwInvalidPackageTarget(match, target, packageJSONUrl, internal, base);
 
@@ -96,8 +120,9 @@ function resolvePackageTargetString(
     throwInvalidSubpath(match + subpath, packageJSONUrl, internal, base);
 
   if (pattern)
-    return new URL(StringPrototypeReplace(resolved.href, patternRegEx,
-                                          subpath));
+    return new URL(
+      StringPrototypeReplace(resolved.href, patternRegEx, subpath)
+    );
   return new URL(subpath, resolved);
 }
 
@@ -108,18 +133,32 @@ function resolvePackageTargetString(
 function isArrayIndex(key) {
   const keyNum = +key;
   if (`${keyNum}` !== key) return false;
-  return keyNum >= 0 && keyNum < 0xFFFF_FFFF;
+  return keyNum >= 0 && keyNum < 0xffff_ffff;
 }
 
-function resolvePackageTarget(packageJSONUrl, target, subpath, packageSubpath,
-                              base, pattern, internal, conditions) {
+function resolvePackageTarget(
+  packageJSONUrl,
+  target,
+  subpath,
+  packageSubpath,
+  base,
+  pattern,
+  internal,
+  conditions
+) {
   if (typeof target === 'string') {
     return resolvePackageTargetString(
-      target, subpath, packageSubpath, packageJSONUrl, base, pattern, internal,
-      conditions);
+      target,
+      subpath,
+      packageSubpath,
+      packageJSONUrl,
+      base,
+      pattern,
+      internal,
+      conditions
+    );
   } else if (ArrayIsArray(target)) {
-    if (target.length === 0)
-      return null;
+    if (target.length === 0) return null;
 
     let lastException;
     for (let i = 0; i < target.length; i++) {
@@ -127,16 +166,21 @@ function resolvePackageTarget(packageJSONUrl, target, subpath, packageSubpath,
       let resolved;
       try {
         resolved = resolvePackageTarget(
-          packageJSONUrl, targetItem, subpath, packageSubpath, base, pattern,
-          internal, conditions);
+          packageJSONUrl,
+          targetItem,
+          subpath,
+          packageSubpath,
+          base,
+          pattern,
+          internal,
+          conditions
+        );
       } catch (e) {
         lastException = e;
-        if (e.code === 'ERR_INVALID_PACKAGE_TARGET')
-          continue;
+        if (e.code === 'ERR_INVALID_PACKAGE_TARGET') continue;
         throw e;
       }
-      if (resolved === undefined)
-        continue;
+      if (resolved === undefined) continue;
       if (resolved === null) {
         lastException = null;
         continue;
@@ -152,8 +196,10 @@ function resolvePackageTarget(packageJSONUrl, target, subpath, packageSubpath,
       const key = keys[i];
       if (isArrayIndex(key)) {
         throw new ERR_INVALID_PACKAGE_CONFIG(
-          fileURLToPath(packageJSONUrl), base,
-          '"exports" cannot contain numeric property keys.');
+          fileURLToPath(packageJSONUrl),
+          base,
+          '"exports" cannot contain numeric property keys.'
+        );
       }
     }
     for (let i = 0; i < keys.length; i++) {
@@ -161,10 +207,16 @@ function resolvePackageTarget(packageJSONUrl, target, subpath, packageSubpath,
       if (key === 'default' || conditions.has(key)) {
         const conditionalTarget = target[key];
         const resolved = resolvePackageTarget(
-          packageJSONUrl, conditionalTarget, subpath, packageSubpath, base,
-          pattern, internal, conditions);
-        if (resolved === undefined)
-          continue;
+          packageJSONUrl,
+          conditionalTarget,
+          subpath,
+          packageSubpath,
+          base,
+          pattern,
+          internal,
+          conditions
+        );
+        if (resolved === undefined) continue;
         return resolved;
       }
     }
@@ -172,8 +224,13 @@ function resolvePackageTarget(packageJSONUrl, target, subpath, packageSubpath,
   } else if (target === null) {
     return null;
   }
-  throwInvalidPackageTarget(packageSubpath, target, packageJSONUrl, internal,
-                            base);
+  throwInvalidPackageTarget(
+    packageSubpath,
+    target,
+    packageJSONUrl,
+    internal,
+    base
+  );
 }
 
 /**
@@ -197,10 +254,12 @@ function isConditionalExportsMainSugar(exports, packageJSONUrl, base) {
       isConditionalSugar = curIsConditionalSugar;
     } else if (isConditionalSugar !== curIsConditionalSugar) {
       throw new ERR_INVALID_PACKAGE_CONFIG(
-        fileURLToPath(packageJSONUrl), base,
+        fileURLToPath(packageJSONUrl),
+        base,
         '"exports" cannot contain some keys starting with \'.\' and some not.' +
-        ' The exports object must either be an object of package subpath keys' +
-        ' or an object of main entry condition name keys only.');
+          ' The exports object must either be an object of package subpath keys' +
+          ' or an object of main entry condition name keys only.'
+      );
     }
   }
   return isConditionalSugar;
@@ -215,21 +274,35 @@ function isConditionalExportsMainSugar(exports, packageJSONUrl, base) {
  * @returns {URL}
  */
 function packageExportsResolve(
-  packageJSONUrl, packageSubpath, packageConfig, base, conditions) {
+  packageJSONUrl,
+  packageSubpath,
+  packageConfig,
+  base,
+  conditions
+) {
   let exports = packageConfig.exports;
   if (isConditionalExportsMainSugar(exports, packageJSONUrl, base))
-    exports = { '.': exports };
+    exports = {'.': exports};
 
-  if (ObjectPrototypeHasOwnProperty(exports, packageSubpath) &&
-      !StringPrototypeIncludes(packageSubpath, '*') &&
-      !StringPrototypeEndsWith(packageSubpath, '/')) {
+  if (
+    ObjectPrototypeHasOwnProperty(exports, packageSubpath) &&
+    !StringPrototypeIncludes(packageSubpath, '*') &&
+    !StringPrototypeEndsWith(packageSubpath, '/')
+  ) {
     const target = exports[packageSubpath];
     const resolved = resolvePackageTarget(
-      packageJSONUrl, target, '', packageSubpath, base, false, false, conditions
+      packageJSONUrl,
+      target,
+      '',
+      packageSubpath,
+      base,
+      false,
+      false,
+      conditions
     );
     if (resolved === null || resolved === undefined)
       throwExportsNotFound(packageSubpath, packageJSONUrl, base);
-    return { resolved, exact: true };
+    return {resolved, exact: true};
   }
 
   let bestMatch = '';
@@ -238,22 +311,32 @@ function packageExportsResolve(
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     const patternIndex = StringPrototypeIndexOf(key, '*');
-    if (patternIndex !== -1 &&
-        StringPrototypeStartsWith(packageSubpath,
-                                  StringPrototypeSlice(key, 0, patternIndex))) {
+    if (
+      patternIndex !== -1 &&
+      StringPrototypeStartsWith(
+        packageSubpath,
+        StringPrototypeSlice(key, 0, patternIndex)
+      )
+    ) {
       const patternTrailer = StringPrototypeSlice(key, patternIndex + 1);
-      if (packageSubpath.length >= key.length &&
-          StringPrototypeEndsWith(packageSubpath, patternTrailer) &&
-          patternKeyCompare(bestMatch, key) === 1 &&
-          StringPrototypeLastIndexOf(key, '*') === patternIndex) {
+      if (
+        packageSubpath.length >= key.length &&
+        StringPrototypeEndsWith(packageSubpath, patternTrailer) &&
+        patternKeyCompare(bestMatch, key) === 1 &&
+        StringPrototypeLastIndexOf(key, '*') === patternIndex
+      ) {
         bestMatch = key;
         bestMatchSubpath = StringPrototypeSlice(
-          packageSubpath, patternIndex,
-          packageSubpath.length - patternTrailer.length);
+          packageSubpath,
+          patternIndex,
+          packageSubpath.length - patternTrailer.length
+        );
       }
-    } else if (key[key.length - 1] === '/' &&
+    } else if (
+      key[key.length - 1] === '/' &&
       StringPrototypeStartsWith(packageSubpath, key) &&
-      patternKeyCompare(bestMatch, key) === 1) {
+      patternKeyCompare(bestMatch, key) === 1
+    ) {
       bestMatch = key;
       bestMatchSubpath = StringPrototypeSlice(packageSubpath, key.length);
     }
@@ -262,14 +345,21 @@ function packageExportsResolve(
   if (bestMatch) {
     const target = exports[bestMatch];
     const pattern = StringPrototypeIncludes(bestMatch, '*');
-    const resolved = resolvePackageTarget(packageJSONUrl, target,
-                                          bestMatchSubpath, bestMatch, base,
-                                          pattern, false, conditions);
+    const resolved = resolvePackageTarget(
+      packageJSONUrl,
+      target,
+      bestMatchSubpath,
+      bestMatch,
+      base,
+      pattern,
+      false,
+      conditions
+    );
     if (resolved === null || resolved === undefined)
       throwExportsNotFound(packageSubpath, packageJSONUrl, base);
     if (!pattern)
       emitFolderMapDeprecation(bestMatch, packageJSONUrl, true, base);
-    return { resolved, exact: pattern };
+    return {resolved, exact: pattern};
   }
 
   throwExportsNotFound(packageSubpath, packageJSONUrl, base);

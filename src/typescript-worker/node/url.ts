@@ -9,12 +9,9 @@
 // and adapted for use in playground-elements.
 
 function fileURLToPath(path) {
-    if (typeof path === 'string')
-      path = new URL(path);
-    else if (!isURLInstance(path))
-      throw new ERR_INVALID_ARG_TYPE('path', ['string', 'URL'], path);
-    if (path.protocol !== 'file:')
-      throw new ERR_INVALID_URL_SCHEME('file');
-    return isWindows ? getPathFromURLWin32(path) : getPathFromURLPosix(path);
-  }
-  
+  if (typeof path === 'string') path = new URL(path);
+  else if (!isURLInstance(path))
+    throw new ERR_INVALID_ARG_TYPE('path', ['string', 'URL'], path);
+  if (path.protocol !== 'file:') throw new ERR_INVALID_URL_SCHEME('file');
+  return isWindows ? getPathFromURLWin32(path) : getPathFromURLPosix(path);
+}
