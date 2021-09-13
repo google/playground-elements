@@ -8,23 +8,32 @@
 // https://github.com/nodejs/node/blob/a9dd03b1ec89a75186f05967fc76ec0704050c36/lib/internal/modules/esm/resolve.js
 // and adapted for use in playground-elements.
 
-/**
- * @param {string} match
- * @param {URL} pjsonUrl
- * @param {boolean} isExports
- * @param {string | URL | undefined} base
- * @returns {void}
- */
-function emitFolderMapDeprecation(match, pjsonUrl, isExports, base) {
-  const pjsonPath = fileURLToPath(pjsonUrl);
+import {fileURLToPath} from './url.js';
+import {
+  InvalidModuleSpecifierError,
+  InvalidPackageConfigError,
+  InvalidPackageTargetError,
+  PackagePathNotExportedError,
+} from './errors.js';
+import type {
+  PackageExports,
+  PackageExportsPathOrConditionMap,
+  PackageExportsTarget,
+  PackageJsonWithExports,
+} from '../util.js';
 
-  if (emittedPackageWarnings.has(pjsonPath + '|' + match)) return;
-  emittedPackageWarnings.add(pjsonPath + '|' + match);
-  process.emitWarning(
+function emitFolderMapDeprecation(
+  match: string,
+  pjsonUrl: URL,
+  isExports: boolean,
+  base: string
+): void {
+  const pjsonPath = fileURLToPath(pjsonUrl);
+  console.warn(
     `Use of deprecated folder mapping "${match}" in the ${
       isExports ? '"exports"' : '"imports"'
     } field module resolution of the package at ${pjsonPath}${
-      base ? ` imported from ${fileURLToPath(base)}` : ''
+      base ? ` imported from ${base}` : ''
     }.\n` +
       `Update this package.json to use a subpath pattern like "${match}*".`,
     'DeprecationWarning',
@@ -32,55 +41,48 @@ function emitFolderMapDeprecation(match, pjsonUrl, isExports, base) {
   );
 }
 
-/**
- * @param {string} specifier
- * @param {URL} packageJSONUrl
- * @param {string | URL | undefined} base
- */
-function throwExportsNotFound(subpath, packageJSONUrl, base) {
-  throw new ERR_PACKAGE_PATH_NOT_EXPORTED(
+function makeExportsNotFoundError(
+  subpath: string,
+  packageJSONUrl: URL,
+  base: string
+): PackagePathNotExportedError {
+  throw new PackagePathNotExportedError(
     fileURLToPath(new URL('.', packageJSONUrl)),
     subpath,
-    base && fileURLToPath(base)
+    base
   );
 }
 
-/**
- *
- * @param {string | URL} subpath
- * @param {URL} packageJSONUrl
- * @param {boolean} internal
- * @param {string | URL | undefined} base
- */
-function throwInvalidSubpath(subpath, packageJSONUrl, internal, base) {
+function makeInvalidSubpathError(
+  subpath: string,
+  packageJSONUrl: URL,
+  internal: boolean,
+  base: string
+) {
   const reason = `request is not a valid subpath for the "${
     internal ? 'imports' : 'exports'
   }" resolution of ${fileURLToPath(packageJSONUrl)}`;
-  throw new ERR_INVALID_MODULE_SPECIFIER(
-    subpath,
-    reason,
-    base && fileURLToPath(base)
-  );
+  return new InvalidModuleSpecifierError(subpath, reason, base);
 }
 
-function throwInvalidPackageTarget(
-  subpath,
-  target,
-  packageJSONUrl,
-  internal,
-  base
+function makeInvalidPackageTargetError(
+  subpath: string,
+  target: PackageExportsTarget,
+  packageJSONUrl: URL,
+  internal: boolean,
+  base: string
 ) {
   if (typeof target === 'object' && target !== null) {
-    target = JSONStringify(target, null, '');
+    target = JSON.stringify(target, null, '');
   } else {
     target = `${target}`;
   }
-  throw new ERR_INVALID_PACKAGE_TARGET(
-    fileURLToPath(new URL('.', packageJSONUrl)),
+  throw new InvalidPackageTargetError(
+    packageJSONUrl,
     subpath,
     target,
     internal,
-    base && fileURLToPath(base)
+    base
   );
 }
 
@@ -88,64 +90,97 @@ const invalidSegmentRegEx = /(^|\\|\/)(\.\.?|node_modules)(\\|\/|$)/;
 const patternRegEx = /\*/g;
 
 function resolvePackageTargetString(
-  target,
-  subpath,
-  match,
-  packageJSONUrl,
-  base,
-  pattern,
-  internal,
-  conditions
-) {
-  if (subpath !== '' && !pattern && target[target.length - 1] !== '/')
-    throwInvalidPackageTarget(match, target, packageJSONUrl, internal, base);
-
-  if (!StringPrototypeStartsWith(target, './')) {
-    throwInvalidPackageTarget(match, target, packageJSONUrl, internal, base);
+  target: string,
+  subpath: string,
+  match: string,
+  packageJSONUrl: URL,
+  base: string,
+  pattern: boolean,
+  internal: boolean,
+  _conditions: Set<string>
+): URL {
+  if (subpath !== '' && !pattern && target[target.length - 1] !== '/') {
+    throw makeInvalidPackageTargetError(
+      match,
+      target,
+      packageJSONUrl,
+      internal,
+      base
+    );
   }
 
-  if (RegExpPrototypeTest(invalidSegmentRegEx, StringPrototypeSlice(target, 2)))
-    throwInvalidPackageTarget(match, target, packageJSONUrl, internal, base);
+  if (!target.startsWith('./')) {
+    // TODO(aomarks) Add when support here for package "imports" is added.
+    throw makeInvalidPackageTargetError(
+      match,
+      target,
+      packageJSONUrl,
+      internal,
+      base
+    );
+  }
+
+  if (invalidSegmentRegEx.test(target.slice(2))) {
+    throw makeInvalidPackageTargetError(
+      match,
+      target,
+      packageJSONUrl,
+      internal,
+      base
+    );
+  }
 
   const resolved = new URL(target, packageJSONUrl);
   const resolvedPath = resolved.pathname;
   const packagePath = new URL('.', packageJSONUrl).pathname;
 
-  if (!StringPrototypeStartsWith(resolvedPath, packagePath))
-    throwInvalidPackageTarget(match, target, packageJSONUrl, internal, base);
-
-  if (subpath === '') return resolved;
-
-  if (RegExpPrototypeTest(invalidSegmentRegEx, subpath))
-    throwInvalidSubpath(match + subpath, packageJSONUrl, internal, base);
-
-  if (pattern)
-    return new URL(
-      StringPrototypeReplace(resolved.href, patternRegEx, subpath)
+  if (!resolvedPath.startsWith(packagePath)) {
+    throw makeInvalidPackageTargetError(
+      match,
+      target,
+      packageJSONUrl,
+      internal,
+      base
     );
+  }
+
+  if (subpath === '') {
+    return resolved;
+  }
+
+  if (invalidSegmentRegEx.test(subpath)) {
+    throw makeInvalidSubpathError(
+      match + subpath,
+      packageJSONUrl,
+      internal,
+      base
+    );
+  }
+
+  if (pattern) {
+    return new URL(resolved.href.replace(patternRegEx, subpath));
+  }
   return new URL(subpath, resolved);
 }
 
-/**
- * @param {string} key
- * @returns {boolean}
- */
-function isArrayIndex(key) {
+function isArrayIndex(key: string): boolean {
   const keyNum = +key;
-  if (`${keyNum}` !== key) return false;
+  if (`${keyNum}` !== key) {
+    return false;
+  }
   return keyNum >= 0 && keyNum < 0xffff_ffff;
 }
 
 function resolvePackageTarget(
-  packageJSONUrl,
-  target,
-  subpath,
-  packageSubpath,
-  base,
-  pattern,
-  internal,
-  conditions
-) {
+  packageJSONUrl: URL,
+  target: PackageExportsTarget,
+  subpath: string,
+  packageSubpath: string,
+  base: string,
+  pattern: boolean,
+  internal: boolean,
+  conditions: Set<string>
+): URL | null | undefined {
   if (typeof target === 'string') {
     return resolvePackageTargetString(
       target,
@@ -157,8 +192,10 @@ function resolvePackageTarget(
       internal,
       conditions
     );
-  } else if (ArrayIsArray(target)) {
-    if (target.length === 0) return null;
+  } else if (Array.isArray(target)) {
+    if (target.length === 0) {
+      return null;
+    }
 
     let lastException;
     for (let i = 0; i < target.length; i++) {
@@ -177,7 +214,9 @@ function resolvePackageTarget(
         );
       } catch (e) {
         lastException = e;
-        if (e.code === 'ERR_INVALID_PACKAGE_TARGET') continue;
+        if (e instanceof InvalidPackageTargetError) {
+          continue;
+        }
         throw e;
       }
       if (resolved === undefined) continue;
@@ -187,15 +226,16 @@ function resolvePackageTarget(
       }
       return resolved;
     }
-    if (lastException === undefined || lastException === null)
+    if (lastException === undefined || lastException === null) {
       return lastException;
+    }
     throw lastException;
   } else if (typeof target === 'object' && target !== null) {
-    const keys = ObjectGetOwnPropertyNames(target);
+    const keys = Object.getOwnPropertyNames(target);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       if (isArrayIndex(key)) {
-        throw new ERR_INVALID_PACKAGE_CONFIG(
+        throw new InvalidPackageConfigError(
           fileURLToPath(packageJSONUrl),
           base,
           '"exports" cannot contain numeric property keys.'
@@ -224,7 +264,7 @@ function resolvePackageTarget(
   } else if (target === null) {
     return null;
   }
-  throwInvalidPackageTarget(
+  throw makeInvalidPackageTargetError(
     packageSubpath,
     target,
     packageJSONUrl,
@@ -233,18 +273,19 @@ function resolvePackageTarget(
   );
 }
 
-/**
- *
- * @param {Exports} exports
- * @param {URL} packageJSONUrl
- * @param {string | URL | undefined} base
- * @returns
- */
-function isConditionalExportsMainSugar(exports, packageJSONUrl, base) {
-  if (typeof exports === 'string' || ArrayIsArray(exports)) return true;
-  if (typeof exports !== 'object' || exports === null) return false;
+function isConditionalExportsMainSugar(
+  exports: PackageExports,
+  packageJSONUrl: URL,
+  base: string
+): boolean {
+  if (typeof exports === 'string' || Array.isArray(exports)) {
+    return true;
+  }
+  if (typeof exports !== 'object' || exports === null) {
+    return false;
+  }
 
-  const keys = ObjectGetOwnPropertyNames(exports);
+  const keys = Object.getOwnPropertyNames(exports);
   let isConditionalSugar = false;
   let i = 0;
   for (let j = 0; j < keys.length; j++) {
@@ -253,7 +294,7 @@ function isConditionalExportsMainSugar(exports, packageJSONUrl, base) {
     if (i++ === 0) {
       isConditionalSugar = curIsConditionalSugar;
     } else if (isConditionalSugar !== curIsConditionalSugar) {
-      throw new ERR_INVALID_PACKAGE_CONFIG(
+      throw new InvalidPackageConfigError(
         fileURLToPath(packageJSONUrl),
         base,
         '"exports" cannot contain some keys starting with \'.\' and some not.' +
@@ -265,29 +306,23 @@ function isConditionalExportsMainSugar(exports, packageJSONUrl, base) {
   return isConditionalSugar;
 }
 
-/**
- * @param {URL} packageJSONUrl
- * @param {string} packageSubpath
- * @param {PackageConfig} packageConfig
- * @param {string | URL | undefined} base
- * @param {Set<string>} conditions
- * @returns {URL}
- */
-function packageExportsResolve(
-  packageJSONUrl,
-  packageSubpath,
-  packageConfig,
-  base,
-  conditions
-) {
+export function packageExportsResolve(
+  packageJSONUrl: URL,
+  packageSubpath: string,
+  packageConfig: PackageJsonWithExports,
+  base: string,
+  conditions: Set<string>
+): URL {
   let exports = packageConfig.exports;
-  if (isConditionalExportsMainSugar(exports, packageJSONUrl, base))
+  if (isConditionalExportsMainSugar(exports, packageJSONUrl, base)) {
     exports = {'.': exports};
+  }
+  exports = exports as PackageExportsPathOrConditionMap;
 
   if (
-    ObjectPrototypeHasOwnProperty(exports, packageSubpath) &&
-    !StringPrototypeIncludes(packageSubpath, '*') &&
-    !StringPrototypeEndsWith(packageSubpath, '/')
+    Object.prototype.hasOwnProperty.call(exports, packageSubpath) &&
+    !packageSubpath.includes('*') &&
+    !packageSubpath.endsWith('/')
   ) {
     const target = exports[packageSubpath];
     const resolved = resolvePackageTarget(
@@ -300,74 +335,72 @@ function packageExportsResolve(
       false,
       conditions
     );
-    if (resolved === null || resolved === undefined)
-      throwExportsNotFound(packageSubpath, packageJSONUrl, base);
-    return {resolved, exact: true};
+    if (resolved === null || resolved === undefined) {
+      throw makeExportsNotFoundError(packageSubpath, packageJSONUrl, base);
+    }
+    return resolved;
   }
 
   let bestMatch = '';
-  let bestMatchSubpath;
-  const keys = ObjectGetOwnPropertyNames(exports);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const patternIndex = StringPrototypeIndexOf(key, '*');
+  let bestMatchSubpath: string | undefined = undefined;
+  for (const key of Object.keys(exports)) {
+    const patternIndex = key.indexOf('*');
     if (
       patternIndex !== -1 &&
-      StringPrototypeStartsWith(
-        packageSubpath,
-        StringPrototypeSlice(key, 0, patternIndex)
-      )
+      packageSubpath.startsWith(key.slice(0, patternIndex))
     ) {
-      const patternTrailer = StringPrototypeSlice(key, patternIndex + 1);
+      const patternTrailer = key.slice(patternIndex + 1);
       if (
         packageSubpath.length >= key.length &&
-        StringPrototypeEndsWith(packageSubpath, patternTrailer) &&
+        packageSubpath.endsWith(patternTrailer) &&
         patternKeyCompare(bestMatch, key) === 1 &&
-        StringPrototypeLastIndexOf(key, '*') === patternIndex
+        key.lastIndexOf('*') === patternIndex
       ) {
         bestMatch = key;
-        bestMatchSubpath = StringPrototypeSlice(
-          packageSubpath,
+        bestMatchSubpath = packageSubpath.slice(
           patternIndex,
           packageSubpath.length - patternTrailer.length
         );
       }
     } else if (
-      key[key.length - 1] === '/' &&
-      StringPrototypeStartsWith(packageSubpath, key) &&
+      key.endsWith('/') &&
+      packageSubpath.startsWith(key) &&
       patternKeyCompare(bestMatch, key) === 1
     ) {
       bestMatch = key;
-      bestMatchSubpath = StringPrototypeSlice(packageSubpath, key.length);
+      bestMatchSubpath = packageSubpath.slice(key.length);
     }
   }
 
   if (bestMatch) {
     const target = exports[bestMatch];
-    const pattern = StringPrototypeIncludes(bestMatch, '*');
+    const pattern = bestMatch.includes('*');
     const resolved = resolvePackageTarget(
       packageJSONUrl,
       target,
-      bestMatchSubpath,
+      // bestMatchSubpath must be defined when bestMatch is not empty string
+      bestMatchSubpath!,
       bestMatch,
       base,
       pattern,
       false,
       conditions
     );
-    if (resolved === null || resolved === undefined)
-      throwExportsNotFound(packageSubpath, packageJSONUrl, base);
-    if (!pattern)
+    if (resolved === null || resolved === undefined) {
+      throw makeExportsNotFoundError(packageSubpath, packageJSONUrl, base);
+    }
+    if (!pattern) {
       emitFolderMapDeprecation(bestMatch, packageJSONUrl, true, base);
-    return {resolved, exact: pattern};
+    }
+    return resolved;
   }
 
-  throwExportsNotFound(packageSubpath, packageJSONUrl, base);
+  throw makeExportsNotFoundError(packageSubpath, packageJSONUrl, base);
 }
 
-function patternKeyCompare(a, b) {
-  const aPatternIndex = StringPrototypeIndexOf(a, '*');
-  const bPatternIndex = StringPrototypeIndexOf(b, '*');
+function patternKeyCompare(a: string, b: string): -1 | 0 | 1 {
+  const aPatternIndex = a.indexOf('*');
+  const bPatternIndex = b.indexOf('*');
   const baseLenA = aPatternIndex === -1 ? a.length : aPatternIndex + 1;
   const baseLenB = bPatternIndex === -1 ? b.length : bPatternIndex + 1;
   if (baseLenA > baseLenB) return -1;

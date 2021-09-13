@@ -8,64 +8,77 @@
 // https://github.com/nodejs/node/blob/a9dd03b1ec89a75186f05967fc76ec0704050c36/lib/internal/errors.js
 // and adapted for use in playground-elements.
 
-E(
-  'ERR_INVALID_MODULE_SPECIFIER',
-  (request, reason, base = undefined) => {
-    return `Invalid module "${request}" ${reason}${
-      base ? ` imported from ${base}` : ''
-    }`;
-  },
-  TypeError
-);
+import {fileURLToPath} from './url.js';
+import type {PackageExportsTarget} from '../util.js';
 
-E(
-  'ERR_INVALID_PACKAGE_CONFIG',
-  (path, base, message) => {
-    return `Invalid package config ${path}${
-      base ? ` while importing ${base}` : ''
-    }${message ? `. ${message}` : ''}`;
-  },
-  Error
-);
+export class InvalidModuleSpecifierError extends Error {
+  constructor(request: string, reason: string, base?: string) {
+    super(
+      `Invalid module "${request}" ${reason}${
+        base ? ` imported from ${base}` : ''
+      }`
+    );
+  }
+}
 
-E(
-  'ERR_INVALID_PACKAGE_TARGET',
-  (pkgPath, key, target, isImport = false, base = undefined) => {
+export class InvalidPackageConfigError extends Error {
+  constructor(path: string, base: string, message: string) {
+    super(
+      `Invalid package config ${path}${base ? ` while importing ${base}` : ''}${
+        message ? `. ${message}` : ''
+      }`
+    );
+  }
+}
+
+export class InvalidPackageTargetError extends Error {
+  constructor(
+    pkgPath: URL,
+    key: string,
+    target: PackageExportsTarget,
+    isImport = false,
+    base?: string
+  ) {
     const relError =
       typeof target === 'string' &&
       !isImport &&
       target.length &&
-      !StringPrototypeStartsWith(target, './');
+      !target.startsWith('./');
+    let msg;
     if (key === '.') {
-      assert(isImport === false);
-      return (
-        `Invalid "exports" main target ${JSONStringify(target)} defined ` +
-        `in the package config ${pkgPath}package.json${
+      msg =
+        `Invalid "exports" main target ${JSON.stringify(target)} defined ` +
+        `in the package config ${fileURLToPath(pkgPath)}package.json${
           base ? ` imported from ${base}` : ''
-        }${relError ? '; targets must start with "./"' : ''}`
+        }${relError ? '; targets must start with "./"' : ''}`;
+    } else {
+      msg = `Invalid "${
+        isImport ? 'imports' : 'exports'
+      }" target ${JSON.stringify(
+        target
+      )} defined for '${key}' in the package config ${fileURLToPath(
+        pkgPath
+      )}package.json${base ? ` imported from ${base}` : ''}${
+        relError ? '; targets must start with "./"' : ''
+      }`;
+    }
+    super(msg);
+  }
+}
+export class PackagePathNotExportedError extends Error {
+  constructor(pkgPath: string, subpath: string, base?: string) {
+    if (subpath === '.') {
+      super(
+        `No "exports" main defined in ${pkgPath}package.json${
+          base ? ` imported from ${base}` : ''
+        }`
+      );
+    } else {
+      super(
+        `Package subpath '${subpath}' is not defined by "exports" in ${pkgPath}package.json${
+          base ? ` imported from ${base}` : ''
+        }`
       );
     }
-    return `Invalid "${
-      isImport ? 'imports' : 'exports'
-    }" target ${JSONStringify(
-      target
-    )} defined for '${key}' in the package config ${pkgPath}package.json${
-      base ? ` imported from ${base}` : ''
-    }${relError ? '; targets must start with "./"' : ''}`;
-  },
-  Error
-);
-
-E(
-  'ERR_PACKAGE_PATH_NOT_EXPORTED',
-  (pkgPath, subpath, base = undefined) => {
-    if (subpath === '.')
-      return `No "exports" main defined in ${pkgPath}package.json${
-        base ? ` imported from ${base}` : ''
-      }`;
-    return `Package subpath '${subpath}' is not defined by "exports" in ${pkgPath}package.json${
-      base ? ` imported from ${base}` : ''
-    }`;
-  },
-  Error
-);
+  }
+}

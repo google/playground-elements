@@ -8,10 +8,12 @@
 // https://github.com/nodejs/node/blob/a9dd03b1ec89a75186f05967fc76ec0704050c36/lib/internal/url.js
 // and adapted for use in playground-elements.
 
-function fileURLToPath(path) {
-  if (typeof path === 'string') path = new URL(path);
-  else if (!isURLInstance(path))
-    throw new ERR_INVALID_ARG_TYPE('path', ['string', 'URL'], path);
-  if (path.protocol !== 'file:') throw new ERR_INVALID_URL_SCHEME('file');
-  return isWindows ? getPathFromURLWin32(path) : getPathFromURLPosix(path);
+export function fileURLToPath(path: URL | string): string {
+  if (typeof path === 'string') {
+    path = new URL(path);
+  }
+  if (path.protocol !== 'file:') {
+    throw new Error('The URL must be of scheme file');
+  }
+  return path.pathname;
 }
