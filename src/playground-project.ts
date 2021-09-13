@@ -179,12 +179,35 @@ export class PlaygroundProject extends LitElement {
   }
 
   /**
+   * Indicates whether the user has modified, added, or removed any project
+   * files. Resets whenever a new project is loaded.
+   */
+  get modified(): boolean {
+    if (this._files === undefined && this._pristineFiles === undefined) {
+      return false;
+    }
+    if (this._files === undefined || this._pristineFiles === undefined) {
+      return true;
+    }
+    return !playgroundFilesDeepEqual(this._files, this._pristineFiles);
+  }
+
+  /**
    * A unique identifier for this instance so the service worker can keep an
    * independent cache of files for it.
    */
   private readonly _sessionId: string = generateUniqueSessionId();
 
+  /**
+   * The active project files.
+   */
   private _files?: SampleFile[];
+
+  /**
+   * A pristine copy of the original project files, used for the "modified"
+   * getter.
+   */
+  private _pristineFiles?: SampleFile[];
 
   @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
@@ -313,6 +336,8 @@ export class PlaygroundProject extends LitElement {
         source as void; // Exhaustive check.
         break;
     }
+    this._pristineFiles =
+      this._files && JSON.parse(JSON.stringify(this._files));
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
@@ -837,4 +862,30 @@ const outdent = (str: string): string => {
     }
   }
   return str.replace(RegExp(`^\\s{${shortestIndent ?? 0}}`, 'gm'), '');
+};
+
+/**
+ * Test whether two lists of Playground files are deeply equal.
+ */
+const playgroundFilesDeepEqual = (
+  filesA: SampleFile[],
+  filesB: SampleFile[]
+): boolean => {
+  if (filesA.length !== filesB.length) {
+    return false;
+  }
+  for (let i = 0; i < filesA.length; i++) {
+    const fileA = filesA[i];
+    const fileB = filesB[i];
+    if (
+      fileA.name !== fileB.name ||
+      fileA.content !== fileB.content ||
+      fileA.contentType !== fileB.contentType ||
+      fileA.hidden !== fileB.hidden ||
+      fileA.label !== fileB.label
+    ) {
+      return false;
+    }
+  }
+  return true;
 };

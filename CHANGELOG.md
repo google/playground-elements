@@ -17,7 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Added `modified` property to `<playground-project>` and `<playground-ide>`
+  which indicates whether the user has modified, added, or removed any project
+  files. Resets whenever a new project is loaded.
 
 ## [0.12.1] - 2021-08-26
 

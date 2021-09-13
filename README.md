@@ -669,6 +669,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                                                                                                        |
 | `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
 | `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
+| `modified`           | `boolean`                        | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
 
 ### Slots
 
@@ -693,6 +694,7 @@ project element.
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                                                                                                           |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
 | `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.                                                                                          |
+| `modified`       | `boolean`                     | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
 
 ### Methods
 
