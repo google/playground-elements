@@ -262,6 +262,14 @@ export class PlaygroundIde extends LitElement {
   @property()
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
+  /**
+   * Indicates whether the user has modified, added, or removed any project
+   * files. Resets whenever a new project is loaded.
+   */
+  get modified(): boolean {
+    return this._project?.modified ?? false;
+  }
+
   @query('playground-project')
   private _project!: PlaygroundProject | null;
 

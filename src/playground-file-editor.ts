@@ -168,11 +168,14 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   };
 
   private _onEdit() {
-    const value = this._editor.value;
-    if (this._currentFile) {
-      this._currentFile.content = value!;
-      this._project?.saveDebounced();
+    if (
+      this._project === undefined ||
+      this._currentFile === undefined ||
+      this._editor.value === undefined
+    ) {
+      return;
     }
+    this._project.editFile(this._currentFile, this._editor.value);
   }
 }
 

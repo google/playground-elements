@@ -409,4 +409,78 @@ suite('playground-ide', () => {
     assert.isFalse(packageJson?.hidden);
     assert.equal(packageJson?.content, '{"dependencies":{}}');
   });
+
+  test('modified property', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Old content',
+        },
+      },
+    };
+    container.appendChild(ide);
+
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const editorInternals = editor as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+
+    // Need to defer another microtask for the config to initialize.
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    // Note the double checks are here to add coverage for cached states.
+    assert.isFalse(ide.modified);
+    assert.isFalse(ide.modified);
+
+    project.addFile('potato.html');
+    assert.isTrue(ide.modified);
+    assert.isTrue(ide.modified);
+
+    project.deleteFile('potato.html');
+    assert.isFalse(ide.modified);
+    assert.isFalse(ide.modified);
+
+    project.renameFile('index.html', 'potato.html');
+    assert.isTrue(ide.modified);
+    assert.isTrue(ide.modified);
+
+    project.renameFile('potato.html', 'index.html');
+    assert.isFalse(ide.modified);
+    assert.isFalse(ide.modified);
+
+    editorInternals._codemirror!.setValue('New content');
+    assert.isTrue(ide.modified);
+    assert.isTrue(ide.modified);
+
+    editorInternals._codemirror!.setValue('Old content');
+    assert.isFalse(ide.modified);
+    assert.isFalse(ide.modified);
+
+    project.addFile('potato.html');
+    assert.isTrue(ide.modified);
+    assert.isTrue(ide.modified);
+
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Different content',
+        },
+      },
+    };
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    assert.isFalse(ide.modified);
+    assert.isFalse(ide.modified);
+  });
 });
