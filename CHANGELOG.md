@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- Node [package exports](https://nodejs.org/api/packages.html#packages_exports)
+  are now supported when resolving dependency modules.
+
+  The `module`, `import`, and `development`
+  [conditions](https://nodejs.org/api/packages.html#packages_conditional_exports)
+  are enabled.
+  
 ### Added
 
 - Added `modified` property to `<playground-project>` and `<playground-ide>`
