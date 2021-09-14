@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.13.0] - 2021-09-14
 
 ### Changed
 
@@ -27,7 +29,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   The `module`, `import`, and `development`
   [conditions](https://nodejs.org/api/packages.html#packages_conditional_exports)
   are enabled.
-  
+
+  Note this change should not theoretically be **BREAKING**, but this release is
+  versioned with a major increment because there a risk of breakage in practice
+  due to misconfigured `package.json` files, differences between `prod` and
+  `dev` modes, etc.
+
 ### Added
 
 - Added `modified` property to `<playground-project>` and `<playground-ide>`
