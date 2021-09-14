@@ -179,17 +179,38 @@ export class PlaygroundProject extends LitElement {
   }
 
   /**
+   * A pristine copy of the original project files, used for the `modified`
+   * getter.
+   */
+  private _pristineFiles?: SampleFile[];
+
+  /**
+   * Cached value for the `modified` getter. When undefined, the modified state
+   * is unknown and must be computed.
+   */
+  private _modified: boolean | undefined = false;
+
+  /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
    */
   get modified(): boolean {
-    if (this._files === undefined && this._pristineFiles === undefined) {
-      return false;
+    if (this._modified === undefined) {
+      if (this._files === undefined && this._pristineFiles === undefined) {
+        this._modified = false;
+      } else if (
+        this._files === undefined ||
+        this._pristineFiles === undefined
+      ) {
+        this._modified = true;
+      } else {
+        this._modified = !playgroundFilesDeepEqual(
+          this._files,
+          this._pristineFiles
+        );
+      }
     }
-    if (this._files === undefined || this._pristineFiles === undefined) {
-      return true;
-    }
-    return !playgroundFilesDeepEqual(this._files, this._pristineFiles);
+    return this._modified;
   }
 
   /**
@@ -202,12 +223,6 @@ export class PlaygroundProject extends LitElement {
    * The active project files.
    */
   private _files?: SampleFile[];
-
-  /**
-   * A pristine copy of the original project files, used for the "modified"
-   * getter.
-   */
-  private _pristineFiles?: SampleFile[];
 
   @internalProperty()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
@@ -338,6 +353,7 @@ export class PlaygroundProject extends LitElement {
     }
     this._pristineFiles =
       this._files && JSON.parse(JSON.stringify(this._files));
+    this._modified = false;
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
@@ -568,6 +584,15 @@ export class PlaygroundProject extends LitElement {
     return true;
   }
 
+  editFile(file: SampleFile, newContent: string) {
+    // Note this method takes the file object itself rather than the name like
+    // add/delete/rename, because edits happen at high frequency so we don't
+    // want to be doing any searches.
+    file.content = newContent;
+    this._modified = undefined;
+    this.saveDebounced();
+  }
+
   addFile(name: string) {
     if (!this._files || !this.isValidNewFilename(name)) {
       return;
@@ -584,13 +609,22 @@ export class PlaygroundProject extends LitElement {
         contentType: typeFromFilename(name),
       });
     }
+    this._modified = undefined;
     this.requestUpdate();
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
 
   deleteFile(filename: string) {
-    this._files = this._files?.filter((file) => file.name !== filename);
+    if (!this._files) {
+      return;
+    }
+    const idx = this._files.findIndex((file) => file.name === filename);
+    if (idx < 0) {
+      return;
+    }
+    this._files = [...this._files.slice(0, idx), ...this._files.slice(idx + 1)];
+    this._modified = undefined;
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
@@ -610,6 +644,7 @@ export class PlaygroundProject extends LitElement {
     file.name = newName;
     file.contentType = typeFromFilename(newName);
     this._files = [...this._files];
+    this._modified = undefined;
     this.dispatchEvent(new CustomEvent('filesChanged'));
     this.save();
   }
@@ -879,11 +914,17 @@ const playgroundFilesDeepEqual = (
     const fileB = filesB[i];
     if (
       fileA.name !== fileB.name ||
-      fileA.content !== fileB.content ||
       fileA.contentType !== fileB.contentType ||
       fileA.hidden !== fileB.hidden ||
       fileA.label !== fileB.label
     ) {
+      return false;
+    }
+  }
+  for (let i = 0; i < filesA.length; i++) {
+    const fileA = filesA[i];
+    const fileB = filesB[i];
+    if (fileA.content !== fileB.content) {
       return false;
     }
   }
