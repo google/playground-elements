@@ -46,7 +46,7 @@ function makeExportsNotFoundError(
   packageJSONUrl: URL,
   base: string
 ): PackagePathNotExportedError {
-  throw new PackagePathNotExportedError(
+  return new PackagePathNotExportedError(
     fileURLToPath(new URL('.', packageJSONUrl)),
     subpath,
     base
@@ -77,7 +77,7 @@ function makeInvalidPackageTargetError(
   } else {
     target = `${target}`;
   }
-  throw new InvalidPackageTargetError(
+  return new InvalidPackageTargetError(
     packageJSONUrl,
     subpath,
     target,
