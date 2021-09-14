@@ -174,24 +174,49 @@ export const charToLineAndChar = (
   return {line, character};
 };
 
+/**
+ * The "exports" field of a package.json.
+ *
+ * See https://nodejs.org/api/packages.html#packages_exports.
+ */
 export type PackageExports =
   | PackageExportsTarget
   | PackageExportsPathOrConditionMap;
 
+/**
+ * The export result for some path or condition.
+ */
 export type PackageExportsTarget =
+  // A concrete path.
   | PackageExportsTargetPath
+  // Condition maps can be nested.
   | PackageExportsConditionMap
+  // The first valid target in an array wins.
   | PackageExportsTarget[]
+  // An explicit "not found".
   | null;
 
-export type PackageExportsPathOrConditionMap = {
-  [PathOrCondition: string]: PackageExportsTarget;
-};
-
+/**
+ * A concrete resolved path (e.g. "./lib/foo.js").
+ */
 export type PackageExportsTargetPath = string;
 
+/**
+ * Map from a path or condition to a target.
+ */
+export type PackageExportsPathOrConditionMap = {
+  [pathOrCondition: string]: PackageExportsTarget;
+};
+
+/**
+ * Map from a condition to a target.
+ *
+ * Note this is technically the same type as PackageExportsPathOrConditionMap,
+ * but it's distinguished for clarity because "path" keys are only allowed in
+ * the top-level of the "exports" object.
+ */
 export type PackageExportsConditionMap = {
-  [Condition: string]: PackageExportsTarget;
+  [condition: string]: PackageExportsTarget;
 };
 
 export interface PackageJson {
