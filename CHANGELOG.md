@@ -17,7 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- Node [package exports](https://nodejs.org/api/packages.html#packages_exports)
+  are now supported when resolving dependency modules.
+
+  The `module`, `import`, and `development`
+  [conditions](https://nodejs.org/api/packages.html#packages_conditional_exports)
+  are enabled.
 
 ## [0.12.1] - 2021-08-26
 

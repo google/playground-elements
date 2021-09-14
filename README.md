@@ -290,6 +290,14 @@ map. This works exactly like it does when using NPM locally.
 > being displayed in the list of project files, if you don't want the end-user
 > to be able to see or modify it.
 
+### Export conditions
+
+Playground supports Node-style [export
+conditions](https://nodejs.org/api/packages.html#packages_exports) when
+resolving modules in dependencies, and sets the following
+[conditions](https://nodejs.org/api/packages.html#packages_conditional_exports):
+`module`, `import`, `development`.
+
 ### Import maps
 
 For full control over module resolution, you can configure an _import map_. You

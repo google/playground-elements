@@ -61,6 +61,12 @@ export class CachingCdn {
    * resolved to concrete ones.
    *
    * E.g. foo@^1.0.0 -> foo@1.2.3/index.js
+   *
+   * TODO(aomarks) Remove this method in favor of separate resolveVersion and
+   * fileExists methods, so that the caller can fully control resolution. We
+   * shouldn't rely on unpkg's redirection logic for resolving paths anymore,
+   * because it doesn't follow Node package exports, which can arbitrary remap
+   * paths.
    */
   async canonicalize(location: NpmFileLocation): Promise<NpmFileLocation> {
     let exact = isExactSemverVersion(location.version);
@@ -77,6 +83,20 @@ export class CachingCdn {
       location = this._parseUnpkgUrl(url);
     }
     return location;
+  }
+
+  /**
+   * Resolve the concrete version of the given package and version range
+   */
+  async resolveVersion({
+    pkg,
+    version,
+  }: {
+    pkg: string;
+    version: string;
+  }): Promise<string> {
+    return (await this.canonicalize({pkg, version, path: 'package.json'}))
+      .version;
   }
 
   /**
