@@ -90,7 +90,7 @@ const addRelativePrefix = (path: string): string => {
   if (path === '') {
     return '.';
   }
-  if (!path.startsWith('./')) {
+  if (!path.startsWith('.') && !path.startsWith('/')) {
     return './' + path;
   }
   return path;
