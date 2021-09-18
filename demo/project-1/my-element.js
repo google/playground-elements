@@ -1,4 +1,5 @@
-import {LitElement, html} from 'https://unpkg.com/lit-element?module';
+import {LitElement, html} from 'https://unpkg.com/lit?module';
+import {customElement} from 'https://unpkg.com/lit/decorators.js?module';
 
 class MyElement extends LitElement {
   static get properties() {

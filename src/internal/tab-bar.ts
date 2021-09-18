@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {html, css, LitElement, customElement, property} from 'lit-element';
-import {ifDefined} from 'lit-html/directives/if-defined.js';
+import {html, css, LitElement} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 import type {PlaygroundInternalTab} from './tab.js';
 

@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  html,
-  customElement,
-  css,
-  property,
-  internalProperty,
-  query,
-  PropertyValues,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {html, css, PropertyValues, nothing} from 'lit';
+import {customElement, property, state, query} from 'lit/decorators.js';
 
 import '@material/mwc-icon-button';
 
@@ -103,10 +95,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   @property({type: Boolean, attribute: 'editable-file-system', reflect: true})
   editableFileSystem = false;
 
-  @internalProperty()
+  @state()
   private _activeFileName = '';
 
-  @internalProperty()
+  @state()
   private _activeFileIndex = 0;
 
   @query('playground-file-system-controls')
@@ -116,7 +108,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
    * The actual `<playground-file-editor>` node, determined by the `editor`
    * property.
    */
-  @internalProperty()
+  @state()
   private _editor?: PlaygroundFileEditor;
 
   /**

@@ -5,11 +5,11 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
 
-import type {UpdatingElement} from 'lit-element';
+import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 
@@ -39,8 +39,8 @@ suite('playground-ide', () => {
     for (const selector of selectors) {
       const result = (node.shadowRoot ?? node).querySelector(selector);
       assert.instanceOf(result, HTMLElement);
-      if ((result as UpdatingElement).updateComplete) {
-        await (result as UpdatingElement).updateComplete;
+      if ((result as ReactiveElement).updateComplete) {
+        await (result as ReactiveElement).updateComplete;
       }
       node = result as HTMLElement;
     }

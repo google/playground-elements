@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  LitElement,
-  html,
-  customElement,
-  css,
-  query,
-  property,
-  PropertyValues,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {LitElement, html, css, PropertyValues, nothing} from 'lit';
+import {customElement, query, property} from 'lit/decorators.js';
 
 import './playground-project.js';
 import './playground-tab-bar.js';

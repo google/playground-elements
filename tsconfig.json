@@ -22,9 +22,16 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "importHelpers": true
+    "importHelpers": true,
+    // TODO(aomarks) Remove when
+    // https://github.com/material-components/material-web/issues/2715 is fixed.
+    "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/internal/worker-api.ts", "src/shared/util.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/internal/worker-api.ts",
+    "src/shared/util.ts"
+  ],
   "exclude": ["src/service-worker", "src/shared", "src/typescript-worker"],
   "references": [
     {
