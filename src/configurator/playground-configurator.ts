@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, customElement, html, css, state, query} from 'lit-element';
-import {nothing} from 'lit-html';
+import {LitElement, html, css, nothing} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import '../playground-ide.js';
 import {PlaygroundIde} from '../playground-ide.js';

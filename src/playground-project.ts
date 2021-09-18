@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  LitElement,
-  html,
-  css,
-  customElement,
-  property,
-  query,
-  PropertyValues,
-  state,
-} from 'lit-element';
+import {LitElement, html, css, PropertyValues} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import {wrap, Remote, proxy} from 'comlink';
 
 import {

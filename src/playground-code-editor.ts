@@ -4,18 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  LitElement,
-  customElement,
-  css,
-  property,
-  query,
-  state,
-  PropertyValues,
-  html,
-} from 'lit-element';
-import {nothing} from 'lit-html';
-import {ifDefined} from 'lit-html/directives/if-defined.js';
+import {LitElement, css, PropertyValues, html, nothing} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
+import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import type {Diagnostic} from 'vscode-languageserver';

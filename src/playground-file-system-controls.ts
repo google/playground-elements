@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  customElement,
-  property,
-  query,
-  html,
-  css,
-  PropertyValues,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {html, css, PropertyValues, nothing} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 // Note despite usual best practices, we should _not_ import
 // @material/mwc-list-item directly, because @material/mwc-list already imports

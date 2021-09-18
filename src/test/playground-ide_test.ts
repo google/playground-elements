@@ -5,7 +5,7 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import {html, render} from 'lit-html';
+import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
 

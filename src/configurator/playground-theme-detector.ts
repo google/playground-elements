@@ -12,7 +12,8 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, customElement, html, css, state, query} from 'lit-element';
+import {LitElement, html, css} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {tokens} from './highlight-tokens.js';

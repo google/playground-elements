@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  customElement,
-  html,
-  css,
-  property,
-  query,
-  PropertyValues,
-  state,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {html, css, PropertyValues, nothing} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import '@material/mwc-icon-button';
 import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
