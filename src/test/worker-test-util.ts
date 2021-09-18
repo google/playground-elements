@@ -48,7 +48,7 @@ export const checkTransform = async (
           results.push(result);
         }
       };
-      build("11111", files, {importMap, cdnBaseUrl}, emit);
+      build(files, {importMap, cdnBaseUrl}, emit);
     });
 
     for (const result of results) {

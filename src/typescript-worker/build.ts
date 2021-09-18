@@ -16,7 +16,6 @@ import {CachingCdn} from './caching-cdn.js';
 import { getBuilder } from './project-cache.js';
 
 export const build = async (
-  projectId: string,
   files: Array<SampleFile>,
   config: {
     importMap: ModuleImportMap;
@@ -26,7 +25,7 @@ export const build = async (
 ): Promise<void> => {
   const moduleResolver = new ImportMapResolver(config.importMap);
   const cdn = new CachingCdn(config.cdnBaseUrl ?? 'https://unpkg.com/');
-  const tsBuilder = getBuilder(projectId, cdn, moduleResolver);
+  const tsBuilder = getBuilder(cdn, moduleResolver);
   const bareModuleBuilder = new BareModuleTransformer(cdn, moduleResolver);
   const results = bareModuleBuilder.process(
     tsBuilder.process(files.map((file) => ({kind: 'file', file})))

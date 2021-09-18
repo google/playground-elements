@@ -3,13 +3,12 @@ import {CachingCdn} from './caching-cdn.js';
 import { ImportMapResolver } from "./import-map-resolver";
 
 
-export const builderCache = new Map();
+export let builderInstance: TypeScriptBuilder;
 
-export function getBuilder(projectId: string, cdn: CachingCdn, moduleResolver: ImportMapResolver) {
-  if (builderCache.has(projectId)) {
-    return builderCache.get(projectId);
+export function getBuilder(cdn: CachingCdn, moduleResolver: ImportMapResolver) {
+  if (builderInstance) {
+    return builderInstance;
   }
-  const tsBuilder = new TypeScriptBuilder(cdn, moduleResolver);
-  builderCache.set(projectId, tsBuilder);
-  return tsBuilder;
+  builderInstance = new TypeScriptBuilder(cdn, moduleResolver);
+  return builderInstance;
 }

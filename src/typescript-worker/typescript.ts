@@ -38,25 +38,17 @@ export class TypeScriptBuilder {
   private readonly _cdn: CachingCdn;
   private readonly _importMapResolver: ImportMapResolver;
 
-  private _languageServiceHost: WorkerLanguageServiceHost | undefined;
-  private _languageService: LanguageService | undefined;
+  private readonly _languageServiceHost: WorkerLanguageServiceHost =
+    new WorkerLanguageServiceHost(self.origin, compilerOptions);
+
+  private _languageService: LanguageService = ts.createLanguageService(
+    this._languageServiceHost,
+    ts.createDocumentRegistry()
+  );
 
   constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
-  }
-
-  _createLanguageService() {
-    // Initialize the language service and the host to manage it
-    // Files are added on the fly
-    this._languageServiceHost = new WorkerLanguageServiceHost(
-      self.origin,
-      compilerOptions
-    );
-    this._languageService = ts.createLanguageService(
-      this._languageServiceHost,
-      ts.createDocumentRegistry()
-    );
   }
 
   async *process(
@@ -95,17 +87,11 @@ export class TypeScriptBuilder {
     for (const {file, url} of inputFiles) {
       loadedFiles.set(url, file.content);
     }
-    if (!this._languageServiceHost || !this._languageService) {
-      this._createLanguageService();
-    }
-
-    if (!this._languageService || !this._languageServiceHost) {
-      throw new Error('Unexpected error: failed to create languageService');
-    }
 
     // Sync the new loaded files with the servicehost.
     // If the file is missing, it's added, if the file is modified,
-    // the modification data and versioning will be handled by the servicehost
+    // the modification data and versioning will be handled by the servicehost.
+    // If a file is removed, it will be removed from the file list
     this._languageServiceHost.sync(loadedFiles);
 
     const program = this._languageService.getProgram();
@@ -158,7 +144,6 @@ export class TypeScriptBuilder {
       for (const tsDiagnostic of this._languageService.getSemanticDiagnostics(
         url
       )) {
-        console.log('Tsdiagnostic', tsDiagnostic);
         yield {
           kind: 'diagnostic',
           filename: file.name,
@@ -218,6 +203,15 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     files.forEach((file, fileName) =>
       this.updateFileContentIfNeeded(fileName, file)
     );
+    this.removeDeletedFiles(files);
+  }
+
+  removeDeletedFiles(files: Map<string, string>) {
+    this.getScriptFileNames().forEach((fileName) => {
+      if (!files.has(fileName)) {
+        this.removeFile(fileName);
+      }
+    });
   }
 
   addFile(fileName: string, file: VersionedFile) {
