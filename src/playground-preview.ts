@@ -11,7 +11,7 @@ import {
   property,
   query,
   PropertyValues,
-  internalProperty,
+  state,
 } from 'lit-element';
 import {nothing} from 'lit-html';
 import '@material/mwc-icon-button';
@@ -107,19 +107,19 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   /**
    * Whether the iframe is currently loading.
    */
-  @internalProperty()
+  @state()
   private _loading = true;
 
   /**
    * Whether to show the loading bar.
    */
-  @internalProperty()
+  @state()
   private _showLoadingBar = false;
 
   /**
    * Whether the iframe has fired its "load" event at least once.
    */
-  @internalProperty()
+  @state()
   private _loadedAtLeastOnce = false;
 
   update(changedProperties: PropertyValues) {

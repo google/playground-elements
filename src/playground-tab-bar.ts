@@ -9,7 +9,7 @@ import {
   customElement,
   css,
   property,
-  internalProperty,
+  state,
   query,
   PropertyValues,
 } from 'lit-element';
@@ -103,10 +103,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   @property({type: Boolean, attribute: 'editable-file-system', reflect: true})
   editableFileSystem = false;
 
-  @internalProperty()
+  @state()
   private _activeFileName = '';
 
-  @internalProperty()
+  @state()
   private _activeFileIndex = 0;
 
   @query('playground-file-system-controls')
@@ -116,7 +116,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
    * The actual `<playground-file-editor>` node, determined by the `editor`
    * property.
    */
-  @internalProperty()
+  @state()
   private _editor?: PlaygroundFileEditor;
 
   /**

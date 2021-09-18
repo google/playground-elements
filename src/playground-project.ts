@@ -12,7 +12,7 @@ import {
   property,
   query,
   PropertyValues,
-  internalProperty,
+  state,
 } from 'lit-element';
 import {wrap, Remote, proxy} from 'comlink';
 
@@ -122,7 +122,7 @@ export class PlaygroundProject extends LitElement {
    * This property is used to settle which of the multiple ways a project can be
    * specified was set most recently.
    */
-  @internalProperty()
+  @state()
   private _source:
     | {
         type: 'none';
@@ -224,7 +224,7 @@ export class PlaygroundProject extends LitElement {
    */
   private _files?: SampleFile[];
 
-  @internalProperty()
+  @state()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
 
   private _deferredTypeScriptWorkerApi = new Deferred<

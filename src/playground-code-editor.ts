@@ -10,7 +10,7 @@ import {
   css,
   property,
   query,
-  internalProperty,
+  state,
   PropertyValues,
   html,
 } from 'lit-element';
@@ -187,13 +187,13 @@ export class PlaygroundCodeEditor extends LitElement {
   @property()
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
-  @internalProperty()
+  @state()
   private _tooltipDiagnostic?: {
     diagnostic: Diagnostic;
     position: string;
   };
 
-  @internalProperty()
+  @state()
   private _showKeyboardHelp = false;
 
   @query('#focusContainer')

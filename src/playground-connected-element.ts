@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, property, internalProperty} from 'lit-element';
+import {LitElement, property, state} from 'lit-element';
 import {PlaygroundProject} from './playground-project.js';
 
 /**
@@ -36,6 +36,6 @@ export class PlaygroundConnectedElement extends LitElement {
    * The actual `<playground-project>` node, determined by the `project`
    * property.
    */
-  @internalProperty()
+  @state()
   protected _project?: PlaygroundProject;
 }
