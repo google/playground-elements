@@ -74,6 +74,7 @@ export interface ServiceWorkerAPI {
 
 export interface TypeScriptWorkerAPI {
   compileProject(
+    projectId: string,
     files: Array<SampleFile>,
     config: {
       importMap: ModuleImportMap;

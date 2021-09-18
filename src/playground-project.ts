@@ -545,6 +545,7 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     workerApi.compileProject(
+      this._sessionId,
       this._files ?? [],
       {importMap: this._importMap},
       proxy((result) => build.onOutput(result))
