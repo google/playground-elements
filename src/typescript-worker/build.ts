@@ -24,7 +24,6 @@ export const build = async (
   },
   emit: (result: BuildOutput) => void
 ): Promise<void> => {
-    console.log({files, config, emit, projectId})
   const moduleResolver = new ImportMapResolver(config.importMap);
   const cdn = new CachingCdn(config.cdnBaseUrl ?? 'https://unpkg.com/');
   const tsBuilder = getBuilder(projectId, cdn, moduleResolver);

@@ -12,6 +12,7 @@ import type * as lsp from 'vscode-languageserver';
 import type {SampleFile, BuildOutput} from '../shared/worker-api.js';
 import type {PackageJson} from './util.js';
 import type {CachingCdn} from './caching-cdn.js';
+import {LanguageService} from 'typescript';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -37,9 +38,25 @@ export class TypeScriptBuilder {
   private readonly _cdn: CachingCdn;
   private readonly _importMapResolver: ImportMapResolver;
 
+  private _languageServiceHost: WorkerLanguageServiceHost | undefined;
+  private _languageService: LanguageService | undefined;
+
   constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
+  }
+
+  _createLanguageService() {
+    // Initialize the language service and the host to manage it
+    // Files are added on the fly
+    this._languageServiceHost = new WorkerLanguageServiceHost(
+      self.origin,
+      compilerOptions
+    );
+    this._languageService = ts.createLanguageService(
+      this._languageServiceHost,
+      ts.createDocumentRegistry()
+    );
   }
 
   async *process(
@@ -78,24 +95,28 @@ export class TypeScriptBuilder {
     for (const {file, url} of inputFiles) {
       loadedFiles.set(url, file.content);
     }
+    if (!this._languageServiceHost || !this._languageService) {
+      this._createLanguageService();
+    }
 
-    // Fast initial compile for JS emit and syntax errors.
-    const languageServiceHost = new WorkerLanguageServiceHost(
-      loadedFiles,
-      self.origin,
-      compilerOptions
-    );
-    const languageService = ts.createLanguageService(
-      languageServiceHost,
-      ts.createDocumentRegistry()
-    );
-    const program = languageService.getProgram();
+    if (!this._languageService || !this._languageServiceHost) {
+      throw new Error('Unexpected error: failed to create languageService');
+    }
+
+    // Sync the new loaded files with the servicehost.
+    // If the file is missing, it's added, if the file is modified,
+    // the modification data and versioning will be handled by the servicehost
+    this._languageServiceHost.sync(loadedFiles);
+
+    const program = this._languageService.getProgram();
     if (program === undefined) {
       throw new Error('Unexpected error: program was undefined');
     }
 
     for (const {file, url} of inputFiles) {
-      for (const tsDiagnostic of languageService.getSyntacticDiagnostics(url)) {
+      for (const tsDiagnostic of this._languageService.getSyntacticDiagnostics(
+        url
+      )) {
         yield {
           kind: 'diagnostic',
           filename: file.name,
@@ -129,12 +150,15 @@ export class TypeScriptBuilder {
       // TypeScript is going to look for these files as paths relative to our
       // source files, so we need to add them to our filesystem with those URLs.
       const url = new URL(`node_modules/${path}`, self.origin).href;
-      if (!loadedFiles.has(url)) {
-        loadedFiles.set(url, content);
+      if (!this._languageServiceHost?.fileExists(url)) {
+        this._languageServiceHost?.addFile(url, {content, version: 0});
       }
     }
     for (const {file, url} of inputFiles) {
-      for (const tsDiagnostic of languageService.getSemanticDiagnostics(url)) {
+      for (const tsDiagnostic of this._languageService.getSemanticDiagnostics(
+        url
+      )) {
+        console.log('Tsdiagnostic', tsDiagnostic);
         yield {
           kind: 'diagnostic',
           filename: file.name,
@@ -145,19 +169,73 @@ export class TypeScriptBuilder {
   }
 }
 
+interface VersionedFile {
+  version: number;
+  content: string;
+}
+
 class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   readonly compilerOptions: ts.CompilerOptions;
   readonly packageRoot: string;
-  readonly files: Map<string, string>;
+  readonly files: Map<string, VersionedFile>;
 
   constructor(
-    files: Map<string, string>,
     packageRoot: string,
-    compilerOptions: ts.CompilerOptions
+    compilerOptions: ts.CompilerOptions,
+    files?: Map<string, VersionedFile>
   ) {
     this.packageRoot = packageRoot;
     this.compilerOptions = compilerOptions;
-    this.files = files;
+    this.files = files || new Map();
+  }
+
+  /*
+   *  When a new new "process" command is received, we iterate through all of the files,
+   *  and update files accordingly depending on if they have new content or not.
+   *
+   *  With how the TS API works, we can use simple versioning to tell the
+   *  Language service that a file has been updated
+   *
+   *  If the file submitted is a new file, we add it to our collection
+   */
+  updateFileContentIfNeeded(fileName: string, content: string) {
+    const file = this.files.get(fileName);
+    if (file && this._fileContentHasUpdated(file, content)) {
+      file.content = content;
+      file.version += 1;
+    } else {
+      this.addFile(fileName, {content, version: 0});
+    }
+  }
+
+  /**
+   * Sync up the freshly acquired project files.
+   * In the syncing process files yet to be added are added, and versioned.
+   * Files that existed already but are modified are updated, and their version number
+   * gets bumped fo that the languageservice knows to update these files.
+   * */
+  sync(files: Map<string, string>) {
+    files.forEach((file, fileName) =>
+      this.updateFileContentIfNeeded(fileName, file)
+    );
+  }
+
+  addFile(fileName: string, file: VersionedFile) {
+    this.files.set(fileName, file);
+  }
+
+  addFiles(files: Map<string, VersionedFile>) {
+    files.forEach((file, fileName) => {
+      this.files.set(fileName, file);
+    });
+  }
+
+  removeFile(fileName: string) {
+    this.files.delete(fileName);
+  }
+
+  _fileContentHasUpdated(oldFile: VersionedFile, newContent: string) {
+    return oldFile?.content !== newContent;
   }
 
   getCompilationSettings(): ts.CompilerOptions {
@@ -168,8 +246,8 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     return [...this.files.keys()];
   }
 
-  getScriptVersion() {
-    return '-1';
+  getScriptVersion(fileName: string) {
+    return this.files.get(fileName)?.version.toString() ?? '-1';
   }
 
   fileExists(fileName: string): boolean {
@@ -177,7 +255,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   }
 
   readFile(fileName: string): string | undefined {
-    return this.files.get(fileName);
+    return this.files.get(fileName)?.content;
   }
 
   getScriptSnapshot(fileName: string): ts.IScriptSnapshot | undefined {
