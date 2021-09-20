@@ -72,13 +72,15 @@ export interface ServiceWorkerAPI {
   setFileAPI(fileAPI: FileAPI, sessionID: string): void;
 }
 
+export interface TypeScriptWorkerConfig {
+  importMap: ModuleImportMap;
+  cdnBaseUrl?: string;
+}
+
 export interface TypeScriptWorkerAPI {
   compileProject(
     files: Array<SampleFile>,
-    config: {
-      importMap: ModuleImportMap;
-      cdnBaseUrl?: string;
-    },
+    config: TypeScriptWorkerConfig,
     emit: (result: BuildOutput) => void
   ): Promise<void>;
 }

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Upgrade to Lit 2.0.
+- TypeScript files are now compiled incrementally for improved performance
 
 ## [0.13.0] - 2021-09-14
 
