@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  LitElement,
-  customElement,
-  html,
-  css,
-  internalProperty,
-  query,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {LitElement, html, css, nothing} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 
 import '../playground-ide.js';
 import {PlaygroundIde} from '../playground-ide.js';
@@ -172,7 +165,7 @@ export class PlaygroundConfigurator extends LitElement {
 
   private values = new KnobValues();
 
-  @internalProperty()
+  @state()
   private _themeDetectorOpen = false;
 
   @query('playground-ide')

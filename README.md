@@ -261,13 +261,13 @@ from unpkg.com at the latest version.
 
 ```js
 // What you write:
-import {html} from 'lit-html';
+import {html} from 'lit';
 
 // What playground serves:
-import {html} from './node_modules/lit-html@1.4.1/lit-html.js';
+import {html} from './node_modules/lit@2.0.0-rc.4/index.js';
 
 // What playground fetches behind-the-scenes:
-// https://unpkg.com/lit-html@latest/lit-html.js
+// https://unpkg.com/lit@latest
 ```
 
 ### `package.json`
@@ -280,7 +280,7 @@ map. This works exactly like it does when using NPM locally.
 ```json
 {
   "dependencies": {
-    "lit-html": "^2.0.0-rc.3"
+    "lit": "^2.0.0-rc.4"
   }
 }
 ```
@@ -309,8 +309,8 @@ module:
   "files": { ... },
   "importMap": {
     "imports": {
-      "lit-html": "https://cdn.skypack.dev/lit-html@^1.3.0",
-      "lit-html/": "https://cdn.skypack.dev/lit-html@^1.3.0/"
+      "lit": "https://cdn.skypack.dev/lit@^2.0.0-rc.4",
+      "lit/": "https://cdn.skypack.dev/lit@^2.0.0-rc.4/"
     }
   }
 }
@@ -323,8 +323,8 @@ When using inline project files, you can specify your import map like so:
   <script type="sample/importmap">
     {
       "imports": {
-        "lit-html": "https://cdn.skypack.dev/lit-html@^1.3.0",
-        "lit-html/": "https://cdn.skypack.dev/lit-html@^1.3.0/"
+        "lit": "https://cdn.skypack.dev/lit@^2.0.0-rc.4,
+        "lit/": "https://cdn.skypack.dev/lit@^2.0.0-rc.4/"
       }
     }
   </script>
@@ -376,7 +376,7 @@ Note that JavaScript `//` style comments are not supported.
 
 ```ts
 /* playground-fold */
-import {html, LitElement} from 'lit-element';
+import {html, LitElement} from 'lit';
 /* playground-fold-end */
 
 class MyElement extends LitElement {
@@ -879,9 +879,9 @@ corresponding class name to the playground element or one of its ancestors:
 ```
 
 A `.js` file is also provided for each theme, which exports a Lit
-[`CSSResult`](https://lit-element.polymer-project.org/api/classes/_lit_element_.cssresult.html).
-You can include this directly in the `static styles` of your own Lit components,
-or get a `CSSStyleSheet` or `string` representation for other use cases:
+[`CSSResult`](https://lit.dev/docs/api/styles/#CSSResult). You can include this
+directly in the `static styles` of your own Lit components, or get a
+`CSSStyleSheet` or `string` representation for other use cases:
 
 ```js
 import ayuMirageTheme from 'playground-elements/themes/ayu-mirage.css.js';

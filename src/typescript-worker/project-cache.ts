@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {TypeScriptBuilder} from './typescript';
+import {TypeScriptBuilder} from './typescript.js';
 import {CachingCdn} from './caching-cdn.js';
-import {ImportMapResolver} from './import-map-resolver';
-import {TypeScriptWorkerConfig} from '../shared/worker-api';
+import {ImportMapResolver} from './import-map-resolver.js';
+import {TypeScriptWorkerConfig} from '../shared/worker-api.js';
 
 export let builderInstance: TypeScriptBuilder;
-let cacheKey: string = '';
+let cacheKey = '';
 
 /**
  * Acquire the existing builder instance, or create a fresh one if missing.

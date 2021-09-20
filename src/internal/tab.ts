@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  html,
-  css,
-  LitElement,
-  customElement,
-  property,
-  PropertyValues,
-  query,
-} from 'lit-element';
+import {html, css, LitElement, PropertyValues} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 
 /**
  * A tab in a <playground-internal-tab-bar>.

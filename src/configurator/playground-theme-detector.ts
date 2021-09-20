@@ -12,14 +12,8 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {
-  LitElement,
-  customElement,
-  html,
-  css,
-  internalProperty,
-  query,
-} from 'lit-element';
+import {LitElement, html, css} from 'lit';
+import {customElement, state, query} from 'lit/decorators.js';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {tokens} from './highlight-tokens.js';
@@ -78,16 +72,16 @@ export class PlaygroundThemeDetector extends LitElement {
     }
   `;
 
-  @internalProperty()
+  @state()
   private _filetype: 'ts' | 'html' | 'css' = 'ts';
 
-  @internalProperty()
+  @state()
   private _iframeSrcdoc = '';
 
-  @internalProperty()
+  @state()
   private _codeText = '';
 
-  @internalProperty()
+  @state()
   private _propertyValues = new Map<string, string | null>([
     ['--playground-code-background', null],
     ...tokens.map(({cssProperty}) => [cssProperty, null]),

@@ -4,15 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  html,
-  customElement,
-  css,
-  property,
-  query,
-  PropertyValues,
-} from 'lit-element';
-import {live} from 'lit-html/directives/live.js';
+import {html, css, PropertyValues} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
+import {live} from 'lit/directives/live.js';
 
 import './playground-code-editor.js';
 import {PlaygroundProject} from './playground-project.js';

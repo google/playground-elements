@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  LitElement,
-  html,
-  css,
-  customElement,
-  property,
-  query,
-  PropertyValues,
-  internalProperty,
-} from 'lit-element';
+import {LitElement, html, css, PropertyValues} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import {wrap, Remote, proxy} from 'comlink';
 
 import {
@@ -122,7 +114,7 @@ export class PlaygroundProject extends LitElement {
    * This property is used to settle which of the multiple ways a project can be
    * specified was set most recently.
    */
-  @internalProperty()
+  @state()
   private _source:
     | {
         type: 'none';
@@ -224,7 +216,7 @@ export class PlaygroundProject extends LitElement {
    */
   private _files?: SampleFile[];
 
-  @internalProperty()
+  @state()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
 
   private _deferredTypeScriptWorkerApi = new Deferred<

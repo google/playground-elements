@@ -4,16 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {
-  customElement,
-  html,
-  css,
-  property,
-  query,
-  PropertyValues,
-  internalProperty,
-} from 'lit-element';
-import {nothing} from 'lit-html';
+import {html, css, PropertyValues, nothing} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import '@material/mwc-icon-button';
 import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
@@ -107,19 +99,19 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   /**
    * Whether the iframe is currently loading.
    */
-  @internalProperty()
+  @state()
   private _loading = true;
 
   /**
    * Whether to show the loading bar.
    */
-  @internalProperty()
+  @state()
   private _showLoadingBar = false;
 
   /**
    * Whether the iframe has fired its "load" event at least once.
    */
-  @internalProperty()
+  @state()
   private _loadedAtLeastOnce = false;
 
   update(changedProperties: PropertyValues) {

@@ -89,7 +89,7 @@ ${excludeDefaults.map(({to, value}) => `  ${to}: ${value};`).join('\n')}
 };
 
 const makeCssModule = (css) => {
-  return `import {css} from 'lit-element';
+  return `import {css} from 'lit';
 const style = css\`
 ${css}
 \`;

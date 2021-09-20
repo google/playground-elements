@@ -73,8 +73,8 @@ export interface ServiceWorkerAPI {
 }
 
 export interface TypeScriptWorkerConfig {
-    importMap: ModuleImportMap;
-    cdnBaseUrl?: string;
+  importMap: ModuleImportMap;
+  cdnBaseUrl?: string;
 }
 
 export interface TypeScriptWorkerAPI {

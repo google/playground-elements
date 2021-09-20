@@ -58,7 +58,8 @@
 </html>
     </script>
     <script type="sample/ts" filename="my-element.ts">
-import { LitElement, html, property, customElement } from 'lit-element';
+import { LitElement, html } from 'lit';
+import { property, customElement } from 'lit/decorators.js';
 import './my-second-element.js';
 
 @customElement('my-element')
@@ -76,7 +77,8 @@ export class MyElement extends LitElement {
 }
     </script>
     <script type="sample/ts" filename="my-second-element.ts">
-import { LitElement, html, customElement } from 'lit-element';
+import { LitElement, html } from 'lit';
+import { property } from 'lit/decorators.js';
 
 @customElement('my-second-element')
 export class MySecondElement extends LitElement {
