@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.14.1] - 2021-09-21
 
+### Changed
+
 - GitHub org changed from PolymerLabs to google.
 
 ## [0.14.0] - 2021-09-20
