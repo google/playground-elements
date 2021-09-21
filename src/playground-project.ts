@@ -672,7 +672,7 @@ const fetchProjectConfig = async (
     config = await resp.json();
   } catch (e) {
     throw new Error(
-      `Error parsing project config JSON from ${url}: ${e.message}`
+      `Error parsing project config JSON from ${url}: ${(e as Error).message}`
     );
   }
   return await expandProjectConfig(
