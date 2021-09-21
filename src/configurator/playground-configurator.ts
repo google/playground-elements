@@ -613,7 +613,7 @@ function throwUnreachable(_x: never, msg: string) {
  * https://tholman.com/github-corners/
  */
 const githubCorner = html`<a
-    href="https://github.com/PolymerLabs/playground-elements"
+    href="https://github.com/google/playground-elements"
     class="github-corner"
     aria-label="View source on GitHub"
     ><svg

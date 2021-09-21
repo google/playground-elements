@@ -13,7 +13,7 @@ export const getRandomString = () =>
  * If the given URL object is a Skypack URL, perform an in-place update that
  * switches from optimized mode to raw mode.
  *
- * See https://github.com/PolymerLabs/playground-elements/issues/107
+ * See https://github.com/google/playground-elements/issues/107
  */
 export const forceSkypackRawMode = (url: URL): URL => {
   if (url.hostname === 'cdn.skypack.dev') {
