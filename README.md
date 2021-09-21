@@ -9,8 +9,8 @@
  <br><br>
   <a href="https://www.npmjs.com/package/playground-elements">
     <img height="20" src="https://img.shields.io/npm/v/playground-elements.svg"></img></a>
-  <a href="https://github.com/PolymerLabs/playground-elements/actions?query=workflow%3Atests+branch%3Amaster+event%3Apush">
-    <img height="20" src="https://github.com/PolymerLabs/code-sample-editor/workflows/Tests/badge.svg"></img></a>
+  <a href="https://github.com/google/playground-elements/actions?query=workflow%3Atests+branch%3Amaster+event%3Apush">
+    <img height="20" src="https://github.com/google/code-sample-editor/workflows/Tests/badge.svg"></img></a>
   <a href="https://www.npmtrends.com/playground-elements">
     <img height="20" src="https://img.shields.io/npm/dw/playground-elements"></a>
   <br><br>
@@ -71,13 +71,13 @@ preview. Mix-and-match components to create any layout you want, or just use
 
 Playground is fully themeable with CSS Custom Properties, down to the color of
 each kind of syntax-highlighted token. You can import themes from VSCode using
-the [configurator](https://polymerlabs.github.io/playground-elements/), and it
+the [configurator](https://google.github.io/playground-elements/), and it
 comes with a number of presets too.
 
 ---
 
 <h3 align="center">
-  <a href="https://polymerlabs.github.io/playground-elements/">
+  <a href="https://google.github.io/playground-elements/">
     Try the demo and configurator!
   </a>
 </h3>
@@ -521,7 +521,7 @@ handling for this file.
 Use the Rollup
 [`@web/rollup-plugin-import-meta-assets`](https://github.com/modernweb-dev/web/tree/master/packages/rollup-plugin-import-meta-assets#readme)
 plugin to automatically copy the worker script into the correct location. See
-[examples/rollup](https://github.com/PolymerLabs/playground-elements/tree/main/examples/rollup)
+[examples/rollup](https://github.com/google/playground-elements/tree/main/examples/rollup)
 for an example configuration.
 
 ### Webpack
@@ -529,7 +529,7 @@ for an example configuration.
 Webpack 5+ [automatically supports loading Web
 Workers](https://webpack.js.org/guides/web-workers/) with no additional plugins.
 See
-[examples/webpack](https://github.com/PolymerLabs/playground-elements/tree/main/examples/webpack)
+[examples/webpack](https://github.com/google/playground-elements/tree/main/examples/webpack)
 for an example configuration.
 
 ### Other
@@ -809,7 +809,7 @@ Floating controls for adding, deleting, and renaming files.
 
 ## Styling
 
-**TIP:** Use the [configurator](https://polymerlabs.github.io/playground-elements/)
+**TIP:** Use the [configurator](https://google.github.io/playground-elements/)
 to quickly experiment with themes and other customizations.
 
 ### Custom Properties
@@ -950,7 +950,7 @@ sending a PR immediately is fine.
 Initialize the repo:
 
 ```sh
-git clone git@github.com:PolymerLabs/playground-elements.git
+git clone git@github.com:google/playground-elements.git
 cd playground-elements
 npm i
 npm run build
@@ -986,7 +986,7 @@ few ideas:
   meaning in URLs. See
   [here](https://github.com/lit/lit.dev/blob/fd4c34e71b47267f3672a2debe52807042f22cc2/packages/lit-dev-content/src/pages/playground.ts#L31)
   for an example safe implementation, and
-  [#102](https://github.com/PolymerLabs/playground-elements/issues/102) to track
+  [#102](https://github.com/google/playground-elements/issues/102) to track
   adding this implementation to Playground itself.
 
 - Integrate with a third-party API like [GitHub
@@ -998,7 +998,7 @@ few ideas:
 
 Support for build plugins like JSX, SASS, and CSS modules are on the roadmap,
 but are not yet available. Follow and comment on
-[#66](https://github.com/PolymerLabs/playground-elements/issues/66).
+[#66](https://github.com/google/playground-elements/issues/66).
 
 ### Why isn't module resolution working?
 
@@ -1006,6 +1006,6 @@ There are currently some missing features in module resolution that you might be
 hitting. Please comment on the issue if it affects you:
 
 - Imports in HTML files are not transformed
-  ([#93](https://github.com/PolymerLabs/playground-elements/issues/93))
+  ([#93](https://github.com/google/playground-elements/issues/93))
 - The import map `scopes` field is not supported
-  ([#103](https://github.com/PolymerLabs/playground-elements/issues/103))
+  ([#103](https://github.com/google/playground-elements/issues/103))

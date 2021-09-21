@@ -21,7 +21,7 @@ import {
     parent.window.console.warn(
       'Playground sandbox is executing with the same origin as its parent.',
       'This is a security risk.',
-      'https://github.com/PolymerLabs/playground-elements#sandbox-security'
+      'https://github.com/google/playground-elements#sandbox-security'
     );
     // eslint-disable-next-line no-empty
   } catch {}
