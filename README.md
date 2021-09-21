@@ -264,7 +264,7 @@ from unpkg.com at the latest version.
 import {html} from 'lit';
 
 // What playground serves:
-import {html} from './node_modules/lit@2.0.0-rc.4/index.js';
+import {html} from './node_modules/lit@2.0.0/index.js';
 
 // What playground fetches behind-the-scenes:
 // https://unpkg.com/lit@latest
@@ -280,7 +280,7 @@ map. This works exactly like it does when using NPM locally.
 ```json
 {
   "dependencies": {
-    "lit": "^2.0.0-rc.4"
+    "lit": "^2.0.0"
   }
 }
 ```
@@ -309,8 +309,8 @@ module:
   "files": { ... },
   "importMap": {
     "imports": {
-      "lit": "https://cdn.skypack.dev/lit@^2.0.0-rc.4",
-      "lit/": "https://cdn.skypack.dev/lit@^2.0.0-rc.4/"
+      "lit": "https://cdn.skypack.dev/lit@^2.0.0",
+      "lit/": "https://cdn.skypack.dev/lit@^2.0.0/"
     }
   }
 }
@@ -323,8 +323,8 @@ When using inline project files, you can specify your import map like so:
   <script type="sample/importmap">
     {
       "imports": {
-        "lit": "https://cdn.skypack.dev/lit@^2.0.0-rc.4,
-        "lit/": "https://cdn.skypack.dev/lit@^2.0.0-rc.4/"
+        "lit": "https://cdn.skypack.dev/lit@^2.0.0,
+        "lit/": "https://cdn.skypack.dev/lit@^2.0.0/"
       }
     }
   </script>
