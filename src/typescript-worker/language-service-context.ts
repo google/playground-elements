@@ -5,9 +5,6 @@
  */
 
 import ts from '../internal/typescript.js';
-import {ImportMapResolver} from './import-map-resolver.js';
-
-import type {CachingCdn} from './caching-cdn.js';
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2017,
@@ -28,24 +25,17 @@ const compilerOptions = {
  * common lib files like lit-element, lib.d.ts and dom.d.ts.
  */
 export class LanguageServiceContext {
-  public readonly compilerOptions = compilerOptions;
-  public readonly cdn: CachingCdn;
-  public readonly importMapResolver: ImportMapResolver;
+  readonly compilerOptions = compilerOptions;
 
-  public readonly serviceHost = new WorkerLanguageServiceHost(
+  readonly serviceHost = new WorkerLanguageServiceHost(
     self.origin,
     compilerOptions
   );
 
-  public readonly service = ts.createLanguageService(
+  readonly service = ts.createLanguageService(
     this.serviceHost,
     ts.createDocumentRegistry()
   );
-
-  constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {
-    this.cdn = cdn;
-    this.importMapResolver = importMapResolver;
-  }
 }
 
 export interface VersionedFile {

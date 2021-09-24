@@ -13,7 +13,7 @@ import {
   ServiceWorkerAPI,
   ProjectManifest,
   PlaygroundMessage,
-  TypeScriptWorkerAPI,
+  WorkerAPI,
   CONFIGURE_PROXY,
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
@@ -220,7 +220,7 @@ export class PlaygroundProject extends LitElement {
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
 
   private _deferredTypeScriptWorkerApi = new Deferred<
-    Remote<TypeScriptWorkerAPI>
+    Remote<WorkerAPI>
   >();
 
   private _validImportMap: ModuleImportMap = {};
@@ -433,7 +433,7 @@ export class PlaygroundProject extends LitElement {
       URL.revokeObjectURL(blobUrl);
     }
     this._deferredTypeScriptWorkerApi.resolve(
-      wrap<TypeScriptWorkerAPI>(worker)
+      wrap<WorkerAPI>(worker)
     );
   }
 
