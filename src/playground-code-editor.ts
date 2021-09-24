@@ -127,6 +127,7 @@ export class PlaygroundCodeEditor extends LitElement {
   // that we can set this value internally without triggering an update.
   private _value?: string;
 
+  @property()
   get value() {
     return this._value;
   }
