@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.1] - 2021-09-21
+
+### Changed
+
+- GitHub org changed from PolymerLabs to google.
+- Refactored language service into a separate module
+
 ## [0.14.0] - 2021-09-20
 
 ### Changed
@@ -132,7 +139,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The service worker now sets the `Origin-Agent-Cluster: ?1` heading on all
   responses, to encourage browsers to allocate a separate process or thread for
   Playground preview iframe under certain conditions. See the [Process
-  isolation](https://github.com/PolymerLabs/playground-elements#process-isolation)
+  isolation](https://github.com/google/playground-elements#process-isolation)
   section of the README for more details.
 
 - It is now possible to change the `font-family` of the tab-bar using a
@@ -373,7 +380,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `playground-hide` and `playground-fold` region comments that hide and
   fold regions of a file, while still compiling and serving them, to help users
   focus on the relevant code. See
-  https://github.com/PolymerLabs/playground-elements#hiding--folding for
+  https://github.com/google/playground-elements#hiding--folding for
   details.
 
 ## [0.6.0] - 2021-02-19
@@ -649,7 +656,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `themes/` directory which includes CSS files and JS modules for each of
   the standard CodeMirror themes, adapted to use CSS Custom Properties.
 
-  Use the configurator at https://polymerlabs.github.io/playground-elements/ to
+  Use the configurator at https://google.github.io/playground-elements/ to
   try out the available themes.
 
   To load a theme, load its stylesheet into your document or shadow root scope,

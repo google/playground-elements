@@ -38,12 +38,12 @@ export class LanguageServiceContext {
   );
 }
 
-export interface VersionedFile {
+interface VersionedFile {
   version: number;
   content: string;
 }
 
-export class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
+class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   readonly compilerOptions: ts.CompilerOptions;
   readonly packageRoot: string;
   readonly files: Map<string, VersionedFile> = new Map<string, VersionedFile>();

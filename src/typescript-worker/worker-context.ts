@@ -9,16 +9,13 @@ import {CachingCdn} from './caching-cdn.js';
 import {ImportMapResolver} from './import-map-resolver.js';
 import {WorkerConfig} from '../shared/worker-api.js';
 
-export let workerContext: WorkerContext;
+let workerContext: WorkerContext | undefined;
 let cacheKey = '';
 
 /**
  * Acquire the existing worker instance, or create a fresh one if missing.
  * If the config differs from the existing instance's config, a new WorkerContext is
- * instantiated and made the new workerInstance.
- *
- * You can provide the caching cdn and moduleResolved instances yourself
- * or let the function generate then from default values.
+ * instantiated and made the new instance.
  */
 export function getWorkerContext(config: WorkerConfig) {
   const configCacheKey = JSON.stringify(config);

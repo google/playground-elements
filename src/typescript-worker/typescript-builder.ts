@@ -10,7 +10,7 @@ import {PackageJson} from './util.js';
 import {makeLspDiagnostic} from './diagnostic.js';
 import {WorkerContext} from './worker-context.js';
 
-export async function* processFiles(
+export async function* processTypeScriptFiles(
   workerContext: WorkerContext,
   results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
 ): AsyncIterable<BuildOutput> {

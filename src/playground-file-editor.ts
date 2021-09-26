@@ -60,7 +60,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
-   * See https://github.com/PolymerLabs/playground-elements#hiding--folding for
+   * See https://github.com/google/playground-elements#hiding--folding for
    * more details.
    *
    * Options:

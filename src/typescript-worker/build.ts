@@ -12,7 +12,7 @@ import type {
   WorkerConfig,
 } from '../shared/worker-api.js';
 import {getWorkerContext} from './worker-context.js';
-import {processFiles} from './typescript-builder.js';
+import {processTypeScriptFiles} from './typescript-builder.js';
 
 export const build = async (
   files: Array<SampleFile>,
@@ -26,7 +26,7 @@ export const build = async (
   );
 
   const results = bareModuleBuilder.process(
-    processFiles(
+    processTypeScriptFiles(
       workerContext,
       files.map((file) => ({kind: 'file', file}))
     )
