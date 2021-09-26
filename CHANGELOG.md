@@ -33,6 +33,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Upgrade to Lit 2.0.
 - TypeScript files are now compiled incrementally for improved performance
 
+### Fixed
+
+- Fixed bug where the `value` property of a `<playground-code-editor>` did not take effect if set before element upgrade.
+
+### Added
+
+- It is now possible to set the `value` of a `<playground-code-editor>` using the `value` HTML attribute.
+
 ## [0.13.0] - 2021-09-14
 
 ### Changed
