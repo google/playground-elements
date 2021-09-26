@@ -6,9 +6,9 @@
 
 import {expose} from 'comlink';
 import {build} from './build.js';
-import type {TypeScriptWorkerAPI} from '../shared/worker-api.js';
+import type {WorkerAPI} from '../shared/worker-api.js';
 
-const workerAPI: TypeScriptWorkerAPI = {
+const workerAPI: WorkerAPI = {
   compileProject: build,
 };
 expose(workerAPI);

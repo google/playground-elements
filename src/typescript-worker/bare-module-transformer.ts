@@ -93,7 +93,7 @@ export class BareModuleTransformer {
           try {
             parsed = JSON.parse(result.file.content) as PackageJson;
           } catch (e) {
-            yield makeJsonParseDiagnostic(e, result.file);
+            yield makeJsonParseDiagnostic(e as Error, result.file);
           }
           if (parsed !== undefined) {
             packageJson.resolve(parsed);
@@ -124,7 +124,10 @@ export class BareModuleTransformer {
       [specifiers] = esModuleLexer.parse(js);
     } catch (e) {
       yield file;
-      const diagnostic = makeEsModuleLexerDiagnostic(e, file.file.name);
+      const diagnostic = makeEsModuleLexerDiagnostic(
+        e as Error,
+        file.file.name
+      );
       if (diagnostic !== undefined) {
         yield diagnostic;
       }
@@ -165,7 +168,9 @@ export class BareModuleTransformer {
           kind: 'diagnostic',
           filename: file.file.name,
           diagnostic: {
-            message: `Could not resolve module "${oldSpecifier}": ${e.message}`,
+            message: `Could not resolve module "${oldSpecifier}": ${
+              (e as Error).message
+            }`,
             range: {
               start: charToLineAndChar(js, start),
               end: charToLineAndChar(js, end),
@@ -316,7 +321,7 @@ export class BareModuleTransformer {
       // HTTP status code, so then we could propagate this specific error to be
       // served by the service worker, so that it shows up more usefully in the
       // network tab.
-      console.error(`Error fetching ${path} from CDN: ${e.message}`);
+      console.error(`Error fetching ${path} from CDN: ${(e as Error).message}`);
       return;
     }
     let packageJson: PackageJson | undefined | null = null;
