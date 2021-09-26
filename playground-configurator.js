@@ -1671,7 +1671,7 @@ span.CodeMirror-selectedtext {
         border: 1px solid var(--playground-code-linenumber-color, #ccc);
         padding: 5px;
       }
-    `,ao],o([he()],lo.prototype,"type",void 0),o([he({type:Boolean,attribute:"line-numbers",reflect:!0})],lo.prototype,"lineNumbers",void 0),o([he({type:Boolean,reflect:!0})],lo.prototype,"readonly",void 0),o([he({attribute:!1})],lo.prototype,"diagnostics",void 0),o([he()],lo.prototype,"pragmas",void 0),o([ge()],lo.prototype,"_tooltipDiagnostic",void 0),o([ge()],lo.prototype,"_showKeyboardHelp",void 0),o([me("#focusContainer")],lo.prototype,"_focusContainer",void 0),o([me(".CodeMirror-code")],lo.prototype,"_codemirrorEditable",void 0),lo=o([pe("playground-code-editor")],lo);
+    `,ao],o([he()],lo.prototype,"value",null),o([he()],lo.prototype,"type",void 0),o([he({type:Boolean,attribute:"line-numbers",reflect:!0})],lo.prototype,"lineNumbers",void 0),o([he({type:Boolean,reflect:!0})],lo.prototype,"readonly",void 0),o([he({attribute:!1})],lo.prototype,"diagnostics",void 0),o([he()],lo.prototype,"pragmas",void 0),o([ge()],lo.prototype,"_tooltipDiagnostic",void 0),o([ge()],lo.prototype,"_showKeyboardHelp",void 0),o([me("#focusContainer")],lo.prototype,"_focusContainer",void 0),o([me(".CodeMirror-code")],lo.prototype,"_codemirrorEditable",void 0),lo=o([pe("playground-code-editor")],lo);
 /**
  * @license
  * Copyright 2019 Google LLC
