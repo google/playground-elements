@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {TypesFetcher} from '../typescript-worker/types-fetcher.js';
-import {ImportMapResolver} from '../typescript-worker/import-map-resolver.js';
-import {configureFakeCdn} from './worker-test-util.js';
-import {assert} from '@esm-bundle/chai';
-import {CachingCdn} from '../typescript-worker/caching-cdn.js';
+import { TypesFetcher } from '../typescript-worker/types-fetcher.js';
+import { ImportMapResolver } from '../typescript-worker/import-map-resolver.js';
+import { configureFakeCdn } from './worker-test-util.js';
+import { assert } from '@esm-bundle/chai';
+import { CachingCdn } from '../typescript-worker/caching-cdn.js';
 
-import type {ModuleImportMap} from '../shared/worker-api.js';
-import type {CdnData} from './fake-cdn-plugin.js';
-import type {PackageJson} from '../typescript-worker/util.js';
+import type { ModuleImportMap } from '../shared/worker-api.js';
+import type { CdnData } from './fake-cdn-plugin.js';
+import type { PackageJson } from '../typescript-worker/util.js';
 import type {
   DependencyGraph,
   NodeModulesDirectory,
@@ -34,7 +34,7 @@ const checkTypesFetcher = async (opts: {
   expectedDependencyGraph?: ExpectedDependencyGraph;
   expectedLayout?: NodeModulesDirectory;
 }) => {
-  const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(opts.cdnData);
+  const { cdnBaseUrl, deleteCdnData } = await configureFakeCdn(opts.cdnData);
   try {
     await checkTypesFetcherImpl(opts, cdnBaseUrl);
   } finally {
@@ -148,15 +148,15 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0', b: '1.0.0'},
+      root: { a: '1.0.0', b: '1.0.0' },
       deps: {},
     };
     // ROOT
     // ├── A1
     // └── B2
     const expectedLayout: NodeModulesDirectory = {
-      a: {version: '1.0.0', nodeModules: {}},
-      b: {version: '1.0.0', nodeModules: {}},
+      a: { version: '1.0.0', nodeModules: {} },
+      b: { version: '1.0.0', nodeModules: {} },
     };
     const expectedFiles = new Map([
       ['a/package.json', '{}'],
@@ -215,7 +215,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.1.0', b: '1.3.0'},
+      root: { a: '1.1.0', b: '1.3.0' },
       deps: {
         a: {
           '1.1.0': {
@@ -228,8 +228,8 @@ suite('types fetcher', () => {
     // ├── A1
     // └── B2
     const expectedLayout: NodeModulesDirectory = {
-      a: {version: '1.1.0', nodeModules: {}},
-      b: {version: '1.3.0', nodeModules: {}},
+      a: { version: '1.1.0', nodeModules: {} },
+      b: { version: '1.3.0', nodeModules: {} },
     };
     const expectedFiles = new Map([
       ['a/package.json', `{"dependencies": {"b": "^1.2.0"}}`],
@@ -296,7 +296,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0'},
+      root: { a: '1.0.0' },
       deps: {
         a: {
           '1.0.0': {
@@ -315,9 +315,9 @@ suite('types fetcher', () => {
     // ├── B2
     // └── C3
     const expectedLayout: NodeModulesDirectory = {
-      a: {version: '1.0.0', nodeModules: {}},
-      b: {version: '2.0.0', nodeModules: {}},
-      c: {version: '3.0.0', nodeModules: {}},
+      a: { version: '1.0.0', nodeModules: {} },
+      b: { version: '2.0.0', nodeModules: {} },
+      c: { version: '3.0.0', nodeModules: {} },
     };
     const expectedFiles = new Map([
       ['a/package.json', '{}'],
@@ -369,7 +369,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0'},
+      root: { a: '1.0.0' },
       deps: {
         a: {
           '1.0.0': {
@@ -387,8 +387,8 @@ suite('types fetcher', () => {
     // ├── A1
     // └── B1
     const expectedLayout: NodeModulesDirectory = {
-      a: {version: '1.0.0', nodeModules: {}},
-      b: {version: '1.0.0', nodeModules: {}},
+      a: { version: '1.0.0', nodeModules: {} },
+      b: { version: '1.0.0', nodeModules: {} },
     };
     const expectedFiles = new Map([
       ['a/package.json', '{}'],
@@ -444,10 +444,10 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.2.3'},
+      root: { a: '1.2.3' },
       deps: {
         a: {
-          '1.2.3': {b: '1.3.4'},
+          '1.2.3': { b: '1.3.4' },
         },
       },
     };
@@ -531,7 +531,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0', b: '1.0.0'},
+      root: { a: '1.0.0', b: '1.0.0' },
       deps: {
         a: {
           '1.0.0': {
@@ -548,10 +548,10 @@ suite('types fetcher', () => {
       a: {
         version: '1.0.0',
         nodeModules: {
-          b: {version: '2.0.0', nodeModules: {}},
+          b: { version: '2.0.0', nodeModules: {} },
         },
       },
-      b: {version: '1.0.0', nodeModules: {}},
+      b: { version: '1.0.0', nodeModules: {} },
     };
     const expectedFiles = new Map([
       ['a/package.json', `{"dependencies": {"b": "^2.0.0"}}`],
@@ -578,7 +578,7 @@ suite('types fetcher', () => {
     const cdnData: CdnData = {
       typescript: {
         versions: {
-          '4.3.5': {
+          '4.4.3': {
             files: {
               'lib/lib.es2020.d.ts': {
                 // References are the same as imports from our perspective.
@@ -598,13 +598,13 @@ suite('types fetcher', () => {
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
       root: {
-        typescript: '4.3.5',
+        typescript: '4.4.3',
       },
       deps: {},
     };
     const expectedLayout: NodeModulesDirectory = {
       typescript: {
-        version: '4.3.5',
+        version: '4.4.3',
         nodeModules: {},
       },
     };
@@ -677,7 +677,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0'},
+      root: { a: '1.0.0' },
       deps: {},
     };
     const expectedLayout: NodeModulesDirectory = {
@@ -780,7 +780,7 @@ suite('types fetcher', () => {
       },
     };
     const expectedDependencyGraph: ExpectedDependencyGraph = {
-      root: {a: '1.0.0', b: '1.0.0', c: '1.0.0'},
+      root: { a: '1.0.0', b: '1.0.0', c: '1.0.0' },
       deps: {
         b: {
           '1.0.0': {
@@ -867,7 +867,7 @@ suite('types fetcher', () => {
     };
     // Note we're using the fake CDN in a slightly different way in this test by
     // directly providing the URL in the import maps.
-    const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
+    const { cdnBaseUrl, deleteCdnData } = await configureFakeCdn(cdnData);
     const importMap: ModuleImportMap = {
       imports: {
         foo: `${cdnBaseUrl}foo@1.2.3`,
@@ -915,7 +915,7 @@ suite('types fetcher', () => {
         },
       },
     };
-    const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
+    const { cdnBaseUrl, deleteCdnData } = await configureFakeCdn(cdnData);
     const importMap: ModuleImportMap = {
       imports: {
         foo: `${cdnBaseUrl}foo@1.2.3`,
@@ -967,7 +967,7 @@ suite('types fetcher', () => {
         },
       },
     };
-    const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
+    const { cdnBaseUrl, deleteCdnData } = await configureFakeCdn(cdnData);
     const importMap: ModuleImportMap = {
       imports: {
         foo: `${cdnBaseUrl}foo@1.2.3`,

@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- Updated TypeScript version from `4.3.5` to `4.4.3`.
 
 ## [0.14.1] - 2021-09-21
 
