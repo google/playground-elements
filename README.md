@@ -2,7 +2,7 @@
 
 <p align="center">
   <br>
-  Serverless code experiences with web components.
+  Serverless coding environments for the web.
   <br>
   <br>
   <img src="./images/preview.png" width="650">
