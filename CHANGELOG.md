@@ -19,12 +19,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.2] - 2021-09-30
+
+### Changed
+
+- Updated bundled version of TypeScript to 4.4.3.
+- Internal refactoring of language service.
+
 ## [0.14.1] - 2021-09-21
 
 ### Changed
 
 - GitHub org changed from PolymerLabs to google.
-- Refactored language service into a separate module
 
 ## [0.14.0] - 2021-09-20
 
