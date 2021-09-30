@@ -33,8 +33,8 @@
 ## Overview
 
 Playground Elements are a set of components for creating interactive editable
-code experiences on the web, with live updating previews. You can use Playground
-to:
+coding environments on the web, with live updating previews. You can use
+Playground Elements to:
 
 - Embed editable code examples in your documentation.
 - Build interactive tutorials and example galleries.
