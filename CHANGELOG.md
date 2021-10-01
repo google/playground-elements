@@ -17,7 +17,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Fixed
+
+- Implemented more aggressive techniques to encourage new versions of the
+  service worker to be found and activated:
+
+  - The expected version number is now included as a URL parameter to encourage
+    cache busting (e.g. `playground-service-worker.js?v=0.14.3`).
+
+  - The previous version of a service worker is now explicitly unregistered, to
+    work around cases where a previous version would never shut down to allow a
+    new version to take over, even across browser restarts.
+
+  - The previous and expected new service worker version numbers are now
+    included in console log messages, to aid in debugging.
 
 ## [0.14.2] - 2021-09-30
 

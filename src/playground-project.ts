@@ -219,9 +219,7 @@ export class PlaygroundProject extends LitElement {
   @state()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
 
-  private _deferredTypeScriptWorkerApi = new Deferred<
-    Remote<WorkerAPI>
-  >();
+  private _deferredTypeScriptWorkerApi = new Deferred<Remote<WorkerAPI>>();
 
   private _validImportMap: ModuleImportMap = {};
 
@@ -432,9 +430,7 @@ export class PlaygroundProject extends LitElement {
       worker = new Worker(blobUrl);
       URL.revokeObjectURL(blobUrl);
     }
-    this._deferredTypeScriptWorkerApi.resolve(
-      wrap<WorkerAPI>(worker)
-    );
+    this._deferredTypeScriptWorkerApi.resolve(wrap<WorkerAPI>(worker));
   }
 
   private _onServiceWorkerProxyIframeLoad() {
@@ -454,7 +450,13 @@ export class PlaygroundProject extends LitElement {
     this._postMessageToServiceWorkerProxyIframe(
       {
         type: CONFIGURE_PROXY,
-        url: 'playground-service-worker.js',
+        // Include a version number in the URL to help encourage cache busting.
+        // Service Worker updates should bypass the browser cache, but it has
+        // been observed that stale responses are sometimes received regardless.
+        // This could be due to a bug in the browser service worker
+        // implementation, or it could be due to a stale response from the
+        // server or some intermediate caching layer.
+        url: `playground-service-worker.js?v=${version}`,
         scope: this.sandboxScope,
         port: port2,
       },
@@ -479,7 +481,9 @@ export class PlaygroundProject extends LitElement {
           // immediately. We'll get back here again after it updates via a
           // CONNECT_PROJECT_TO_SW message from the proxy.
           console.info(
-            'Playground service worker is outdated, waiting for update.'
+            `Playground service worker is outdated. ` +
+              `Want ${version} but got ${e.data.version}. ` +
+              `Waiting for update.`
           );
           this._postMessageToServiceWorkerProxyIframe({
             type: UPDATE_SERVICE_WORKER,
