@@ -56,6 +56,8 @@ const terserOptions = {
   },
 };
 
+const maybeTerser = process.env.NO_TERSER ? [] : [terser(terserOptions)];
+
 export default [
   // Generate playground-service-worker-proxy.html, the HTML file + inline
   // script that proxies between a project and a service worker on a possibly
@@ -67,7 +69,7 @@ export default [
       format: 'esm',
     },
     plugins: [
-      terser(terserOptions),
+      ...maybeTerser,
       inlineHtml('playground-service-worker-proxy.html'),
     ],
   },
@@ -100,7 +102,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
         [/typeof exports ?===? ?['"`]object['"`]/g, 'false'],
         [/typeof define ?===? ?['"`]function['"`]/g, 'false'],
       ]),
-      terser(terserOptions),
+      ...maybeTerser,
       summary(),
     ],
   },
@@ -111,7 +113,7 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       format: 'iife',
       exports: 'none',
     },
-    plugins: [resolve(), terser(terserOptions)],
+    plugins: [resolve(), ...maybeTerser],
   },
   {
     input: 'typescript-worker/playground-typescript-worker.js',
@@ -120,6 +122,6 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       format: 'iife',
       exports: 'none',
     },
-    plugins: [resolve(), terser(terserOptions)],
+    plugins: [resolve(), ...maybeTerser],
   },
 ];
