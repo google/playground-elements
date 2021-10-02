@@ -48,19 +48,32 @@ suite('playground-ide', () => {
     return node;
   };
 
+  // TODO(aomarks) Use sendKeys instead
+  // https://modern-web.dev/docs/test-runner/commands/#send-keys
+  const updateCurrentFile = async (
+    editor: PlaygroundCodeEditor,
+    newValue: string
+  ) => {
+    const codemirror = (
+      editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      }
+    )._codemirror;
+    codemirror!.setValue(newValue);
+  };
+
+  const waitForIframeLoad = (iframe: HTMLElement) =>
+    new Promise<void>((resolve) => {
+      iframe.addEventListener('load', () => resolve(), {once: true});
+    });
+
   const assertPreviewContains = async (text: string) => {
     const iframe = (await pierce(
       'playground-ide',
       'playground-preview',
       'iframe'
     )) as HTMLIFrameElement;
-    await new Promise<void>((resolve) => {
-      const listener = () => {
-        iframe.removeEventListener('load', listener);
-        resolve();
-      };
-      iframe.addEventListener('load', listener);
-    });
+    await waitForIframeLoad(iframe);
     // TODO(aomarks) Chromium and Webkit both fire iframe "load" after the
     // contentDocument has actually loaded, but Firefox fires it before. Why is
     // that? If not for that, we wouldn't need to poll here.
@@ -145,15 +158,12 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello HTML 1');
 
-    const codemirror = (await pierce(
+    const editor = (await pierce(
       'playground-ide',
       'playground-file-editor',
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
-    const codemirrorInternals = codemirror as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
-    };
-    codemirrorInternals._codemirror!.setValue('Hello HTML 2');
+    updateCurrentFile(editor, 'Hello HTML 2');
     const project = (await pierce(
       'playground-ide',
       'playground-project'
