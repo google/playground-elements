@@ -4,10 +4,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+import {Deferred} from '../shared/deferred.js';
+
 type IteratorResultWithNext<T> = Promise<{
   value: IteratorResult<T>;
   next: () => IteratorResultWithNext<T>;
 }>;
+
+const NEW_ITERATOR = Symbol();
 
 /**
  * Merges multiple async iterables into one iterable. Iterator next promises are
@@ -19,6 +23,7 @@ export class MergedAsyncIterables<T> {
     () => IteratorResultWithNext<T>,
     IteratorResultWithNext<T>
   >();
+  private _newIterator = new Deferred<typeof NEW_ITERATOR>();
 
   add(iterable: AsyncIterable<T>) {
     const iterator = iterable[Symbol.asyncIterator]();
@@ -27,11 +32,23 @@ export class MergedAsyncIterables<T> {
       next,
     });
     this._iterators.set(next, next());
+    this._newIterator.resolve(NEW_ITERATOR);
   }
 
   async *[Symbol.asyncIterator]() {
     while (this._iterators.size > 0) {
-      const {value, next} = await Promise.race(this._iterators.values());
+      // Emit any available value from our source iterators, or notice there is
+      // a new iterator. We should immediately add new iterators to this race,
+      // because a new one might have a value before the older ones.
+      const result = await Promise.race([
+        ...this._iterators.values(),
+        this._newIterator.promise,
+      ]);
+      if (result === NEW_ITERATOR) {
+        this._newIterator = new Deferred();
+        continue; // Start a new race.
+      }
+      const {value, next} = result;
       if (value.done) {
         this._iterators.delete(next);
       } else {

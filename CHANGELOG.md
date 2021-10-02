@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed a bottleneck that prevented previews from loading until semantic
+  TypeScript errors were computed. This should significantly improve the latency
+  between updating a file and the new preview loading.
+
 - Implemented more aggressive techniques to encourage new versions of the
   service worker to be found and activated:
 
