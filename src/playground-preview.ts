@@ -248,13 +248,27 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   }
 
   reload = () => {
-    if (!this._iframe) {
+    const iframe = this._iframe;
+    if (!iframe) {
       return;
+    }
+    // Reloading the iframe can cause a history entry to be added to the parent
+    // window (on Chrome but not Firefox, and only when the parent/iframe origins
+    // are different). Removing the iframe from the DOM while we initiate the
+    // reload prevents a history entry from being added.
+    const parentNode = iframe.parentNode;
+    const nextSibling = iframe.nextSibling;
+    if (parentNode) {
+      iframe.nextSibling;
+      iframe.remove();
     }
     // Note we can't use contentWindow.location.reload() here, because the
     // IFrame might be on a different origin.
-    this._iframe.src = '';
-    this._iframe.src = this._indexUrl;
+    iframe.src = '';
+    iframe.src = this._indexUrl;
+    if (parentNode) {
+      parentNode.insertBefore(iframe, nextSibling);
+    }
     this._loading = true;
     this._showLoadingBar = true;
   };
