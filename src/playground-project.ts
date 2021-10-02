@@ -450,13 +450,7 @@ export class PlaygroundProject extends LitElement {
     this._postMessageToServiceWorkerProxyIframe(
       {
         type: CONFIGURE_PROXY,
-        // Include a version number in the URL to help encourage cache busting.
-        // Service Worker updates should bypass the browser cache, but it has
-        // been observed that stale responses are sometimes received regardless.
-        // This could be due to a bug in the browser service worker
-        // implementation, or it could be due to a stale response from the
-        // server or some intermediate caching layer.
-        url: `playground-service-worker.js?v=${version}`,
+        url: 'playground-service-worker.js',
         scope: this.sandboxScope,
         port: port2,
       },
