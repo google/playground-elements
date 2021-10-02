@@ -4,58 +4,41 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {Deferred} from '../shared/deferred.js';
-
-type IteratorResultWithNext<T> = Promise<{
-  value: IteratorResult<T>;
-  next: () => IteratorResultWithNext<T>;
-}>;
-
-const NEW_ITERATOR = Symbol();
-
 /**
  * Merges multiple async iterables into one iterable. Iterator next promises are
  * raced, so order is not preserved. Additional iterables can be added before or
  * during iteration.
  */
 export class MergedAsyncIterables<T> {
-  private _iterators = new Map<
-    () => IteratorResultWithNext<T>,
-    IteratorResultWithNext<T>
-  >();
-  private _newIterator = new Deferred<typeof NEW_ITERATOR>();
-
-  add(iterable: AsyncIterable<T>) {
-    const iterator = iterable[Symbol.asyncIterator]();
-    const next = async () => ({
-      value: await iterator.next(),
-      next,
-    });
-    this._iterators.set(next, next());
-    this._newIterator.resolve(NEW_ITERATOR);
-  }
+  private readonly _buffer: Array<{value: T; emitted: () => void}> = [];
+  private _numSources = 0;
+  private _notify?: () => void;
 
   async *[Symbol.asyncIterator]() {
-    while (this._iterators.size > 0) {
-      // Emit any available value from our source iterators, or notice there is
-      // a new iterator. We should immediately add new iterators to this race,
-      // because a new one might have a value before the older ones.
-      const result = await Promise.race([
-        ...this._iterators.values(),
-        this._newIterator.promise,
-      ]);
-      if (result === NEW_ITERATOR) {
-        this._newIterator = new Deferred();
-        continue; // Start a new race.
+    while (this._numSources > 0) {
+      while (this._buffer.length > 0) {
+        const {value, emitted} = this._buffer.shift()!;
+        yield value;
+        // Let the loop in add() continue
+        emitted();
       }
-      const {value, next} = result;
-      if (value.done) {
-        this._iterators.delete(next);
-      } else {
-        yield value.value;
-        this._iterators.set(next, next());
-      }
+      // Wait until there is a new value or a source iterator was exhausted
+      await new Promise<void>((resolve) => (this._notify = resolve));
+      this._notify = undefined;
     }
+  }
+
+  async add(iterable: AsyncIterable<T>) {
+    this._numSources++;
+    for await (const value of iterable) {
+      // Wait for this value to be emitted before continuing
+      await new Promise<void>((emitted) => {
+        this._buffer.push({value, emitted});
+        this._notify?.();
+      });
+    }
+    this._numSources--;
+    this._notify?.();
   }
 }
 
