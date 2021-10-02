@@ -494,4 +494,50 @@ suite('playground-ide', () => {
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
   });
+
+  test('reloading preview does not modify history', async () => {
+    const historyLengthBefore = window.history.length;
+
+    // NOTE: For some reason, the parent window's history only seems to be
+    // affected when the iframe origin is different.
+    const separateOrigin = (await executeServerCommand(
+      'separate-origin'
+    )) as string;
+
+    render(
+      html`
+        <playground-ide sandbox-base-url="${separateOrigin}">
+          <script type="sample/html" filename="index.html">
+            <body>
+              <p>Hello HTML 1</p>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const iframe = (await pierce(
+      'playground-ide',
+      'playground-preview',
+      'iframe'
+    )) as HTMLIFrameElement;
+    await waitForIframeLoad(iframe);
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    updateCurrentFile(editor, 'Hello HTML 2');
+
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+    project.save();
+    await waitForIframeLoad(iframe);
+
+    const historyLengthAfter = window.history.length;
+    assert.equal(historyLengthAfter, historyLengthBefore);
+  });
 });
