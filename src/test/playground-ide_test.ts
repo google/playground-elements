@@ -8,6 +8,7 @@ import {assert} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
+import {executeServerCommand} from '@web/test-runner-commands';
 
 import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
