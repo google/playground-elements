@@ -4,41 +4,50 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-type IteratorResultWithNext<T> = Promise<{
-  value: IteratorResult<T>;
-  next: () => IteratorResultWithNext<T>;
-}>;
-
 /**
- * Merges multiple async iterables into one iterable. Iterator next promises are
- * raced, so order is not preserved. Additional iterables can be added before or
- * during iteration.
+ * Merges multiple async iterables into one iterable. Order is not preserved.
+ * Iterables can be added before or during iteration. After exhausted, adding a
+ * new iterator throws.
  */
 export class MergedAsyncIterables<T> {
-  private _iterators = new Map<
-    () => IteratorResultWithNext<T>,
-    IteratorResultWithNext<T>
-  >();
-
-  add(iterable: AsyncIterable<T>) {
-    const iterator = iterable[Symbol.asyncIterator]();
-    const next = async () => ({
-      value: await iterator.next(),
-      next,
-    });
-    this._iterators.set(next, next());
-  }
+  private readonly _buffer: Array<{value: T; emitted: () => void}> = [];
+  private _numSources = 0;
+  private _notify?: () => void;
+  private _done = false;
 
   async *[Symbol.asyncIterator]() {
-    while (this._iterators.size > 0) {
-      const {value, next} = await Promise.race(this._iterators.values());
-      if (value.done) {
-        this._iterators.delete(next);
-      } else {
-        yield value.value;
-        this._iterators.set(next, next());
+    while (this._numSources > 0) {
+      while (this._buffer.length > 0) {
+        const {value, emitted} = this._buffer.shift()!;
+        yield value;
+        // Let the loop in add() continue
+        emitted();
       }
+      // Wait until there is a new value or a source iterator was exhausted
+      await new Promise<void>((resolve) => (this._notify = resolve));
+      this._notify = undefined;
     }
+    this._done = true;
+  }
+
+  add(iterable: AsyncIterable<T>) {
+    if (this._done) {
+      throw new Error(
+        'Merged iterator is exhausted. Cannot add new source iterators.'
+      );
+    }
+    this._numSources++;
+    (async () => {
+      for await (const value of iterable) {
+        // Wait for this value to be emitted before continuing
+        await new Promise<void>((emitted) => {
+          this._buffer.push({value, emitted});
+          this._notify?.();
+        });
+      }
+      this._numSources--;
+      this._notify?.();
+    })();
   }
 }
 

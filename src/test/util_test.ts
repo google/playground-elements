@@ -46,6 +46,23 @@ suite('MergedAsyncIterables', () => {
     assert.deepEqual(actual, expected);
   });
 
+  test('throws if iterator added after complete', async () => {
+    const merged = new MergedAsyncIterables();
+    merged.add(
+      (async function* () {
+        yield 'a';
+      })()
+    );
+    await flush(merged);
+    assert.throws(() => {
+      merged.add(
+        (async function* () {
+          yield 'b';
+        })()
+      );
+    });
+  });
+
   test('two iterables', async () => {
     const a = (async function* () {
       await raf();
@@ -120,6 +137,36 @@ suite('MergedAsyncIterables', () => {
     const expected = ['a0', 'a1', 'b0', 'c0', 'b1'];
     merged.add(a);
     const actual = await flush(merged);
+    assert.deepEqual(actual, expected);
+  });
+
+  test('notice a new iterator while waiting on an existing one', async () => {
+    const merged = new MergedAsyncIterables<string>();
+
+    merged.add(
+      (async function* () {
+        await raf();
+        yield 'slow';
+      })()
+    );
+
+    // The key thing about this test is that we've started iterating before
+    // adding the second source.
+    const actual: string[] = [];
+    const done = (async () => {
+      for await (const value of merged) {
+        actual.push(value);
+      }
+    })();
+
+    merged.add(
+      (async function* () {
+        yield 'fast';
+      })()
+    );
+
+    await done;
+    const expected = ['fast', 'slow'];
     assert.deepEqual(actual, expected);
   });
 });
