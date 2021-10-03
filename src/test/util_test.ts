@@ -46,6 +46,23 @@ suite('MergedAsyncIterables', () => {
     assert.deepEqual(actual, expected);
   });
 
+  test('throws if iterator added after complete', async () => {
+    const merged = new MergedAsyncIterables();
+    merged.add(
+      (async function* () {
+        yield 'a';
+      })()
+    );
+    await flush(merged);
+    assert.throws(() => {
+      merged.add(
+        (async function* () {
+          yield 'b';
+        })()
+      );
+    });
+  });
+
   test('two iterables', async () => {
     const a = (async function* () {
       await raf();

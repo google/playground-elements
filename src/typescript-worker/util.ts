@@ -5,14 +5,15 @@
  */
 
 /**
- * Merges multiple async iterables into one iterable. Iterator next promises are
- * raced, so order is not preserved. Additional iterables can be added before or
- * during iteration.
+ * Merges multiple async iterables into one iterable. Order is not preserved.
+ * Iterables can be added before or during iteration. After exhausted, adding a
+ * new iterator throws.
  */
 export class MergedAsyncIterables<T> {
   private readonly _buffer: Array<{value: T; emitted: () => void}> = [];
   private _numSources = 0;
   private _notify?: () => void;
+  private _done = false;
 
   async *[Symbol.asyncIterator]() {
     while (this._numSources > 0) {
@@ -26,19 +27,27 @@ export class MergedAsyncIterables<T> {
       await new Promise<void>((resolve) => (this._notify = resolve));
       this._notify = undefined;
     }
+    this._done = true;
   }
 
-  async add(iterable: AsyncIterable<T>) {
-    this._numSources++;
-    for await (const value of iterable) {
-      // Wait for this value to be emitted before continuing
-      await new Promise<void>((emitted) => {
-        this._buffer.push({value, emitted});
-        this._notify?.();
-      });
+  add(iterable: AsyncIterable<T>) {
+    if (this._done) {
+      throw new Error(
+        'Merged iterator is exhausted. Cannot add new source iterators.'
+      );
     }
-    this._numSources--;
-    this._notify?.();
+    this._numSources++;
+    (async () => {
+      for await (const value of iterable) {
+        // Wait for this value to be emitted before continuing
+        await new Promise<void>((emitted) => {
+          this._buffer.push({value, emitted});
+          this._notify?.();
+        });
+      }
+      this._numSources--;
+      this._notify?.();
+    })();
   }
 }
 
