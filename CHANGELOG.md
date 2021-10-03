@@ -25,8 +25,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   TypeScript errors were computed. This should significantly improve the latency
   between updating a file and the new preview loading.
 
-- Implemented more aggressive techniques to encourage new versions of the
-  service worker to be found and activated:
+- Improvements to service worker version updates:
+
+  - The service worker will require less frequent updates going forward.
+    Previously it needed updating for every playground-elements release. Now it
+    only needs updating if the bytes of the service worker have changed between
+    releases.
 
   - The previous version of a service worker is now explicitly unregistered, to
     work around cases where a previous version would never shut down to allow a

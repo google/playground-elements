@@ -26,7 +26,7 @@ import {
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
-import {version} from './shared/version.js';
+import {npmVersion, serviceWorkerHash} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
@@ -151,7 +151,7 @@ export class PlaygroundProject extends LitElement {
    * "/node_modules/playground-elements/").
    */
   @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = `https://unpkg.com/playground-elements@${version}/`;
+  sandboxBaseUrl = `https://unpkg.com/playground-elements@${npmVersion}/`;
 
   /**
    * The service worker scope to register on
@@ -462,7 +462,7 @@ export class PlaygroundProject extends LitElement {
     const onMessage = (e: MessageEvent<PlaygroundMessage>) => {
       if (e.data.type === ACKNOWLEDGE_SW_CONNECTION) {
         port.removeEventListener('message', onMessage);
-        if (e.data.version === version) {
+        if (e.data.version === serviceWorkerHash) {
           this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
           this._serviceWorkerAPI.setFileAPI(
             proxy({
@@ -476,7 +476,7 @@ export class PlaygroundProject extends LitElement {
           // CONNECT_PROJECT_TO_SW message from the proxy.
           console.info(
             `Playground service worker is outdated. ` +
-              `Want ${version} but got ${e.data.version}. ` +
+              `Want ${serviceWorkerHash} but got ${e.data.version}. ` +
               `Waiting for update.`
           );
           this._postMessageToServiceWorkerProxyIframe({
