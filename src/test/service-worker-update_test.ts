@@ -88,12 +88,12 @@ suite('service worker update', () => {
     await writeOutdatedServiceWorker();
     assert.equal(1, 1);
 
-    // await navigator.serviceWorker.register(
-    //   `/test/${TEST_DIR}/playground-service-worker.js`,
-    //   {
-    //     scope: `/test/${TEST_DIR}/playground-elements`,
-    //   }
-    // );
+    await navigator.serviceWorker.register(
+      `/test/${TEST_DIR}/playground-service-worker.js`,
+      {
+        scope: `/test/${TEST_DIR}/playground-elements`,
+      }
+    );
 
     // await writeCurrentServiceWorker();
 
