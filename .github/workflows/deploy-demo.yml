@@ -16,11 +16,8 @@ jobs:
           node-version: 16
           cache: npm
 
-      - name: NPM install
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run build
 
       - name: Deploy to gh-pages
         run: |
