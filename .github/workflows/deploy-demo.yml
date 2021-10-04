@@ -15,11 +15,6 @@ jobs:
         with:
           node-version: 16
 
-      # Needed because a recent version of NPM changed SHAs for git
-      # dependencies, breaking our package-lock.json files.
-      - name: Update NPM
-        run: npm i --global npm@^7.8.0
-
       - name: NPM install
         run: npm ci
 
