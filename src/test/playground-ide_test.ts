@@ -8,6 +8,7 @@ import {assert} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
+import {sendKeys} from '@web/test-runner-commands';
 
 import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
@@ -482,5 +483,71 @@ suite('playground-ide', () => {
     await new Promise((resolve) => requestAnimationFrame(resolve));
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
+  });
+  test('returns the correct cursor position and index', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.js': {
+          content: '',
+        },
+      },
+    };
+    container.appendChild(ide);
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const codeToAdd = `console.log("Foo");
+    console.log("bar");`;
+
+    await new Promise(resolve => window.requestAnimationFrame(resolve));
+
+    editor.focus();
+    await sendKeys({
+      type: codeToAdd,
+    });
+
+    assert.equal(editor.value, codeToAdd);
+    assert.equal(editor.cursorIndex, codeToAdd.length);
+    const cursorPosition = editor.cursorPosition;
+    assert.equal(cursorPosition?.line, 1);
+    assert.equal(cursorPosition?.ch, 23);
+  });
+  test('returns the token under cursor', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.js': {
+          content: 'console.log("Foo")',
+        },
+      },
+    };
+    container.appendChild(ide);
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    await new Promise(resolve => window.requestAnimationFrame(resolve));
+
+    editor.focus();
+
+    await sendKeys({
+      press: "ArrowRight"
+    })
+
+    const tokenUnderCursor = editor.tokenUnderCursor;
+
+    assert.equal(tokenUnderCursor?.start, 0);
+    assert.equal(tokenUnderCursor?.end, 7);
+    assert.equal(tokenUnderCursor?.string, 'console');
   });
 });

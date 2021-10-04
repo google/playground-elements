@@ -11,6 +11,7 @@ import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
+import type {Position} from 'codemirror';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -21,6 +22,15 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
   keys(): IterableIterator<keyof T>;
   values(): IterableIterator<T[keyof T]>;
   entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
+}
+
+export interface EditorToken {
+  /** The character (on the given line) at which the token starts. */
+  start: number;
+  /** The character at which the token ends. */
+  end: number;
+  /** Code string under the cursor. */
+  string: string;
 }
 
 const unreachable = (n: never) => n;
@@ -101,8 +111,35 @@ export class PlaygroundCodeEditor extends LitElement {
     playgroundStyles,
   ];
 
-  // Used by tests.
   protected _codemirror?: ReturnType<typeof CodeMirror>;
+
+  get cursorPosition(): Position | undefined {
+    const cm = this._codemirror;
+    if (!cm) return undefined;
+
+    return cm.getCursor('start');
+  }
+
+  get cursorIndex(): number | undefined {
+    const cm = this._codemirror;
+    if (!cm) return undefined;
+
+    const cursorPosition = cm.getCursor('start');
+    return cm.indexFromPos(cursorPosition);
+  }
+
+  get tokenUnderCursor(): EditorToken | undefined {
+    const cm = this._codemirror;
+    if (!cm) return undefined;
+
+    const cursorPosition = cm.getCursor('start');
+    const token = cm.getTokenAt(cursorPosition);
+    return {
+      start: token.start,
+      end: token.end,
+      string: token.string,
+    };
+  }
 
   // We store _value ourselves, rather than using a public reactive property, so
   // that we can set this value internally without triggering an update.
@@ -213,6 +250,14 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'diagnostics':
             this._showDiagnostics();
+            break;
+          case 'cursorIndex':
+            cm.setCursor(this.cursorIndex ?? 0);
+            break;
+          case 'cursorPosition':
+            cm.setCursor(this.cursorPosition ?? {ch: 0, line: 0});
+            break;
+          case 'tokenUnderCursor':
             break;
           default:
             unreachable(prop);
@@ -337,6 +382,10 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
     this._codemirror = cm;
+  }
+
+  focus() {
+    this._codemirrorEditable?.focus();
   }
 
   private _onMousedown() {
