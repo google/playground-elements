@@ -6,17 +6,11 @@
     "rootDir": ".",
     "tsBuildInfoFile": "../../typescript-worker/.tsbuildinfo",
     "target": "es2019",
-    "lib": [
-      "ES2020",
-      "WebWorker"
-    ],
+    "lib": ["ES2020", "WebWorker"],
     "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
+    "skipDefaultLibCheck": true
   },
-  "include": [
-    "*.ts",
-    "**/*.ts"
-  ],
+  "include": ["*.ts", "**/*.ts"],
   "exclude": [],
   "references": [
     {

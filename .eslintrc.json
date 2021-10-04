@@ -19,11 +19,9 @@
   },
   "overrides": [
     {
-      "files": [
-        "src/playground-styles.ts"
-      ],
+      "files": ["src/playground-styles.ts"],
       "rules": {
-        "no-var":"off"
+        "no-var": "off"
       }
     }
   ]

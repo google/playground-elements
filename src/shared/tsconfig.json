@@ -5,14 +5,9 @@
     "outDir": "../../shared",
     "rootDir": ".",
     "tsBuildInfoFile": "../../shared/.tsbuildinfo",
-    "lib": [
-      "ES2017",
-      "WebWorker"
-    ],
+    "lib": ["ES2017", "WebWorker"],
     "skipLibCheck": true
   },
-  "include": [
-    "*.ts",
-  ],
+  "include": ["*.ts"],
   "exclude": []
 }

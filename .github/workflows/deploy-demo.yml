@@ -6,25 +6,18 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-demo:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: 16
+          cache: npm
 
-      # Needed because a recent version of NPM changed SHAs for git
-      # dependencies, breaking our package-lock.json files.
-      - name: Update NPM
-        run: npm i --global npm@^7.8.0
-
-      - name: NPM install
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run build
 
       - name: Deploy to gh-pages
         run: |

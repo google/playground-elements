@@ -20,6 +20,8 @@
 // loading each of the original themes stylesheets, and extracting colors from
 // probe nodes that mimic the structure of /actual CodeMirror DOM.
 
+/* eslint-env browser */
+
 import * as fs from 'fs';
 import * as pathlib from 'path';
 import * as url from 'url';
@@ -67,14 +69,6 @@ const postMinifyCss = (css) => {
   // width is 0. We can strip off the rest when width is 0.
   css = css.replace(/0px none rgb.*;/g, '0px;');
   return css;
-};
-
-const fromMap = {
-  color: 'color',
-  background: 'background',
-  borderRight: 'border-right',
-  borderLeftColor: 'border-left-color',
-  boxShadow: 'box-shadow',
 };
 
 const makeThemeCss = (themeName, results, defaultResults) => {

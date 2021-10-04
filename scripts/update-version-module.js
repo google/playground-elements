@@ -17,6 +17,8 @@ import {fileURLToPath} from 'url';
 // sandbox location, and we use the service worker hash to determine when we
 // need to force a service worker update.
 
+/* eslint-env node */
+
 const thisDir = dirname(fileURLToPath(import.meta.url));
 
 const getNpmVersion = async () => {

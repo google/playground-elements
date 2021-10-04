@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Changed
+
+- Upgraded dependencies, including CodeMirror.
+
 ### Fixed
 
 - Fixed a bottleneck that prevented previews from loading until semantic
