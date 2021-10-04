@@ -462,6 +462,7 @@ export class PlaygroundProject extends LitElement {
     const onMessage = (e: MessageEvent<PlaygroundMessage>) => {
       if (e.data.type === ACKNOWLEDGE_SW_CONNECTION) {
         port.removeEventListener('message', onMessage);
+        console.log('got version', e.data.version);
         if (e.data.version === serviceWorkerHash) {
           this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
           this._serviceWorkerAPI.setFileAPI(
