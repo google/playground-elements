@@ -11,7 +11,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 15
+          node-version: 16
 
       # Installs system dependencies needed for playwright.
       - uses: microsoft/playwright-github-action@v1
