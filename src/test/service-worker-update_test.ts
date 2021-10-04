@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {assert} from '@esm-bundle/chai';
-// import {html, render} from 'lit';
+import {html, render} from 'lit';
 import {readFile, writeFile} from '@web/test-runner-commands';
 // import {pierce, waitUntilIframeContains} from './test-util.js';
 
@@ -23,12 +22,12 @@ const mustReadFile = async (path: string) => {
   return data;
 };
 
-// const writeServiceWorkerProxy = async () => {
-//   await writeFile({
-//     path: `${TEST_DIR}/playground-service-worker-proxy.html`,
-//     content: await mustReadFile('../playground-service-worker-proxy.html'),
-//   });
-// };
+const writeServiceWorkerProxy = async () => {
+  await writeFile({
+    path: `${TEST_DIR}/playground-service-worker-proxy.html`,
+    content: await mustReadFile('../playground-service-worker-proxy.html'),
+  });
+};
 
 // const writeCurrentServiceWorker = async () => {
 //   await writeFile({
@@ -62,8 +61,8 @@ const writeOutdatedServiceWorker = async () => {
 };
 
 suite('service worker update', () => {
-  // let container: HTMLDivElement;
-  // let abort: AbortController;
+  let container: HTMLDivElement;
+  let abort: AbortController;
 
   // const assertPreviewContains = async (text: string) =>
   //   await waitUntilIframeContains(
@@ -72,21 +71,20 @@ suite('service worker update', () => {
   //     abort.signal
   //   );
 
-  // setup(async () => {
-  //   container = document.createElement('div');
-  //   document.body.appendChild(container);
-  //   abort = new AbortController();
-  //   await writeServiceWorkerProxy();
-  // });
+  setup(async () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    abort = new AbortController();
+    await writeServiceWorkerProxy();
+  });
 
-  // teardown(async () => {
-  //   container.remove();
-  //   abort.abort();
-  // });
+  teardown(async () => {
+    container.remove();
+    abort.abort();
+  });
 
   test('updates from outdated to current service worker', async () => {
     await writeOutdatedServiceWorker();
-    assert.equal(1, 1);
 
     await navigator.serviceWorker.register(
       `/test/${TEST_DIR}/playground-service-worker.js`,
@@ -97,20 +95,20 @@ suite('service worker update', () => {
 
     // await writeCurrentServiceWorker();
 
-    // render(
-    //   html`
-    //     <playground-project id="p" sandbox-base-url="/test/temp">
-    //       <script type="sample/html" filename="index.html">
-    //         <body>
-    //           <p>Hello</p>
-    //         </body>
-    //       </script>
-    //     </playground-project>
+    render(
+      html`
+        <playground-project id="p" sandbox-base-url="/test/temp">
+          <script type="sample/html" filename="index.html">
+            <body>
+              <p>Hello</p>
+            </body>
+          </script>
+        </playground-project>
 
-    //     <playground-preview project="p"></playground-preview>
-    //   `,
-    //   container
-    // );
+        <playground-preview project="p"></playground-preview>
+      `,
+      container
+    );
 
     // await assertPreviewContains('Hello');
   });
