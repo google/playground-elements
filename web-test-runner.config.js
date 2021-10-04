@@ -7,6 +7,27 @@
 import {playwrightLauncher} from '@web/test-runner-playwright';
 import {puppeteerLauncher} from '@web/test-runner-puppeteer';
 import {fakeCdnPlugin} from './test/fake-cdn-plugin.js';
+import {startDevServer} from '@web/dev-server';
+
+// For some tests we want a separate origin to use as the sandbox-base-url.
+const separateOriginServer = await startDevServer({
+  config: {
+    rootDir: './',
+    nodeResolve: true,
+  },
+});
+
+// This plugin lets our tests discover the origin (this way we don't have to
+// hard-code a port and assume it is available).
+const separateOriginPlugin = () => ({
+  name: 'separate-origin-plugin',
+  executeCommand({command}) {
+    if (command === 'separate-origin') {
+      const {hostname, port} = separateOriginServer.config;
+      return `http://${hostname}:${port}/`;
+    }
+  },
+});
 
 // https://modern-web.dev/docs/test-runner/cli-and-configuration/
 export default {
@@ -40,7 +61,7 @@ export default {
       timeout: '30000', // default 2000
     },
   },
-  plugins: [fakeCdnPlugin()],
+  plugins: [fakeCdnPlugin(), separateOriginPlugin()],
   filterBrowserLogs: ({args}) =>
     // This warning will always happen because we use the same local server for
     // the elements and the service worker, and that's fine.
