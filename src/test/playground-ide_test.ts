@@ -9,44 +9,45 @@ import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
 import {sendKeys, executeServerCommand} from '@web/test-runner-commands';
+import {
+  pierce,
+  raf,
+  waitForIframeLoad,
+  waitUntilIframeContains,
+} from './test-util.js';
 
-import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 
 suite('playground-ide', () => {
   let container: HTMLDivElement;
-  let testRunning: boolean;
+  let abort: AbortController;
 
   setup(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
-    testRunning = true;
+    abort = new AbortController();
   });
 
   teardown(() => {
     container.remove();
-    testRunning = false;
+    abort.abort();
   });
+
+  const assertPreviewContains = async (text: string) =>
+    waitUntilIframeContains(
+      (await pierce(
+        'playground-ide',
+        'playground-preview',
+        'iframe'
+      )) as HTMLIFrameElement,
+      text,
+      abort.signal
+    );
 
   test('is registered', () => {
     assert.instanceOf(document.createElement('playground-ide'), PlaygroundIde);
   });
-
-  const raf = async () => new Promise((r) => requestAnimationFrame(r));
-
-  const pierce = async (...selectors: string[]) => {
-    let node = document.body;
-    for (const selector of selectors) {
-      const result = (node.shadowRoot ?? node).querySelector(selector);
-      assert.instanceOf(result, HTMLElement);
-      if ((result as ReactiveElement).updateComplete) {
-        await (result as ReactiveElement).updateComplete;
-      }
-      node = result as HTMLElement;
-    }
-    return node;
-  };
 
   // TODO(aomarks) Use sendKeys instead
   // https://modern-web.dev/docs/test-runner/commands/#send-keys
@@ -60,33 +61,6 @@ suite('playground-ide', () => {
       }
     )._codemirror;
     codemirror!.setValue(newValue);
-  };
-
-  const waitForIframeLoad = (iframe: HTMLElement) =>
-    new Promise<void>((resolve) => {
-      iframe.addEventListener('load', () => resolve(), {once: true});
-    });
-
-  const assertPreviewContains = async (text: string) => {
-    const iframe = (await pierce(
-      'playground-ide',
-      'playground-preview',
-      'iframe'
-    )) as HTMLIFrameElement;
-    await waitForIframeLoad(iframe);
-    // TODO(aomarks) Chromium and Webkit both fire iframe "load" after the
-    // contentDocument has actually loaded, but Firefox fires it before. Why is
-    // that? If not for that, we wouldn't need to poll here.
-    await new Promise<void>((resolve) => {
-      const check = () => {
-        if (iframe.contentDocument?.body?.textContent?.includes(text)) {
-          resolve();
-        } else if (testRunning) {
-          setTimeout(check, 10);
-        }
-      };
-      check();
-    });
   };
 
   test('renders HTML', async () => {
@@ -399,7 +373,7 @@ suite('playground-ide', () => {
       'playground-project'
     )) as PlaygroundProject;
     // Need to defer another microtask for the config to initialize.
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await raf();
 
     // Already exists.
     assert.isFalse(project.isValidNewFilename('index.html'));
@@ -449,7 +423,7 @@ suite('playground-ide', () => {
     };
 
     // Need to defer another microtask for the config to initialize.
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await raf();
 
     // Note the double checks are here to add coverage for cached states.
     assert.isFalse(ide.modified);
@@ -490,7 +464,7 @@ suite('playground-ide', () => {
         },
       },
     };
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await raf();
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
   });
@@ -516,7 +490,7 @@ suite('playground-ide', () => {
     const codeToAdd = `console.log("Foo");
     console.log("bar");`;
 
-    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    await raf();
 
     editor.focus();
     await sendKeys({
@@ -548,7 +522,7 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
 
-    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    await raf();
 
     editor.focus();
 
