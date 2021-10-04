@@ -9,7 +9,8 @@
   "main": "playground-ide.js",
   "scripts": {
     "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
-    "prepack": "node scripts/update-version-module.js && npm run build",
+    "prepack": "npm run build && npm run update-version-module",
+    "update-version-module": "node scripts/update-version-module.js",
     "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
     "nuke": "rm -rf node_modules package-lock.json && npm install",
     "build": "npm run clean && npm run build:themes && npm run build:lib && npm run build:typescript && npm run bundle && npm run build:configurator",

@@ -14,7 +14,7 @@ import {
 } from '../shared/worker-api.js';
 import {expose} from 'comlink';
 import {Deferred} from '../shared/deferred.js';
-import {version} from '../shared/version.js';
+import {serviceWorkerHash} from '../shared/version.js';
 
 // eslint-disable-next-line no-var
 declare var self: ServiceWorkerGlobalScope;
@@ -167,7 +167,7 @@ const onMessage = (
   if (e.data.type === CONNECT_SW_TO_PROJECT) {
     const ack: PlaygroundMessage = {
       type: ACKNOWLEDGE_SW_CONNECTION,
-      version,
+      version: serviceWorkerHash,
     };
     e.data.port.postMessage(ack);
     expose(workerAPI, e.data.port);
