@@ -23,6 +23,20 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
   entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
 }
 
+export interface EditorToken {
+  /** The character (on the given line) at which the token starts. */
+  start: number;
+  /** The character at which the token ends. */
+  end: number;
+  /** Code string under the cursor. */
+  string: string;
+}
+
+interface EditorPosition {
+  ch: number;
+  line: number;
+}
+
 const unreachable = (n: never) => n;
 
 /**
@@ -101,8 +115,38 @@ export class PlaygroundCodeEditor extends LitElement {
     playgroundStyles,
   ];
 
-  // Used by tests.
   protected _codemirror?: ReturnType<typeof CodeMirror>;
+
+  get cursorPosition(): EditorPosition {
+    const cursor = this._codemirror?.getCursor('start');
+    if (!cursor) return {ch: 0, line: 0};
+
+    return {
+      ch: cursor.ch,
+      line: cursor.line,
+    };
+  }
+
+  get cursorIndex(): number {
+    const cm = this._codemirror;
+    if (!cm) return 0;
+
+    const cursorPosition = cm.getCursor('start');
+    return cm.indexFromPos(cursorPosition);
+  }
+
+  get tokenUnderCursor(): EditorToken {
+    const cm = this._codemirror;
+    if (!cm) return {start: 0, end: 0, string: ''};
+
+    const cursorPosition = cm.getCursor('start');
+    const token = cm.getTokenAt(cursorPosition);
+    return {
+      start: token.start,
+      end: token.end,
+      string: token.string,
+    };
+  }
 
   // We store _value ourselves, rather than using a public reactive property, so
   // that we can set this value internally without triggering an update.
@@ -213,6 +257,14 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'diagnostics':
             this._showDiagnostics();
+            break;
+          case 'cursorIndex':
+            cm.setCursor(this.cursorIndex ?? 0);
+            break;
+          case 'cursorPosition':
+            cm.setCursor(this.cursorPosition ?? {ch: 0, line: 0});
+            break;
+          case 'tokenUnderCursor':
             break;
           default:
             unreachable(prop);
@@ -337,6 +389,10 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
     this._codemirror = cm;
+  }
+
+  focus() {
+    this._codemirrorEditable?.focus();
   }
 
   private _onMousedown() {
