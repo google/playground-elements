@@ -20,11 +20,11 @@
     "build:typescript": "rollup -c rollup.config.typescript.js",
     "bundle": "rollup -c rollup.config.js",
     "test": "wtr",
-    "lint": "eslint \"src/**/*.ts\"",
+    "lint": "eslint .",
     "watch": "npm run build:lib -- --watch & NO_TERSER=1 rollup -c rollup.config.js -w",
     "serve": "web-dev-server --node-resolve --watch --open=configurator/",
-    "format": "prettier src/**/*.ts --write",
-    "format:check": "prettier src/**/*.ts --check"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "author": "Google LLC",
   "license": "BSD-3-Clause",
