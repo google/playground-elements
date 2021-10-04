@@ -1770,7 +1770,7 @@ const ho=$`@keyframes mdc-linear-progress-primary-indeterminate-translate{0%{tra
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-let mo=class extends Yr{constructor(){super(),this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{this._iframe&&(this._iframe.src="",this._iframe.src=this._indexUrl,this._loading=!0,this._showLoadingBar=!0)},void 0===navigator.serviceWorker&&(this._error=F`<p>
+let mo=class extends Yr{constructor(){super(),this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{const e=this._iframe;if(!e)return;const{parentNode:t,nextSibling:r}=e;t&&e.remove(),e.src="",e.src=this._indexUrl,t&&t.insertBefore(e,r),this._loading=!0,this._showLoadingBar=!0},void 0===navigator.serviceWorker&&(this._error=F`<p>
           <b>Sorry!</b> Preview unavailable because this browser doesn't
           <a
             href="https://caniuse.com/serviceworkers"
