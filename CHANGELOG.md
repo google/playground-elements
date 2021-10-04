@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   TypeScript errors were computed. This should significantly improve the latency
   between updating a file and the new preview loading.
 
+- Fixed bug where parent window history entries were added every time the
+  preview reloaded.
+
 - Improvements to service worker version updates:
 
   - The service worker will require less frequent updates going forward.

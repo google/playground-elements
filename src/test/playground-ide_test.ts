@@ -8,6 +8,7 @@ import {assert} from '@esm-bundle/chai';
 import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
+import {executeServerCommand} from '@web/test-runner-commands';
 
 import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
@@ -47,19 +48,32 @@ suite('playground-ide', () => {
     return node;
   };
 
+  // TODO(aomarks) Use sendKeys instead
+  // https://modern-web.dev/docs/test-runner/commands/#send-keys
+  const updateCurrentFile = async (
+    editor: PlaygroundCodeEditor,
+    newValue: string
+  ) => {
+    const codemirror = (
+      editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      }
+    )._codemirror;
+    codemirror!.setValue(newValue);
+  };
+
+  const waitForIframeLoad = (iframe: HTMLElement) =>
+    new Promise<void>((resolve) => {
+      iframe.addEventListener('load', () => resolve(), {once: true});
+    });
+
   const assertPreviewContains = async (text: string) => {
     const iframe = (await pierce(
       'playground-ide',
       'playground-preview',
       'iframe'
     )) as HTMLIFrameElement;
-    await new Promise<void>((resolve) => {
-      const listener = () => {
-        iframe.removeEventListener('load', listener);
-        resolve();
-      };
-      iframe.addEventListener('load', listener);
-    });
+    await waitForIframeLoad(iframe);
     // TODO(aomarks) Chromium and Webkit both fire iframe "load" after the
     // contentDocument has actually loaded, but Firefox fires it before. Why is
     // that? If not for that, we wouldn't need to poll here.
@@ -144,15 +158,12 @@ suite('playground-ide', () => {
     );
     await assertPreviewContains('Hello HTML 1');
 
-    const codemirror = (await pierce(
+    const editor = (await pierce(
       'playground-ide',
       'playground-file-editor',
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
-    const codemirrorInternals = codemirror as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
-    };
-    codemirrorInternals._codemirror!.setValue('Hello HTML 2');
+    updateCurrentFile(editor, 'Hello HTML 2');
     const project = (await pierce(
       'playground-ide',
       'playground-project'
@@ -482,5 +493,51 @@ suite('playground-ide', () => {
     await new Promise((resolve) => requestAnimationFrame(resolve));
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
+  });
+
+  test('reloading preview does not modify history', async () => {
+    const historyLengthBefore = window.history.length;
+
+    // NOTE: For some reason, the parent window's history only seems to be
+    // affected when the iframe origin is different.
+    const separateOrigin = (await executeServerCommand(
+      'separate-origin'
+    )) as string;
+
+    render(
+      html`
+        <playground-ide sandbox-base-url="${separateOrigin}">
+          <script type="sample/html" filename="index.html">
+            <body>
+              <p>Hello HTML 1</p>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const iframe = (await pierce(
+      'playground-ide',
+      'playground-preview',
+      'iframe'
+    )) as HTMLIFrameElement;
+    await waitForIframeLoad(iframe);
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    updateCurrentFile(editor, 'Hello HTML 2');
+
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+    project.save();
+    await waitForIframeLoad(iframe);
+
+    const historyLengthAfter = window.history.length;
+    assert.equal(historyLengthAfter, historyLengthBefore);
   });
 });

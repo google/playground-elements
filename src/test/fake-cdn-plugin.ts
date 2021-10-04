@@ -68,8 +68,9 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
         // especially for when we're in a long running --watch mode session.
         const id = payload as string;
         dataMap.delete(id);
+        return true;
       }
-      return false;
+      return null;
     },
 
     serve(ctx) {
