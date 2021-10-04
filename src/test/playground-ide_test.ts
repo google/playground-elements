@@ -494,6 +494,7 @@ suite('playground-ide', () => {
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
   });
+
   test('returns the correct cursor position and index', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
@@ -525,9 +526,10 @@ suite('playground-ide', () => {
     assert.equal(editor.value, codeToAdd);
     assert.equal(editor.cursorIndex, codeToAdd.length);
     const cursorPosition = editor.cursorPosition;
-    assert.equal(cursorPosition?.line, 1);
-    assert.equal(cursorPosition?.ch, 23);
+    assert.equal(cursorPosition.line, 1);
+    assert.equal(cursorPosition.ch, 23);
   });
+
   test('returns the token under cursor', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
@@ -556,9 +558,9 @@ suite('playground-ide', () => {
 
     const tokenUnderCursor = editor.tokenUnderCursor;
 
-    assert.equal(tokenUnderCursor?.start, 0);
-    assert.equal(tokenUnderCursor?.end, 7);
-    assert.equal(tokenUnderCursor?.string, 'console');
+    assert.equal(tokenUnderCursor.start, 0);
+    assert.equal(tokenUnderCursor.end, 7);
+    assert.equal(tokenUnderCursor.string, 'console');
   });
 
   test('reloading preview does not modify history', async () => {

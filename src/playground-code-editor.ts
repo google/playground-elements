@@ -11,7 +11,6 @@ import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
-import type {Position} from 'codemirror';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -31,6 +30,11 @@ export interface EditorToken {
   end: number;
   /** Code string under the cursor. */
   string: string;
+}
+
+interface EditorPosition {
+  ch: number;
+  line: number;
 }
 
 const unreachable = (n: never) => n;
@@ -113,24 +117,27 @@ export class PlaygroundCodeEditor extends LitElement {
 
   protected _codemirror?: ReturnType<typeof CodeMirror>;
 
-  get cursorPosition(): Position | undefined {
-    const cm = this._codemirror;
-    if (!cm) return undefined;
+  get cursorPosition(): EditorPosition {
+    const cursor = this._codemirror?.getCursor('start');
+    if (!cursor) return {ch: 0, line: 0};
 
-    return cm.getCursor('start');
+    return {
+      ch: cursor.ch,
+      line: cursor.line,
+    };
   }
 
-  get cursorIndex(): number | undefined {
+  get cursorIndex(): number {
     const cm = this._codemirror;
-    if (!cm) return undefined;
+    if (!cm) return 0;
 
     const cursorPosition = cm.getCursor('start');
     return cm.indexFromPos(cursorPosition);
   }
 
-  get tokenUnderCursor(): EditorToken | undefined {
+  get tokenUnderCursor(): EditorToken {
     const cm = this._codemirror;
-    if (!cm) return undefined;
+    if (!cm) return {start: 0, end: 0, string: ''};
 
     const cursorPosition = cm.getCursor('start');
     const token = cm.getTokenAt(cursorPosition);
