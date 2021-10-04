@@ -97,6 +97,7 @@ function resolvePackageTargetString(
   base: string,
   pattern: boolean,
   internal: boolean,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _conditions: Set<string>
 ): URL {
   if (subpath !== '' && !pattern && target[target.length - 1] !== '/') {
