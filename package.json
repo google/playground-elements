@@ -70,7 +70,7 @@
     "eslint": "^7.31.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-no-only-tests": "^2.6.0",
-    "google_modes": "git+https://github.com/codemirror/google-modes.git#b78e1c3841a567505c41ad7befa6ca2c289e889e",
+    "google_modes": "git+https://github.com/codemirror/google-modes.git#e4725332b9bba4c3418f29a28f3042799d559e76",
     "playwright": "^1.15.1",
     "prettier": "^2.0.5",
     "rollup": "^2.21.0",
