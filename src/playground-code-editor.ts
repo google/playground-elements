@@ -9,6 +9,7 @@ import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
+import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
@@ -48,32 +49,6 @@ export class PlaygroundCodeEditor extends LitElement {
         border-radius: inherit;
       }
 
-      #keyboardHelpScrim {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        z-index: 9;
-        pointer-events: none;
-        background: rgba(0, 0, 0, 0.32);
-      }
-
-      #keyboardHelp {
-        background: #fff;
-        color: #000;
-        padding: 20px 40px;
-        border-radius: 5px;
-        font-family: sans-serif;
-        font-size: 18px;
-        line-height: 32px;
-        box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;
-      }
-
       .CodeMirror-foldmarker {
         font-family: sans-serif;
       }
@@ -81,6 +56,12 @@ export class PlaygroundCodeEditor extends LitElement {
         cursor: pointer;
         /* Pretty much any color from the theme is good enough. */
         color: var(--playground-code-keyword-color, #770088);
+      }
+
+      #keyboardHelp {
+        font-size: 18px;
+        font-family: sans-serif;
+        padding: 10px 20px;
       }
 
       .diagnostic {
@@ -255,12 +236,12 @@ export class PlaygroundCodeEditor extends LitElement {
         @keydown=${this._onKeyDown}
       >
         ${this._showKeyboardHelp
-          ? html`<div id="keyboardHelpScrim">
+          ? html`<playground-internal-overlay>
               <p id="keyboardHelp" part="dialog">
                 Press <strong>Enter</strong> to start editing<br />
                 Press <strong>Escape</strong> to exit editor
               </p>
-            </div>`
+            </playground-internal-overlay>`
           : nothing}
         ${this._cmDom}
         <div

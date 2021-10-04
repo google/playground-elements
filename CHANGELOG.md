@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Added an overlay that will display over the preview when we detect that
+  service workers are not available. One reason this can happen is using
+  Playground in Firefox private browsing mode, which does not support service
+  workers (https://bugzilla.mozilla.org/show_bug.cgi?id=1320796).
+
 ### Changed
 
 - Upgraded dependencies, including CodeMirror.

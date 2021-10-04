@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {html, css, PropertyValues, nothing} from 'lit';
+import {html, css, PropertyValues, nothing, TemplateResult} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
+import {classMap} from 'lit/directives/class-map.js';
 import '@material/mwc-icon-button';
 import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
+import './internal/overlay.js';
 
 /**
  * An HTML preview component consisting of an iframe and a floating reload
@@ -55,6 +57,14 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
       max-height: 100%;
       position: relative;
       flex: 1;
+    }
+
+    #content.error {
+      display: none;
+    }
+
+    #error {
+      padding: 0 20px;
     }
 
     mwc-linear-progress {
@@ -114,6 +124,40 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   @state()
   private _loadedAtLeastOnce = false;
 
+  /**
+   * An error to display instead of the iframe when something has gone wrong.
+   */
+  @state()
+  private _error?: TemplateResult;
+
+  constructor() {
+    super();
+    if (navigator.serviceWorker === undefined) {
+      this._error = html`<p>
+          <b>Sorry!</b> Preview unavailable because this browser doesn't
+          <a
+            href="https://caniuse.com/serviceworkers"
+            target="_blank"
+            rel="noopener"
+            >support</a
+          >
+          service workers.
+        </p>
+        <p>
+          <i
+            >Note: Firefox
+            <a
+              href="https://bugzilla.mozilla.org/show_bug.cgi?id=1320796"
+              target="_blank"
+              rel="noopener"
+              >doesn't</a
+            >
+            support service workers in private browsing mode.</i
+          >
+        </p> `;
+    }
+  }
+
   update(changedProperties: PropertyValues) {
     if (changedProperties.has('_project')) {
       const oldProject = changedProperties.get('_project') as PlaygroundProject;
@@ -166,7 +210,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         </mwc-icon-button>
       </div>
 
-      <div id="content">
+      <div id="content" class=${classMap({error: !!this._error})}>
         <mwc-linear-progress
           aria-hidden=${this._loading ? 'false' : 'true'}
           part="preview-loading-indicator"
@@ -182,6 +226,14 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
           ?hidden=${!this._loadedAtLeastOnce}
         ></iframe>
       </div>
+
+      ${this._error
+        ? html`
+            <playground-internal-overlay id="error">
+              ${this._error}</playground-internal-overlay
+            >
+          `
+        : nothing}
     `;
   }
 
