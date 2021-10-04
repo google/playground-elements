@@ -3,7 +3,7 @@ name: format
 on: [push, pull_request]
 
 jobs:
-  tests:
+  format:
     runs-on: ubuntu-latest
 
     steps:
