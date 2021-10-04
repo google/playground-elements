@@ -256,10 +256,8 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     // window (on Chrome but not Firefox, and only when the parent/iframe origins
     // are different). Removing the iframe from the DOM while we initiate the
     // reload prevents a history entry from being added.
-    const parentNode = iframe.parentNode;
-    const nextSibling = iframe.nextSibling;
+    const {parentNode, nextSibling} = iframe;
     if (parentNode) {
-      iframe.nextSibling;
       iframe.remove();
     }
     // Note we can't use contentWindow.location.reload() here, because the
