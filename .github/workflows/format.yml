@@ -1,4 +1,4 @@
-name: Tests
+name: format
 
 on: [push, pull_request]
 
@@ -14,7 +14,4 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npx playwright install-deps
-      - run: npm run build
-      - run: npm test
-      - run: npm run lint
+      - run: npm run format:check

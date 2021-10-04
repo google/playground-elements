@@ -23,7 +23,8 @@
     "lint": "eslint \"src/**/*.ts\"",
     "watch": "npm run build:lib -- --watch & NO_TERSER=1 rollup -c rollup.config.js -w",
     "serve": "web-dev-server --node-resolve --watch --open=configurator/",
-    "format": "prettier src/**/*.ts --write"
+    "format": "prettier src/**/*.ts --write",
+    "format:check": "prettier src/**/*.ts --check"
   },
   "author": "Google LLC",
   "license": "BSD-3-Clause",
