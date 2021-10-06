@@ -71,12 +71,6 @@ import {
         // if we never end up getting a new version here. That would indicate
         // that the SW and project are out of date *on the server*.
         registration.update();
-        // There seems to be a bug in Chrome where the previous version of a
-        // service worker sometimes gets stuck and never shuts down when an
-        // updating is pending, even across a full browser restart. Calling
-        // unregister here seems to reliably force the previous version to shut
-        // down.
-        registration.unregister();
       }
     }
   );
