@@ -54,8 +54,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     worker updates more reliable because old and new versions of service workers
     will no longer be in contention to control the same URLs.
 
-  - The previous and expected new service worker version numbers are now
-    included in console log messages, to aid in debugging.
+  - Misc other small service worker robustness improvements, and additional
+    logging to help debug future issues.
 
 ## [0.14.2] - 2021-09-30
 
