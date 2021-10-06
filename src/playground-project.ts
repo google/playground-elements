@@ -158,7 +158,7 @@ export class PlaygroundProject extends LitElement {
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'playground-projects/';
+  sandboxScope = `__playground_swfs_${serviceWorkerHash}/`;
 
   private _build?: PlaygroundBuild;
 

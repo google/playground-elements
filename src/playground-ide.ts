@@ -13,7 +13,7 @@ import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
 import {ProjectManifest} from './shared/worker-api.js';
-import {npmVersion} from './shared/version.js';
+import {npmVersion, serviceWorkerHash} from './shared/version.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -216,7 +216,7 @@ export class PlaygroundIde extends LitElement {
    */
   // TODO: generate this?
   @property({attribute: 'sandbox-scope'})
-  sandboxScope = 'playground-projects/';
+  sandboxScope = `__playground_swfs_${serviceWorkerHash}/`;
 
   /**
    * Allow the user to add, remove, and rename files in the project's virtual

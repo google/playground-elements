@@ -48,6 +48,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     only needs updating if the bytes of the service worker have changed between
     releases.
 
+  - The default service worker scope has changed from
+    `<sandboxBaseUrl>/playground-project` to
+    `<sandboxBaseUrl>/__playground_swfs_<serviceWorkerHash>`. This should make service
+    worker updates more reliable because old and new versions of service workers
+    will no longer be in contention to control the same URLs.
+
   - The previous version of a service worker is now explicitly unregistered, to
     work around cases where a previous version would never shut down to allow a
     new version to take over, even across browser restarts.
