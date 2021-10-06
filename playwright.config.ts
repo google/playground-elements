@@ -12,10 +12,13 @@ const config: PlaywrightTestConfig = {
   //
   // TODO(aomarks) Investigate this further. Haven't been able to isolate the
   // flakes yet, but it could indicate a genuine problem.
-  retries: 3,
+  retries: 5,
   // Not running both browsers at the same time helps with flakiness too. Could
   // this imply a race condition that is influenced by CPU load?
   workers: 1,
+  // Defaults to 30 seconds. We shouldn't need that much time, and it's better
+  // to fail fast and retry.
+  timeout: 5000,
   projects: [
     {
       name: 'chromium',
