@@ -56,9 +56,6 @@ import {
   const getNewestWorker = () =>
     registration.installing ?? registration.waiting ?? registration.active;
 
-  /** The service worker we most recently connected to. */
-  let newest: ServiceWorker | null = null;
-
   /**
    * Resolve when the given service worker reaches its activated state.
    */
@@ -81,9 +78,17 @@ import {
     });
   };
 
-  const connectToNewest = async () => {
+  /** The service worker we most recently connected to. */
+  let connected: ServiceWorker | null = null;
+
+  const connectToNewest = async (force = false) => {
     const sw = getNewestWorker();
-    newest = sw;
+    if (!force && sw === connected) {
+      // This can happen because on a fresh install we'll call connectToNewest()
+      // but "updatefound" will also fire and call it too.
+      return;
+    }
+    connected = sw;
     if (sw === null) {
       // Can't find a way to reproduce this scenario, possibly can't happen.
       console.error('No playground service worker found.');
@@ -94,8 +99,9 @@ import {
     // Otherwise the project might try to load a preview before the service
     // worker is actively controlling the preview's URL space.
     await activated(sw);
-    if (sw !== newest) {
-      // A new service worker appeared while we were waiting.
+    if (sw !== connected) {
+      // A new service worker appeared while we were waiting. This probably
+      // can't happen in practice.
       return;
     }
 
@@ -117,20 +123,14 @@ import {
   registration.addEventListener('updatefound', () => {
     // We can get a new service worker at any time, so we need to listen for
     // updates and connect to new workers on demand.
-    //
-    // Note this event fires on the very first install, but in that case we've
-    // already called connectToNewest, so this conditional guards against a
-    // double connect.
-    if (registration.installing !== newest) {
-      connectToNewest();
-    }
+    connectToNewest();
   });
 
   // A message from the service worker.
   navigator.serviceWorker.addEventListener(
     'message',
     (event: MessageEvent<PlaygroundMessage>) => {
-      if (event.source !== newest) {
+      if (event.source !== connected) {
         // Ignore messages from outdated service workers.
         return;
       }
@@ -139,7 +139,11 @@ import {
         // file API for. Most likely the service worker was stopped and lost its
         // state, as can happen at any time. The fetch re-awakened it, and now
         // the fetch is waiting for us to re-connect.
-        connectToNewest();
+        //
+        // Force required because we usually avoid connecting to a service
+        // worker we've already connected to, but in this case that's exactly
+        // what we must do.
+        connectToNewest(true);
       }
     }
   );
