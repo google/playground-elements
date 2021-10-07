@@ -38,17 +38,13 @@ export default {
   browsers: [
     playwrightLauncher({product: 'chromium'}),
     playwrightLauncher({product: 'webkit'}),
-    // Playwright Firefox does not seem to work at all with Service Workers. The
-    // issue can be reproduced by launching Firefox with flag "-juggler 0". So
-    // for now we'll use Puppeteer for Firefox.
+    // Playwright Firefox does not currently work with service workers, see
+    // https://github.com/microsoft/playwright/issues/7288.
     //
     // Also note we can't use Puppeteer for both Chromium and Firefox, because
     // only one or the other can be installed at once (see our "postinstall" NPM
     // script). See
     // https://modern-web.dev/docs/test-runner/browser-launchers/puppeteer/.
-    //
-    // TODO(aomarks) Look into this a little more and file an issue on
-    // Playwright (or Firefox).
     puppeteerLauncher({launchOptions: {product: 'firefox'}}),
   ],
   browserStartTimeout: 30000, // default 30000

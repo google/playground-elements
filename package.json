@@ -22,7 +22,7 @@
     "build:configurator": "rollup -c rollup.config.configurator.js",
     "build:typescript": "rollup -c rollup.config.typescript.js",
     "bundle": "rollup -c rollup.config.js",
-    "test": "wtr",
+    "test": "wtr && playwright test",
     "lint": "eslint .",
     "watch": "npm run build:lib -- --watch & NO_TERSER=1 rollup -c rollup.config.js -w",
     "serve": "web-dev-server --node-resolve --watch --open=configurator/",
@@ -53,6 +53,7 @@
   "devDependencies": {
     "@esm-bundle/chai": "^4.1.5",
     "@material/mwc-dialog": "^0.25.1",
+    "@playwright/test": "^1.15.1",
     "@rollup/plugin-commonjs": "^21.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^3.0.0",
