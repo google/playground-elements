@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.5] - 2021-10-07
+
+### Fixed
+
+- Upgraded `es-module-lexer` dependency to bring in fix for
+  https://github.com/guybedford/es-module-lexer/issues/92.
+
 ## [0.14.4] - 2021-10-06
 
 ### Fixed
