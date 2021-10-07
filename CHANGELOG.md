@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Playground in Firefox private browsing mode, which does not support service
   workers (https://bugzilla.mozilla.org/show_bug.cgi?id=1320796).
 
-- Added getters for code-editor to access the cursor position, and the tokens under cursor
+- Added `cursorPosition`, `cursorIndex`, and `tokenUnderCursor` getters to
+  `<playground-code-editor>`.
 
 ### Changed
 
