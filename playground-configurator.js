@@ -1845,6 +1845,7 @@ let mo=class extends Yr{constructor(){super(),this.location="Result",this._loadi
       background: white;
       font-family: sans-serif;
       height: 350px;
+      position: relative; /* for the error message overlay */
     }
 
     #toolbar {
