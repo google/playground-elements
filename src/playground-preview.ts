@@ -28,6 +28,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
       background: white;
       font-family: sans-serif;
       height: 350px;
+      position: relative; /* for the error message overlay */
     }
 
     #toolbar {
