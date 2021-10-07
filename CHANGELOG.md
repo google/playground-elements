@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Fixed positioning of overlay that displays over previews when service workers
   are not available so that it is constrained to the preview, rather than the
-  nearest containing relative ancestor.
+  nearest containing positioned ancestor.
 
 ## [0.14.3] - 2021-10-06
 
