@@ -31,6 +31,7 @@ import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
 import type {Diagnostic} from 'vscode-languageserver';
+import {EditorToken} from './playground-code-editor.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -169,6 +170,12 @@ export class PlaygroundProject extends LitElement {
   get diagnostics(): Map<string, Diagnostic[]> | undefined {
     return this._build?.diagnostics;
   }
+
+  get completions(): Array<string> | undefined {
+      return this._completions;
+  }
+
+  private _completions?: Array<string>;
 
   /**
    * A pristine copy of the original project files, used for the `modified`
@@ -544,6 +551,18 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     this.dispatchEvent(new CustomEvent('compileDone'));
+  }
+
+  /**
+   * Query the language service for completion options on
+   * token under cursor in code-editor
+   * */
+  getCompletions(tokenUnderCursor: EditorToken) {
+    console.log('Token', tokenUnderCursor);
+    // TODO: Get completions from language service / worker api
+
+    this._completions = ["Lit", "Matsu", "Playground"];
+    this.dispatchEvent(new CustomEvent("completionsChanged"))
   }
 
   private lastSave = Promise.resolve();

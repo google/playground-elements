@@ -11,6 +11,7 @@ import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
+import type {Editor, Hints, Position, ShowHintOptions} from 'codemirror';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -111,6 +112,43 @@ export class PlaygroundCodeEditor extends LitElement {
         border: 1px solid var(--playground-code-linenumber-color, #ccc);
         padding: 5px;
       }
+
+      .CodeMirror-hints {
+        position: absolute;
+        z-index: 10;
+        overflow: hidden;
+        list-style: none;
+
+        margin: 0;
+        padding: 2px;
+
+        -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
+        -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        border: 1px solid silver;
+
+        background: white;
+        font-size: 90%;
+        font-family: monospace;
+
+        max-height: 20em;
+        overflow-y: auto;
+      }
+
+      .CodeMirror-hint {
+        margin: 0;
+        padding: 0 4px;
+        border-radius: 2px;
+        white-space: pre;
+        color: black;
+        cursor: pointer;
+      }
+
+      li.CodeMirror-hint-active {
+        background: #08f;
+        color: white;
+      }
     `,
     playgroundStyles,
   ];
@@ -189,6 +227,9 @@ export class PlaygroundCodeEditor extends LitElement {
   @property({attribute: false})
   diagnostics?: Array<Diagnostic>;
 
+  @property({type: Array})
+  completions?: Array<string>;
+
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
@@ -265,6 +306,9 @@ export class PlaygroundCodeEditor extends LitElement {
             cm.setCursor(this.cursorPosition ?? {ch: 0, line: 0});
             break;
           case 'tokenUnderCursor':
+            break;
+          case 'completions':
+            this._showCompletions();
             break;
           default:
             unreachable(prop);
@@ -393,6 +437,39 @@ export class PlaygroundCodeEditor extends LitElement {
 
   focus() {
     this._codemirrorEditable?.focus();
+  }
+
+  private _hintFunction(
+    cm: Editor,
+    options: ShowHintOptions
+  ): Hints | null | undefined | PromiseLike<Hints | null | undefined> {
+    const cursorPosition = cm.getCursor('start');
+    const token = cm.getTokenAt(cursorPosition);
+    const lineNumber = cursorPosition.line;
+
+    const hints = {
+      from: {line: lineNumber, ch: token.start} as Position,
+      to: {line: lineNumber, ch: token.end} as Position,
+      list: options.words,
+    } as Hints;
+
+    return hints;
+  }
+
+  private _showCompletions() {
+      console.log("Show completions")
+    const cm = this._codemirror;
+    if (!cm || !this.completions || this.completions.length <= 0) return;
+
+    const options: ShowHintOptions = {
+      hint: this._hintFunction.bind(this),
+      completeSingle: false,
+      closeOnPick: true,
+      closeOnUnfocus: true,
+      container: this._focusContainer,
+      words: this.completions,
+    };
+    cm.showHint(options);
   }
 
   private _onMousedown() {
