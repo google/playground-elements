@@ -7,8 +7,10 @@
 import {expose} from 'comlink';
 import {build} from './build.js';
 import type {WorkerAPI} from '../shared/worker-api.js';
+import {queryCompletions} from './completions.js';
 
 const workerAPI: WorkerAPI = {
   compileProject: build,
+  getCompletions: queryCompletions,
 };
 expose(workerAPI);

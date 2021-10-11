@@ -77,12 +77,32 @@ export interface WorkerConfig {
   cdnBaseUrl?: string;
 }
 
+export interface EditorToken {
+  /** The character (on the given line) at which the token starts. */
+  start: number;
+  /** The character at which the token ends. */
+  end: number;
+  /** Code string under the cursor. */
+  string: string;
+}
+
+export interface EditorPosition {
+  ch: number;
+  line: number;
+}
+
 export interface WorkerAPI {
   compileProject(
     files: Array<SampleFile>,
     config: WorkerConfig,
     emit: (result: BuildOutput) => void
   ): Promise<void>;
+  getCompletions(
+    filename: string,
+    tokenUnderCursor: EditorToken,
+    cursorIndex: number,
+    config: WorkerConfig
+  ): Promise<string[]>;
 }
 
 export interface HttpError {

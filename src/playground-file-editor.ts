@@ -172,8 +172,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
 
   private _onCompletionsChanged = () => {
     // Propagate completions.
-    console.log('Completions changed');
-    console.log(this._project?.completions)
     this.requestUpdate();
   };
 
@@ -187,7 +185,11 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     }
     this._project.editFile(this._currentFile, this._editor.value);
     // TODO: Debounce
-    this._project.getCompletions(this._editor.tokenUnderCursor);
+    this._project.getCompletions(
+      this.filename ?? '',
+      this._editor.tokenUnderCursor,
+      this._editor.cursorIndex
+    );
   }
 }
 

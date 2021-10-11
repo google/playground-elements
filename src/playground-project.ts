@@ -20,6 +20,7 @@ import {
   ModuleImportMap,
   HttpError,
   UPDATE_SERVICE_WORKER,
+  EditorToken,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -31,7 +32,6 @@ import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
 import type {Diagnostic} from 'vscode-languageserver';
-import {EditorToken} from './playground-code-editor.js';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -172,7 +172,7 @@ export class PlaygroundProject extends LitElement {
   }
 
   get completions(): Array<string> | undefined {
-      return this._completions;
+    return this._completions;
   }
 
   private _completions?: Array<string>;
@@ -557,12 +557,19 @@ export class PlaygroundProject extends LitElement {
    * Query the language service for completion options on
    * token under cursor in code-editor
    * */
-  getCompletions(tokenUnderCursor: EditorToken) {
-    console.log('Token', tokenUnderCursor);
+  async getCompletions(filename: string, tokenUnderCursor: EditorToken, cursorIndex: number) {
     // TODO: Get completions from language service / worker api
+    //
+    const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+    const completions = await workerApi.getCompletions(
+      filename,
+      tokenUnderCursor,
+      cursorIndex,
+      {importMap: this._importMap}
+    );
 
-    this._completions = ["Lit", "Matsu", "Playground"];
-    this.dispatchEvent(new CustomEvent("completionsChanged"))
+    this._completions = completions;
+    this.dispatchEvent(new CustomEvent('completionsChanged'));
   }
 
   private lastSave = Promise.resolve();

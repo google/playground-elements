@@ -12,6 +12,7 @@ import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
 import type {Editor, Hints, Position, ShowHintOptions} from 'codemirror';
+import { EditorPosition, EditorToken } from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -22,20 +23,6 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
   keys(): IterableIterator<keyof T>;
   values(): IterableIterator<T[keyof T]>;
   entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
-}
-
-export interface EditorToken {
-  /** The character (on the given line) at which the token starts. */
-  start: number;
-  /** The character at which the token ends. */
-  end: number;
-  /** Code string under the cursor. */
-  string: string;
-}
-
-interface EditorPosition {
-  ch: number;
-  line: number;
 }
 
 const unreachable = (n: never) => n;
@@ -457,7 +444,6 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _showCompletions() {
-      console.log("Show completions")
     const cm = this._codemirror;
     if (!cm || !this.completions || this.completions.length <= 0) return;
 
@@ -468,6 +454,7 @@ export class PlaygroundCodeEditor extends LitElement {
       closeOnUnfocus: true,
       container: this._focusContainer,
       words: this.completions,
+      alignWithWord: true
     };
     cm.showHint(options);
   }
