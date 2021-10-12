@@ -21,6 +21,7 @@ import {
   HttpError,
   UPDATE_SERVICE_WORKER,
   EditorToken,
+  EditorCompletion,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -171,11 +172,11 @@ export class PlaygroundProject extends LitElement {
     return this._build?.diagnostics;
   }
 
-  get completions(): Array<string> | undefined {
+  get completions(): EditorCompletion[] | undefined {
     return this._completions;
   }
 
-  private _completions?: Array<string>;
+  private _completions?: EditorCompletion[];
 
   /**
    * A pristine copy of the original project files, used for the `modified`
@@ -558,8 +559,6 @@ export class PlaygroundProject extends LitElement {
    * token under cursor in code-editor
    * */
   async getCompletions(filename: string, tokenUnderCursor: EditorToken, cursorIndex: number) {
-    // TODO: Get completions from language service / worker api
-    //
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completions = await workerApi.getCompletions(
       filename,

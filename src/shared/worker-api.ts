@@ -91,6 +91,12 @@ export interface EditorPosition {
   line: number;
 }
 
+export interface EditorCompletion {
+    text: string;
+    displayText: string;
+    score: number;
+}
+
 export interface WorkerAPI {
   compileProject(
     files: Array<SampleFile>,
@@ -102,7 +108,7 @@ export interface WorkerAPI {
     tokenUnderCursor: EditorToken,
     cursorIndex: number,
     config: WorkerConfig
-  ): Promise<string[]>;
+  ): Promise<EditorCompletion[]>;
 }
 
 export interface HttpError {

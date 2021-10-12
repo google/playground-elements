@@ -12,7 +12,7 @@ import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
 import type {Editor, Hints, Position, ShowHintOptions} from 'codemirror';
-import { EditorPosition, EditorToken } from './shared/worker-api.js';
+import { EditorCompletion, EditorPosition, EditorToken } from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -215,7 +215,7 @@ export class PlaygroundCodeEditor extends LitElement {
   diagnostics?: Array<Diagnostic>;
 
   @property({type: Array})
-  completions?: Array<string>;
+  completions?: EditorCompletion[];
 
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
@@ -427,20 +427,40 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _hintFunction(
-    cm: Editor,
-    options: ShowHintOptions
+    cm: Editor
   ): Hints | null | undefined | PromiseLike<Hints | null | undefined> {
     const cursorPosition = cm.getCursor('start');
     const token = cm.getTokenAt(cursorPosition);
     const lineNumber = cursorPosition.line;
 
+    /*
+        * 
+    interface Hint {
+        text: string;
+        className?: string | undefined;
+        displayText?: string | undefined;
+        from?: Position | undefined;
+        hint?: ((cm: Editor, data: Hints, cur: Hint) => void) | undefined;
+        render?: ((element: HTMLLIElement, data: Hints, cur: Hint) => void) | undefined;
+        to?: Position | undefined;
+    }
+    */
+    const hintList = this._completionsAsHints();
+
     const hints = {
       from: {line: lineNumber, ch: token.start} as Position,
       to: {line: lineNumber, ch: token.end} as Position,
-      list: options.words,
+      list: hintList,
     } as Hints;
 
     return hints;
+  }
+
+  private _completionsAsHints() {
+      return this.completions?.map(comp => ({
+          text: comp.text,
+          displayText: comp.displayText
+      })) ?? [];
   }
 
   private _showCompletions() {
@@ -453,7 +473,6 @@ export class PlaygroundCodeEditor extends LitElement {
       closeOnPick: true,
       closeOnUnfocus: true,
       container: this._focusContainer,
-      words: this.completions,
       alignWithWord: true
     };
     cm.showHint(options);

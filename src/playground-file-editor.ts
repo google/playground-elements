@@ -162,6 +162,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
 
   private _onCompileDone = () => {
     // Propagate diagnostics.
+    // Do a round for completions after build
+    this._completionTrigger();
     this.requestUpdate();
   };
 
@@ -175,6 +177,20 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     this.requestUpdate();
   };
 
+  private completionTimeout: number = 0;
+
+  private _completionTrigger() {
+    // Reduce the jank caused by a group of completion calls
+    clearTimeout(this.completionTimeout);
+    this.completionTimeout = window.setTimeout(() => {
+      this._project?.getCompletions(
+        this.filename ?? '',
+        this._editor.tokenUnderCursor,
+        this._editor.cursorIndex
+      );
+    }, 0);
+  }
+
   private _onEdit() {
     if (
       this._project === undefined ||
@@ -184,12 +200,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       return;
     }
     this._project.editFile(this._currentFile, this._editor.value);
-    // TODO: Debounce
-    this._project.getCompletions(
-      this.filename ?? '',
-      this._editor.tokenUnderCursor,
-      this._editor.cursorIndex
-    );
   }
 }
 

@@ -6,7 +6,11 @@
 
 import Fuse from 'fuse.js';
 import type {GetCompletionsAtPositionOptions} from 'typescript';
-import {EditorToken, WorkerConfig} from '../shared/worker-api';
+import {
+  EditorCompletion,
+  EditorToken,
+  WorkerConfig,
+} from '../shared/worker-api';
 import {getWorkerContext} from './worker-context';
 
 export const queryCompletions = async (
@@ -14,30 +18,55 @@ export const queryCompletions = async (
   tokenUnderCursor: EditorToken,
   cursorIndex: number,
   config: WorkerConfig
-): Promise<string[]> => {
+): Promise<EditorCompletion[]> => {
   const workerContext = getWorkerContext(config);
 
   const languageService = workerContext.languageServiceContext.service;
+  const searchWordIsPeriod = tokenUnderCursor.string === '.';
   const options = {} as GetCompletionsAtPositionOptions;
-  // TODO: Find a way to wait for build
-  await new Promise(resolve => setTimeout(resolve, 100));
+  if (searchWordIsPeriod) {
+    options.triggerCharacter = '.';
+  }
+
   const completions = languageService.getCompletionsAtPosition(
     filename,
     cursorIndex,
     options
   );
 
+  if (searchWordIsPeriod) {
+    // On period, just return the completions without fuzzy finding since there's no need for it
+    const editorCompletions =
+      completions?.entries
+        .sort((a, b) => parseInt(a.sortText) - parseInt(b.sortText))
+        .map((comp) => ({
+          // Temporary hack to make it not replace the period
+          text: '.' + comp.name,
+          displayText: comp.name,
+          score: parseInt(comp.sortText),
+        })) ?? [];
 
-  const fuse = new Fuse(completions?.entries.map(comp => comp.name) ?? [], {
-    threshold: 0.6,
+    return editorCompletions;
+  }
+
+  const fuse = new Fuse(completions?.entries.map((comp) => comp.name) ?? [], {
+    threshold: 0.4,
     distance: 3,
     shouldSort: true,
     isCaseSensitive: true,
     includeScore: true,
-    minMatchCharLength: Math.max(tokenUnderCursor.string.length - 1, 1)
+    minMatchCharLength: Math.max(tokenUnderCursor.string.length - 1, 1),
   });
 
   const relevantCompletions = fuse.search(tokenUnderCursor.string);
 
-  return relevantCompletions?.map(comp => comp.item) ?? [];
+  const editorCompletions: EditorCompletion[] = relevantCompletions.map(
+    (item) => ({
+      text: item.item,
+      displayText: item.item,
+      score: item.score ?? 0,
+    })
+  );
+
+  return editorCompletions;
 };
