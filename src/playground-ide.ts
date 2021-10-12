@@ -77,7 +77,7 @@ export class PlaygroundIde extends LitElement {
       height: 100%;
       flex: 1;
       min-width: 100px;
-      overflow: hidden;
+      /*overflow: hidden;*/
       border-radius: inherit;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;

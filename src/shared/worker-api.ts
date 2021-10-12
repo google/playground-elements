@@ -91,10 +91,17 @@ export interface EditorPosition {
   line: number;
 }
 
+type RangeTuple = [number, number];
+
+export type EditorCompletionMatch = {
+  indices: ReadonlyArray<RangeTuple>;
+};
+
 export interface EditorCompletion {
-    text: string;
-    displayText: string;
-    score: number;
+  text: string;
+  displayText: string;
+  score: number;
+  matches?: EditorCompletionMatch[]
 }
 
 export interface WorkerAPI {

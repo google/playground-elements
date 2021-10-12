@@ -471,7 +471,7 @@ export class PlaygroundCodeEditor extends LitElement {
       hint: this._hintFunction.bind(this),
       completeSingle: false,
       closeOnPick: true,
-      closeOnUnfocus: true,
+      closeOnUnfocus: false,
       container: this._focusContainer,
       alignWithWord: true
     };

@@ -8,6 +8,7 @@ import Fuse from 'fuse.js';
 import type {GetCompletionsAtPositionOptions} from 'typescript';
 import {
   EditorCompletion,
+  EditorCompletionMatch,
   EditorToken,
   WorkerConfig,
 } from '../shared/worker-api';
@@ -50,21 +51,25 @@ export const queryCompletions = async (
   }
 
   const fuse = new Fuse(completions?.entries.map((comp) => comp.name) ?? [], {
-    threshold: 0.4,
-    distance: 3,
+    threshold: 0.3,
+    distance: 20,
     shouldSort: true,
     isCaseSensitive: true,
     includeScore: true,
-    minMatchCharLength: Math.max(tokenUnderCursor.string.length - 1, 1),
+    includeMatches: true,
+    findAllMatches: true,
+    minMatchCharLength: Math.max(tokenUnderCursor.string.length, 1),
   });
 
   const relevantCompletions = fuse.search(tokenUnderCursor.string);
 
+  console.log(relevantCompletions);
   const editorCompletions: EditorCompletion[] = relevantCompletions.map(
     (item) => ({
       text: item.item,
       displayText: item.item,
       score: item.score ?? 0,
+      matches: item.matches as EditorCompletionMatch[]
     })
   );
 
