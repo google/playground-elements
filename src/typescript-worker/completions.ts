@@ -16,6 +16,7 @@ import {getWorkerContext} from './worker-context';
 
 export const queryCompletions = async (
   filename: string,
+  fileContent: string,
   tokenUnderCursor: EditorToken,
   cursorIndex: number,
   config: WorkerConfig
@@ -23,11 +24,14 @@ export const queryCompletions = async (
   const workerContext = getWorkerContext(config);
 
   const languageService = workerContext.languageServiceContext.service;
+  const languageServiceHost = workerContext.languageServiceContext.serviceHost;
   const searchWordIsPeriod = tokenUnderCursor.string === '.';
   const options = {} as GetCompletionsAtPositionOptions;
   if (searchWordIsPeriod) {
     options.triggerCharacter = '.';
   }
+
+  languageServiceHost.updateFile(filename, fileContent);
 
   const completions = languageService.getCompletionsAtPosition(
     filename,
@@ -63,15 +67,19 @@ export const queryCompletions = async (
 
   const relevantCompletions = fuse.search(tokenUnderCursor.string);
 
-  console.log(relevantCompletions);
   const editorCompletions: EditorCompletion[] = relevantCompletions.map(
     (item) => ({
       text: item.item,
       displayText: item.item,
       score: item.score ?? 0,
-      matches: item.matches as EditorCompletionMatch[]
+      matches: item.matches as EditorCompletionMatch[],
     })
-  );
+  ).sort((a,b) => {
+      if (a.score === b.score) {
+          return a.text.localeCompare(b.text);
+      }
+      return a.score - b.score;
+  });
 
   return editorCompletions;
 };

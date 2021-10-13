@@ -85,6 +85,17 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     this._removeDeletedFiles(files);
   }
 
+  updateFile(filename: string, fileContent: string) {
+    const fileAbsolutePath = new URL(filename, self.origin).href;
+    const currentFile = this.files.get(fileAbsolutePath);
+    if (currentFile) {
+      currentFile.version += 1;
+      currentFile.content = fileContent;
+    } else {
+      this.files.set(fileAbsolutePath, {content: fileContent, version: 0});
+    }
+  }
+
   private _removeDeletedFiles(files: Map<string, string>) {
     this.getScriptFileNames().forEach((fileName) => {
       if (!files.has(fileName)) {

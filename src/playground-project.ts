@@ -558,10 +558,11 @@ export class PlaygroundProject extends LitElement {
    * Query the language service for completion options on
    * token under cursor in code-editor
    * */
-  async getCompletions(filename: string, tokenUnderCursor: EditorToken, cursorIndex: number) {
+  async getCompletions(filename: string, fileContent: string, tokenUnderCursor: EditorToken, cursorIndex: number) {
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completions = await workerApi.getCompletions(
       filename,
+      fileContent,
       tokenUnderCursor,
       cursorIndex,
       {importMap: this._importMap}

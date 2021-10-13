@@ -112,6 +112,7 @@ export interface WorkerAPI {
   ): Promise<void>;
   getCompletions(
     filename: string,
+    fileContent: string,
     tokenUnderCursor: EditorToken,
     cursorIndex: number,
     config: WorkerConfig
