@@ -53,6 +53,7 @@ export const queryCompletions = async (
 
     return editorCompletions;
   }
+  console.log(completions);
 
   const fuse = new Fuse(completions?.entries.map((comp) => comp.name) ?? [], {
     threshold: 0.3,

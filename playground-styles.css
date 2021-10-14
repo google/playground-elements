@@ -376,18 +376,18 @@ div.CodeMirror-dragcursors {
 
 .CodeMirror-hints {
   font-size: var(--playground-code-font-size, 14px);
-  background: var(--playground-code-background);
-  border: 1px solid var(--playground-code-selection-background);
+  background: var(--playground-code-background, white);
+  border: 1px solid var(--playground-code-selection-background, silver);
   overflow-y: clip;
 }
 
 .CodeMirror-hint {
-  color: var(--playground-code-cursor-color);
+  color: var(--playground-code-cursor-color, black);
 }
 
 .CodeMirror-hint-active {
-  background: var(--playground-code-meta-color);
-  color: var(--playground-code-background);
+  background: var(--playground-code-meta-color, rgb(0, 136, 255));
+  color: var(--playground-code-background, white);
 }
 
 /* Used to force a border model for a node */
