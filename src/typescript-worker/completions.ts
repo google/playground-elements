@@ -5,9 +5,10 @@
  */
 
 import Fuse from 'fuse.js';
-import type {GetCompletionsAtPositionOptions} from 'typescript';
+import type {GetCompletionsAtPositionOptions, SymbolDisplayPart} from 'typescript';
 import {
   EditorCompletion,
+  EditorCompletionDetails,
   EditorCompletionMatch,
   EditorToken,
   WorkerConfig,
@@ -26,12 +27,12 @@ export const queryCompletions = async (
   const languageService = workerContext.languageServiceContext.service;
   const languageServiceHost = workerContext.languageServiceContext.serviceHost;
   const searchWordIsPeriod = tokenUnderCursor.string === '.';
+  languageServiceHost.updateFile(filename, fileContent);
+
   const options = {} as GetCompletionsAtPositionOptions;
   if (searchWordIsPeriod) {
     options.triggerCharacter = '.';
   }
-
-  languageServiceHost.updateFile(filename, fileContent);
 
   const completions = languageService.getCompletionsAtPosition(
     filename,
@@ -55,7 +56,7 @@ export const queryCompletions = async (
   }
   console.log(completions);
 
-  const fuse = new Fuse(completions?.entries.map((comp) => comp.name) ?? [], {
+  const fuse = new Fuse(completions?.entries ?? [], {
     threshold: 0.3,
     distance: 20,
     shouldSort: true,
@@ -63,15 +64,17 @@ export const queryCompletions = async (
     includeScore: true,
     includeMatches: true,
     findAllMatches: true,
+    keys: ["name"],
     minMatchCharLength: Math.max(tokenUnderCursor.string.length, 1),
   });
 
   const relevantCompletions = fuse.search(tokenUnderCursor.string);
 
+  console.log(relevantCompletions);
   const editorCompletions: EditorCompletion[] = relevantCompletions.map(
     (item) => ({
-      text: item.item,
-      displayText: item.item,
+      text: item.item.name,
+      displayText: item.item.name,
       score: item.score ?? 0,
       matches: item.matches as EditorCompletionMatch[],
     })
@@ -82,5 +85,45 @@ export const queryCompletions = async (
       return a.score - b.score;
   });
 
+  //formatOptions: FormatCodeOptions | FormatCodeSettings | undefined, source: string | undefined, preferences: UserPreferences | undefined, data: CompletionEntryData | undefined
+
   return editorCompletions;
 };
+
+export const getCompletionItemDetails = async (
+  filename: string,
+  cursorIndex: number,
+  config: WorkerConfig,
+  completionWord: string
+): Promise<EditorCompletionDetails> => {
+  const workerContext = getWorkerContext(config);
+  const languageService = workerContext.languageServiceContext.service;
+
+  const details = languageService.getCompletionEntryDetails(filename, cursorIndex, completionWord, undefined, undefined, undefined, undefined);
+
+  const detailInformation: EditorCompletionDetails = {
+     text: displayPartsToString(details?.displayParts),
+     tags: details?.tags ?? [],
+     documentation: getDocumentations(details?.documentation)
+  };
+  return detailInformation;
+}
+
+function displayPartsToString(displayParts: SymbolDisplayPart[] | undefined): string {
+  if (!displayParts || displayParts.length === 0) return "";
+  let displayString = "";
+  displayParts.forEach(part => {
+    displayString += part.text;
+  })
+  return displayString;
+}
+
+function getDocumentations(documentation: SymbolDisplayPart[] | undefined): string[] {
+  if (!documentation || documentation.length === 0) return [];
+
+  const documentationStrings: string[] = [];
+  documentation.forEach(doc => {
+    documentationStrings.push(doc.text);
+  })
+  return documentationStrings;
+}

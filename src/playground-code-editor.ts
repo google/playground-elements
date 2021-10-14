@@ -4,15 +4,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, PropertyValues, html, nothing} from 'lit';
+import {LitElement, css, PropertyValues, html, nothing, render} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
-import type {Editor, Hints, Position, ShowHintOptions} from 'codemirror';
-import { EditorCompletion, EditorPosition, EditorToken } from './shared/worker-api.js';
+import type {Editor, Hint, Hints, Position, ShowHintOptions} from 'codemirror';
+import {
+  EditorCompletion,
+  EditorCompletionDetails,
+  EditorPosition,
+  EditorToken,
+} from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -217,6 +222,9 @@ export class PlaygroundCodeEditor extends LitElement {
   @property({type: Array})
   completions?: EditorCompletion[];
 
+  @property({type: Object})
+  completionItemDetails?: EditorCompletionDetails;
+
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
@@ -295,6 +303,7 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'tokenUnderCursor':
             break;
           case 'completions':
+          case 'completionItemDetails':
             this._showCompletions();
             break;
           default:
@@ -456,11 +465,26 @@ export class PlaygroundCodeEditor extends LitElement {
     return hints;
   }
 
+  private _renderHint(element: HTMLLIElement, _data: Hints, cur: Hint) {
+    if (element.classList.contains('CodeMirror-hint-active')) {
+      render(
+        html`<span>${cur.displayText}</span>
+          <span>${this.completionItemDetails?.text}</span>`,
+        element
+      );
+    } else {
+      render(html`<span>${cur.displayText}</span>`, element);
+    }
+  }
+
   private _completionsAsHints() {
-      return this.completions?.map(comp => ({
-          text: comp.text,
-          displayText: comp.displayText
-      })) ?? [];
+    return (
+      this.completions?.map((comp) => ({
+        text: comp.text,
+        displayText: comp.displayText,
+        render: this._renderHint.bind(this),
+      })) ?? []
+    );
   }
 
   private _showCompletions() {
@@ -473,8 +497,9 @@ export class PlaygroundCodeEditor extends LitElement {
       closeOnPick: true,
       closeOnUnfocus: false,
       container: this._focusContainer,
-      alignWithWord: true
+      alignWithWord: true,
     };
+
     cm.showHint(options);
   }
 

@@ -147,6 +147,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 this._currentFile?.name ?? ''
               )}
               .completions=${this._project?.completions}
+              .completionItemDetails=${this._project?.completionItemDetails}
               @change=${this._onEdit}
             >
             </playground-code-editor>

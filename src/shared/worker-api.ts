@@ -101,7 +101,23 @@ export interface EditorCompletion {
   text: string;
   displayText: string;
   score: number;
-  matches?: EditorCompletionMatch[]
+  matches?: EditorCompletionMatch[];
+}
+
+export interface EditorTagInfo {
+  name: string;
+  text?: EditorTag[];
+}
+
+export interface EditorTag {
+  text: string;
+  kind: string;
+}
+
+export interface EditorCompletionDetails {
+  text: string;
+  tags: EditorTagInfo[];
+  documentation: string[];
 }
 
 export interface WorkerAPI {
@@ -117,6 +133,12 @@ export interface WorkerAPI {
     cursorIndex: number,
     config: WorkerConfig
   ): Promise<EditorCompletion[]>;
+  getCompletionItemDetails(
+    filename: string,
+    cursorIndex: number,
+    config: WorkerConfig,
+    completionWord: string
+  ): Promise<EditorCompletionDetails>;
 }
 
 export interface HttpError {

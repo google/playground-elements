@@ -22,6 +22,7 @@ import {
   UPDATE_SERVICE_WORKER,
   EditorToken,
   EditorCompletion,
+  EditorCompletionDetails,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -176,7 +177,13 @@ export class PlaygroundProject extends LitElement {
     return this._completions;
   }
 
+  get completionItemDetails(): EditorCompletionDetails | undefined {
+    return this._completionItemDetails;
+  }
+
   private _completions?: EditorCompletion[];
+
+  private _completionItemDetails?: EditorCompletionDetails;
 
   /**
    * A pristine copy of the original project files, used for the `modified`
@@ -558,7 +565,12 @@ export class PlaygroundProject extends LitElement {
    * Query the language service for completion options on
    * token under cursor in code-editor
    * */
-  async getCompletions(filename: string, fileContent: string, tokenUnderCursor: EditorToken, cursorIndex: number) {
+  async getCompletions(
+    filename: string,
+    fileContent: string,
+    tokenUnderCursor: EditorToken,
+    cursorIndex: number
+  ) {
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completions = await workerApi.getCompletions(
       filename,
@@ -569,7 +581,27 @@ export class PlaygroundProject extends LitElement {
     );
 
     this._completions = completions;
+    // TODO: Need for await?
+    const completionWord = this._completions?.[0].displayText ?? "";
+    await this.getCompletionDetails(filename, cursorIndex, completionWord);
     this.dispatchEvent(new CustomEvent('completionsChanged'));
+  }
+
+  async getCompletionDetails(
+    filename: string,
+    cursorIndex: number,
+    completionWord: string
+  ) {
+    //TODO: Call this function when completion hover changes
+    const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+    const completionItemDetails = await workerApi.getCompletionItemDetails(
+      filename,
+      cursorIndex,
+      {importMap: this._importMap},
+      completionWord
+    );
+    
+    this._completionItemDetails = completionItemDetails;
   }
 
   private lastSave = Promise.resolve();
