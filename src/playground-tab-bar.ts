@@ -256,9 +256,22 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       return;
     }
     controls.state = 'menu';
-    controls.filename = (
-      event.target as HTMLElement
-    ).parentElement!.dataset.filename;
+    // Figure out which file the open menu should be associated with. It's not
+    // necessarily the active tab, since you can click on the menu button for a
+    // tab without activating that tab.
+    //
+    // We're looking for a "data-filename" attribute in the event path, which
+    // should be on the <playground-internal-tab>.
+    //
+    // Note that we can't be sure what the target of the click event will be.
+    // Between MWC v0.25.1 and v0.25.2, when clicking on an <mwc-icon-button>,
+    // the target changed from the <mwc-icon-button> to its internal <svg>.
+    for (const el of event.composedPath()) {
+      if (el instanceof HTMLElement && el.dataset.filename) {
+        controls.filename = el.dataset.filename;
+        break;
+      }
+    }
     controls.anchorElement = event.target as HTMLElement;
     event.stopPropagation();
   }
