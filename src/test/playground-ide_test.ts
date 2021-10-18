@@ -39,7 +39,7 @@ suite('playground-ide', () => {
     let node = document.body;
     for (const selector of selectors) {
       const result = (node.shadowRoot ?? node).querySelector(selector);
-      assert.instanceOf(result, HTMLElement);
+      assert.instanceOf(result, Element);
       if ((result as ReactiveElement).updateComplete) {
         await (result as ReactiveElement).updateComplete;
       }
@@ -607,5 +607,46 @@ suite('playground-ide', () => {
 
     const historyLengthAfter = window.history.length;
     assert.equal(historyLengthAfter, historyLengthBefore);
+  });
+
+  test('delete file using menu', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/" editable-file-system>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <p>Hello HTML</p>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    await assertPreviewContains('Hello HTML');
+
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+    assert.lengthOf(project.files ?? [], 1);
+
+    // Between MWC v0.25.1 and v0.25.2, when clicking on an <mwc-icon-button>,
+    // the target changed from the <mwc-icon-button> to its internal <svg>.
+    const menuButtonSvg = await pierce(
+      'playground-ide',
+      'playground-tab-bar',
+      '.menu-button > svg'
+    );
+    menuButtonSvg.dispatchEvent(new Event('click', {bubbles: true}));
+
+    const deleteButton = await pierce(
+      'playground-ide',
+      'playground-tab-bar',
+      'playground-file-system-controls',
+      '#deleteButton'
+    );
+    deleteButton.click();
+
+    assert.lengthOf(project.files ?? [], 0);
   });
 });

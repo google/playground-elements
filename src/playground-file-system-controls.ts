@@ -163,7 +163,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private get _menu() {
     return html`
       <mwc-list class="menu-list" @action=${this._onMenuAction}>
-        <mwc-list-item graphic="icon">
+        <mwc-list-item graphic="icon" id="renameButton">
           Rename
           <svg
             slot="graphic"
@@ -177,7 +177,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
             />
           </svg>
         </mwc-list-item>
-        <mwc-list-item graphic="icon">
+        <mwc-list-item graphic="icon" id="deleteButton">
           Delete
           <svg
             slot="graphic"
