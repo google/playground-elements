@@ -184,7 +184,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
 
   private get _indexUrl() {
     const base = this._project?.baseUrl;
-    if (!base || this.file) {
+    if (!base || !this.file) {
       return '';
     }
     const url = new URL(this.file, base);
