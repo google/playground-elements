@@ -418,30 +418,35 @@ export class PlaygroundCodeEditor extends LitElement {
     }
 
     private _renderHint(element: HTMLLIElement, _data: Hints, cur: Hint) {
-        let objectName = cur.displayText;
         const itemIndex = _data.list.indexOf(cur);
         const completionData = this.completions?.[itemIndex];
-        const matches = completionData?.matches;
+        const objectName = this._buildHintObjectName(cur.displayText, completionData);
+        if (element.classList.contains('CodeMirror-hint-active')) {
+            render(
+                html`<span class="hint-object-name">${objectName}</span>
+                    <span class="hint-object-details">${this.completionItemDetails?.text}</span>`,
+                element
+            );
+        } else {
+            render(html`<span class="hint-object-name">${objectName}</span>`, element);
+        }
+    }
+
+    private _buildHintObjectName(objectName: string | undefined, completionData: EditorCompletion | undefined) {
+        let markedObjectName = objectName ?? '';
+        const matches = completionData?.matches ?? [];
         let padding = 0;
         matches?.forEach(match => {
             match.indices.forEach(ind => {
                 const start = ind[0];
                 const end = ind[1];
-                objectName = objectName?.substring(0, start + padding)
-                    + "<mark>" + objectName?.substring(start + padding, end + padding + 1) + '</mark>'
-                    + objectName?.substring(end + padding + 1);
+                markedObjectName = markedObjectName?.substring(0, start + padding)
+                    + "<mark>" + markedObjectName?.substring(start + padding, end + padding + 1) + '</mark>'
+                    + markedObjectName?.substring(end + padding + 1);
                 padding += "<mark></mark>".length;
             })
-        })
-        if (element.classList.contains('CodeMirror-hint-active')) {
-            render(
-                html`<span class="hint-object-name">${unsafeHTML(objectName)}</span>
-                    <span class="hint-object-details">${this.completionItemDetails?.text}</span>`,
-                element
-            );
-        } else {
-            render(html`<span class="hint-object-name">${unsafeHTML(objectName)}</span>`, element);
-        }
+        });
+        return unsafeHTML(markedObjectName);
     }
 
     private _completionsAsHints() {
