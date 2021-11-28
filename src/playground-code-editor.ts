@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { LitElement, css, PropertyValues, html, nothing, render } from 'lit';
+import { LitElement, css, PropertyValues, html, nothing, render, } from 'lit';
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { CodeMirror } from './internal/codemirror.js';
@@ -103,43 +104,6 @@ export class PlaygroundCodeEditor extends LitElement {
            background, but slightly muted. */
         border: 1px solid var(--playground-code-linenumber-color, #ccc);
         padding: 5px;
-      }
-
-      .CodeMirror-hints {
-        position: absolute;
-        z-index: 10;
-        overflow: hidden;
-        list-style: none;
-
-        margin: 0;
-        padding: 2px;
-
-        -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-        -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-        box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-        border-radius: 3px;
-        border: 1px solid silver;
-
-        background: white;
-        font-size: 90%;
-        font-family: monospace;
-
-        max-height: 20em;
-        overflow-y: auto;
-      }
-
-      .CodeMirror-hint {
-        margin: 0;
-        padding: 0 4px;
-        border-radius: 2px;
-        white-space: pre;
-        color: black;
-        cursor: pointer;
-      }
-
-      li.CodeMirror-hint-active {
-        background: #08f;
-        color: white;
       }
     `,
         playgroundStyles,
@@ -454,14 +418,29 @@ export class PlaygroundCodeEditor extends LitElement {
     }
 
     private _renderHint(element: HTMLLIElement, _data: Hints, cur: Hint) {
+        let objectName = cur.displayText;
+        const itemIndex = _data.list.indexOf(cur);
+        const completionData = this.completions?.[itemIndex];
+        const matches = completionData?.matches;
+        let padding = 0;
+        matches?.forEach(match => {
+            match.indices.forEach(ind => {
+                const start = ind[0];
+                const end = ind[1];
+                objectName = objectName?.substring(0, start + padding)
+                    + "<mark>" + objectName?.substring(start + padding, end + padding + 1) + '</mark>'
+                    + objectName?.substring(end + padding + 1);
+                padding += "<mark></mark>".length;
+            })
+        })
         if (element.classList.contains('CodeMirror-hint-active')) {
             render(
-                html`<span>${cur.displayText}</span>
-          <span>${this.completionItemDetails?.text}</span>`,
+                html`<span class="hint-object-name">${unsafeHTML(objectName)}</span>
+                    <span class="hint-object-details">${this.completionItemDetails?.text}</span>`,
                 element
             );
         } else {
-            render(html`<span>${cur.displayText}</span>`, element);
+            render(html`<span class="hint-object-name">${unsafeHTML(objectName)}</span>`, element);
         }
     }
 
