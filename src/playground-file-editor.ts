@@ -12,7 +12,7 @@ import './playground-code-editor.js';
 import { PlaygroundProject } from './playground-project.js';
 import { PlaygroundCodeEditor } from './playground-code-editor.js';
 import { PlaygroundConnectedElement } from './playground-connected-element.js';
-import type { EditorChange } from 'codemirror';
+import type { EditorChange, Hint } from 'codemirror';
 
 /**
  * A text editor associated with a <playground-project>.
@@ -106,6 +106,10 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                     'completionsChanged',
                     this._onCompletionsChanged
                 );
+                oldProject.removeEventListener(
+                    'completionsDetailsChanged',
+                    this._onCompletionsDetailsChanged
+                );
             }
             if (this._project) {
                 this._project.addEventListener(
@@ -120,6 +124,10 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 this._project.addEventListener(
                     'completionsChanged',
                     this._onCompletionsChanged
+                );
+                this._project.addEventListener(
+                    'completionsDetailsChanged',
+                    this._onCompletionsDetailsChanged
                 );
             }
             this._onProjectFilesChanged();
@@ -150,6 +158,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .completions=${this._project?.completions}
               .completionItemDetails=${this._project?.completionItemDetails}
               @change=${this._onEdit}
+              @completion-focus-change=${this._onCompletionFocusChange}
             >
             </playground-code-editor>
           `
@@ -177,6 +186,11 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         this.requestUpdate();
     };
 
+    private _onCompletionsDetailsChanged = () => {
+        // Propagate completions.
+        this.requestUpdate();
+    };
+
     private _completionTrigger(changeObject: EditorChange) {
         this._project?.getCompletions(
             this.filename ?? '',
@@ -184,6 +198,15 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
             this._editor.tokenUnderCursor,
             this._editor.cursorIndex,
             changeObject
+        );
+    }
+
+    private _onCompletionFocusChange(e: CustomEvent) {
+        const focusedCompletion = e.detail.completion as Hint | undefined;
+        this._project?.getCompletionDetails(
+            this.filename ?? '',
+            this._editor.cursorIndex,
+            focusedCompletion?.displayText ?? ''
         );
     }
 
@@ -196,7 +219,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
             return;
         }
         const changeObject = e.detail.changeObject as EditorChange;
-        console.log(changeObject);
         this._completionTrigger(changeObject);
         this._project.editFile(this._currentFile, this._editor.value);
     }

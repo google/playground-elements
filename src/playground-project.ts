@@ -593,9 +593,6 @@ export class PlaygroundProject extends LitElement {
         );
 
         this._completions = completions;
-        // TODO: Need for await?
-        const completionWord = this._completions?.[0]?.displayText ?? "";
-        await this.getCompletionDetails(filename, cursorIndex, completionWord);
         this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 
@@ -614,6 +611,7 @@ export class PlaygroundProject extends LitElement {
         );
 
         this._completionItemDetails = completionItemDetails;
+        this.dispatchEvent(new CustomEvent('completionsDetailsChanged'));
     }
 
     private lastSave = Promise.resolve();

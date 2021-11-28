@@ -394,6 +394,7 @@ div.CodeMirror-dragcursors {
   font-family: monospace;
 
   max-height: 20em;
+  width: 600px;
   max-width: 600px;
   overflow-y: auto;
 }
@@ -429,6 +430,7 @@ div.CodeMirror-dragcursors {
   font-size: calc(var(--playground-code-font-size, 14px) * 0.9);
   color: var(--playground-code-string-2-color, white);
   opacity: 0.8;
+  text-align: right;
 
   overflow: hidden;
   text-overflow: ellipsis;

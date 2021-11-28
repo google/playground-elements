@@ -6,6 +6,7 @@
 
 import { LitElement, css, PropertyValues, html, nothing, render, } from 'lit';
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { DirectiveResult } from "lit/directive.js";
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { CodeMirror } from './internal/codemirror.js';
@@ -189,6 +190,12 @@ export class PlaygroundCodeEditor extends LitElement {
     @property({ type: Object })
     completionItemDetails?: EditorCompletionDetails;
 
+    @property({ type: Object })
+    currentFocusedCompletion: Hint | string = "";
+
+    @property({ type: Element })
+    currentFocusedCompletionElement: HTMLLIElement | undefined;
+
     /**
      * How to handle `playground-hide` and `playground-fold` comments.
      *
@@ -265,10 +272,14 @@ export class PlaygroundCodeEditor extends LitElement {
                         cm.setCursor(this.cursorPosition ?? { ch: 0, line: 0 });
                         break;
                     case 'completions':
-                    case 'completionItemDetails':
                         this._showCompletions();
                         break;
+                    case 'completionItemDetails':
+                        this._updateCompletions();
+                        break;
+                    case 'currentFocusedCompletion':
                     case 'tokenUnderCursor':
+                    case 'currentFocusedCompletionElement':
                         break;
                     default:
                         unreachable(prop);
@@ -414,6 +425,15 @@ export class PlaygroundCodeEditor extends LitElement {
             list: hintList,
         } as Hints;
 
+        CodeMirror.on(hints, "select", (completion: Hint | string, _element: Element) => {
+            if (this.currentFocusedCompletion === completion) {
+                return;
+            }
+
+            this.currentFocusedCompletion = completion;
+            this.dispatchEvent(new CustomEvent('completion-focus-change', { detail: { completion } }));
+        });
+
         return hints;
     }
 
@@ -421,15 +441,11 @@ export class PlaygroundCodeEditor extends LitElement {
         const itemIndex = _data.list.indexOf(cur);
         const completionData = this.completions?.[itemIndex];
         const objectName = this._buildHintObjectName(cur.displayText, completionData);
-        if (element.classList.contains('CodeMirror-hint-active')) {
-            render(
-                html`<span class="hint-object-name">${objectName}</span>
-                    <span class="hint-object-details">${this.completionItemDetails?.text}</span>`,
-                element
-            );
-        } else {
-            render(html`<span class="hint-object-name">${objectName}</span>`, element);
-        }
+        this._renderCompletionObjectName(objectName, element);
+    }
+
+    private _renderCompletionObjectName(objectName: DirectiveResult, target: HTMLLIElement) {
+        render(html`<span class="hint-object-name">${objectName}</span>`, target);
     }
 
     private _buildHintObjectName(objectName: string | undefined, completionData: EditorCompletion | undefined) {
@@ -473,6 +489,19 @@ export class PlaygroundCodeEditor extends LitElement {
         };
 
         cm.showHint(options);
+    }
+
+    private _updateCompletions() {
+        const activeCompletion = this._focusContainer?.querySelector(".CodeMirror-hint-active") as HTMLLIElement;
+        if (this.currentFocusedCompletionElement) {
+            const hintlessBody = this.currentFocusedCompletionElement.querySelector("span")?.outerHTML;
+            this._renderCompletionObjectName(unsafeHTML(hintlessBody), this.currentFocusedCompletionElement);
+        }
+        this.currentFocusedCompletion;
+        if (activeCompletion) {
+            render(html`${unsafeHTML(activeCompletion.innerHTML)} <span class="hint-object-details">${this.completionItemDetails?.text}</span>`, activeCompletion);
+            this.currentFocusedCompletionElement = activeCompletion;
+        }
     }
 
     private _onMousedown() {
