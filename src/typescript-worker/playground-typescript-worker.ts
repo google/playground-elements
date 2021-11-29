@@ -12,6 +12,6 @@ import {getCompletionItemDetails, queryCompletions} from './completions.js';
 const workerAPI: WorkerAPI = {
   compileProject: build,
   getCompletions: queryCompletions,
-  getCompletionItemDetails: getCompletionItemDetails
+  getCompletionItemDetails: getCompletionItemDetails,
 };
 expose(workerAPI);

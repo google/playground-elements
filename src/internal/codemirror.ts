@@ -21,6 +21,8 @@ import type CodeMirrorHinting from 'codemirror/addon/hint/show-hint.js';
  */
 export const CodeMirror = (
   window as {
-    CodeMirror: typeof CodeMirrorCore & typeof CoreMirrorFolding & typeof CodeMirrorHinting;
+    CodeMirror: typeof CodeMirrorCore &
+      typeof CoreMirrorFolding &
+      typeof CodeMirrorHinting;
   }
 ).CodeMirror;
