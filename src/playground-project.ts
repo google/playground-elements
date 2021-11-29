@@ -601,7 +601,6 @@ export class PlaygroundProject extends LitElement {
     cursorIndex: number,
     completionWord: string
   ) {
-    //TODO: Call this function when completion hover changes
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completionItemDetails = await workerApi.getCompletionItemDetails(
       filename,
