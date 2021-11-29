@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.6] - 2021-10-18
+
+### Fixed
+
+- Fixed bug where files could not be deleted or renamed using MWC v0.25.2 or
+  above.
+
 ## [0.14.5] - 2021-10-07
 
 ### Fixed
