@@ -411,13 +411,13 @@ div.CodeMirror-dragcursors {
 }
 
 .CodeMirror-hint-active {
-  background: var(--playground-code-background);
+  background: var(--playground-code-background, rgba(0,0,0,0.2));
   filter: brightness(1.2);
 }
 
 .CodeMirror-hint mark {
   background: inherit;
-  color: var(--playground-code-qualifier-color, white);
+  color: var(--playground-code-qualifier-color, #555);
 }
 
 .CodeMirror-hint .hint-object-name {
