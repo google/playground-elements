@@ -1027,7 +1027,7 @@ let Jr=class extends Zr{constructor(){super(...arguments),this.editableFileSyste
             >
               ${t||e}
               ${this.editableFileSystem?M`<mwc-icon-button
-                    label="File menu"
+                    aria-label="File menu"
                     class="menu-button"
                     @click=${this._onOpenMenu}
                   >
@@ -1049,7 +1049,7 @@ let Jr=class extends Zr{constructor(){super(...arguments),this.editableFileSyste
       ${this.editableFileSystem?M`
             <mwc-icon-button
               class="add-file-button"
-              label="New file"
+              aria-label="New file"
               @click=${this._onClickAddFile}
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
@@ -1776,7 +1776,7 @@ let co=class extends Zr{constructor(){super(),this.location="Result",this._loadi
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
           id="reload-button"
-          label="Reload preview"
+          aria-label="Reload preview"
           part="preview-reload-button"
           ?disabled=${!this._indexUrl}
           @click=${this.reload}
