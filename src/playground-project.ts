@@ -24,19 +24,23 @@ import {
     EditorCompletion,
     EditorCompletionDetails,
     CodeEditorChangeData,
+    CompletionInfoWithDetails,
+    CompletionEntryWithDetails,
 } from './shared/worker-api.js';
 import {
     getRandomString,
     endWithSlash,
     forceSkypackRawMode,
 } from './shared/util.js';
-import { completionEntriesAsEditorCompletions, sortCompletionItems } from "./shared/completion-utils";
+import {
+    completionEntriesAsEditorCompletions,
+    sortCompletionItems,
+} from './shared/completion-utils';
 import { npmVersion, serviceWorkerHash } from './shared/version.js';
 import { Deferred } from './shared/deferred.js';
 import { PlaygroundBuild } from './internal/build.js';
 
 import type { Diagnostic } from 'vscode-languageserver';
-import { CompletionInfo, WithMetadata } from 'typescript';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -184,7 +188,7 @@ export class PlaygroundProject extends LitElement {
         return this._completionItemDetails;
     }
 
-    private _completionInfo?: WithMetadata<CompletionInfo>;
+    private _completionInfo?: CompletionInfoWithDetails;
 
     private _completions?: EditorCompletion[];
 
@@ -570,7 +574,7 @@ export class PlaygroundProject extends LitElement {
      * Query the language service for completion options on
      * token under cursor in code-editor
      * */
-    async getCompletions(
+    async updateCompletions(
         filename: string,
         fileContent: string,
         tokenUnderCursor: EditorToken,
@@ -594,23 +598,59 @@ export class PlaygroundProject extends LitElement {
         // a already fetched completions list, by narrowing keyword matches, we can
         // just work with what we have fetched earlier.
         if (!codeEditorChangeData.isCompletingCompletions) {
-            console.count("Language Service Worker Round trip");
             const workerApi = await this._deferredTypeScriptWorkerApi.promise;
-            this._completionInfo = await workerApi.getCompletions(
+            const completionInfo = await workerApi.getCompletions(
                 filename,
                 fileContent,
                 tokenUnderCursorAsString,
                 cursorIndex,
                 { importMap: this._importMap }
             );
+            if (completionInfo) {
+
+                const completionInfoWithDetails = completionInfo as CompletionInfoWithDetails;
+                const getCompletionDetailsFunction =
+                    this.getCompletionDetails.bind(this);
+                completionInfoWithDetails.entries = completionInfo?.entries.map(
+                    (entry) => ({
+                        ...entry,
+                        // Details are fetched using a proxy pattern, in which the details
+                        // are not instantiated until requested for. When using the completion
+                        // items, one should always use the getDetails function to fetch them.
+                        details: undefined,
+                        getDetails: function() {
+                            if (!this.details) {
+                                this.details = getCompletionDetailsFunction(
+                                    filename,
+                                    cursorIndex,
+                                    entry.name
+                                );
+                            }
+                            return this.details;
+                        },
+                    } as CompletionEntryWithDetails)
+                );
+                this._completionInfo = completionInfoWithDetails;
+            }
         }
 
-        const searchWordIsPeriod = tokenUnderCursor.string === ".";
+        const searchWordIsPeriod = tokenUnderCursor.string === '.';
+        // In the case that the search word is a period, we don't really
+        // have any material to fuzzy find with, so we don't have need
+        // for running the search results through a fuzzy search.
+        // For this case, we just return the entries as completion items as is.
         if (searchWordIsPeriod) {
-            this._completions = completionEntriesAsEditorCompletions(this._completionInfo?.entries, ".");
+            this._completions = completionEntriesAsEditorCompletions(
+                this._completionInfo?.entries,
+                '.'
+            );
         } else {
-            this._completions = sortCompletionItems(this._completionInfo?.entries, tokenUnderCursorAsString);
+            this._completions = sortCompletionItems(
+                this._completionInfo?.entries,
+                tokenUnderCursorAsString
+            );
         }
+        this._completions[0]?.getDetails();
         this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 
@@ -628,7 +668,8 @@ export class PlaygroundProject extends LitElement {
         );
 
         this._completionItemDetails = completionItemDetails;
-        this.dispatchEvent(new CustomEvent('completionsDetailsChanged'));
+        //this.dispatchEvent(new CustomEvent('completionsDetailsChanged'));
+        return completionItemDetails;
     }
 
     private lastSave = Promise.resolve();
@@ -724,8 +765,7 @@ export class PlaygroundProject extends LitElement {
         this.save();
     }
 }
-
-/**
+/*
  * Fetches and expands the given JSON project config URL.
  */
 const fetchProjectConfig = async (
@@ -764,8 +804,7 @@ const fetchProjectConfig = async (
         alreadyFetchedConfigUrls
     );
 };
-
-/**
+/*
  * Expands a partial project config by following its `extends` property, and
  * fetching the content for all files.
  */
@@ -885,9 +924,9 @@ const typeEnumToMimeType = (type?: string) => {
     return undefined;
 };
 
-/**
+/*
  * Validate an import map configuration (https://wicg.github.io/import-maps/).
- * Returns an array of errors. If empty, the import map is valid.
+ * Returns an array of errors.If empty, the import map is valid.
  */
 const validateImportMap = (importMap: unknown): string[] => {
     const errors = [];
@@ -955,9 +994,9 @@ declare global {
     }
 }
 
-/**
+/*
  * Trim shared leading whitespace from all lines, and remove empty
- * leading/trailing lines.
+ * leading / trailing lines.
  */
 const outdent = (str: string): string => {
     // Remove leading/trailing empty lines (we don't use trim() because we don't
@@ -973,7 +1012,7 @@ const outdent = (str: string): string => {
     return str.replace(RegExp(`^\\s{${shortestIndent ?? 0}}`, 'gm'), '');
 };
 
-/**
+/*
  * Test whether two lists of Playground files are deeply equal.
  */
 const playgroundFilesDeepEqual = (

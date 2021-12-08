@@ -10,10 +10,7 @@ import type {
     SymbolDisplayPart,
     WithMetadata,
 } from 'typescript';
-import {
-    EditorCompletionDetails,
-    WorkerConfig,
-} from '../shared/worker-api.js';
+import { EditorCompletionDetails, WorkerConfig } from '../shared/worker-api.js';
 import { getWorkerContext } from './worker-context.js';
 
 /**
@@ -39,7 +36,7 @@ export const queryCompletions = async (
     }
     // Update language service status so that the file is up to date
     const fileAbsolutePath = new URL(filename, self.origin).href;
-    // TODO: Could this cause a race condition between the build phase 
+    // TODO: Could this cause a race condition between the build phase
     // and the completion phase, and could that be a problem?
     languageServiceHost.updateFileContentIfNeeded(fileAbsolutePath, fileContent);
 
@@ -56,8 +53,11 @@ export const queryCompletions = async (
 };
 
 /**
- * Acquire extra information on the hovered completion item. This includes some package info,
- * context and signatures.
+ * Acquire extra information on the hovered completion item.
+ * This includes some package info, context and signatures.
+ *
+ * This is done separate from acquiring completions, since it's slower, and
+ * is done on a per completion basis.
  */
 export const getCompletionItemDetails = async (
     filename: string,
@@ -103,11 +103,5 @@ function displayPartsToString(
 function getDocumentations(
     documentation: SymbolDisplayPart[] | undefined
 ): string[] {
-    if (!documentation || documentation.length === 0) return [];
-
-    const documentationStrings: string[] = [];
-    documentation.forEach((doc) => {
-        documentationStrings.push(doc.text);
-    });
-    return documentationStrings;
+    return documentation?.map(doc => doc.text) ?? [];
 }

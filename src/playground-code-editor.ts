@@ -41,6 +41,12 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
     entries(): IterableIterator<{ [K in keyof T]: [K, T[K]] }[keyof T]>;
 }
 
+export interface CodeEditorHint extends Hint {
+    details: undefined | Promise<EditorCompletionDetails>;
+    getDetails: () => Promise<EditorCompletionDetails>;
+    element?: HTMLLIElement;
+}
+
 const unreachable = (n: never) => n;
 
 /**
@@ -196,14 +202,11 @@ export class PlaygroundCodeEditor extends LitElement {
     @property({ type: Array })
     completions?: EditorCompletion[];
 
-    @property({ type: Object })
-    completionItemDetails?: EditorCompletionDetails;
+    @property({ type: Function })
+    onSelectedChange?: Function;
 
-    @property({ type: Object })
-    currentFocusedCompletion: Hint | string = '';
-
-    @property({ type: Element })
-    currentFocusedCompletionElement: HTMLLIElement | undefined;
+    @property({ type: String })
+    currentSelectionLabel: string = '';
 
     /**
      * How to handle `playground-hide` and `playground-fold` comments.
@@ -283,12 +286,9 @@ export class PlaygroundCodeEditor extends LitElement {
                     case 'completions':
                         this._showCompletions();
                         break;
-                    case 'completionItemDetails':
-                        this._updateCompletions();
-                        break;
-                    case 'currentFocusedCompletion':
                     case 'tokenUnderCursor':
-                    case 'currentFocusedCompletionElement':
+                    case 'onSelectedChange':
+                    case 'currentSelectionLabel':
                         break;
                     default:
                         unreachable(prop);
@@ -408,17 +408,20 @@ export class PlaygroundCodeEditor extends LitElement {
                 this._applyHideAndFoldRegions();
                 this._showDiagnostics();
             } else {
-                const previousToken = _editorInstance.getTokenAt(changeObject.from)
+                const previousToken = _editorInstance.getTokenAt(changeObject.from);
                 const tokenUnderCursor = this.tokenUnderCursor.string.trim();
-                // To help reduce round trips to a language service or a completion provider, we 
+                // To help reduce round trips to a language service or a completion provider, we
                 // are providing a flag if the completion is building on top of the earlier recommendations.
                 // If the flag is true, the completion system can just filter the already stored
                 // collection of completions again with the more precise input.
                 // On deletion events, we want to query the LS again, since we might be in a new context after
                 // removing characters.
                 const isInputEvent = changeObject.origin === EditorChangeOrigin.INPUT;
-                const isCompletingCompletions = (tokenUnderCursor.length > 1 || previousToken.string === ".") && isInputEvent;
-                const changeWasCodeCompletion = changeObject.origin === EditorChangeOrigin.COMPLETE
+                const isCompletingCompletions =
+                    (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
+                    isInputEvent;
+                const changeWasCodeCompletion =
+                    changeObject.origin === EditorChangeOrigin.COMPLETE;
                 // Change event is only for user input.
                 this.dispatchEvent(
                     new CustomEvent('change', {
@@ -453,35 +456,69 @@ export class PlaygroundCodeEditor extends LitElement {
             list: hintList,
         } as Hints;
 
-        CodeMirror.on(hints, 'select', (completion: Hint | string) => {
-            if (this.currentFocusedCompletion === completion) {
-                return;
-            }
+        CodeMirror.on(hints, 'select', async (hint: Hint | string) => {
+            if (!this._isCodeEditorHint(hint)) return;
+            // If the current selection is the same, e.g. the completions were just
+            // updated by user input, instead of moving through compltions, we don't
+            // want to re-render and re-fetch the details.
+            if (this.currentSelectionLabel === hint.text) return;
 
-            this.currentFocusedCompletion = completion;
-            this.dispatchEvent(
-                new CustomEvent('completion-focus-change', { detail: { completion } })
-            );
+            this.onSelectedChange?.();
+
+            const details = await hint.getDetails();
+            if (hint.element !== undefined) {
+                this._renderHint(hint.element, hints, hint, details);
+            }
         });
 
         return hints;
     }
 
-    private _renderHint(element: HTMLLIElement, _data: Hints, cur: Hint) {
-        const itemIndex = _data.list.indexOf(cur);
-        const completionData = this.completions?.[itemIndex];
-        const objectName = this._buildHintObjectName(
-            cur.displayText,
-            completionData
-        );
-        this._renderCompletionObjectName(objectName, element);
+    private _isCodeEditorHint(hint: any): hint is CodeEditorHint {
+        return typeof hint !== 'string' && hint.getDetails;
     }
 
-    private _renderCompletionObjectName(
+    private async _renderHint(
+        element: HTMLLIElement | undefined,
+        _data: Hints,
+        hint: CodeEditorHint,
+        detail?: EditorCompletionDetails | Promise<EditorCompletionDetails>
+    ) {
+        if (!element) return;
+
+        const itemIndex = _data.list.indexOf(hint);
+        const completionData = this.completions?.[itemIndex];
+        const objectName = this._buildHintObjectName(
+            hint.displayText,
+            completionData
+        );
+        hint.element = element;
+        this._renderCompletionItem(objectName, element);
+        if (detail !== undefined) {
+            const detailResult = await detail;
+            this._renderCompletionItemWithDetails(objectName, detailResult, element);
+            this.onSelectedChange = () => this._renderHint(hint.element, _data, hint);
+            this.currentSelectionLabel = hint.text;
+        }
+    }
+
+    private _renderCompletionItem(
         objectName: DirectiveResult,
         target: HTMLLIElement
     ) {
         render(html`<span class="hint-object-name">${objectName}</span>`, target);
+    }
+
+    private _renderCompletionItemWithDetails(
+        objectName: DirectiveResult,
+        details: EditorCompletionDetails,
+        target: HTMLLIElement
+    ) {
+        render(
+            html`<span class="hint-object-name">${objectName}</span>
+        <span class="hint-object-details">${details.text}</span> `,
+            target
+        );
     }
 
     private _buildHintObjectName(
@@ -507,13 +544,21 @@ export class PlaygroundCodeEditor extends LitElement {
         return unsafeHTML(markedObjectName);
     }
 
-    private _completionsAsHints() {
+    private _completionsAsHints(): CodeEditorHint[] {
         return (
-            this.completions?.map((comp) => ({
-                text: comp.text,
-                displayText: comp.displayText,
-                render: this._renderHint.bind(this),
-            })) ?? []
+            this.completions?.map(
+                (comp) =>
+                ({
+                    text: comp.text,
+                    displayText: comp.displayText,
+                    render: async (element, _data, hint) => {
+                        const codeEditorHint = hint as CodeEditorHint;
+                        this._renderHint(element, _data, codeEditorHint, codeEditorHint.details);
+                    },
+                    details: comp.details,
+                    getDetails: comp.getDetails,
+                } as CodeEditorHint)
+            ) ?? []
         );
     }
 
@@ -531,31 +576,6 @@ export class PlaygroundCodeEditor extends LitElement {
         };
 
         cm.showHint(options);
-    }
-
-    private _updateCompletions() {
-        const activeCompletion = this._focusContainer?.querySelector(
-            '.CodeMirror-hint-active'
-        ) as HTMLLIElement;
-        if (this.currentFocusedCompletionElement) {
-            const hintlessBody =
-                this.currentFocusedCompletionElement.querySelector('span')?.outerHTML;
-            this._renderCompletionObjectName(
-                unsafeHTML(hintlessBody),
-                this.currentFocusedCompletionElement
-            );
-        }
-        this.currentFocusedCompletion;
-        if (activeCompletion) {
-            render(
-                html`${unsafeHTML(activeCompletion.innerHTML)}
-          <span class="hint-object-details"
-            >${this.completionItemDetails?.text}</span
-          >`,
-                activeCompletion
-            );
-            this.currentFocusedCompletionElement = activeCompletion;
-        }
     }
 
     private _onMousedown() {

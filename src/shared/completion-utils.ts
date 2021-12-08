@@ -4,11 +4,17 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import Fuse from "fuse.js";
-import type { CompletionEntry } from "typescript";
-import { EditorCompletion, EditorCompletionMatch } from "./worker-api";
+import Fuse from 'fuse.js';
+import {
+    EditorCompletion,
+    EditorCompletionMatch,
+    CompletionEntryWithDetails,
+} from './worker-api';
 
-export function sortCompletionItems(completions: CompletionEntry[] | undefined, searchWord: string): EditorCompletion[] {
+export function sortCompletionItems(
+    completions: CompletionEntryWithDetails[] | undefined,
+    searchWord: string
+): EditorCompletion[] {
     if (!completions) return [];
     // If the user input a letter or a partial word, we want to offer
     // the closest matches first, and the weaker matches after. We will use
@@ -30,12 +36,17 @@ export function sortCompletionItems(completions: CompletionEntry[] | undefined, 
 
     const editorCompletions: EditorCompletion[] = relevantCompletions
         // Map the relevant info from fuse scoring
-        .map((item) => ({
-            text: item.item.name,
-            displayText: item.item.name,
-            score: item.score ?? 0,
-            matches: item.matches as EditorCompletionMatch[],
-        }))
+        .map(
+            (item) =>
+            ({
+                text: item.item.name,
+                displayText: item.item.name,
+                score: item.score ?? 0,
+                matches: item.matches as EditorCompletionMatch[],
+                details: item.item.details,
+                getDetails: item.item.getDetails,
+            } as EditorCompletion)
+        )
         // Sort the completions by how well they matched the given keyword
         .sort((a, b) => {
             if (a.score === b.score) {
@@ -44,19 +55,28 @@ export function sortCompletionItems(completions: CompletionEntry[] | undefined, 
             return a.score - b.score;
         });
 
-    console.log(editorCompletions);
-    return editorCompletions
+    return editorCompletions;
 }
 
-export function completionEntriesAsEditorCompletions(completions: CompletionEntry[] | undefined, prefix: string = ""): EditorCompletion[] {
-    return completions?.map((comp) => ({
-        // Since the completion engine will only append the word
-        // given as the text property here, auto-completing from a period
-        // would replace the period with the word. This is why we need
-        // to append the period into the text property. This is not visible to the
-        // user however, so no harm is done.
-        text: prefix + comp.name,
-        displayText: comp.name,
-        score: Number.parseInt(comp.sortText),
-    })) ?? [];
+export function completionEntriesAsEditorCompletions(
+    completions: CompletionEntryWithDetails[] | undefined,
+    prefix: string = ''
+): EditorCompletion[] {
+    return (
+        completions?.map(
+            (comp) =>
+            ({
+                // Since the completion engine will only append the word
+                // given as the text property here, auto-completing from a period
+                // would replace the period with the word. This is why we need
+                // to append the period into the text property. This is not visible to the
+                // user however, so no harm is done.
+                text: prefix + comp.name,
+                displayText: comp.name,
+                score: Number.parseInt(comp.sortText),
+                details: comp.details,
+                getDetails: comp.getDetails,
+            } as EditorCompletion)
+        ) ?? []
+    );
 }

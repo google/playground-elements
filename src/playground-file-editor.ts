@@ -12,7 +12,6 @@ import './playground-code-editor.js';
 import { PlaygroundProject } from './playground-project.js';
 import { PlaygroundCodeEditor } from './playground-code-editor.js';
 import { PlaygroundConnectedElement } from './playground-connected-element.js';
-import type { Hint } from 'codemirror';
 import { CodeEditorChangeData } from './shared/worker-api.js';
 
 /**
@@ -193,7 +192,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     };
 
     private _completionTrigger(codeEditorChangeData: CodeEditorChangeData) {
-        this._project?.getCompletions(
+        this._project?.updateCompletions(
             this.filename ?? '',
             this._editor?.value ?? '',
             this._editor.tokenUnderCursor,
@@ -203,12 +202,13 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     }
 
     private _onCompletionFocusChange(e: CustomEvent) {
-        const focusedCompletion = e.detail.completion as Hint | undefined;
-        this._project?.getCompletionDetails(
+        console.log(e);
+        //const focusedCompletion = e.detail.completion as Hint | undefined;
+        /*this._project?.getCompletionDetails(
             this.filename ?? '',
             this._editor.cursorIndex,
             focusedCompletion?.displayText ?? ''
-        );
+        );*/
     }
 
     private _onEdit(e: CustomEvent) {

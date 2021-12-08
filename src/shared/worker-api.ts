@@ -5,7 +5,7 @@
  */
 
 import { EditorChange } from 'codemirror';
-import { CompletionInfo, WithMetadata } from 'typescript';
+import { CompletionEntry, CompletionInfo, WithMetadata } from 'typescript';
 import type { Diagnostic } from 'vscode-languageserver';
 
 /**
@@ -104,6 +104,8 @@ export interface EditorCompletion {
     displayText: string;
     score: number;
     matches?: EditorCompletionMatch[];
+    details: undefined | Promise<EditorCompletionDetails>;
+    getDetails: () => Promise<EditorCompletionDetails>;
 }
 
 export interface EditorTagInfo {
@@ -195,6 +197,15 @@ export interface CodeEditorChangeData {
     changeObject: EditorChange,
     changeWasCodeCompletion: boolean,
     isCompletingCompletions: boolean
+}
+
+export interface CompletionEntryWithDetails extends CompletionEntry {
+    details: undefined | Promise<EditorCompletionDetails>;
+    getDetails: () => Promise<EditorCompletionDetails>;
+}
+
+export interface CompletionInfoWithDetails extends WithMetadata<CompletionInfo> {
+    entries: CompletionEntryWithDetails[]
 }
 
 export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
