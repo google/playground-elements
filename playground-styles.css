@@ -383,8 +383,6 @@ div.CodeMirror-dragcursors {
   margin: 0;
   padding: 2px;
 
-  -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
   box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
   border-radius: 3px;
   border: 1px solid var(--playground-code-selection-background, silver);
@@ -411,7 +409,7 @@ div.CodeMirror-dragcursors {
 }
 
 .CodeMirror-hint-active {
-  background: var(--playground-code-background, rgba(0,0,0,0.2));
+  background: var(--playground-code-background, rgba(0, 0, 0, 0.2));
   filter: brightness(1.2);
 }
 
@@ -421,7 +419,7 @@ div.CodeMirror-dragcursors {
 }
 
 .CodeMirror-hint .hint-object-name {
-  padding-right: 2rem;
+  padding-right: 2em;
   font-weight: bold;
 }
 
