@@ -39,9 +39,10 @@ export const queryCompletions = async (
     if (searchWordIsPeriod) {
         options.triggerCharacter = '.';
     }
-
     // Update language service status so that the file is up to date
     const fileAbsolutePath = new URL(filename, self.origin).href;
+    // TODO: Could this cause a race condition between the build phase 
+    // and the completion phase, and could that be a problem?
     languageServiceHost.updateFileContentIfNeeded(fileAbsolutePath, fileContent);
 
     // Fetch the collection of completions, the language service offers us for our current context.
@@ -54,10 +55,13 @@ export const queryCompletions = async (
     );
 
     if (searchWordIsPeriod) {
-        // On period, just return the completions without fuzzy finding since there's no need for it
+        // On period, just return the completions without fuzzy finding, since 
+        // fuzzy finding is done on a matching substring of a word, and if our 
+        // latest 'word' is just a period, we don't have a substring to query with,
+        // as opposed to inputting `console.lo`, where we can fuzzy search with
+        // the string `lo` inside the context of `console`.
         const editorCompletions =
             completions?.entries
-                .sort((a, b) => parseInt(a.sortText) - parseInt(b.sortText))
                 .map((comp) => ({
                     // Since the completion engine will only append the word
                     // given as the text property here, auto-completing from a period
