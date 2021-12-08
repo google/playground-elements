@@ -22,6 +22,7 @@ import type {
     ShowHintOptions,
 } from 'codemirror';
 import {
+    CodeEditorChangeData,
     EditorCompletion,
     EditorCompletionDetails,
     EditorPosition,
@@ -407,6 +408,16 @@ export class PlaygroundCodeEditor extends LitElement {
                 this._applyHideAndFoldRegions();
                 this._showDiagnostics();
             } else {
+                const previousToken = _editorInstance.getTokenAt(changeObject.from)
+                const tokenUnderCursor = this.tokenUnderCursor.string.trim();
+                // To help reduce round trips to a language service or a completion provider, we 
+                // are providing a flag if the completion is building on top of the earlier recommendations.
+                // If the flag is true, the completion system can just filter the already stored
+                // collection of completions again with the more precise input.
+                // On deletion events, we want to query the LS again, since we might be in a new context after
+                // removing characters.
+                const isInputEvent = changeObject.origin === EditorChangeOrigin.INPUT;
+                const isCompletingCompletions = (tokenUnderCursor.length > 1 || previousToken.string === ".") && isInputEvent;
                 const changeWasCodeCompletion = changeObject.origin === EditorChangeOrigin.COMPLETE
                 // Change event is only for user input.
                 this.dispatchEvent(
@@ -414,7 +425,8 @@ export class PlaygroundCodeEditor extends LitElement {
                         detail: {
                             changeObject,
                             changeWasCodeCompletion,
-                        },
+                            isCompletingCompletions,
+                        } as CodeEditorChangeData,
                     })
                 );
             }

@@ -4,16 +4,14 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import Fuse from 'fuse.js';
 import type {
+    CompletionInfo,
     GetCompletionsAtPositionOptions,
     SymbolDisplayPart,
+    WithMetadata,
 } from 'typescript';
 import {
-    EditorCompletion,
     EditorCompletionDetails,
-    EditorCompletionMatch,
-    EditorToken,
     WorkerConfig,
 } from '../shared/worker-api.js';
 import { getWorkerContext } from './worker-context.js';
@@ -25,15 +23,15 @@ import { getWorkerContext } from './worker-context.js';
 export const queryCompletions = async (
     filename: string,
     fileContent: string,
-    tokenUnderCursor: EditorToken,
+    tokenUnderCursor: String,
     cursorIndex: number,
     config: WorkerConfig
-): Promise<EditorCompletion[]> => {
+): Promise<WithMetadata<CompletionInfo> | undefined> => {
     const workerContext = getWorkerContext(config);
 
     const languageService = workerContext.languageServiceContext.service;
     const languageServiceHost = workerContext.languageServiceContext.serviceHost;
-    const searchWordIsPeriod = tokenUnderCursor.string === '.';
+    const searchWordIsPeriod = tokenUnderCursor === '.';
 
     const options = {} as GetCompletionsAtPositionOptions;
     if (searchWordIsPeriod) {
@@ -54,61 +52,7 @@ export const queryCompletions = async (
         options
     );
 
-    if (searchWordIsPeriod) {
-        // On period, just return the completions without fuzzy finding, since 
-        // fuzzy finding is done on a matching substring of a word, and if our 
-        // latest 'word' is just a period, we don't have a substring to query with,
-        // as opposed to inputting `console.lo`, where we can fuzzy search with
-        // the string `lo` inside the context of `console`.
-        const editorCompletions =
-            completions?.entries
-                .map((comp) => ({
-                    // Since the completion engine will only append the word
-                    // given as the text property here, auto-completing from a period
-                    // would replace the period with the word. This is why we need
-                    // to append the period into the text property. This is not visible to the
-                    // user however, so no harm is done.
-                    text: '.' + comp.name,
-                    displayText: comp.name,
-                    score: parseInt(comp.sortText),
-                })) ?? [];
-
-        return editorCompletions;
-    }
-    // If the user input a letter or a partial word, we want to offer
-    // the closest matches first, and the weaker matches after. We will use
-    // Fuse to score our completions by their fuzzy matches.
-    // See https://fusejs.io/api/options.html
-    const fuse = new Fuse(completions?.entries ?? [], {
-        threshold: 0.3,
-        distance: 20,
-        shouldSort: true,
-        isCaseSensitive: true,
-        includeScore: true,
-        includeMatches: true,
-        findAllMatches: true,
-        keys: ['name'],
-        minMatchCharLength: Math.max(tokenUnderCursor.string.length, 1),
-    });
-    const relevantCompletions = fuse.search(tokenUnderCursor.string);
-
-    const editorCompletions: EditorCompletion[] = relevantCompletions
-        // Map the relevant info from fuse scoring
-        .map((item) => ({
-            text: item.item.name,
-            displayText: item.item.name,
-            score: item.score ?? 0,
-            matches: item.matches as EditorCompletionMatch[],
-        }))
-        // Sort the completions by how well they matched the given keyword
-        .sort((a, b) => {
-            if (a.score === b.score) {
-                return a.text.localeCompare(b.text);
-            }
-            return a.score - b.score;
-        });
-
-    return editorCompletions
+    return completions;
 };
 
 /**

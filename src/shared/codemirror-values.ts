@@ -5,7 +5,7 @@
  */
 
 export const EditorChangeOrigin = {
-    INSERT: '+insert',
+    INPUT: '+input',
     DELETE: '+delete',
     COMPLETE: 'complete',
 };

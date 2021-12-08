@@ -23,19 +23,20 @@ import {
     EditorToken,
     EditorCompletion,
     EditorCompletionDetails,
+    CodeEditorChangeData,
 } from './shared/worker-api.js';
 import {
     getRandomString,
     endWithSlash,
     forceSkypackRawMode,
 } from './shared/util.js';
+import { completionEntriesAsEditorCompletions, sortCompletionItems } from "./shared/completion-utils";
 import { npmVersion, serviceWorkerHash } from './shared/version.js';
 import { Deferred } from './shared/deferred.js';
 import { PlaygroundBuild } from './internal/build.js';
-import { EditorChangeOrigin } from './shared/codemirror-values.js';
 
 import type { Diagnostic } from 'vscode-languageserver';
-import type { EditorChange } from 'codemirror';
+import { CompletionInfo, WithMetadata } from 'typescript';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -182,6 +183,8 @@ export class PlaygroundProject extends LitElement {
     get completionItemDetails(): EditorCompletionDetails | undefined {
         return this._completionItemDetails;
     }
+
+    private _completionInfo?: WithMetadata<CompletionInfo>;
 
     private _completions?: EditorCompletion[];
 
@@ -572,9 +575,12 @@ export class PlaygroundProject extends LitElement {
         fileContent: string,
         tokenUnderCursor: EditorToken,
         cursorIndex: number,
-        changeWasCodeCompletion: boolean
+        codeEditorChangeData: CodeEditorChangeData
     ) {
-        if (changeWasCodeCompletion) {
+        const tokenUnderCursorAsString = tokenUnderCursor.string.trim();
+        if (tokenUnderCursorAsString.length <= 0) return;
+
+        if (codeEditorChangeData.changeWasCodeCompletion) {
             // If the case that the user triggered a code completion,
             // we want to stop fetching recommendations until
             // a letter is input.
@@ -583,16 +589,28 @@ export class PlaygroundProject extends LitElement {
             return;
         }
 
-        const workerApi = await this._deferredTypeScriptWorkerApi.promise;
-        const completions = await workerApi.getCompletions(
-            filename,
-            fileContent,
-            tokenUnderCursor,
-            cursorIndex,
-            { importMap: this._importMap }
-        );
+        // If the user is starting a new word, we need to fetch relevant completion items
+        // from the TypeScript Language Service. If we are however building on top of
+        // a already fetched completions list, by narrowing keyword matches, we can
+        // just work with what we have fetched earlier.
+        if (!codeEditorChangeData.isCompletingCompletions) {
+            console.count("Language Service Worker Round trip");
+            const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+            this._completionInfo = await workerApi.getCompletions(
+                filename,
+                fileContent,
+                tokenUnderCursorAsString,
+                cursorIndex,
+                { importMap: this._importMap }
+            );
+        }
 
-        this._completions = completions;
+        const searchWordIsPeriod = tokenUnderCursor.string === ".";
+        if (searchWordIsPeriod) {
+            this._completions = completionEntriesAsEditorCompletions(this._completionInfo?.entries, ".");
+        } else {
+            this._completions = sortCompletionItems(this._completionInfo?.entries, tokenUnderCursorAsString);
+        }
         this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 

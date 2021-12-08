@@ -12,7 +12,8 @@ import './playground-code-editor.js';
 import { PlaygroundProject } from './playground-project.js';
 import { PlaygroundCodeEditor } from './playground-code-editor.js';
 import { PlaygroundConnectedElement } from './playground-connected-element.js';
-import type { EditorChange, Hint } from 'codemirror';
+import type { Hint } from 'codemirror';
+import { CodeEditorChangeData } from './shared/worker-api.js';
 
 /**
  * A text editor associated with a <playground-project>.
@@ -191,13 +192,13 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         this.requestUpdate();
     };
 
-    private _completionTrigger(changeWasCodeCompletion: boolean) {
+    private _completionTrigger(codeEditorChangeData: CodeEditorChangeData) {
         this._project?.getCompletions(
             this.filename ?? '',
             this._editor?.value ?? '',
             this._editor.tokenUnderCursor,
             this._editor.cursorIndex,
-            changeWasCodeCompletion
+            codeEditorChangeData
         );
     }
 
@@ -218,8 +219,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         ) {
             return;
         }
-        const changeWasCodeCompletion: boolean = e.detail.changeWasCodeCompletion;
-        this._completionTrigger(changeWasCodeCompletion);
+        const codeEditorChangeData = e.detail as CodeEditorChangeData;
+        this._completionTrigger(codeEditorChangeData);
         this._project.editFile(this._currentFile, this._editor.value);
     }
 }
