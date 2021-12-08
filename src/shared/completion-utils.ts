@@ -15,15 +15,17 @@ export function sortCompletionItems(completions: CompletionEntry[] | undefined, 
     // Fuse to score our completions by their fuzzy matches.
     // See https://fusejs.io/api/options.html
     const fuse = new Fuse(completions ?? [], {
-        threshold: 0.3,
-        distance: 20,
+        // Keep the threshold a bit lower than the default
+        // so that the matching isn't too forgiving/confusing, but so
+        // that a small typo doesn't delete all of the matches
+        threshold: 0.4,
+        distance: 100,
         shouldSort: true,
         isCaseSensitive: true,
         includeScore: true,
         includeMatches: true,
         findAllMatches: true,
         keys: ['name'],
-        minMatchCharLength: Math.max(searchWord.length, 1),
     });
     const relevantCompletions = fuse.search(searchWord);
 
@@ -43,6 +45,7 @@ export function sortCompletionItems(completions: CompletionEntry[] | undefined, 
             return a.score - b.score;
         });
 
+    console.log(editorCompletions);
     return editorCompletions
 }
 
