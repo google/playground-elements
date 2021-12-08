@@ -19,7 +19,6 @@ export function sortCompletionItems(completions: CompletionEntry[] | undefined, 
         // so that the matching isn't too forgiving/confusing, but so
         // that a small typo doesn't delete all of the matches
         threshold: 0.4,
-        distance: 100,
         shouldSort: true,
         isCaseSensitive: true,
         includeScore: true,
