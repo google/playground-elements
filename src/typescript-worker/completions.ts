@@ -21,7 +21,7 @@ import { getWorkerContext } from './worker-context.js';
 /**
  * Query completions from the Language Service, and sort them by
  * relevance for user to use.
- * */
+ */
 export const queryCompletions = async (
     filename: string,
     fileContent: string,
@@ -66,7 +66,7 @@ export const queryCompletions = async (
                     // Since the completion engine will only append the word
                     // given as the text property here, auto-completing from a period
                     // would replace the period with the word. This is why we need
-                    // to append the priod into the text property. This is not visible to the
+                    // to append the period into the text property. This is not visible to the
                     // user however, so no harm is done.
                     text: '.' + comp.name,
                     displayText: comp.name,
@@ -78,6 +78,7 @@ export const queryCompletions = async (
     // If the user input a letter or a partial word, we want to offer
     // the closest matches first, and the weaker matches after. We will use
     // Fuse to score our completions by their fuzzy matches.
+    // See https://fusejs.io/api/options.html
     const fuse = new Fuse(completions?.entries ?? [], {
         threshold: 0.3,
         distance: 20,
@@ -107,15 +108,13 @@ export const queryCompletions = async (
             return a.score - b.score;
         });
 
-    // Limit to a 100 completion suggestions to save some bandwidth
-    // ...Surely no-one wants more than a 100 suggestions?
-    return editorCompletions.slice(0, 100);
+    return editorCompletions
 };
 
 /**
  * Acquire extra information on the hovered completion item. This includes some package info,
  * context and signatures.
- * */
+ */
 export const getCompletionItemDetails = async (
     filename: string,
     cursorIndex: number,
