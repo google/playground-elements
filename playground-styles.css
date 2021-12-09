@@ -421,6 +421,7 @@ div.CodeMirror-dragcursors {
 .CodeMirror-hint .hint-object-name {
   padding-right: 2em;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .CodeMirror-hint .hint-object-details {

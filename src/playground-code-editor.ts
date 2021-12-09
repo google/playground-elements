@@ -5,7 +5,6 @@
  */
 
 import {LitElement, css, PropertyValues, html, nothing, render} from 'lit';
-import {unsafeHTML} from 'lit/directives/unsafe-html.js';
 import {DirectiveResult} from 'lit/directive.js';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
@@ -538,23 +537,35 @@ export class PlaygroundCodeEditor extends LitElement {
     objectName: string | undefined,
     completionData: EditorCompletion | undefined
   ) {
-    let markedObjectName = objectName ?? '';
+    const markedObjectName = objectName ?? '';
     const matches = completionData?.matches ?? [];
     let padding = 0;
-    matches?.forEach((match) => {
-      match.indices.forEach((ind) => {
-        const start = ind[0];
-        const end = ind[1];
-        markedObjectName =
-          markedObjectName?.substring(0, start + padding) +
-          '<mark>' +
-          markedObjectName?.substring(start + padding, end + padding + 1) +
-          '</mark>' +
-          markedObjectName?.substring(end + padding + 1);
-        padding += '<mark></mark>'.length;
-      });
-    });
-    return unsafeHTML(markedObjectName);
+    if (matches.length <= 0) {
+      return html`${markedObjectName}`;
+    }
+
+    const markedObjectHTML = html`
+      ${matches.map(
+        (match) => html`
+          ${match.indices.map((ind) => {
+            const start = ind[0];
+            const end = ind[1];
+            const markedHTML = html`
+              ${markedObjectName?.substring(
+                0,
+                start + padding
+              )}<mark>${markedObjectName?.substring(
+                start + padding,
+                end + padding + 1
+              )}</mark>${markedObjectName?.substring(end + padding + 1)}
+            `;
+            padding += '<mark></mark>'.length;
+            return markedHTML;
+          })}
+        `
+      )}
+    `;
+    return markedObjectHTML;
   }
 
   private _completionsAsHints(): CodeEditorHint[] {

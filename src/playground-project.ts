@@ -635,7 +635,7 @@ export class PlaygroundProject extends LitElement {
     // If it's not the same, we pre-fetch the first completion's details,
     // if present.
     if (previousFirstCompletion?.text === firstCompletion?.text) {
-      firstCompletion.details = previousFirstCompletion.details;
+      firstCompletion.details = previousFirstCompletion?.details;
     } else {
       this._completions[0]?.getDetails();
     }
