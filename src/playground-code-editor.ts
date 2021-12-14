@@ -407,8 +407,8 @@ export class PlaygroundCodeEditor extends LitElement {
                 this._applyHideAndFoldRegions();
                 this._showDiagnostics();
             } else {
-                this._requestCompletionsIfNeeded(_editorInstance, changeObject);
                 this.dispatchEvent(new Event('change'));
+                this._requestCompletionsIfNeeded(_editorInstance, changeObject);
             }
         });
         this._codemirror = cm;
@@ -431,16 +431,15 @@ export class PlaygroundCodeEditor extends LitElement {
         const isRefinement =
             (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
             isInputEvent;
-        const changeWasCodeCompletion =
-            changeObject.origin === EditorChangeOrigin.COMPLETE;
+        const changeWasCodeCompletion = changeObject.origin === EditorChangeOrigin.COMPLETE;
 
         if (tokenUnderCursorAsString.length <= 0) return;
 
         if (changeWasCodeCompletion) {
             // If the case that the user triggered a code completion,
-            // we want to stop fetching recommendations until
+            // we want to empty out the completions until
             // a letter is input.
-            this.completions = [];
+            this.dispatchEvent(new CustomEvent("empty-completions"));
             return;
         }
 

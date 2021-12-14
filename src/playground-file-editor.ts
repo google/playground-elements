@@ -157,7 +157,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                         )}
               .completions=${this._project?.completions}
               @change=${this._onEdit}
-              @request-completions=${this._onRequestCompletion}
+              @request-completions=${this._onRequestCompletions}
+              @empty-completions=${this._onEmptyCompletions}
             >
             </playground-code-editor>
           `
@@ -211,9 +212,13 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         this._project.editFile(this._currentFile, this._editor.value);
     }
 
-    private _onRequestCompletion(e: CustomEvent) {
+    private _onRequestCompletions(e: CustomEvent) {
         const codeEditorChangeData = e.detail as CodeEditorChangeData;
         this._completionTrigger(codeEditorChangeData);
+    }
+
+    private _onEmptyCompletions() {
+        this._project?.emptyCompletions();
     }
 }
 

@@ -564,6 +564,10 @@ export class PlaygroundProject extends LitElement {
         this.dispatchEvent(new CustomEvent('compileDone'));
     }
 
+    emptyCompletions() {
+        this._completions = [];
+    }
+
     /**
      * Query the language service for completion options on
      * token under cursor in code-editor
@@ -576,7 +580,6 @@ export class PlaygroundProject extends LitElement {
         codeEditorChangeData: CodeEditorChangeData
     ) {
         const tokenUnderCursorAsString = tokenUnderCursor.string.trim();
-
         // If the user is starting a new word, we need to fetch relevant completion items
         // from the TypeScript Language Service. If we are however building on top of
         // a already fetched completions list, by narrowing keyword matches, we can
