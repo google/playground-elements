@@ -443,11 +443,9 @@ export class PlaygroundCodeEditor extends LitElement {
             return;
         }
 
-
         this.dispatchEvent(
             new CustomEvent('request-completions', {
                 detail: {
-                    changeObject,
                     isRefinement,
                 } as CodeEditorChangeData,
             })

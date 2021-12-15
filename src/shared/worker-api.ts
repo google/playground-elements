@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { EditorChange } from 'codemirror';
 import { CompletionEntry, CompletionInfo, WithMetadata } from 'typescript';
 import type { Diagnostic } from 'vscode-languageserver';
 
@@ -194,7 +193,6 @@ export interface ModuleImportMap {
 }
 
 export interface CodeEditorChangeData {
-    changeObject: EditorChange;
     isRefinement: boolean;
 }
 
