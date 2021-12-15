@@ -417,6 +417,8 @@ export class PlaygroundCodeEditor extends LitElement {
         _editorInstance: Editor,
         changeObject: EditorChange
     ) {
+        if (!this._currentFiletypeSupportsCompletion()) return;
+
         const previousToken = _editorInstance.getTokenAt(changeObject.from);
         const tokenUnderCursor = this.tokenUnderCursor.string.trim();
         const tokenUnderCursorAsString = tokenUnderCursor.trim();
@@ -449,6 +451,12 @@ export class PlaygroundCodeEditor extends LitElement {
                 } as CodeEditorChangeData,
             })
         );
+    }
+
+    private _currentFiletypeSupportsCompletion() {
+        // Currently we are only supporting code completion for TS. Change
+        // this in a case that we start to support it for other languages too.
+        return this.type === "ts";
     }
 
     focus() {
