@@ -40,10 +40,14 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
     entries(): IterableIterator<{ [K in keyof T]: [K, T[K]] }[keyof T]>;
 }
 
-export interface CodeEditorHint extends Hint {
+export interface CodeEditorHint {
     details: undefined | Promise<EditorCompletionDetails>;
     getDetails: () => Promise<EditorCompletionDetails>;
     element?: HTMLLIElement;
+
+    text: string;
+    displayText?: string | undefined;
+    render?: ((element: HTMLLIElement, data: Hints, cur: Hint) => void) | undefined;
 }
 
 const unreachable = (n: never) => n;
