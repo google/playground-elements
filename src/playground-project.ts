@@ -606,7 +606,6 @@ export class PlaygroundProject extends LitElement {
       }
     }
 
-    // Store the previous round's 0-index completion for comparison later on.
     const searchWordIsPeriod = tokenUnderCursor.string === '.';
     // In the case that the search word is a period, we don't really
     // have any material to fuzzy find with, so we don't have need
@@ -635,10 +634,6 @@ export class PlaygroundProject extends LitElement {
     cursorIndex: number,
     completionWord: string
   ) {
-    console.log(
-      'Fetching completion details for completionWord ',
-      completionWord
-    );
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completionItemDetails = await workerApi.getCompletionItemDetails(
       filename,
