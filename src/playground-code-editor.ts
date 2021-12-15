@@ -43,7 +43,6 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
 export interface CodeEditorHint {
     details: undefined | Promise<EditorCompletionDetails>;
     getDetails: () => Promise<EditorCompletionDetails>;
-    element?: HTMLLIElement;
 
     text: string;
     displayText?: string | undefined;
@@ -475,7 +474,7 @@ export class PlaygroundCodeEditor extends LitElement {
             list: hintList,
         } as Hints;
 
-        CodeMirror.on(hints, 'select', async (hint: Hint | string) => {
+        CodeMirror.on(hints, 'select', async (hint: Hint | string, element: Element) => {
             if (!this._isCodeEditorHint(hint)) return;
             // If the current selection is the same, e.g. the completions were just
             // updated by user input, instead of moving through compltions, we don't
@@ -485,9 +484,7 @@ export class PlaygroundCodeEditor extends LitElement {
             this.onSelectedChange?.();
 
             const details = hint.getDetails();
-            if (hint.element !== undefined) {
-                this._renderHint(hint.element, hints, hint, details);
-            }
+            this._renderHint(element as HTMLElement, hints, hint, details);
         });
 
         return hints;
@@ -501,7 +498,7 @@ export class PlaygroundCodeEditor extends LitElement {
     }
 
     private _renderHint(
-        element: HTMLLIElement | undefined,
+        element: HTMLElement | undefined,
         _data: Hints,
         hint: CodeEditorHint,
         detail?: Promise<EditorCompletionDetails>
@@ -514,7 +511,6 @@ export class PlaygroundCodeEditor extends LitElement {
             hint.displayText,
             completionData
         );
-        hint.element = element;
         // Render the actual completion item first
         this._renderCompletionItem(objectName, element);
 
@@ -528,8 +524,12 @@ export class PlaygroundCodeEditor extends LitElement {
                     detailResult,
                     element
                 );
+                // Set the current onSelectedChange to a callback to re-render
+                // the currently selected element, but without the details. This is
+                // then triggered when moving to another selection, removing the details
+                // text from the previously selected element.
                 this.onSelectedChange = () =>
-                    this._renderHint(hint.element, _data, hint);
+                    this._renderHint(element, _data, hint);
                 this.currentSelectionLabel = hint.text;
             });
         }
@@ -537,7 +537,7 @@ export class PlaygroundCodeEditor extends LitElement {
 
     private _renderCompletionItem(
         objectName: DirectiveResult,
-        target: HTMLLIElement
+        target: HTMLElement
     ) {
         render(html`<span class="hint-object-name">${objectName}</span>`, target);
     }
@@ -545,7 +545,7 @@ export class PlaygroundCodeEditor extends LitElement {
     private _renderCompletionItemWithDetails(
         objectName: DirectiveResult,
         details: EditorCompletionDetails,
-        target: HTMLLIElement
+        target: HTMLElement
     ) {
         render(
             html`<span class="hint-object-name">${objectName}</span>
