@@ -5,10 +5,13 @@
  */
 
 import Fuse from 'fuse.js';
+import type {CompletionInfo} from 'typescript';
 import {
   EditorCompletion,
   EditorCompletionMatch,
   CompletionEntryWithDetails,
+  CompletionInfoWithDetails,
+  EditorCompletionDetails,
 } from './worker-api.js';
 
 export function sortCompletionItems(
@@ -44,8 +47,9 @@ export function sortCompletionItems(
           displayText: item.item.name,
           score: item.score ?? 0,
           matches: item.matches as EditorCompletionMatch[],
-          details: item.item.details,
-          getDetails: item.item.getDetails,
+          get details() {
+            return item.item.details;
+          },
         } as EditorCompletion)
     )
     // Sort the completions by how well they matched the given keyword
@@ -75,9 +79,51 @@ export function completionEntriesAsEditorCompletions(
           text: prefix + comp.name,
           displayText: comp.name,
           score: Number.parseInt(comp.sortText),
-          details: comp.details,
-          getDetails: comp.getDetails,
+          get details() {
+            return comp.details;
+          },
         } as EditorCompletion)
     ) ?? []
   );
+}
+
+/**
+ * Create a array of completion entries with a details fetching
+ * function built in, so that the code editor can use it to fetch
+ * the details when needed itself, instead of having to ask the project
+ * layer for them.
+ */
+export function populateCompletionInfoWithDetailGetters(
+  completionInfo: CompletionInfo,
+  filename: string,
+  cursorIndex: number,
+  getCompletionDetailsFunction: (
+    filename: string,
+    cursorIndex: number,
+    completionWord: string
+  ) => Promise<EditorCompletionDetails>
+) {
+  const completionInfoWithDetails = completionInfo as CompletionInfoWithDetails;
+  completionInfoWithDetails.entries = completionInfo?.entries.map(
+    (entry) =>
+      ({
+        ...entry,
+        // Details are fetched using a proxy pattern, in which the details
+        // are not instantiated until requested for. When asking for details
+        // from the completion item, the getter is called, launching the
+        // query if needed.
+        _details: undefined,
+        get details() {
+          if (!this._details) {
+            this._details = getCompletionDetailsFunction(
+              filename,
+              cursorIndex,
+              entry.name
+            );
+          }
+          return this._details;
+        },
+      } as CompletionEntryWithDetails)
+  );
+  return completionInfoWithDetails;
 }
