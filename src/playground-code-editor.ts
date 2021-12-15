@@ -204,11 +204,9 @@ export class PlaygroundCodeEditor extends LitElement {
     @property({ attribute: false })
     completions?: EditorCompletion[];
 
-    @property({ type: Function })
-    onSelectedChange?: () => void;
+    private _onSelectedChange?: () => void;
 
-    @property({ type: String })
-    currentSelectionLabel = '';
+    private _currentSelectionLabel = '';
 
     /**
      * How to handle `playground-hide` and `playground-fold` comments.
@@ -289,8 +287,6 @@ export class PlaygroundCodeEditor extends LitElement {
                         this._showCompletions();
                         break;
                     case 'tokenUnderCursor':
-                    case 'onSelectedChange':
-                    case 'currentSelectionLabel':
                         break;
                     default:
                         unreachable(prop);
@@ -479,9 +475,9 @@ export class PlaygroundCodeEditor extends LitElement {
             // If the current selection is the same, e.g. the completions were just
             // updated by user input, instead of moving through compltions, we don't
             // want to re-render and re-fetch the details.
-            if (this.currentSelectionLabel === hint.text) return;
+            if (this._currentSelectionLabel === hint.text) return;
 
-            this.onSelectedChange?.();
+            this._onSelectedChange?.();
 
             const details = hint.getDetails();
             this._renderHint(element as HTMLElement, hints, hint, details);
@@ -528,9 +524,9 @@ export class PlaygroundCodeEditor extends LitElement {
                 // the currently selected element, but without the details. This is
                 // then triggered when moving to another selection, removing the details
                 // text from the previously selected element.
-                this.onSelectedChange = () =>
+                this._onSelectedChange = () =>
                     this._renderHint(element, _data, hint);
-                this.currentSelectionLabel = hint.text;
+                this._currentSelectionLabel = hint.text;
             });
         }
     }
