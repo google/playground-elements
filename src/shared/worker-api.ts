@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { CompletionEntry, CompletionInfo, WithMetadata } from 'typescript';
-import type { Diagnostic } from 'vscode-languageserver';
+import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
+import type {Diagnostic} from 'vscode-languageserver';
 
 /**
  * Sent from the project to the proxy, with configuration and a port for further
@@ -44,185 +44,185 @@ export const MISSING_FILE_API = 5;
 export const UPDATE_SERVICE_WORKER = 6;
 
 export type PlaygroundMessage =
-    | {
-        type: typeof CONFIGURE_PROXY;
-        url: string;
-        scope: string;
-        port: MessagePort;
+  | {
+      type: typeof CONFIGURE_PROXY;
+      url: string;
+      scope: string;
+      port: MessagePort;
     }
-    | {
-        type: typeof CONNECT_SW_TO_PROJECT;
-        port: MessagePort;
+  | {
+      type: typeof CONNECT_SW_TO_PROJECT;
+      port: MessagePort;
     }
-    | {
-        type: typeof CONNECT_PROJECT_TO_SW;
-        port: MessagePort;
+  | {
+      type: typeof CONNECT_PROJECT_TO_SW;
+      port: MessagePort;
     }
-    | {
-        type: typeof ACKNOWLEDGE_SW_CONNECTION;
-        version: string;
+  | {
+      type: typeof ACKNOWLEDGE_SW_CONNECTION;
+      version: string;
     }
-    | {
-        type: typeof MISSING_FILE_API;
+  | {
+      type: typeof MISSING_FILE_API;
     }
-    | {
-        type: typeof UPDATE_SERVICE_WORKER;
+  | {
+      type: typeof UPDATE_SERVICE_WORKER;
     };
 
 export interface ServiceWorkerAPI {
-    setFileAPI(fileAPI: FileAPI, sessionID: string): void;
+  setFileAPI(fileAPI: FileAPI, sessionID: string): void;
 }
 
 export interface WorkerConfig {
-    importMap: ModuleImportMap;
-    cdnBaseUrl?: string;
+  importMap: ModuleImportMap;
+  cdnBaseUrl?: string;
 }
 
 export interface EditorToken {
-    /** The character (on the given line) at which the token starts. */
-    start: number;
-    /** The character at which the token ends. */
-    end: number;
-    /** Code string under the cursor. */
-    string: string;
+  /** The character (on the given line) at which the token starts. */
+  start: number;
+  /** The character at which the token ends. */
+  end: number;
+  /** Code string under the cursor. */
+  string: string;
 }
 
 export interface EditorPosition {
-    ch: number;
-    line: number;
+  ch: number;
+  line: number;
 }
 
 type RangeTuple = [number, number];
 
 export type EditorCompletionMatch = {
-    indices: ReadonlyArray<RangeTuple>;
+  indices: ReadonlyArray<RangeTuple>;
 };
 
 export interface EditorCompletion {
-    text: string;
-    displayText: string;
-    score: number;
-    matches?: EditorCompletionMatch[];
-    details: Promise<EditorCompletionDetails>;
+  text: string;
+  displayText: string;
+  score: number;
+  matches?: EditorCompletionMatch[];
+  details: Promise<EditorCompletionDetails>;
 }
 
 export interface EditorTagInfo {
-    name: string;
-    text?: EditorTag[];
+  name: string;
+  text?: EditorTag[];
 }
 
 export interface EditorTag {
-    text: string;
-    kind: string;
+  text: string;
+  kind: string;
 }
 
 export interface EditorCompletionDetails {
-    text: string;
-    tags: EditorTagInfo[];
-    documentation: string[];
+  text: string;
+  tags: EditorTagInfo[];
+  documentation: string[];
 }
 
 export interface WorkerAPI {
-    compileProject(
-        files: Array<SampleFile>,
-        config: WorkerConfig,
-        emit: (result: BuildOutput) => void
-    ): Promise<void>;
-    getCompletions(
-        filename: string,
-        fileContent: string,
-        tokenUnderCursor: string,
-        cursorIndex: number,
-        config: WorkerConfig
-    ): Promise<WithMetadata<CompletionInfo> | undefined>;
-    getCompletionItemDetails(
-        filename: string,
-        cursorIndex: number,
-        config: WorkerConfig,
-        completionWord: string
-    ): Promise<EditorCompletionDetails>;
+  compileProject(
+    files: Array<SampleFile>,
+    config: WorkerConfig,
+    emit: (result: BuildOutput) => void
+  ): Promise<void>;
+  getCompletions(
+    filename: string,
+    fileContent: string,
+    tokenUnderCursor: string,
+    cursorIndex: number,
+    config: WorkerConfig
+  ): Promise<WithMetadata<CompletionInfo> | undefined>;
+  getCompletionItemDetails(
+    filename: string,
+    cursorIndex: number,
+    config: WorkerConfig,
+    completionWord: string
+  ): Promise<EditorCompletionDetails>;
 }
 
 export interface HttpError {
-    status: number;
-    body: string;
+  status: number;
+  body: string;
 }
 
 export interface FileAPI {
-    getFile(name: string): Promise<SampleFile | HttpError>;
+  getFile(name: string): Promise<SampleFile | HttpError>;
 }
 
 export interface SampleFile {
-    /** Filename. */
-    name: string;
-    /** Optional display label. */
-    label?: string;
-    /** File contents. */
-    content: string;
-    /** MIME type. */
-    contentType?: string;
-    /** Don't display in tab bar. */
-    hidden?: boolean;
+  /** Filename. */
+  name: string;
+  /** Optional display label. */
+  label?: string;
+  /** File contents. */
+  content: string;
+  /** MIME type. */
+  contentType?: string;
+  /** Don't display in tab bar. */
+  hidden?: boolean;
 }
 
 export interface FileOptions {
-    /** Optional file content. If omitted, files are fetched by name. */
-    content?: string;
-    /**
-     * Optional content MIME type. If omitted, type is taken from fetch
-     * Content-Type header if available, otherwise inferred from filename.
-     */
-    contentType?: string;
-    /** Optional display label. */
-    label?: string;
-    /** Don't display in tab bar. */
-    hidden?: boolean;
+  /** Optional file content. If omitted, files are fetched by name. */
+  content?: string;
+  /**
+   * Optional content MIME type. If omitted, type is taken from fetch
+   * Content-Type header if available, otherwise inferred from filename.
+   */
+  contentType?: string;
+  /** Optional display label. */
+  label?: string;
+  /** Don't display in tab bar. */
+  hidden?: boolean;
 }
 
 export interface ProjectManifest {
-    /** Optional project manifest URL to extend from */
-    extends?: string;
-    files?: { [filename: string]: FileOptions };
-    importMap?: ModuleImportMap;
+  /** Optional project manifest URL to extend from */
+  extends?: string;
+  files?: {[filename: string]: FileOptions};
+  importMap?: ModuleImportMap;
 }
 
 export interface ModuleImportMap {
-    imports?: { [name: string]: string };
-    // No scopes for now.
+  imports?: {[name: string]: string};
+  // No scopes for now.
 }
 
 export interface CodeEditorChangeData {
-    isRefinement: boolean;
-    fileName: string;
-    fileContent: string;
-    tokenUnderCursor: string;
-    cursorIndex: number;
-    provideCompletions: (completions: EditorCompletion[]) => void;
+  isRefinement: boolean;
+  fileName: string;
+  fileContent: string;
+  tokenUnderCursor: string;
+  cursorIndex: number;
+  provideCompletions: (completions: EditorCompletion[]) => void;
 }
 
 export interface CompletionEntryWithDetails extends CompletionEntry {
-    _details: undefined | Promise<EditorCompletionDetails>;
-    details: Promise<EditorCompletionDetails>;
+  _details: undefined | Promise<EditorCompletionDetails>;
+  details: Promise<EditorCompletionDetails>;
 }
 
 export interface CompletionInfoWithDetails
-    extends WithMetadata<CompletionInfo> {
-    entries: CompletionEntryWithDetails[];
+  extends WithMetadata<CompletionInfo> {
+  entries: CompletionEntryWithDetails[];
 }
 
 export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
 
 export type FileBuildOutput = {
-    kind: 'file';
-    file: SampleFile;
+  kind: 'file';
+  file: SampleFile;
 };
 
 export type DiagnosticBuildOutput = {
-    kind: 'diagnostic';
-    filename: string;
-    diagnostic: Diagnostic;
+  kind: 'diagnostic';
+  filename: string;
+  diagnostic: Diagnostic;
 };
 
 export type DoneOutput = {
-    kind: 'done';
+  kind: 'done';
 };
