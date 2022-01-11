@@ -21,7 +21,6 @@ import type {
     ShowHintOptions,
 } from 'codemirror';
 import {
-    CodeEditorChangeData,
     EditorCompletion,
     EditorCompletionDetails,
     EditorPosition,
@@ -181,6 +180,9 @@ export class PlaygroundCodeEditor extends LitElement {
     @property()
     type: 'js' | 'ts' | 'html' | 'css' | 'json' | undefined;
 
+    @property({ attribute: 'file-name' })
+    fileName: string = '';
+
     /**
      * If true, display a left-hand-side gutter with line numbers. Default false
      * (hidden).
@@ -286,6 +288,8 @@ export class PlaygroundCodeEditor extends LitElement {
                         this._showCompletions();
                         break;
                     case 'tokenUnderCursor':
+                    case 'fileName':
+                        // Ignored
                         break;
                     default:
                         unreachable(prop);
@@ -447,7 +451,14 @@ export class PlaygroundCodeEditor extends LitElement {
             new CustomEvent('request-completions', {
                 detail: {
                     isRefinement,
-                } as CodeEditorChangeData,
+                    fileName: this.fileName,
+                    fileContent: this.value,
+                    tokenUnderCursor,
+                    cursorIndex: this.cursorIndex,
+                    provideCompletions: (completions: EditorCompletion[]) => {
+                        this.completions = completions;
+                    }
+                },
             })
         );
     }

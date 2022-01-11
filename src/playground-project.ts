@@ -20,7 +20,6 @@ import {
     ModuleImportMap,
     HttpError,
     UPDATE_SERVICE_WORKER,
-    EditorToken,
     EditorCompletion,
     CodeEditorChangeData,
     CompletionInfoWithDetails,
@@ -567,29 +566,19 @@ export class PlaygroundProject extends LitElement {
         this._completions = [];
     }
 
-    /**
-     * Query the language service for completion options on
-     * token under cursor in code-editor
-     * */
-    async updateCompletions(
-        filename: string,
-        fileContent: string,
-        tokenUnderCursor: EditorToken,
-        cursorIndex: number,
-        codeEditorChangeData: CodeEditorChangeData
-    ) {
-        const tokenUnderCursorAsString = tokenUnderCursor.string.trim();
+    async provideCompletions(changeData: CodeEditorChangeData) {
+        const tokenUnderCursorAsString = changeData.tokenUnderCursor.trim();
         // If the user is starting a new word, we need to fetch relevant completion items
         // from the TypeScript Language Service. If we are however building on top of
         // a already fetched completions list, by narrowing keyword matches, we can
         // just work with what we have fetched earlier.
-        if (!codeEditorChangeData.isRefinement) {
+        if (!changeData.isRefinement) {
             const workerApi = await this._deferredTypeScriptWorkerApi.promise;
             const completionInfo = await workerApi.getCompletions(
-                filename,
-                fileContent,
+                changeData.fileName,
+                changeData.fileContent,
                 tokenUnderCursorAsString,
-                cursorIndex,
+                changeData.cursorIndex,
                 { importMap: this._importMap }
             );
             if (completionInfo) {
@@ -599,25 +588,26 @@ export class PlaygroundProject extends LitElement {
                 // if neeeded, they can fetch their details themselves.
                 this._completionInfo = populateCompletionInfoWithDetailGetters(
                     completionInfo,
-                    filename,
-                    cursorIndex,
+                    changeData.fileName,
+                    changeData.cursorIndex,
                     getCompletionDetailsFunction
                 );
             }
         }
 
-        const searchWordIsPeriod = tokenUnderCursor.string === '.';
+        const searchWordIsPeriod = changeData.tokenUnderCursor === '.';
         // In the case that the search word is a period, we don't really
         // have any material to fuzzy find with, so we don't have need
         // for running the search results through a fuzzy search.
         // For this case, we just return the entries as completion items as is.
+        let completions = [];
         if (searchWordIsPeriod) {
-            this._completions = completionEntriesAsEditorCompletions(
+            completions = completionEntriesAsEditorCompletions(
                 this._completionInfo?.entries,
                 '.'
             );
         } else {
-            this._completions = sortCompletionItems(
+            completions = sortCompletionItems(
                 this._completionInfo?.entries,
                 tokenUnderCursorAsString
             );
@@ -625,8 +615,9 @@ export class PlaygroundProject extends LitElement {
         // We want to pre-fetch the first completion item, if it's present
         // so that when the data gets to the code-editor, the detail hopefully
         // is already loaded.
-        this._completions[0]?.details;
-        this.dispatchEvent(new CustomEvent('completionsChanged'));
+        completions[0]?.details;
+        return completions;
+        //this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 
     private async _getCompletionDetails(
