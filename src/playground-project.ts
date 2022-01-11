@@ -877,7 +877,7 @@ const typeEnumToMimeType = (type?: string) => {
   return undefined;
 };
 
-/*
+/**
  * Validate an import map configuration (https://wicg.github.io/import-maps/).
  * Returns an array of errors.If empty, the import map is valid.
  */
