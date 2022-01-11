@@ -27,7 +27,6 @@ import {
     EditorPosition,
     EditorToken,
 } from './shared/worker-api.js';
-import { EditorChangeOrigin } from './shared/codemirror-values.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -428,12 +427,11 @@ export class PlaygroundCodeEditor extends LitElement {
         // collection of completions again with the more precise input.
         // On deletion events, we want to query the LS again, since we might be in a new context after
         // removing characters from our code.
-        const isInputEvent = changeObject.origin === EditorChangeOrigin.INPUT;
+        const isInputEvent = changeObject.origin === '+input';
         const isRefinement =
             (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
             isInputEvent;
-        const changeWasCodeCompletion =
-            changeObject.origin === EditorChangeOrigin.COMPLETE;
+        const changeWasCodeCompletion = changeObject.origin === 'complete';
 
         if (tokenUnderCursorAsString.length <= 0) return;
 
