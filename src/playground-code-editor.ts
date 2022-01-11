@@ -209,6 +209,8 @@ export class PlaygroundCodeEditor extends LitElement {
 
   private _currentSelectionLabel = '';
 
+  private _currentCompletionRequestId = 0;
+
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
@@ -447,6 +449,7 @@ export class PlaygroundCodeEditor extends LitElement {
       return;
     }
 
+    const id = ++this._currentCompletionRequestId;
     this.dispatchEvent(
       new CustomEvent('request-completions', {
         detail: {
@@ -455,12 +458,23 @@ export class PlaygroundCodeEditor extends LitElement {
           fileContent: this.value,
           tokenUnderCursor,
           cursorIndex: this.cursorIndex,
-          provideCompletions: (completions: EditorCompletion[]) => {
-            this.completions = completions;
-          },
+          provideCompletions: (completions: EditorCompletion[]) =>
+            this._onCompletionsProvided(id, completions),
         },
       })
     );
+  }
+
+  private _onCompletionsProvided(id: number, completions: EditorCompletion[]) {
+    // To prevent race conditioning, check that the completions provided
+    // are from the latest completions request.
+    if (id !== this._currentCompletionRequestId) {
+      return;
+    }
+
+    // Reset the counter on a successful completion
+    this._currentCompletionRequestId = 0;
+    this.completions = completions;
   }
 
   private _currentFiletypeSupportsCompletion() {
