@@ -102,14 +102,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                     'diagnosticsChanged',
                     this._onDiagnosticsChanged
                 );
-                oldProject.removeEventListener(
-                    'completionsChanged',
-                    this._onCompletionsChanged
-                );
-                oldProject.removeEventListener(
-                    'completionsDetailsChanged',
-                    this._onCompletionsDetailsChanged
-                );
             }
             if (this._project) {
                 this._project.addEventListener(
@@ -120,14 +112,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 this._project.addEventListener(
                     'diagnosticsChanged',
                     this._onDiagnosticsChanged
-                );
-                this._project.addEventListener(
-                    'completionsChanged',
-                    this._onCompletionsChanged
-                );
-                this._project.addEventListener(
-                    'completionsDetailsChanged',
-                    this._onCompletionsDetailsChanged
                 );
             }
             this._onProjectFilesChanged();
@@ -156,10 +140,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .diagnostics=${this._project?.diagnostics?.get(
                             this._currentFile?.name ?? ''
                         )}
-              .completions=${this._project?.completions}
               @change=${this._onEdit}
               @request-completions=${this._onRequestCompletions}
-              @empty-completions=${this._onEmptyCompletions}
             >
             </playground-code-editor>
           `
@@ -182,30 +164,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         this.requestUpdate();
     };
 
-    private _onCompletionsChanged = () => {
-        // Propagate completions.
-        this.requestUpdate();
-    };
-
-    private _onCompletionsDetailsChanged = () => {
-        // Propagate completions.
-        this.requestUpdate();
-    };
-
-    private async _completionTrigger(codeEditorChangeData: CodeEditorChangeData) {
-        /*this._project?.updateCompletions(
-            this.filename ?? '',
-            this._editor?.value ?? '',
-            this._editor.tokenUnderCursor,
-            this._editor.cursorIndex,
-            codeEditorChangeData
-        );*/
-        const completions = await this._project?.provideCompletions(codeEditorChangeData);
-        if (completions) {
-            codeEditorChangeData.provideCompletions(completions);
-        }
-    }
-
     private _onEdit() {
         if (
             this._project === undefined ||
@@ -217,14 +175,14 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
         this._project.editFile(this._currentFile, this._editor.value);
     }
 
-    private _onRequestCompletions(e: CustomEvent) {
+    private async _onRequestCompletions(e: CustomEvent) {
         const codeEditorChangeData = e.detail as CodeEditorChangeData;
-        this._completionTrigger(codeEditorChangeData);
+        const completions = await this._project?.provideCompletions(codeEditorChangeData);
+        if (completions) {
+            codeEditorChangeData.provideCompletions(completions);
+        }
     }
 
-    private _onEmptyCompletions() {
-        this._project?.emptyCompletions();
-    }
 }
 
 declare global {

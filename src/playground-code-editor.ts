@@ -443,7 +443,7 @@ export class PlaygroundCodeEditor extends LitElement {
             // If the case that the user triggered a code completion,
             // we want to empty out the completions until
             // a letter is input.
-            this.dispatchEvent(new CustomEvent('empty-completions'));
+            this.completions = [];
             return;
         }
 

@@ -20,7 +20,6 @@ import {
     ModuleImportMap,
     HttpError,
     UPDATE_SERVICE_WORKER,
-    EditorCompletion,
     CodeEditorChangeData,
     CompletionInfoWithDetails,
 } from './shared/worker-api.js';
@@ -178,13 +177,7 @@ export class PlaygroundProject extends LitElement {
         return this._build?.diagnostics;
     }
 
-    get completions(): EditorCompletion[] | undefined {
-        return this._completions;
-    }
-
     private _completionInfo?: CompletionInfoWithDetails;
-
-    private _completions?: EditorCompletion[];
 
     /**
      * A pristine copy of the original project files, used for the `modified`
@@ -562,10 +555,6 @@ export class PlaygroundProject extends LitElement {
         this.dispatchEvent(new CustomEvent('compileDone'));
     }
 
-    emptyCompletions() {
-        this._completions = [];
-    }
-
     async provideCompletions(changeData: CodeEditorChangeData) {
         const tokenUnderCursorAsString = changeData.tokenUnderCursor.trim();
         // If the user is starting a new word, we need to fetch relevant completion items
@@ -617,7 +606,6 @@ export class PlaygroundProject extends LitElement {
         // is already loaded.
         completions[0]?.details;
         return completions;
-        //this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 
     private async _getCompletionDetails(
