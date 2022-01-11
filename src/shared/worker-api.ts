@@ -197,7 +197,7 @@ export interface CodeEditorChangeData {
     fileContent: string;
     tokenUnderCursor: string;
     cursorIndex: number;
-    provideCompletions: (completions: EditorCompletion[]) => {};
+    provideCompletions: (completions: EditorCompletion[]) => void;
 }
 
 export interface CompletionEntryWithDetails extends CompletionEntry {
