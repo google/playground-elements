@@ -594,7 +594,7 @@ export class PlaygroundProject extends LitElement {
             );
             if (completionInfo) {
                 const getCompletionDetailsFunction =
-                    this.getCompletionDetails.bind(this);
+                    this._getCompletionDetails.bind(this);
                 // We pre-generate the getter for each completion item's details, so that
                 // if neeeded, they can fetch their details themselves.
                 this._completionInfo = populateCompletionInfoWithDetailGetters(
@@ -629,7 +629,7 @@ export class PlaygroundProject extends LitElement {
         this.dispatchEvent(new CustomEvent('completionsChanged'));
     }
 
-    async getCompletionDetails(
+    private async _getCompletionDetails(
         filename: string,
         cursorIndex: number,
         completionWord: string
