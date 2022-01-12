@@ -472,8 +472,6 @@ export class PlaygroundCodeEditor extends LitElement {
       return;
     }
 
-    // Reset the counter on a successful completion
-    this._currentCompletionRequestId = 0;
     this.completions = completions;
   }
 
