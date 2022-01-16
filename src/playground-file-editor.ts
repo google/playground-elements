@@ -136,7 +136,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 // content is not updated by user edits.
                 live(this._currentFile?.content ?? '')
               }
-              .fileName=${this._currentFile?.name}
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
@@ -184,6 +183,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
 
   private async _onRequestCompletions(e: CustomEvent) {
     const codeEditorChangeData = e.detail as CodeEditorChangeData;
+    codeEditorChangeData.fileName = this.filename ?? '';
     const completions = await this._project?.provideCompletions(
       codeEditorChangeData
     );
