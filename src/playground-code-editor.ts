@@ -557,6 +557,9 @@ export class PlaygroundCodeEditor extends LitElement {
     // And if we have the detail promise passed into this function,
     // we want to asynchronously update the detail info into our completion
     // item. We don't want to block the rendering, so we don't use await.
+    //
+    // The detail promise is passed into this function only for the item
+    // currently highlighted from the completions list.
     if (detail !== undefined) {
       detail.then((detailResult: EditorCompletionDetails) => {
         this._renderCompletionItemWithDetails(
@@ -626,10 +629,10 @@ export class PlaygroundCodeEditor extends LitElement {
                 start + padding,
                 end + padding + 1
               )}</mark>${markedObjectName?.substring(end + padding + 1)}
-            `;
+          `;
             // As the matching is done in a fuzzy manner, we might have multiple matching
             // indices in the completion word. In these situations, we need to pad out the
-            // matching positions, by the length of our already appended <mark> -tags.
+            // matching positions, by the length of our already appended mark -tags.
             padding += '<mark></mark>'.length;
             return markedHTML;
           })}
