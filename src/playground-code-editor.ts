@@ -208,7 +208,7 @@ export class PlaygroundCodeEditor extends LitElement {
   @state()
   _completions?: EditorCompletion[];
 
-  private _onSelectedChange?: () => void;
+  private _onCompletionSelectedChange?: () => void;
 
   private _currentSelectionLabel = '';
 
@@ -513,7 +513,7 @@ export class PlaygroundCodeEditor extends LitElement {
         // want to re-render and re-fetch the details.
         if (this._currentSelectionLabel === hint.text) return;
 
-        this._onSelectedChange?.();
+        this._onCompletionSelectedChange?.();
 
         this._renderHint(element as HTMLElement, hints, hint, hint.details);
       }
@@ -560,7 +560,7 @@ export class PlaygroundCodeEditor extends LitElement {
         // the currently selected element, but without the details. This is
         // then triggered when moving to another selection, removing the details
         // text from the previously selected element.
-        this._onSelectedChange = () => this._renderHint(element, _data, hint);
+        this._onCompletionSelectedChange = () => this._renderHint(element, _data, hint);
         this._currentSelectionLabel = hint.text;
       });
     }
