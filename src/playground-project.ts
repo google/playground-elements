@@ -555,7 +555,7 @@ export class PlaygroundProject extends LitElement {
     this.dispatchEvent(new CustomEvent('compileDone'));
   }
 
-  async provideCompletions(changeData: CodeEditorChangeData) {
+  async getCompletions(changeData: CodeEditorChangeData) {
     const tokenUnderCursorAsString = changeData.tokenUnderCursor.trim();
     // If the user is starting a new word, we need to fetch relevant completion items
     // from the TypeScript Language Service. If we are however building on top of

@@ -184,7 +184,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   private async _onRequestCompletions(e: CustomEvent) {
     const codeEditorChangeData = e.detail as CodeEditorChangeData;
     codeEditorChangeData.fileName = this.filename ?? '';
-    const completions = await this._project?.provideCompletions(
+    const completions = await this._project?.getCompletions(
       codeEditorChangeData
     );
     if (completions) {
