@@ -498,12 +498,31 @@ export class PlaygroundCodeEditor extends LitElement {
     this._codemirrorEditable?.focus();
   }
 
-  private _hintFunction(cm: Editor): Hints {
+  private _completionsAsHints(cm: Editor): Hints {
     const cursorPosition = cm.getCursor('start');
     const token = cm.getTokenAt(cursorPosition);
     const lineNumber = cursorPosition.line;
 
-    const hintList = this._completionsAsHints();
+    const hintList =
+      this._completions?.map(
+        (comp, i) =>
+          ({
+            text: comp.text,
+            displayText: comp.displayText,
+            render: (element, _data, hint) => {
+              const codeEditorHint = hint as CodeEditorHint;
+              this._renderHint(
+                element,
+                _data,
+                codeEditorHint,
+                i === 0 ? comp.details : undefined // Only render the detail on the first item
+              );
+            },
+            get details() {
+              return comp.details;
+            },
+          } as CodeEditorHint)
+      ) ?? [];
 
     const hints: Hints = {
       from: {line: lineNumber, ch: token.start} as Position,
@@ -629,7 +648,7 @@ export class PlaygroundCodeEditor extends LitElement {
                 start + padding,
                 end + padding + 1
               )}</mark>${markedObjectName?.substring(end + padding + 1)}
-          `;
+            `;
             // As the matching is done in a fuzzy manner, we might have multiple matching
             // indices in the completion word. In these situations, we need to pad out the
             // matching positions, by the length of our already appended mark -tags.
@@ -642,36 +661,12 @@ export class PlaygroundCodeEditor extends LitElement {
     return markedObjectHTML;
   }
 
-  private _completionsAsHints(): CodeEditorHint[] {
-    return (
-      this._completions?.map(
-        (comp, i) =>
-          ({
-            text: comp.text,
-            displayText: comp.displayText,
-            render: (element, _data, hint) => {
-              const codeEditorHint = hint as CodeEditorHint;
-              this._renderHint(
-                element,
-                _data,
-                codeEditorHint,
-                i === 0 ? comp.details : undefined // Only render the detail on the first item
-              );
-            },
-            get details() {
-              return comp.details;
-            },
-          } as CodeEditorHint)
-      ) ?? []
-    );
-  }
-
   private _showCompletions() {
     const cm = this._codemirror;
     if (!cm || !this._completions || this._completions.length <= 0) return;
 
     const options: ShowHintOptions = {
-      hint: this._hintFunction.bind(this),
+      hint: this._completionsAsHints.bind(this),
       completeSingle: false,
       closeOnPick: true,
       closeOnUnfocus: false,
