@@ -416,20 +416,21 @@ export class PlaygroundCodeEditor extends LitElement {
         this._showDiagnostics();
       } else {
         this.dispatchEvent(new Event('change'));
-        this._requestCompletionsIfNeeded(cm, changeObject);
+        this._requestCompletionsIfNeeded(changeObject);
       }
     });
     this._codemirror = cm;
   }
 
-  private _requestCompletionsIfNeeded(
-    editorInstance: Editor,
-    changeObject: EditorChange
-  ) {
-    if (this.noCompletions || !this._currentFiletypeSupportsCompletion())
+  private _requestCompletionsIfNeeded(changeObject: EditorChange) {
+    if (
+      this.noCompletions ||
+      !this._currentFiletypeSupportsCompletion() ||
+      !this._codemirror
+    )
       return;
 
-    const previousToken = editorInstance.getTokenAt(changeObject.from);
+    const previousToken = this._codemirror.getTokenAt(changeObject.from);
     const tokenUnderCursor = this.tokenUnderCursor.string.trim();
     const tokenUnderCursorAsString = tokenUnderCursor.trim();
     // To help reduce round trips to a language service or a completion provider, we
