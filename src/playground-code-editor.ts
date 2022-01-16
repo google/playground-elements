@@ -210,7 +210,7 @@ export class PlaygroundCodeEditor extends LitElement {
 
   private _onCompletionSelectedChange?: () => void;
 
-  private _currentSelectionLabel = '';
+  private _currentCompletionSelectionLabel = '';
 
   private _currentCompletionRequestId = 0;
 
@@ -511,7 +511,7 @@ export class PlaygroundCodeEditor extends LitElement {
         // If the current selection is the same, e.g. the completions were just
         // updated by user input, instead of moving through completions, we don't
         // want to re-render and re-fetch the details.
-        if (this._currentSelectionLabel === hint.text) return;
+        if (this._currentCompletionSelectionLabel === hint.text) return;
 
         this._onCompletionSelectedChange?.();
 
@@ -561,7 +561,7 @@ export class PlaygroundCodeEditor extends LitElement {
         // then triggered when moving to another selection, removing the details
         // text from the previously selected element.
         this._onCompletionSelectedChange = () => this._renderHint(element, _data, hint);
-        this._currentSelectionLabel = hint.text;
+        this._currentCompletionSelectionLabel = hint.text;
       });
     }
   }
