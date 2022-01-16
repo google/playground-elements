@@ -4,45 +4,45 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, PropertyValues, html, nothing, render} from 'lit';
-import {DirectiveResult} from 'lit/directive.js';
-import {customElement, property, query, state} from 'lit/decorators.js';
-import {ifDefined} from 'lit/directives/if-defined.js';
-import {CodeMirror} from './internal/codemirror.js';
+import { LitElement, css, PropertyValues, html, nothing, render } from 'lit';
+import { DirectiveResult } from 'lit/directive.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
+import { CodeMirror } from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
-import type {Diagnostic} from 'vscode-languageserver';
+import type { Diagnostic } from 'vscode-languageserver';
 import type {
-  Editor,
-  EditorChange,
-  Hint,
-  Hints,
-  Position,
-  ShowHintOptions,
+    Editor,
+    EditorChange,
+    Hint,
+    Hints,
+    Position,
+    ShowHintOptions,
 } from 'codemirror';
 import {
-  EditorCompletion,
-  EditorCompletionDetails,
-  EditorPosition,
-  EditorToken,
+    EditorCompletion,
+    EditorCompletionDetails,
+    EditorPosition,
+    EditorToken,
 } from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
 interface TypedMap<T> extends Map<keyof T, unknown> {
-  get<K extends keyof T>(key: K): T[K];
-  set<K extends keyof T>(key: K, value: T[K]): this;
-  delete<K extends keyof T>(key: K): boolean;
-  keys(): IterableIterator<keyof T>;
-  values(): IterableIterator<T[keyof T]>;
-  entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
+    get<K extends keyof T>(key: K): T[K];
+    set<K extends keyof T>(key: K, value: T[K]): this;
+    delete<K extends keyof T>(key: K): boolean;
+    keys(): IterableIterator<keyof T>;
+    values(): IterableIterator<T[keyof T]>;
+    entries(): IterableIterator<{ [K in keyof T]: [K, T[K]] }[keyof T]>;
 }
 
 export interface CodeEditorHint {
-  details?: Promise<EditorCompletionDetails>;
-  text: string;
-  displayText?: string | undefined;
-  render?:
+    details?: Promise<EditorCompletionDetails>;
+    text: string;
+    displayText?: string | undefined;
+    render?:
     | ((element: HTMLLIElement, data: Hints, cur: Hint) => void)
     | undefined;
 }
@@ -54,8 +54,8 @@ const unreachable = (n: never) => n;
  */
 @customElement('playground-code-editor')
 export class PlaygroundCodeEditor extends LitElement {
-  static styles = [
-    css`
+    static styles = [
+        css`
       :host {
         display: block;
       }
@@ -122,197 +122,198 @@ export class PlaygroundCodeEditor extends LitElement {
         padding: 5px;
       }
     `,
-    playgroundStyles,
-  ];
+        playgroundStyles,
+    ];
 
-  protected _codemirror?: ReturnType<typeof CodeMirror>;
+    protected _codemirror?: ReturnType<typeof CodeMirror>;
 
-  get cursorPosition(): EditorPosition {
-    const cursor = this._codemirror?.getCursor('start');
-    if (!cursor) return {ch: 0, line: 0};
+    get cursorPosition(): EditorPosition {
+        const cursor = this._codemirror?.getCursor('start');
+        if (!cursor) return { ch: 0, line: 0 };
 
-    return {
-      ch: cursor.ch,
-      line: cursor.line,
+        return {
+            ch: cursor.ch,
+            line: cursor.line,
+        };
+    }
+
+    get cursorIndex(): number {
+        const cm = this._codemirror;
+        if (!cm) return 0;
+
+        const cursorPosition = cm.getCursor('start');
+        return cm.indexFromPos(cursorPosition);
+    }
+
+    get tokenUnderCursor(): EditorToken {
+        const cm = this._codemirror;
+        if (!cm) return { start: 0, end: 0, string: '' };
+
+        const cursorPosition = cm.getCursor('start');
+        const token = cm.getTokenAt(cursorPosition);
+        return {
+            start: token.start,
+            end: token.end,
+            string: token.string,
+        };
+    }
+
+    // We store _value ourselves, rather than using a public reactive property, so
+    // that we can set this value internally without triggering an update.
+    private _value?: string;
+
+    @property()
+    get value() {
+        return this._value;
+    }
+
+    set value(v: string | undefined) {
+        const oldValue = this._value;
+        this._value = v;
+        this.requestUpdate('value', oldValue);
+    }
+
+    /**
+     * The type of the file being edited, as represented by its usual file
+     * extension.
+     */
+    @property()
+    type: 'js' | 'ts' | 'html' | 'css' | 'json' | undefined;
+
+    @property({ attribute: 'file-name' })
+    fileName = '';
+
+    /**
+     * If true, display a left-hand-side gutter with line numbers. Default false
+     * (hidden).
+     */
+    @property({ type: Boolean, attribute: 'line-numbers', reflect: true })
+    lineNumbers = false;
+
+    /**
+     * If true, this editor is not editable.
+     */
+    @property({ type: Boolean, reflect: true })
+    readonly = false;
+
+    /**
+     * If true, will disable code completions in the code-editor.
+     */
+    @property({ type: Boolean, attribute: 'no-completions' })
+    noCompletions = false;
+
+    /**
+     * Diagnostics to display on the current file.
+     */
+    @property({ attribute: false })
+    diagnostics?: Array<Diagnostic>;
+
+    @state()
+    _completions?: EditorCompletion[];
+
+    private _onSelectedChange?: () => void;
+
+    private _currentSelectionLabel = '';
+
+    private _currentCompletionRequestId = 0;
+
+    /**
+     * How to handle `playground-hide` and `playground-fold` comments.
+     *
+     * See https://github.com/google/playground-elements#hiding--folding for
+     * more details.
+     *
+     * Options:
+     * - on: Hide and fold regions, and hide the special comments.
+     * - off: Don't hide or fold regions, but still hide the special comments.
+     * - off-visible: Don't hide or fold regions, and show the special comments as
+     *   literal text.
+     */
+    @property()
+    pragmas: 'on' | 'off' | 'off-visible' = 'on';
+
+    @state()
+    private _tooltipDiagnostic?: {
+        diagnostic: Diagnostic;
+        position: string;
     };
-  }
 
-  get cursorIndex(): number {
-    const cm = this._codemirror;
-    if (!cm) return 0;
+    @state()
+    private _showKeyboardHelp = false;
 
-    const cursorPosition = cm.getCursor('start');
-    return cm.indexFromPos(cursorPosition);
-  }
+    @query('#focusContainer')
+    private _focusContainer?: HTMLDivElement;
 
-  get tokenUnderCursor(): EditorToken {
-    const cm = this._codemirror;
-    if (!cm) return {start: 0, end: 0, string: ''};
+    @query('.CodeMirror-code')
+    private _codemirrorEditable?: HTMLDivElement;
 
-    const cursorPosition = cm.getCursor('start');
-    const token = cm.getTokenAt(cursorPosition);
-    return {
-      start: token.start,
-      end: token.end,
-      string: token.string,
-    };
-  }
+    private _resizeObserver?: ResizeObserver;
+    private _resizing = false;
+    private _valueChangingFromOutside = false;
+    private _ignoreValueChange = false;
+    private _hideOrFoldRegionsActive = false;
+    private _cmDom?: HTMLElement;
+    private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
+    private _diagnosticsMouseoverListenerActive = false;
 
-  // We store _value ourselves, rather than using a public reactive property, so
-  // that we can set this value internally without triggering an update.
-  private _value?: string;
-
-  @property()
-  get value() {
-    return this._value;
-  }
-
-  set value(v: string | undefined) {
-    const oldValue = this._value;
-    this._value = v;
-    this.requestUpdate('value', oldValue);
-  }
-
-  /**
-   * The type of the file being edited, as represented by its usual file
-   * extension.
-   */
-  @property()
-  type: 'js' | 'ts' | 'html' | 'css' | 'json' | undefined;
-
-  @property({attribute: 'file-name'})
-  fileName = '';
-
-  /**
-   * If true, display a left-hand-side gutter with line numbers. Default false
-   * (hidden).
-   */
-  @property({type: Boolean, attribute: 'line-numbers', reflect: true})
-  lineNumbers = false;
-
-  /**
-   * If true, this editor is not editable.
-   */
-  @property({type: Boolean, reflect: true})
-  readonly = false;
-
-  /**
-   * If true, will disable code completions in the code-editor.
-   */
-  @property({type: Boolean, attribute: 'no-completions'})
-  noCompletions = false;
-
-  /**
-   * Diagnostics to display on the current file.
-   */
-  @property({attribute: false})
-  diagnostics?: Array<Diagnostic>;
-
-  @property({attribute: false})
-  completions?: EditorCompletion[];
-
-  private _onSelectedChange?: () => void;
-
-  private _currentSelectionLabel = '';
-
-  private _currentCompletionRequestId = 0;
-
-  /**
-   * How to handle `playground-hide` and `playground-fold` comments.
-   *
-   * See https://github.com/google/playground-elements#hiding--folding for
-   * more details.
-   *
-   * Options:
-   * - on: Hide and fold regions, and hide the special comments.
-   * - off: Don't hide or fold regions, but still hide the special comments.
-   * - off-visible: Don't hide or fold regions, and show the special comments as
-   *   literal text.
-   */
-  @property()
-  pragmas: 'on' | 'off' | 'off-visible' = 'on';
-
-  @state()
-  private _tooltipDiagnostic?: {
-    diagnostic: Diagnostic;
-    position: string;
-  };
-
-  @state()
-  private _showKeyboardHelp = false;
-
-  @query('#focusContainer')
-  private _focusContainer?: HTMLDivElement;
-
-  @query('.CodeMirror-code')
-  private _codemirrorEditable?: HTMLDivElement;
-
-  private _resizeObserver?: ResizeObserver;
-  private _resizing = false;
-  private _valueChangingFromOutside = false;
-  private _ignoreValueChange = false;
-  private _hideOrFoldRegionsActive = false;
-  private _cmDom?: HTMLElement;
-  private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
-  private _diagnosticsMouseoverListenerActive = false;
-
-  update(changedProperties: PropertyValues) {
-    const cm = this._codemirror;
-    if (cm === undefined) {
-      this._createView();
-    } else {
-      const changedTyped = changedProperties as TypedMap<
-        Omit<PlaygroundCodeEditor, keyof LitElement | 'render' | 'update'>
-      >;
-      for (const prop of changedTyped.keys()) {
-        switch (prop) {
-          case 'value':
-            this._valueChangingFromOutside = true;
-            cm.setValue(this.value ?? '');
-            this._valueChangingFromOutside = false;
-            break;
-          case 'lineNumbers':
-            cm.setOption('lineNumbers', this.lineNumbers);
-            break;
-          case 'type':
-            cm.setOption('mode', this._getLanguageMode());
-            break;
-          case 'readonly':
-            cm.setOption('readOnly', this.readonly);
-            break;
-          case 'pragmas':
-            this._applyHideAndFoldRegions();
-            break;
-          case 'diagnostics':
-            this._showDiagnostics();
-            break;
-          case 'cursorIndex':
-            cm.setCursor(this.cursorIndex ?? 0);
-            break;
-          case 'cursorPosition':
-            cm.setCursor(this.cursorPosition ?? {ch: 0, line: 0});
-            break;
-          case 'completions':
-            this._showCompletions();
-            break;
-          case 'tokenUnderCursor':
-          case 'fileName':
-          case 'noCompletions':
-            // Ignored
-            break;
-          default:
-            unreachable(prop);
+    update(changedProperties: PropertyValues) {
+        const cm = this._codemirror;
+        if (cm === undefined) {
+            this._createView();
+        } else {
+            const changedTyped = changedProperties as TypedMap<
+                Omit<PlaygroundCodeEditor, keyof LitElement | 'render' | 'update'>
+            >;
+            for (const prop of changedTyped.keys()) {
+                switch (prop) {
+                    case 'value':
+                        this._valueChangingFromOutside = true;
+                        cm.setValue(this.value ?? '');
+                        this._valueChangingFromOutside = false;
+                        break;
+                    case 'lineNumbers':
+                        cm.setOption('lineNumbers', this.lineNumbers);
+                        break;
+                    case 'type':
+                        cm.setOption('mode', this._getLanguageMode());
+                        break;
+                    case 'readonly':
+                        cm.setOption('readOnly', this.readonly);
+                        break;
+                    case 'pragmas':
+                        this._applyHideAndFoldRegions();
+                        break;
+                    case 'diagnostics':
+                        this._showDiagnostics();
+                        this._showCompletions();
+                        break;
+                    case 'cursorIndex':
+                        cm.setCursor(this.cursorIndex ?? 0);
+                        break;
+                    case 'cursorPosition':
+                        cm.setCursor(this.cursorPosition ?? { ch: 0, line: 0 });
+                        break;
+                    case '_completions':
+                        this._showCompletions();
+                        break;
+                    case 'tokenUnderCursor':
+                    case 'fileName':
+                    case 'noCompletions':
+                        // Ignored
+                        break;
+                    default:
+                        unreachable(prop);
+                }
+            }
         }
-      }
+        super.update(changedProperties);
     }
-    super.update(changedProperties);
-  }
 
-  render() {
-    if (this.readonly) {
-      return this._cmDom;
-    }
-    return html`
+    render() {
+        if (this.readonly) {
+            return this._cmDom;
+        }
+        return html`
       <div
         id="focusContainer"
         tabindex="0"
@@ -322,13 +323,13 @@ export class PlaygroundCodeEditor extends LitElement {
         @keydown=${this._onKeyDown}
       >
         ${this._showKeyboardHelp
-          ? html`<playground-internal-overlay>
+                ? html`<playground-internal-overlay>
               <p id="keyboardHelp" part="dialog">
                 Press <strong>Enter</strong> to start editing<br />
                 Press <strong>Escape</strong> to exit editor
               </p>
             </playground-internal-overlay>`
-          : nothing}
+                : nothing}
         ${this._cmDom}
         <div
           id="tooltip"
@@ -341,583 +342,583 @@ export class PlaygroundCodeEditor extends LitElement {
         </div>
       </div>
     `;
-  }
+    }
 
-  connectedCallback() {
-    // CodeMirror uses JavaScript to control whether scrollbars are visible. It
-    // does so automatically on interaction, but won't notice container size
-    // changes. If the browser doesn't have ResizeObserver, scrollbars will
-    // sometimes be missing, but typing in the editor will fix it.
-    if (typeof ResizeObserver === 'function') {
-      this._resizeObserver = new ResizeObserver(() => {
-        if (this._resizing) {
-          // Don't get in a resize loop.
-          return;
+    connectedCallback() {
+        // CodeMirror uses JavaScript to control whether scrollbars are visible. It
+        // does so automatically on interaction, but won't notice container size
+        // changes. If the browser doesn't have ResizeObserver, scrollbars will
+        // sometimes be missing, but typing in the editor will fix it.
+        if (typeof ResizeObserver === 'function') {
+            this._resizeObserver = new ResizeObserver(() => {
+                if (this._resizing) {
+                    // Don't get in a resize loop.
+                    return;
+                }
+                this._resizing = true;
+                this._codemirror?.refresh();
+                this._resizing = false;
+            });
+            this._resizeObserver.observe(this);
         }
-        this._resizing = true;
-        this._codemirror?.refresh();
-        this._resizing = false;
-      });
-      this._resizeObserver.observe(this);
-    }
-    super.connectedCallback();
-  }
-
-  disconnectedCallback() {
-    this._resizeObserver?.disconnect();
-    this._resizeObserver = undefined;
-    super.disconnectedCallback();
-  }
-
-  private _createView() {
-    const cm = CodeMirror(
-      (dom) => {
-        this._cmDom = dom;
-        this._resizing = true;
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            // It seems that some dynamic layouts confuse CodeMirror, causing it
-            // to measure itself too soon, which then causes the position of
-            // interactions to be interpreted incorrectly. Here we hackily force
-            // a refresh after initial layout is usually done.
-            this._codemirror?.refresh();
-            this._resizing = false;
-          });
-        });
-      },
-      {
-        value: this.value ?? '',
-        lineNumbers: this.lineNumbers,
-        mode: this._getLanguageMode(),
-        readOnly: this.readonly,
-        inputStyle: 'contenteditable',
-        // Don't allow naturally tabbing into the editor, because it's a
-        // tab-trap. Instead, the container is focusable, and Enter/Escape are
-        // used to explicitly enter the editable area.
-        tabindex: -1,
-        // Tab key inserts spaces instead of tab character
-        extraKeys: {
-          Tab: () => {
-            cm.replaceSelection(
-              Array(cm.getOption('indentUnit') ?? 2).join(' ')
-            );
-          },
-        },
-      }
-    );
-    cm.on('change', (_editorInstance: Editor, changeObject: EditorChange) => {
-      if (this._ignoreValueChange) {
-        return;
-      }
-      this._value = cm.getValue();
-
-      // External changes are usually things like the editor switching which
-      // file it is displaying.
-      if (this._valueChangingFromOutside) {
-        // Users can't change hide/fold regions.
-        this._applyHideAndFoldRegions();
-        this._showDiagnostics();
-      } else {
-        this.dispatchEvent(new Event('change'));
-        this._requestCompletionsIfNeeded(cm, changeObject);
-      }
-    });
-    this._codemirror = cm;
-  }
-
-  private _requestCompletionsIfNeeded(
-    editorInstance: Editor,
-    changeObject: EditorChange
-  ) {
-    if (this.noCompletions || !this._currentFiletypeSupportsCompletion())
-      return;
-
-    const previousToken = editorInstance.getTokenAt(changeObject.from);
-    const tokenUnderCursor = this.tokenUnderCursor.string.trim();
-    const tokenUnderCursorAsString = tokenUnderCursor.trim();
-    // To help reduce round trips to a language service or a completion provider, we
-    // are providing a flag if the completion is building on top of the earlier recommendations.
-    // If the flag is true, the completion system can just filter the already stored
-    // collection of completions again with the more precise input.
-    // On deletion events, we want to query the LS again, since we might be in a new context after
-    // removing characters from our code.
-    const isInputEvent = changeObject.origin === '+input';
-    const isRefinement =
-      (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
-      isInputEvent;
-    const changeWasCodeCompletion = changeObject.origin === 'complete';
-
-    if (tokenUnderCursorAsString.length <= 0) return;
-
-    if (changeWasCodeCompletion) {
-      // If the case that the user triggered a code completion,
-      // we want to empty out the completions until
-      // a letter is input.
-      this.completions = [];
-      return;
+        super.connectedCallback();
     }
 
-    const id = ++this._currentCompletionRequestId;
-    this.dispatchEvent(
-      new CustomEvent('request-completions', {
-        detail: {
-          isRefinement,
-          fileName: this.fileName,
-          fileContent: this.value,
-          tokenUnderCursor,
-          cursorIndex: this.cursorIndex,
-          provideCompletions: (completions: EditorCompletion[]) =>
-            this._onCompletionsProvided(id, completions),
-        },
-      })
-    );
-  }
-
-  private _onCompletionsProvided(id: number, completions: EditorCompletion[]) {
-    // To prevent race conditioning, check that the completions provided
-    // are from the latest completions request.
-    if (id !== this._currentCompletionRequestId) {
-      return;
+    disconnectedCallback() {
+        this._resizeObserver?.disconnect();
+        this._resizeObserver = undefined;
+        super.disconnectedCallback();
     }
 
-    this.completions = completions;
-  }
-
-  private _currentFiletypeSupportsCompletion() {
-    // Currently we are only supporting code completion for TS. Change
-    // this in a case that we start to support it for other languages too.
-    return this.type === 'ts';
-  }
-
-  focus() {
-    this._codemirrorEditable?.focus();
-  }
-
-  private _hintFunction(
-    cm: Editor
-  ): Hints | null | undefined | PromiseLike<Hints | null | undefined> {
-    const cursorPosition = cm.getCursor('start');
-    const token = cm.getTokenAt(cursorPosition);
-    const lineNumber = cursorPosition.line;
-
-    const hintList = this._completionsAsHints();
-
-    const hints = {
-      from: {line: lineNumber, ch: token.start} as Position,
-      to: {line: lineNumber, ch: token.end} as Position,
-      list: hintList,
-    } as Hints;
-
-    CodeMirror.on(
-      hints,
-      'select',
-      async (hint: Hint | string, element: Element) => {
-        if (!this._isCodeEditorHint(hint)) return;
-        // If the current selection is the same, e.g. the completions were just
-        // updated by user input, instead of moving through compltions, we don't
-        // want to re-render and re-fetch the details.
-        if (this._currentSelectionLabel === hint.text) return;
-
-        this._onSelectedChange?.();
-
-        this._renderHint(element as HTMLElement, hints, hint, hint.details);
-      }
-    );
-
-    return hints;
-  }
-
-  private _isCodeEditorHint(hint: Hint | string): hint is CodeEditorHint {
-    return (
-      typeof hint !== 'string' &&
-      Object.prototype.hasOwnProperty.call(hint, 'details')
-    );
-  }
-
-  private _renderHint(
-    element: HTMLElement | undefined,
-    _data: Hints,
-    hint: CodeEditorHint,
-    detail?: Promise<EditorCompletionDetails>
-  ) {
-    if (!element) return;
-
-    const itemIndex = _data.list.indexOf(hint);
-    const completionData = this.completions?.[itemIndex];
-    const objectName = this._buildHintObjectName(
-      hint.displayText,
-      completionData
-    );
-    // Render the actual completion item first
-    this._renderCompletionItem(objectName, element);
-
-    // And if we have the detail promise passed into this function,
-    // we want to asynchronously update the detail info into our completion
-    // item. We don't want to block the rendering, so we don't use await.
-    if (detail !== undefined) {
-      detail.then((detailResult: EditorCompletionDetails) => {
-        this._renderCompletionItemWithDetails(
-          objectName,
-          detailResult,
-          element
+    private _createView() {
+        const cm = CodeMirror(
+            (dom) => {
+                this._cmDom = dom;
+                this._resizing = true;
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        // It seems that some dynamic layouts confuse CodeMirror, causing it
+                        // to measure itself too soon, which then causes the position of
+                        // interactions to be interpreted incorrectly. Here we hackily force
+                        // a refresh after initial layout is usually done.
+                        this._codemirror?.refresh();
+                        this._resizing = false;
+                    });
+                });
+            },
+            {
+                value: this.value ?? '',
+                lineNumbers: this.lineNumbers,
+                mode: this._getLanguageMode(),
+                readOnly: this.readonly,
+                inputStyle: 'contenteditable',
+                // Don't allow naturally tabbing into the editor, because it's a
+                // tab-trap. Instead, the container is focusable, and Enter/Escape are
+                // used to explicitly enter the editable area.
+                tabindex: -1,
+                // Tab key inserts spaces instead of tab character
+                extraKeys: {
+                    Tab: () => {
+                        cm.replaceSelection(
+                            Array(cm.getOption('indentUnit') ?? 2).join(' ')
+                        );
+                    },
+                },
+            }
         );
-        // Set the current onSelectedChange to a callback to re-render
-        // the currently selected element, but without the details. This is
-        // then triggered when moving to another selection, removing the details
-        // text from the previously selected element.
-        this._onSelectedChange = () => this._renderHint(element, _data, hint);
-        this._currentSelectionLabel = hint.text;
-      });
-    }
-  }
+        cm.on('change', (_editorInstance: Editor, changeObject: EditorChange) => {
+            if (this._ignoreValueChange) {
+                return;
+            }
+            this._value = cm.getValue();
 
-  private _renderCompletionItem(
-    objectName: DirectiveResult,
-    target: HTMLElement
-  ) {
-    render(html`<span class="hint-object-name">${objectName}</span>`, target);
-  }
-
-  private _renderCompletionItemWithDetails(
-    objectName: DirectiveResult,
-    details: EditorCompletionDetails,
-    target: HTMLElement
-  ) {
-    render(
-      html`<span class="hint-object-name">${objectName}</span>
-        <span class="hint-object-details">${details.text}</span> `,
-      target
-    );
-  }
-
-  private _buildHintObjectName(
-    objectName: string | undefined,
-    completionData: EditorCompletion | undefined
-  ) {
-    const markedObjectName = objectName ?? '';
-    const matches = completionData?.matches ?? [];
-    let padding = 0;
-    if (matches.length <= 0) {
-      return html`${markedObjectName}`;
+            // External changes are usually things like the editor switching which
+            // file it is displaying.
+            if (this._valueChangingFromOutside) {
+                // Users can't change hide/fold regions.
+                this._applyHideAndFoldRegions();
+                this._showDiagnostics();
+            } else {
+                this.dispatchEvent(new Event('change'));
+                this._requestCompletionsIfNeeded(cm, changeObject);
+            }
+        });
+        this._codemirror = cm;
     }
 
-    const markedObjectHTML = html`
-      ${matches.map(
-        (match) => html`
-          ${match.indices.map((ind) => {
-            const start = ind[0];
-            const end = ind[1];
-            const markedHTML = html`
-              ${markedObjectName?.substring(
-                0,
-                start + padding
-              )}<mark>${markedObjectName?.substring(
-                start + padding,
-                end + padding + 1
-              )}</mark>${markedObjectName?.substring(end + padding + 1)}
-            `;
-            padding += '<mark></mark>'.length;
-            return markedHTML;
-          })}
-        `
-      )}
-    `;
-    return markedObjectHTML;
-  }
+    private _requestCompletionsIfNeeded(
+        editorInstance: Editor,
+        changeObject: EditorChange
+    ) {
+        if (this.noCompletions || !this._currentFiletypeSupportsCompletion())
+            return;
 
-  private _completionsAsHints(): CodeEditorHint[] {
-    return (
-      this.completions?.map(
-        (comp, i) =>
-          ({
-            text: comp.text,
-            displayText: comp.displayText,
-            render: (element, _data, hint) => {
-              const codeEditorHint = hint as CodeEditorHint;
-              this._renderHint(
-                element,
-                _data,
-                codeEditorHint,
-                i === 0 ? comp.details : undefined // Only render the detail on the first item
-              );
-            },
-            get details() {
-              return comp.details;
-            },
-          } as CodeEditorHint)
-      ) ?? []
-    );
-  }
+        const previousToken = editorInstance.getTokenAt(changeObject.from);
+        const tokenUnderCursor = this.tokenUnderCursor.string.trim();
+        const tokenUnderCursorAsString = tokenUnderCursor.trim();
+        // To help reduce round trips to a language service or a completion provider, we
+        // are providing a flag if the completion is building on top of the earlier recommendations.
+        // If the flag is true, the completion system can just filter the already stored
+        // collection of completions again with the more precise input.
+        // On deletion events, we want to query the LS again, since we might be in a new context after
+        // removing characters from our code.
+        const isInputEvent = changeObject.origin === '+input';
+        const isRefinement =
+            (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
+            isInputEvent;
+        const changeWasCodeCompletion = changeObject.origin === 'complete';
 
-  private _showCompletions() {
-    const cm = this._codemirror;
-    if (!cm || !this.completions || this.completions.length <= 0) return;
+        if (tokenUnderCursorAsString.length <= 0) return;
 
-    const options: ShowHintOptions = {
-      hint: this._hintFunction.bind(this),
-      completeSingle: false,
-      closeOnPick: true,
-      closeOnUnfocus: false,
-      container: this._focusContainer,
-      alignWithWord: true,
-    };
-
-    cm.showHint(options);
-  }
-
-  private _onMousedown() {
-    // Directly focus editable region.
-    this._codemirrorEditable?.focus();
-  }
-
-  private _onFocus() {
-    // Outer container was focused, either by tabbing from outside, or by
-    // pressing Escape.
-    this._showKeyboardHelp = true;
-  }
-
-  private _onBlur() {
-    // Outer container was unfocused, either by tabbing away from it, or by
-    // pressing Enter.
-    this._showKeyboardHelp = false;
-  }
-
-  private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && event.target === this._focusContainer) {
-      this._codemirrorEditable?.focus();
-      // Prevent typing a newline from this same event.
-      event.preventDefault();
-    } else if (event.key === 'Escape') {
-      // Note there is no API for "select the next naturally focusable element",
-      // so instead we just re-focus the outer container, from which point the
-      // user can tab to move focus entirely elsewhere.
-      this._focusContainer?.focus();
-    }
-  }
-
-  /**
-   * Create hidden and folded regions for playground-hide and playground-fold
-   * comments.
-   */
-  private async _applyHideAndFoldRegions() {
-    const cm = this._codemirror;
-    if (!cm) {
-      return;
-    }
-
-    const value = cm.getValue();
-    if (this._hideOrFoldRegionsActive) {
-      // We need to reset any existing hide/fold regions. Hacky, but prodding
-      // the value this way works. We need to defer to a microtask though,
-      // because if we're already inside a CodeMirror change event callback
-      // stack, then these setValue calls will queue up two async change events
-      // that would fire later, and throw us for a loop. This way, the change
-      // events fire synchronously, and we can use our loop guard property
-      // correctly.
-      await null;
-      this._ignoreValueChange = true;
-      cm.setValue('');
-      cm.setValue(value);
-      this._ignoreValueChange = false;
-    }
-    this._hideOrFoldRegionsActive = false;
-
-    if (this.pragmas === 'off-visible') {
-      return;
-    }
-    const pattern = this._maskPatternForLang();
-    if (pattern === undefined) {
-      return;
-    }
-
-    const doc = cm.getDoc();
-
-    const fold = (fromIdx: number, toIdx: number) => {
-      cm.foldCode(/* ignored by our rangeFinder */ 0, {
-        widget: '…',
-        rangeFinder: () => ({
-          from: doc.posFromIndex(fromIdx),
-          to: doc.posFromIndex(toIdx),
-        }),
-      });
-      this._hideOrFoldRegionsActive = true;
-    };
-
-    const hide = (fromIdx: number, toIdx: number) => {
-      doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
-        collapsed: true,
-      });
-      this._hideOrFoldRegionsActive = true;
-    };
-
-    for (const match of value.matchAll(pattern)) {
-      const [, opener, kind, content, closer] = match;
-      const openerStart = match.index;
-      if (openerStart === undefined) {
-        continue;
-      }
-
-      const openerEnd = openerStart + opener.length;
-      hide(openerStart, openerEnd);
-
-      const contentStart = openerEnd;
-      let contentEnd;
-      if (content && closer) {
-        contentEnd = contentStart + content.length;
-        const closerStart = contentEnd;
-        const closerEnd = contentEnd + closer.length;
-        hide(closerStart, closerEnd);
-      } else {
-        // No matching end comment. Include the entire rest of the file.
-        contentEnd = value.length;
-      }
-
-      if (this.pragmas === 'on') {
-        if (kind === 'fold') {
-          fold(contentStart, contentEnd);
-        } else if (kind === 'hide') {
-          hide(contentStart, contentEnd);
+        if (changeWasCodeCompletion) {
+            // If the case that the user triggered a code completion,
+            // we want to empty out the completions until
+            // a letter is input.
+            this._completions = [];
+            return;
         }
-      }
-    }
-  }
 
-  private _maskPatternForLang(): RegExp | undefined {
-    switch (this.type) {
-      case 'js':
-      case 'ts':
-      case 'css':
-        // We consume all leading whitespace and one trailing newline for each
-        // start/end comment. This lets us put start/end comments on their own
-        // line and indent them like the surrounding without affecting the
-        // selected region.
-        return /( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;
-      case 'html':
-        return /( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;
-      default:
+        const id = ++this._currentCompletionRequestId;
+        this.dispatchEvent(
+            new CustomEvent('request-completions', {
+                detail: {
+                    isRefinement,
+                    fileName: this.fileName,
+                    fileContent: this.value,
+                    tokenUnderCursor,
+                    cursorIndex: this.cursorIndex,
+                    provideCompletions: (completions: EditorCompletion[]) =>
+                        this._onCompletionsProvided(id, completions),
+                },
+            })
+        );
+    }
+
+    private _onCompletionsProvided(id: number, completions: EditorCompletion[]) {
+        // To prevent race conditioning, check that the completions provided
+        // are from the latest completions request.
+        if (id !== this._currentCompletionRequestId) {
+            return;
+        }
+
+        this._completions = completions;
+    }
+
+    private _currentFiletypeSupportsCompletion() {
+        // Currently we are only supporting code completion for TS. Change
+        // this in a case that we start to support it for other languages too.
+        return this.type === 'ts';
+    }
+
+    focus() {
+        this._codemirrorEditable?.focus();
+    }
+
+    private _hintFunction(
+        cm: Editor
+    ): Hints | null | undefined | PromiseLike<Hints | null | undefined> {
+        const cursorPosition = cm.getCursor('start');
+        const token = cm.getTokenAt(cursorPosition);
+        const lineNumber = cursorPosition.line;
+
+        const hintList = this._completionsAsHints();
+
+        const hints = {
+            from: { line: lineNumber, ch: token.start } as Position,
+            to: { line: lineNumber, ch: token.end } as Position,
+            list: hintList,
+        } as Hints;
+
+        CodeMirror.on(
+            hints,
+            'select',
+            async (hint: Hint | string, element: Element) => {
+                if (!this._isCodeEditorHint(hint)) return;
+                // If the current selection is the same, e.g. the completions were just
+                // updated by user input, instead of moving through compltions, we don't
+                // want to re-render and re-fetch the details.
+                if (this._currentSelectionLabel === hint.text) return;
+
+                this._onSelectedChange?.();
+
+                this._renderHint(element as HTMLElement, hints, hint, hint.details);
+            }
+        );
+
+        return hints;
+    }
+
+    private _isCodeEditorHint(hint: Hint | string): hint is CodeEditorHint {
+        return (
+            typeof hint !== 'string' &&
+            Object.prototype.hasOwnProperty.call(hint, 'details')
+        );
+    }
+
+    private _renderHint(
+        element: HTMLElement | undefined,
+        _data: Hints,
+        hint: CodeEditorHint,
+        detail?: Promise<EditorCompletionDetails>
+    ) {
+        if (!element) return;
+
+        const itemIndex = _data.list.indexOf(hint);
+        const completionData = this._completions?.[itemIndex];
+        const objectName = this._buildHintObjectName(
+            hint.displayText,
+            completionData
+        );
+        // Render the actual completion item first
+        this._renderCompletionItem(objectName, element);
+
+        // And if we have the detail promise passed into this function,
+        // we want to asynchronously update the detail info into our completion
+        // item. We don't want to block the rendering, so we don't use await.
+        if (detail !== undefined) {
+            detail.then((detailResult: EditorCompletionDetails) => {
+                this._renderCompletionItemWithDetails(
+                    objectName,
+                    detailResult,
+                    element
+                );
+                // Set the current onSelectedChange to a callback to re-render
+                // the currently selected element, but without the details. This is
+                // then triggered when moving to another selection, removing the details
+                // text from the previously selected element.
+                this._onSelectedChange = () => this._renderHint(element, _data, hint);
+                this._currentSelectionLabel = hint.text;
+            });
+        }
+    }
+
+    private _renderCompletionItem(
+        objectName: DirectiveResult,
+        target: HTMLElement
+    ) {
+        render(html`<span class="hint-object-name">${objectName}</span>`, target);
+    }
+
+    private _renderCompletionItemWithDetails(
+        objectName: DirectiveResult,
+        details: EditorCompletionDetails,
+        target: HTMLElement
+    ) {
+        render(
+            html`<span class="hint-object-name">${objectName}</span>
+        <span class="hint-object-details">${details.text}</span> `,
+            target
+        );
+    }
+
+    private _buildHintObjectName(
+        objectName: string | undefined,
+        completionData: EditorCompletion | undefined
+    ) {
+        const markedObjectName = objectName ?? '';
+        const matches = completionData?.matches ?? [];
+        let padding = 0;
+        if (matches.length <= 0) {
+            return html`${markedObjectName}`;
+        }
+
+        const markedObjectHTML = html`
+      ${matches.map(
+            (match) => html`
+          ${match.indices.map((ind) => {
+                const start = ind[0];
+                const end = ind[1];
+                const markedHTML = html`
+              ${markedObjectName?.substring(
+                    0,
+                    start + padding
+                )}<mark>${markedObjectName?.substring(
+                    start + padding,
+                    end + padding + 1
+                )}</mark>${markedObjectName?.substring(end + padding + 1)}
+            `;
+                padding += '<mark></mark>'.length;
+                return markedHTML;
+            })}
+        `
+        )}
+    `;
+        return markedObjectHTML;
+    }
+
+    private _completionsAsHints(): CodeEditorHint[] {
+        return (
+            this._completions?.map(
+                (comp, i) =>
+                ({
+                    text: comp.text,
+                    displayText: comp.displayText,
+                    render: (element, _data, hint) => {
+                        const codeEditorHint = hint as CodeEditorHint;
+                        this._renderHint(
+                            element,
+                            _data,
+                            codeEditorHint,
+                            i === 0 ? comp.details : undefined // Only render the detail on the first item
+                        );
+                    },
+                    get details() {
+                        return comp.details;
+                    },
+                } as CodeEditorHint)
+            ) ?? []
+        );
+    }
+
+    private _showCompletions() {
+        const cm = this._codemirror;
+        if (!cm || !this._completions || this._completions.length <= 0) return;
+
+        const options: ShowHintOptions = {
+            hint: this._hintFunction.bind(this),
+            completeSingle: false,
+            closeOnPick: true,
+            closeOnUnfocus: false,
+            container: this._focusContainer,
+            alignWithWord: true,
+        };
+
+        cm.showHint(options);
+    }
+
+    private _onMousedown() {
+        // Directly focus editable region.
+        this._codemirrorEditable?.focus();
+    }
+
+    private _onFocus() {
+        // Outer container was focused, either by tabbing from outside, or by
+        // pressing Escape.
+        this._showKeyboardHelp = true;
+    }
+
+    private _onBlur() {
+        // Outer container was unfocused, either by tabbing away from it, or by
+        // pressing Enter.
+        this._showKeyboardHelp = false;
+    }
+
+    private _onKeyDown(event: KeyboardEvent) {
+        if (event.key === 'Enter' && event.target === this._focusContainer) {
+            this._codemirrorEditable?.focus();
+            // Prevent typing a newline from this same event.
+            event.preventDefault();
+        } else if (event.key === 'Escape') {
+            // Note there is no API for "select the next naturally focusable element",
+            // so instead we just re-focus the outer container, from which point the
+            // user can tab to move focus entirely elsewhere.
+            this._focusContainer?.focus();
+        }
+    }
+
+    /**
+     * Create hidden and folded regions for playground-hide and playground-fold
+     * comments.
+     */
+    private async _applyHideAndFoldRegions() {
+        const cm = this._codemirror;
+        if (!cm) {
+            return;
+        }
+
+        const value = cm.getValue();
+        if (this._hideOrFoldRegionsActive) {
+            // We need to reset any existing hide/fold regions. Hacky, but prodding
+            // the value this way works. We need to defer to a microtask though,
+            // because if we're already inside a CodeMirror change event callback
+            // stack, then these setValue calls will queue up two async change events
+            // that would fire later, and throw us for a loop. This way, the change
+            // events fire synchronously, and we can use our loop guard property
+            // correctly.
+            await null;
+            this._ignoreValueChange = true;
+            cm.setValue('');
+            cm.setValue(value);
+            this._ignoreValueChange = false;
+        }
+        this._hideOrFoldRegionsActive = false;
+
+        if (this.pragmas === 'off-visible') {
+            return;
+        }
+        const pattern = this._maskPatternForLang();
+        if (pattern === undefined) {
+            return;
+        }
+
+        const doc = cm.getDoc();
+
+        const fold = (fromIdx: number, toIdx: number) => {
+            cm.foldCode(/* ignored by our rangeFinder */ 0, {
+                widget: '…',
+                rangeFinder: () => ({
+                    from: doc.posFromIndex(fromIdx),
+                    to: doc.posFromIndex(toIdx),
+                }),
+            });
+            this._hideOrFoldRegionsActive = true;
+        };
+
+        const hide = (fromIdx: number, toIdx: number) => {
+            doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
+                collapsed: true,
+            });
+            this._hideOrFoldRegionsActive = true;
+        };
+
+        for (const match of value.matchAll(pattern)) {
+            const [, opener, kind, content, closer] = match;
+            const openerStart = match.index;
+            if (openerStart === undefined) {
+                continue;
+            }
+
+            const openerEnd = openerStart + opener.length;
+            hide(openerStart, openerEnd);
+
+            const contentStart = openerEnd;
+            let contentEnd;
+            if (content && closer) {
+                contentEnd = contentStart + content.length;
+                const closerStart = contentEnd;
+                const closerEnd = contentEnd + closer.length;
+                hide(closerStart, closerEnd);
+            } else {
+                // No matching end comment. Include the entire rest of the file.
+                contentEnd = value.length;
+            }
+
+            if (this.pragmas === 'on') {
+                if (kind === 'fold') {
+                    fold(contentStart, contentEnd);
+                } else if (kind === 'hide') {
+                    hide(contentStart, contentEnd);
+                }
+            }
+        }
+    }
+
+    private _maskPatternForLang(): RegExp | undefined {
+        switch (this.type) {
+            case 'js':
+            case 'ts':
+            case 'css':
+                // We consume all leading whitespace and one trailing newline for each
+                // start/end comment. This lets us put start/end comments on their own
+                // line and indent them like the surrounding without affecting the
+                // selected region.
+                return /( *\/\* *playground-(?<kind>hide|fold) *\*\/\n?)(?:(.*?)( *\/\* *playground-\k<kind>-end *\*\/\n?))?/gs;
+            case 'html':
+                return /( *<!-- *playground-(?<kind>hide|fold) *-->\n?)(?:(.*?)( *<!-- *playground-\k<kind>-end *-->\n?))?/gs;
+            default:
+                return undefined;
+        }
+    }
+
+    private _getLanguageMode() {
+        switch (this.type) {
+            case 'ts':
+                return 'google-typescript';
+            case 'js':
+            case 'json':
+                // While the stock CodeMirror JavaScript mode has a restricted "json"
+                // mode, the google-javascript mode does not (which we use because it
+                // supports html-in-js highlighting). Adding the CodeMirror JavaScript
+                // mode would add ~50KiB minified + brotli, so let's just put up with
+                // the fact that you'll get highlighting for JS even though it's not
+                // valid JSON.
+                return 'google-javascript';
+            case 'html':
+                return 'google-html';
+            case 'css':
+                return 'css';
+        }
         return undefined;
     }
-  }
 
-  private _getLanguageMode() {
-    switch (this.type) {
-      case 'ts':
-        return 'google-typescript';
-      case 'js':
-      case 'json':
-        // While the stock CodeMirror JavaScript mode has a restricted "json"
-        // mode, the google-javascript mode does not (which we use because it
-        // supports html-in-js highlighting). Adding the CodeMirror JavaScript
-        // mode would add ~50KiB minified + brotli, so let's just put up with
-        // the fact that you'll get highlighting for JS even though it's not
-        // valid JSON.
-        return 'google-javascript';
-      case 'html':
-        return 'google-html';
-      case 'css':
-        return 'css';
-    }
-    return undefined;
-  }
-
-  private _showDiagnostics() {
-    const cm = this._codemirror;
-    if (cm === undefined) {
-      return;
-    }
-    cm.operation(() => {
-      this._tooltipDiagnostic = undefined;
-      while (this._diagnosticMarkers.length > 0) {
-        this._diagnosticMarkers.pop()!.clear();
-      }
-      if (!this.diagnostics?.length) {
-        if (this._diagnosticsMouseoverListenerActive) {
-          this._cmDom?.removeEventListener(
-            'mouseover',
-            this._onMouseOverWithDiagnostics
-          );
-          this._diagnosticsMouseoverListenerActive = false;
+    private _showDiagnostics() {
+        const cm = this._codemirror;
+        if (cm === undefined) {
+            return;
         }
-        return;
-      }
-      if (!this._diagnosticsMouseoverListenerActive) {
-        this._cmDom?.addEventListener(
-          'mouseover',
-          this._onMouseOverWithDiagnostics
-        );
-        this._diagnosticsMouseoverListenerActive = true;
-      }
-      for (let i = 0; i < this.diagnostics.length; i++) {
-        const diagnostic = this.diagnostics[i];
-        this._diagnosticMarkers.push(
-          cm.markText(
-            {
-              line: diagnostic.range.start.line,
-              ch: diagnostic.range.start.character,
-            },
-            {
-              line: diagnostic.range.end.line,
-              ch: diagnostic.range.end.character,
-            },
-            {
-              className: `diagnostic diagnostic-${i}`,
+        cm.operation(() => {
+            this._tooltipDiagnostic = undefined;
+            while (this._diagnosticMarkers.length > 0) {
+                this._diagnosticMarkers.pop()!.clear();
             }
-          )
+            if (!this.diagnostics?.length) {
+                if (this._diagnosticsMouseoverListenerActive) {
+                    this._cmDom?.removeEventListener(
+                        'mouseover',
+                        this._onMouseOverWithDiagnostics
+                    );
+                    this._diagnosticsMouseoverListenerActive = false;
+                }
+                return;
+            }
+            if (!this._diagnosticsMouseoverListenerActive) {
+                this._cmDom?.addEventListener(
+                    'mouseover',
+                    this._onMouseOverWithDiagnostics
+                );
+                this._diagnosticsMouseoverListenerActive = true;
+            }
+            for (let i = 0; i < this.diagnostics.length; i++) {
+                const diagnostic = this.diagnostics[i];
+                this._diagnosticMarkers.push(
+                    cm.markText(
+                        {
+                            line: diagnostic.range.start.line,
+                            ch: diagnostic.range.start.character,
+                        },
+                        {
+                            line: diagnostic.range.end.line,
+                            ch: diagnostic.range.end.character,
+                        },
+                        {
+                            className: `diagnostic diagnostic-${i}`,
+                        }
+                    )
+                );
+            }
+        });
+    }
+
+    // Using property assignment syntax so that it's already bound to `this` for
+    // add/removeEventListener.
+    private _onMouseOverWithDiagnostics = (event: MouseEvent) => {
+        if (!this.diagnostics?.length) {
+            return;
+        }
+        // Find the diagnostic. Note we could use cm.findMarksAt() with the pointer
+        // coordinates (like the built-in linter plugin does), but since we've
+        // encoded the diagnostic index into a class, we can just extract it
+        // directly from the target.
+        const idxMatch = (event.target as Element).className?.match(
+            /diagnostic-(\d+)/
         );
-      }
-    });
-  }
+        if (idxMatch === null) {
+            this._tooltipDiagnostic = undefined;
+            return;
+        }
+        const idx = Number(idxMatch[1]);
+        const diagnostic = this.diagnostics[idx];
+        if (diagnostic === this._tooltipDiagnostic?.diagnostic) {
+            // Already showing the tooltip for this diagnostic.
+            return;
+        }
 
-  // Using property assignment syntax so that it's already bound to `this` for
-  // add/removeEventListener.
-  private _onMouseOverWithDiagnostics = (event: MouseEvent) => {
-    if (!this.diagnostics?.length) {
-      return;
-    }
-    // Find the diagnostic. Note we could use cm.findMarksAt() with the pointer
-    // coordinates (like the built-in linter plugin does), but since we've
-    // encoded the diagnostic index into a class, we can just extract it
-    // directly from the target.
-    const idxMatch = (event.target as Element).className?.match(
-      /diagnostic-(\d+)/
-    );
-    if (idxMatch === null) {
-      this._tooltipDiagnostic = undefined;
-      return;
-    }
-    const idx = Number(idxMatch[1]);
-    const diagnostic = this.diagnostics[idx];
-    if (diagnostic === this._tooltipDiagnostic?.diagnostic) {
-      // Already showing the tooltip for this diagnostic.
-      return;
-    }
-
-    // Position the tooltip relative to the squiggly code span. To maximize
-    // available space, place it above/below and left/right depending on which
-    // quadrant the span is in.
-    let position = '';
-    const hostRect = this.getBoundingClientRect();
-    const spanRect = (event.target as Element).getBoundingClientRect();
-    const hostCenterY = hostRect.y + hostRect.height / 2;
-    if (spanRect.y < hostCenterY) {
-      // Note the rects are viewport relative, so the extra subtractions here
-      // are to convert to host-relative.
-      position += `top:${spanRect.y + spanRect.height - hostRect.y}px;`;
-    } else {
-      position += `bottom:${hostRect.bottom - spanRect.y}px;`;
-    }
-    const hostCenterX = hostRect.x + hostRect.width / 2;
-    if (spanRect.left < hostCenterX) {
-      position += `left:${Math.max(0, spanRect.x - hostRect.x)}px`;
-    } else {
-      position += `right:${Math.max(0, hostRect.right - spanRect.right)}px`;
-    }
-    this._tooltipDiagnostic = {diagnostic, position};
-  };
+        // Position the tooltip relative to the squiggly code span. To maximize
+        // available space, place it above/below and left/right depending on which
+        // quadrant the span is in.
+        let position = '';
+        const hostRect = this.getBoundingClientRect();
+        const spanRect = (event.target as Element).getBoundingClientRect();
+        const hostCenterY = hostRect.y + hostRect.height / 2;
+        if (spanRect.y < hostCenterY) {
+            // Note the rects are viewport relative, so the extra subtractions here
+            // are to convert to host-relative.
+            position += `top:${spanRect.y + spanRect.height - hostRect.y}px;`;
+        } else {
+            position += `bottom:${hostRect.bottom - spanRect.y}px;`;
+        }
+        const hostCenterX = hostRect.x + hostRect.width / 2;
+        if (spanRect.left < hostCenterX) {
+            position += `left:${Math.max(0, spanRect.x - hostRect.x)}px`;
+        } else {
+            position += `right:${Math.max(0, hostRect.right - spanRect.right)}px`;
+        }
+        this._tooltipDiagnostic = { diagnostic, position };
+    };
 }
 
 declare global {
-  interface HTMLElementTagNameMap {
-    'playground-code-editor': PlaygroundCodeEditor;
-  }
+    interface HTMLElementTagNameMap {
+        'playground-code-editor': PlaygroundCodeEditor;
+    }
 }
