@@ -141,6 +141,13 @@ export const knobs = [
     default: false,
     htmlAttribute: 'line-numbers',
   }),
+  checkbox({
+    id: 'noCompletions',
+    label: 'No completions',
+    section: 'features',
+    default: false,
+    htmlAttribute: 'no-completions',
+  }),
 
   // general appearance
   color({

@@ -197,6 +197,12 @@ export class PlaygroundCodeEditor extends LitElement {
   readonly = false;
 
   /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
+  /**
    * Diagnostics to display on the current file.
    */
   @property({attribute: false})
@@ -291,6 +297,7 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'tokenUnderCursor':
           case 'fileName':
+          case 'noCompletions':
             // Ignored
             break;
           default:
@@ -422,7 +429,8 @@ export class PlaygroundCodeEditor extends LitElement {
     editorInstance: Editor,
     changeObject: EditorChange
   ) {
-    if (!this._currentFiletypeSupportsCompletion()) return;
+    if (this.noCompletions || !this._currentFiletypeSupportsCompletion())
+      return;
 
     const previousToken = editorInstance.getTokenAt(changeObject.from);
     const tokenUnderCursor = this.tokenUnderCursor.string.trim();

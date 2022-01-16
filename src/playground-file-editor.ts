@@ -79,6 +79,12 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   @property({type: Boolean, reflect: true})
   readonly = false;
 
+  /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
   private get _files() {
     return this._project?.files ?? [];
   }
@@ -140,6 +146,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .diagnostics=${this._project?.diagnostics?.get(
                 this._currentFile?.name ?? ''
               )}
+              .noCompletions=${this.noCompletions}
               @change=${this._onEdit}
               @request-completions=${this._onRequestCompletions}
             >

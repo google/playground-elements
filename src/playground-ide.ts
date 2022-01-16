@@ -254,6 +254,12 @@ export class PlaygroundIde extends LitElement {
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
   /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
+  /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
    */
@@ -300,6 +306,7 @@ export class PlaygroundIde extends LitElement {
           .lineNumbers=${this.lineNumbers}
           .project=${projectId}
           .pragmas=${this.pragmas}
+          .noCompletions=${this.noCompletions}
         >
         </playground-file-editor>
       </div>
