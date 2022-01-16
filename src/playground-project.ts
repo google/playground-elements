@@ -717,6 +717,7 @@ export class PlaygroundProject extends LitElement {
     this.save();
   }
 }
+
 /**
  * Fetches and expands the given JSON project config URL.
  */
@@ -757,6 +758,7 @@ const fetchProjectConfig = async (
     alreadyFetchedConfigUrls
   );
 };
+
 /**
  * Expands a partial project config by following its `extends` property, and
  * fetching the content for all files.
@@ -879,7 +881,7 @@ const typeEnumToMimeType = (type?: string) => {
 
 /**
  * Validate an import map configuration (https://wicg.github.io/import-maps/).
- * Returns an array of errors.If empty, the import map is valid.
+ * Returns an array of errors. If empty, the import map is valid.
  */
 const validateImportMap = (importMap: unknown): string[] => {
   const errors = [];
