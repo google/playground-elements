@@ -499,11 +499,11 @@ export class PlaygroundCodeEditor extends LitElement {
 
     const hintList = this._completionsAsHints();
 
-    const hints = {
+    const hints: Hints = {
       from: {line: lineNumber, ch: token.start} as Position,
       to: {line: lineNumber, ch: token.end} as Position,
       list: hintList,
-    } as Hints;
+    };
 
     CodeMirror.on(
       hints,
