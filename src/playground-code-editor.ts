@@ -490,9 +490,7 @@ export class PlaygroundCodeEditor extends LitElement {
     this._codemirrorEditable?.focus();
   }
 
-  private _hintFunction(
-    cm: Editor
-  ): Hints | null | undefined | PromiseLike<Hints | null | undefined> {
+  private _hintFunction(cm: Editor): Hints {
     const cursorPosition = cm.getCursor('start');
     const token = cm.getTokenAt(cursorPosition);
     const lineNumber = cursorPosition.line;
@@ -511,7 +509,7 @@ export class PlaygroundCodeEditor extends LitElement {
       async (hint: Hint | string, element: Element) => {
         if (!this._isCodeEditorHint(hint)) return;
         // If the current selection is the same, e.g. the completions were just
-        // updated by user input, instead of moving through compltions, we don't
+        // updated by user input, instead of moving through completions, we don't
         // want to re-render and re-fetch the details.
         if (this._currentSelectionLabel === hint.text) return;
 
