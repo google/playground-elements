@@ -290,7 +290,6 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'diagnostics':
             this._showDiagnostics();
-            this._showCompletions();
             break;
           case 'cursorIndex':
             cm.setCursor(this.cursorIndex ?? 0);
@@ -464,6 +463,7 @@ export class PlaygroundCodeEditor extends LitElement {
     }
 
     const id = ++this._currentCompletionRequestId;
+    const cursorIndexOnRequest = this.cursorIndex;
     this.dispatchEvent(
       new CustomEvent('request-completions', {
         detail: {
@@ -472,16 +472,25 @@ export class PlaygroundCodeEditor extends LitElement {
           tokenUnderCursor,
           cursorIndex: this.cursorIndex,
           provideCompletions: (completions: EditorCompletion[]) =>
-            this._onCompletionsProvided(id, completions),
+            this._onCompletionsProvided(id, completions, cursorIndexOnRequest),
         },
       })
     );
   }
 
-  private _onCompletionsProvided(id: number, completions: EditorCompletion[]) {
+  private _onCompletionsProvided(
+    id: number,
+    completions: EditorCompletion[],
+    cursorIndex: number
+  ) {
     // To prevent race conditioning, check that the completions provided
     // are from the latest completions request.
-    if (id !== this._currentCompletionRequestId) {
+    // We also check that the cursor hasn't moved to another position since the
+    // completion request, causing the completion to be applied in a wrong spot.
+    if (
+      id !== this._currentCompletionRequestId ||
+      cursorIndex !== this.cursorIndex
+    ) {
       return;
     }
 
