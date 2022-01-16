@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, PropertyValues, html, nothing, render} from 'lit';
+import {LitElement, css, PropertyValues, html, nothing, render, TemplateResult} from 'lit';
 import {DirectiveResult} from 'lit/directive.js';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
@@ -567,7 +567,7 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _renderCompletionItem(
-    objectName: DirectiveResult,
+    objectName: string | TemplateResult,
     target: HTMLElement
   ) {
     render(html`<span class="hint-object-name">${objectName}</span>`, target);
