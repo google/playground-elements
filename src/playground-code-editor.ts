@@ -4,7 +4,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, PropertyValues, html, nothing, render, TemplateResult} from 'lit';
+import {
+  LitElement,
+  css,
+  PropertyValues,
+  html,
+  nothing,
+  render,
+  TemplateResult,
+} from 'lit';
 import {DirectiveResult} from 'lit/directive.js';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
@@ -560,7 +568,8 @@ export class PlaygroundCodeEditor extends LitElement {
         // the currently selected element, but without the details. This is
         // then triggered when moving to another selection, removing the details
         // text from the previously selected element.
-        this._onCompletionSelectedChange = () => this._renderHint(element, _data, hint);
+        this._onCompletionSelectedChange = () =>
+          this._renderHint(element, _data, hint);
         this._currentCompletionSelectionLabel = hint.text;
       });
     }
@@ -585,15 +594,22 @@ export class PlaygroundCodeEditor extends LitElement {
     );
   }
 
+  /**
+   * Builds the name of the completable item for use in the completion UI.
+   * Using marks, we can highlight the matching characters in the typed input
+   * matching with the completion suggestion.
+   */
   private _buildHintObjectName(
     objectName: string | undefined,
     completionData: EditorCompletion | undefined
-  ) {
+  ): TemplateResult | string {
     const markedObjectName = objectName ?? '';
     const matches = completionData?.matches ?? [];
     let padding = 0;
     if (matches.length <= 0) {
-      return html`${markedObjectName}`;
+      // In the situation, that none of the input matches with the
+      // completion item suggestion, we exit early, leaving the objectName unmarked.
+      return markedObjectName;
     }
 
     const markedObjectHTML = html`
@@ -611,6 +627,9 @@ export class PlaygroundCodeEditor extends LitElement {
                 end + padding + 1
               )}</mark>${markedObjectName?.substring(end + padding + 1)}
             `;
+            // As the matching is done in a fuzzy manner, we might have multiple matching
+            // indices in the completion word. In these situations, we need to pad out the
+            // matching positions, by the length of our already appended <mark> -tags.
             padding += '<mark></mark>'.length;
             return markedHTML;
           })}
