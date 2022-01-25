@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import { html, css, PropertyValues, nothing, TemplateResult } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
+import {html, css, PropertyValues, nothing, TemplateResult} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators.js';
+import {classMap} from 'lit/directives/class-map.js';
 import '@material/mwc-icon-button';
-import { PlaygroundProject } from './playground-project.js';
+import {PlaygroundProject} from './playground-project.js';
 import '@material/mwc-linear-progress';
-import { PlaygroundConnectedElement } from './playground-connected-element.js';
+import {PlaygroundConnectedElement} from './playground-connected-element.js';
 import './internal/overlay.js';
 
 /**
@@ -217,7 +217,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
         </mwc-icon-button>
       </div>
 
-      <div id="content" class=${classMap({ error: !!this._error })}>
+      <div id="content" class=${classMap({error: !!this._error})}>
         <mwc-linear-progress
           aria-hidden=${this._loading ? 'false' : 'true'}
           part="preview-loading-indicator"
@@ -263,7 +263,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     // window (on Chrome but not Firefox, and only when the parent/iframe origins
     // are different). Removing the iframe from the DOM while we initiate the
     // reload prevents a history entry from being added.
-    const { parentNode, nextSibling } = iframe;
+    const {parentNode, nextSibling} = iframe;
     if (parentNode) {
       iframe.remove();
     }
@@ -298,7 +298,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   }
 
   private _slotHasAnyVisibleChildren() {
-    const assigned = this._slot?.assignedNodes({ flatten: true });
+    const assigned = this._slot?.assignedNodes({flatten: true});
     if (!assigned) {
       return false;
     }
