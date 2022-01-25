@@ -1,11 +1,11 @@
 <h1 align="center">playground-elements</h1>
 
 <p align="center">
-  <br>
+  <br>
   Serverless coding environments for the web.
   <br>
-  <br>
-  <img src="./images/preview.png" width="650">
+  <br>
+  <img src="./images/preview.png" width="650">
  <br><br>
   <a href="https://www.npmjs.com/package/playground-elements">
     <img height="20" src="https://img.shields.io/npm/v/playground-elements.svg"></img></a>
@@ -161,7 +161,7 @@ There are 3 ways to specify the files of a playground project:
 Add one or more `<script>` tags as children of
 your `<playground-ide>` or `<playground-project>`, using the following attributes:
 
-| Attribute             |  Description                                                                                                          |
+| Attribute             | Description                                                                                                           |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `type`                | Required filetype. Options: `sample/html`, `sample/css`, `sample/js`, `sample/ts`, `sample/json`, `sample/importmap`. |
 | `filename`            | Required filename.                                                                                                    |
@@ -203,7 +203,7 @@ Be sure to escape closing `</script>` tags within your source as `<&lt;script>`.
 
 Set the `project-src` attribute or `projectSrc` property to a JSON file with format:
 
-| Property            |  Description                                                                                                                                                                     |
+| Property            | Description                                                                                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `files`             | An object mapping filenames to file data.                                                                                                                                        |
 | `files.content`     | Optional text content of the file. If omitted, a `fetch` is made to retrieve the file by filename, relative to the manifest URL.                                                 |
@@ -342,7 +342,7 @@ Playground automatically compiles `.ts` files using
 
 The following compiler settings are used:
 
-| Name                                                                                       | Value    |
+| Name                                                                                       | Value    |
 | ------------------------------------------------------------------------------------------ | -------- |
 | [`target`](https://www.typescriptlang.org/tsconfig#target)                                 | `ES2017` |
 | [`module`](https://www.typescriptlang.org/tsconfig#module)                                 | `ESNext` |
@@ -668,13 +668,13 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Properties
 
-| Name                 |  Type                            | Default                   | Description                                                                                                                                                                                        |
+| Name                 | Type                             | Default                   | Description                                                                                                                                                                                        |
 | -------------------- | -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                                                                                                           |
 | `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
-| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
-| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                                                                                                         |
-| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                                                                                                        |
+| `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
+| `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                                                                                                         |
+| `resizable`          | `boolean`                        | `false`                   | Allow dragging the line between editor and preview to change relative sizes                                                                                                                        |
 | `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
 | `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
 | `modified`           | `boolean`                        | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
@@ -682,9 +682,9 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 
 ### Slots
 
-| Name         |  Description                              |
-| ------------ | ----------------------------------------- |
-| `default`    | Inline files ([details](#inline-scripts)) |
+| Name      | Description                               |
+| --------- | ----------------------------------------- |
+| `default` | Inline files ([details](#inline-scripts)) |
 
 ---
 
@@ -696,7 +696,7 @@ project element.
 
 ### Properties
 
-| Name             |  Type                         | Default                   | Description                                                                                                                                                                                        |
+| Name             | Type                          | Default                   | Description                                                                                                                                                                                        |
 | ---------------- | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                                                                                                                |
 | `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
@@ -707,7 +707,7 @@ project element.
 
 ### Methods
 
-| Method                                         |   Description                                                |
+| Method                                         | Description                                                  |
 | ---------------------------------------------- | ------------------------------------------------------------ |
 | `addFile(filename: string)`                    | Create a new file. Type is inferred from filename extension. |
 | `deleteFile(filename: string)`                 | Delete a file.                                               |
@@ -715,13 +715,13 @@ project element.
 
 ### Slots
 
-| Name         |  Description                              |
-| ------------ | ----------------------------------------- |
-| `default`    | Inline files ([details](#inline-scripts)) |
+| Name      | Description                               |
+| --------- | ----------------------------------------- |
+| `default` | Inline files ([details](#inline-scripts)) |
 
 ### Events
 
-| Event          |  Description                           |
+| Event          | Description                            |
 | -------------- | -------------------------------------- |
 | `filesChanged` | A file was added, removed, or renamed. |
 | `urlChanged`   | The preview URL has changed            |
@@ -734,11 +734,11 @@ project element.
 
 ### Properties
 
-| Property             |  Type                            | Default     | Description                                                                                                       |
+| Property             | Type                             | Default     | Description                                                                                                       |
 | -------------------- | -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
 | `project`            | `string \| PlaygroundProject`    | `undefined` | The project this bar is associated with. Either the `<playground-project>` itself, or its `id` in the host scope. |
 | `editor`             | `string \| PlaygroundFileEditor` | `undefined` | The editor this bar controls. Either the `<playground-file-editor>` itself, or its `id` in the host scope.        |
-| `editableFileSystem` | `boolean`                        | `false`     | Allow adding, removing, and renaming files                                                                        |
+| `editableFileSystem` | `boolean`                        | `false`     | Allow adding, removing, and renaming files                                                                        |
 
 ---
 
@@ -746,14 +746,14 @@ project element.
 
 ### Properties
 
-| Name          |  Type                             | Default     | Description                                                                                                                    |
+| Name          | Type                              | Default     | Description                                                                                                                    |
 | ------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `project`     | `string \| PlaygroundProject`     | `undefined` | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
 | `filename`    | `string`                          | `undefined` | The name of the project file that is currently being displayed. Set when changing tabs. Does not reflect to attribute.         |
 | `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
-| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
+| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
 | `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
-| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
+| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
 
 ---
 
@@ -763,19 +763,19 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name          |  Type                             | Default       | Description                                                                                   |
-| ------------- | --------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
-| `value`       | `string`                          | `""`          | Code as string                                                                                |
-| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined`   | Language of the file to syntax highlight                                                      |
-| `readonly`    | `boolean`                         | `false`       | Do not allow edits                                                                            |
-| `lineNumbers` | `boolean`                         | `false`       | Render a gutter with line numbers in the editor                                               |
-| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`        | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
+| Name          | Type                              | Default     | Description                                                                                   |
+| ------------- | --------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `value`       | `string`                          | `""`        | Code as string                                                                                |
+| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | Language of the file to syntax highlight                                                      |
+| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                            |
+| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                               |
+| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
 
 ### Events
 
-| Event         |  Description                         |
-| ------------- | ------------------------------------ |
-| `changed`     | User made an edit to the active file |
+| Event     | Description                          |
+| --------- | ------------------------------------ |
+| `changed` | User made an edit to the active file |
 
 ---
 
@@ -783,7 +783,7 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name       |  Type                      | Default        | Description                                                                                                                    |
+| Name       | Type                       | Default        | Description                                                                                                                    |
 | ---------- | -------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `project`  | `string PlaygroundProject` | `undefined`    | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
 | `location` | `string`                   | `""`           |                                                                                                                                |
@@ -797,17 +797,17 @@ Floating controls for adding, deleting, and renaming files.
 
 ### Properties
 
-| Name            |  Type                                         | Default       | Description                                                                                                                                                                                                   |
-| --------------- | --------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `state`         | `"closed" \| "menu" \| "rename" \| "newfile"` | `"closed"`    | The kind of control to display.<br><br>`closed`: Hidden.<br>`menu`: Menu with "Rename" and "Delete" items.<br>`rename`: Control for renaming an existing file.<br>`newfile`: Control for creating a new file. |
-| `filename`      | `string`                                      | `undefined`   | When state is `menu` or `newfile`, the name of the relevant file.                                                                                                                                             |
-| `anchorElement` | `HTMLElement`                                 | `undefined`   | Absolutely position these controls at the bottom-left corner of this element.                                                                                                                                 |
+| Name            | Type                                          | Default     | Description                                                                                                                                                                                                   |
+| --------------- | --------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `state`         | `"closed" \| "menu" \| "rename" \| "newfile"` | `"closed"`  | The kind of control to display.<br><br>`closed`: Hidden.<br>`menu`: Menu with "Rename" and "Delete" items.<br>`rename`: Control for renaming an existing file.<br>`newfile`: Control for creating a new file. |
+| `filename`      | `string`                                      | `undefined` | When state is `menu` or `newfile`, the name of the relevant file.                                                                                                                                             |
+| `anchorElement` | `HTMLElement`                                 | `undefined` | Absolutely position these controls at the bottom-left corner of this element.                                                                                                                                 |
 
 ### Events
 
-| Event         | Detail               |  Description                                               |
-| ------------- | -------------------- | ---------------------------------------------------------- |
-| `newFile`     | `{filename: string}` | The specified new file was created through these controls. |
+| Event     | Detail               | Description                                                |
+| --------- | -------------------- | ---------------------------------------------------------- |
+| `newFile` | `{filename: string}` | The specified new file was created through these controls. |
 
 ## Styling
 
@@ -816,33 +816,33 @@ to quickly experiment with themes and other customizations.
 
 ### Custom Properties
 
-| Name                                               | Default                                                                                     | Description                                                                                                                        |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `--playground-bar-height`                          | `40px`                                                                                      | `height` of the tab bar and the preview bar                                                                                        |
-| `--playground-code-font-family`                    | `monospace`                                                                                 | `font-family` of code in the editor                                                                                                |
-| `--playground-code-font-size`                      | `14px`                                                                                      | `font-size` of code in the editor                                                                                                  |
-| `--playground-code-line-height`                    | `1.4em`                                                                                     | `line-height` of code in the editor                                                                                                |
-| `--playground-code-TOKEN-color`                    | *various*                                                                                   | Color of each kind of `TOKEN` in syntax highlighted-code. See the [syntax highlighting](#syntax-highlighting) section for details. |
-| `--playground-highlight-color`                     | ![](images/colors/6200EE.png) `#6200EE`                                                     | Color of the active file-picker tab label and indicator, and the preview loading bar                                               |
-| `--playground-code-background`                     | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                     | `background` of the code editor                                                                                                    |
-| `--playground-code-gutter-background`              | ![](images/colors/FFFFFF.png) `var(--playground-code-background, #FFFFFF)`                  | `background` of the line-numbers gutter                                                                                            |
-| `--playground-code-gutter-box-shadow`              | `none`                                                                                      | `box-shadow` of the line-numbers gutter                                                                                            |
-| `--playground-code-gutter-border-right`            | `none`                                                                                      | `border-right` of the line-numbers gutter                                                                                          |
-| `--playground-code-linenumber-color`               | ![](images/colors/767676.png) `#767676`                                                     | `color` of line-numbers                                                                                                            |
-| `--playground-code-cursor-color`                   | ![](images/colors/000000.png) `var(--playground-code-default-color, #000000)`               | `color` of the cursor                                                                                                              |
-| `--playground-code-selection-background`           | ![](images/colors/D7D4F0.png) `#D7D4F0`                                                     | `background` of selected text                                                                                                      |
-| `--playground-code-padding`                        | `0`                                                                                         | `padding` around the editor code block                                                                                             |
-| `--playground-code-line-padding`                   | `0 4px`                                                                                     | `padding` around each line of code                                                                                                 |
-| `--playground-tab-bar-background`                  | ![](images/colors/EAEAEA.png) `#EAEAEA`                                                     | `background` of the file-picker tab bar                                                                                            |
-| `--playground-tab-bar-active-background`           | ![](images/colors/EAEAEA.png) `transparent`                                                 | `background` of the active file-picker tab                                                                                         |
-| `--playground-tab-bar-foreground-color`            | ![](images/colors/000000.png) `#000000`                                                     | Text `color` of inactive file-picker tabs                                                                                          |
-| `--playground-tab-bar-active-color`                | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Text `color` of active file-picker tab                                                                                             |
-| `--playground-tab-bar-indicator-color`             | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | `color` of active file-picker tab indicator (use `transparent` to hide)                                                            |
-| `--playground-tab-bar-font-size`                   | `14px`                                                                                      | `font-size` of tab titles in the file-picker tab bar                                                                               |
-| `--playground-preview-toolbar-background`          | ![](images/colors/FFFFFF.png) `#FFFFFF`                                                     | `background` of the preview toolbar                                                                                                |
-| `--playground-preview-toolbar-foreground-color`    | ![](images/colors/444444.png) `#444444`                                                     | Text `color` of the preview toolbar                                                                                                |
-| `--playground-border`                              | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                                            | Outer and inner border                                                                                                             |
-| `--playground-floating-controls-highlight-color`   | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`                  | Highlight color of popup controls buttons and inputs                                                                               |
+| Name                                             | Default                                                                       | Description                                                                                                                        |
+| ------------------------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `--playground-bar-height`                        | `40px`                                                                        | `height` of the tab bar and the preview bar                                                                                        |
+| `--playground-code-font-family`                  | `monospace`                                                                   | `font-family` of code in the editor                                                                                                |
+| `--playground-code-font-size`                    | `14px`                                                                        | `font-size` of code in the editor                                                                                                  |
+| `--playground-code-line-height`                  | `1.4em`                                                                       | `line-height` of code in the editor                                                                                                |
+| `--playground-code-TOKEN-color`                  | _various_                                                                     | Color of each kind of `TOKEN` in syntax highlighted-code. See the [syntax highlighting](#syntax-highlighting) section for details. |
+| `--playground-highlight-color`                   | ![](images/colors/6200EE.png) `#6200EE`                                       | Color of the active file-picker tab label and indicator, and the preview loading bar                                               |
+| `--playground-code-background`                   | ![](images/colors/FFFFFF.png) `#FFFFFF`                                       | `background` of the code editor                                                                                                    |
+| `--playground-code-gutter-background`            | ![](images/colors/FFFFFF.png) `var(--playground-code-background, #FFFFFF)`    | `background` of the line-numbers gutter                                                                                            |
+| `--playground-code-gutter-box-shadow`            | `none`                                                                        | `box-shadow` of the line-numbers gutter                                                                                            |
+| `--playground-code-gutter-border-right`          | `none`                                                                        | `border-right` of the line-numbers gutter                                                                                          |
+| `--playground-code-linenumber-color`             | ![](images/colors/767676.png) `#767676`                                       | `color` of line-numbers                                                                                                            |
+| `--playground-code-cursor-color`                 | ![](images/colors/000000.png) `var(--playground-code-default-color, #000000)` | `color` of the cursor                                                                                                              |
+| `--playground-code-selection-background`         | ![](images/colors/D7D4F0.png) `#D7D4F0`                                       | `background` of selected text                                                                                                      |
+| `--playground-code-padding`                      | `0`                                                                           | `padding` around the editor code block                                                                                             |
+| `--playground-code-line-padding`                 | `0 4px`                                                                       | `padding` around each line of code                                                                                                 |
+| `--playground-tab-bar-background`                | ![](images/colors/EAEAEA.png) `#EAEAEA`                                       | `background` of the file-picker tab bar                                                                                            |
+| `--playground-tab-bar-active-background`         | ![](images/colors/EAEAEA.png) `transparent`                                   | `background` of the active file-picker tab                                                                                         |
+| `--playground-tab-bar-foreground-color`          | ![](images/colors/000000.png) `#000000`                                       | Text `color` of inactive file-picker tabs                                                                                          |
+| `--playground-tab-bar-active-color`              | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`    | Text `color` of active file-picker tab                                                                                             |
+| `--playground-tab-bar-indicator-color`           | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`    | `color` of active file-picker tab indicator (use `transparent` to hide)                                                            |
+| `--playground-tab-bar-font-size`                 | `14px`                                                                        | `font-size` of tab titles in the file-picker tab bar                                                                               |
+| `--playground-preview-toolbar-background`        | ![](images/colors/FFFFFF.png) `#FFFFFF`                                       | `background` of the preview toolbar                                                                                                |
+| `--playground-preview-toolbar-foreground-color`  | ![](images/colors/444444.png) `#444444`                                       | Text `color` of the preview toolbar                                                                                                |
+| `--playground-border`                            | ![](images/colors/DDDDDD.png)`1px solid #DDDDDD`                              | Outer and inner border                                                                                                             |
+| `--playground-floating-controls-highlight-color` | ![](images/colors/6200EE.png) `var(--playground-highlight-color, #6200EE)`    | Highlight color of popup controls buttons and inputs                                                                               |
 
 ### Shadow Parts
 
@@ -851,17 +851,17 @@ parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) are exported,
 which you can style with additional rules not covered by the above CSS custom
 properties.
 
-| Part name                                   | Exported by                         | Description                                                                                                |
-| ------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `tab-bar`                                   | `ide`                               | Tab bar file switcher                                                                                      |
-| `editor`                                    | `ide`                               | Editor                                                                                                     |
-| `preview`                                   | `ide`                               | Preview                                                                                                    |
-| `preview-toolbar`                           | `ide`, `preview`                    | Preview top bar                                                                                            |
-| `preview-location`                          | `ide`, `preview`                    | Preview top bar "Result" heading                                                                           |
-| `preview-reload-button`                     | `ide`, `preview`                    | Preview top bar reload button                                                                              |
-| `preview-loading-indicator`                 | `ide`, `preview`                    | Preview top bar horizontal loading indicator                                                               |
-| `diagnostic-tooltip`                        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
-| `dialog`                                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
+| Part name                   | Exported by                         | Description                                                                                                |
+| --------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `tab-bar`                   | `ide`                               | Tab bar file switcher                                                                                      |
+| `editor`                    | `ide`                               | Editor                                                                                                     |
+| `preview`                   | `ide`                               | Preview                                                                                                    |
+| `preview-toolbar`           | `ide`, `preview`                    | Preview top bar                                                                                            |
+| `preview-location`          | `ide`, `preview`                    | Preview top bar "Result" heading                                                                           |
+| `preview-reload-button`     | `ide`, `preview`                    | Preview top bar reload button                                                                              |
+| `preview-loading-indicator` | `ide`, `preview`                    | Preview top bar horizontal loading indicator                                                               |
+| `diagnostic-tooltip`        | `ide`, `file-editor`, `code-editor` | The tooltip that appears when hovering over a code span that has an error                                  |
+| `dialog`                    | `ide`, `file-editor`, `code-editor` | Dialogs appearing on top of a component (e.g. the editor keyboard help modal that shows on keyboard focus) |
 
 ## Syntax highlighting
 
