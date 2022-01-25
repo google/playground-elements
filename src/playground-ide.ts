@@ -255,6 +255,12 @@ export class PlaygroundIde extends LitElement {
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
 
   /**
+   * The HTML file used in the preview.
+   */
+  @property()
+  htmlFile = 'index.html';
+
+  /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
    */
@@ -321,6 +327,7 @@ export class PlaygroundIde extends LitElement {
                        preview-loading-indicator,
                        diagnostic-tooltip,
                        dialog"
+          .htmlFile=${this.htmlFile}
           .project=${projectId}
         ></playground-preview>
       </div>

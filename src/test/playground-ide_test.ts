@@ -649,4 +649,19 @@ suite('playground-ide', () => {
 
     assert.lengthOf(project.files ?? [], 0);
   });
+
+  test('uses custom htmlFile property', async () => {
+    const ide = document.createElement('playground-ide')!;
+    ide.sandboxBaseUrl = '/';
+    ide.htmlFile = 'src/index.html';
+    container.appendChild(ide);
+    ide.config = {
+      files: {
+        'src/index.html': {
+          content: 'Hello HTML',
+        },
+      },
+    };
+    await assertPreviewContains('Hello HTML');
+  });
 });

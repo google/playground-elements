@@ -96,6 +96,12 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   `;
 
   /**
+   * The HTML file used in the preview.
+   */
+  @property()
+  htmlFile = 'index.html';
+
+  /**
    * The string to display in the location bar.
    */
   @property()
@@ -178,10 +184,10 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
 
   private get _indexUrl() {
     const base = this._project?.baseUrl;
-    if (!base) {
+    if (!base || !this.htmlFile) {
       return '';
     }
-    const url = new URL('index.html', base);
+    const url = new URL(this.htmlFile, base);
     return url.toString();
   }
 
