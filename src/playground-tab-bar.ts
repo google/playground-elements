@@ -175,7 +175,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
               ${label || name}
               ${this.editableFileSystem
                 ? html`<mwc-icon-button
-                    label="File menu"
+                    aria-label="File menu"
                     class="menu-button"
                     @click=${this._onOpenMenu}
                   >
@@ -200,7 +200,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         ? html`
             <mwc-icon-button
               class="add-file-button"
-              label="New file"
+              aria-label="New file"
               @click=${this._onClickAddFile}
             >
               <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->

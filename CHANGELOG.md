@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.7] - 2021-12-07
+
+### Fixed
+
+- Fixed missing `aria-label` attributes on the reload button, file context menu
+  button, and new file button
+
 ## [0.14.6] - 2021-10-18
 
 ### Fixed
