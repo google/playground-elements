@@ -660,8 +660,15 @@ suite('playground-ide', () => {
         'src/index.html': {
           content: 'Hello HTML',
         },
+        'other.html': {
+          content: 'Other HTML',
+        },
       },
     };
     await assertPreviewContains('Hello HTML');
+
+    // test that the preview updates when the htmlFile property changes
+    ide.htmlFile = 'other.html';
+    await assertPreviewContains('Other HTML');
   });
 });
