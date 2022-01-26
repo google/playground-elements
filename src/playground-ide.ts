@@ -257,7 +257,7 @@ export class PlaygroundIde extends LitElement {
   /**
    * The HTML file used in the preview.
    */
-  @property()
+  @property({attribute: 'html-file'})
   htmlFile = 'index.html';
 
   /**

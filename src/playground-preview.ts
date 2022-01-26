@@ -98,7 +98,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   /**
    * The HTML file used in the preview.
    */
-  @property()
+  @property({attribute: 'html-file'})
   htmlFile = 'index.html';
 
   /**
