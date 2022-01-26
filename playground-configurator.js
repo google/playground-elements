@@ -1750,7 +1750,7 @@ const lo=$`@keyframes mdc-linear-progress-primary-indeterminate-translate{0%{tra
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-let co=class extends Zr{constructor(){super(),this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{const e=this._iframe;if(!e)return;const{parentNode:t,nextSibling:r}=e;t&&e.remove(),e.src="",e.src=this._indexUrl,t&&t.insertBefore(e,r),this._loading=!0,this._showLoadingBar=!0},void 0===navigator.serviceWorker&&(this._error=M`<p>
+let co=class extends Zr{constructor(){super(),this.htmlFile="index.html",this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{const e=this._iframe;if(!e)return;const{parentNode:t,nextSibling:r}=e;t&&e.remove(),e.src="",e.src=this._indexUrl,t&&t.insertBefore(e,r),this._loading=!0,this._showLoadingBar=!0},void 0===navigator.serviceWorker&&(this._error=M`<p>
           <b>Sorry!</b> Preview unavailable because this browser doesn't
           <a
             href="https://caniuse.com/serviceworkers"
@@ -1771,7 +1771,7 @@ let co=class extends Zr{constructor(){super(),this.location="Result",this._loadi
             >
             support service workers in private browsing mode.</i
           >
-        </p> `)}update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("urlChanged",this.reload),t.removeEventListener("compileStart",this.reload)),this._project&&(this._project.addEventListener("urlChanged",this.reload),this._project.addEventListener("compileStart",this.reload))}super.update(e)}get _indexUrl(){var e;const t=null===(e=this._project)||void 0===e?void 0:e.baseUrl;return t?new URL("index.html",t).toString():""}render(){return M`
+        </p> `)}update(e){if(e.has("_project")){const t=e.get("_project");t&&(t.removeEventListener("urlChanged",this.reload),t.removeEventListener("compileStart",this.reload)),this._project&&(this._project.addEventListener("urlChanged",this.reload),this._project.addEventListener("compileStart",this.reload))}super.update(e)}get _indexUrl(){var e;const t=null===(e=this._project)||void 0===e?void 0:e.baseUrl;return t&&this.htmlFile?new URL(this.htmlFile,t).toString():""}render(){return M`
       <div id="toolbar" part="preview-toolbar">
         <span id="location" part="preview-location"> ${this.location}</span>
         <mwc-icon-button
@@ -1890,13 +1890,13 @@ let co=class extends Zr{constructor(){super(),this.location="Result",this._loadi
     [hidden] {
       display: none;
     }
-  `,o([he()],co.prototype,"location",void 0),o([be("iframe")],co.prototype,"_iframe",void 0),o([be("slot")],co.prototype,"_slot",void 0),o([ge()],co.prototype,"_loading",void 0),o([ge()],co.prototype,"_showLoadingBar",void 0),o([ge()],co.prototype,"_loadedAtLeastOnce",void 0),o([ge()],co.prototype,"_error",void 0),co=o([ue("playground-preview")],co);
+  `,o([he({attribute:"html-file"})],co.prototype,"htmlFile",void 0),o([he()],co.prototype,"location",void 0),o([be("iframe")],co.prototype,"_iframe",void 0),o([be("slot")],co.prototype,"_slot",void 0),o([ge()],co.prototype,"_loading",void 0),o([ge()],co.prototype,"_showLoadingBar",void 0),o([ge()],co.prototype,"_loadedAtLeastOnce",void 0),o([ge()],co.prototype,"_error",void 0),co=o([ue("playground-preview")],co);
 /**
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-let uo=class extends se{constructor(){super(...arguments),this.sandboxBaseUrl="https://unpkg.com/playground-elements@0.14.7/",this.sandboxScope="__playground_swfs_f56081d9/",this.editableFileSystem=!1,this.lineNumbers=!1,this.resizable=!1,this.pragmas="on"}get projectSrc(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.projectSrc)&&void 0!==t?t:this._projectSrcSetBeforeRender}set projectSrc(e){const t=this._project;t?t.projectSrc=e:this._projectSrcSetBeforeRender=e}get config(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.config)&&void 0!==t?t:this._configSetBeforeRender}set config(e){const t=this._project;t?t.config=e:this._configSetBeforeRender=e}get modified(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.modified)&&void 0!==t&&t}render(){const e="project",t="editor";return M`
+let uo=class extends se{constructor(){super(...arguments),this.sandboxBaseUrl="https://unpkg.com/playground-elements@0.14.7/",this.sandboxScope="__playground_swfs_f56081d9/",this.editableFileSystem=!1,this.lineNumbers=!1,this.resizable=!1,this.pragmas="on",this.htmlFile="index.html"}get projectSrc(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.projectSrc)&&void 0!==t?t:this._projectSrcSetBeforeRender}set projectSrc(e){const t=this._project;t?t.projectSrc=e:this._projectSrcSetBeforeRender=e}get config(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.config)&&void 0!==t?t:this._configSetBeforeRender}set config(e){const t=this._project;t?t.config=e:this._configSetBeforeRender=e}get modified(){var e,t;return null!==(t=null===(e=this._project)||void 0===e?void 0:e.modified)&&void 0!==t&&t}render(){const e="project",t="editor";return M`
       <playground-project
         id=${e}
         .sandboxBaseUrl=${this.sandboxBaseUrl}
@@ -1938,6 +1938,7 @@ let uo=class extends se{constructor(){super(...arguments),this.sandboxBaseUrl="h
                        preview-loading-indicator,
                        diagnostic-tooltip,
                        dialog"
+          .htmlFile=${this.htmlFile}
           .project=${e}
         ></playground-preview>
       </div>
@@ -2017,7 +2018,7 @@ let uo=class extends se{constructor(){super(...arguments),this.sandboxBaseUrl="h
       z-index: 99999;
       cursor: col-resize;
     }
-  `,o([he({attribute:"project-src",hasChanged:()=>!1})],uo.prototype,"projectSrc",null),o([he({attribute:!1,hasChanged:()=>!1})],uo.prototype,"config",null),o([he({attribute:"sandbox-base-url"})],uo.prototype,"sandboxBaseUrl",void 0),o([he({attribute:"sandbox-scope"})],uo.prototype,"sandboxScope",void 0),o([he({type:Boolean,attribute:"editable-file-system"})],uo.prototype,"editableFileSystem",void 0),o([he({type:Boolean,attribute:"line-numbers"})],uo.prototype,"lineNumbers",void 0),o([he({type:Boolean})],uo.prototype,"resizable",void 0),o([he()],uo.prototype,"pragmas",void 0),o([be("playground-project")],uo.prototype,"_project",void 0),o([be("#resizeBar")],uo.prototype,"_resizeBar",void 0),o([be("#rhs")],uo.prototype,"_rhs",void 0),uo=o([ue("playground-ide")],uo);const po=[$`
+  `,o([he({attribute:"project-src",hasChanged:()=>!1})],uo.prototype,"projectSrc",null),o([he({attribute:!1,hasChanged:()=>!1})],uo.prototype,"config",null),o([he({attribute:"sandbox-base-url"})],uo.prototype,"sandboxBaseUrl",void 0),o([he({attribute:"sandbox-scope"})],uo.prototype,"sandboxScope",void 0),o([he({type:Boolean,attribute:"editable-file-system"})],uo.prototype,"editableFileSystem",void 0),o([he({type:Boolean,attribute:"line-numbers"})],uo.prototype,"lineNumbers",void 0),o([he({type:Boolean})],uo.prototype,"resizable",void 0),o([he()],uo.prototype,"pragmas",void 0),o([he({attribute:"html-file"})],uo.prototype,"htmlFile",void 0),o([be("playground-project")],uo.prototype,"_project",void 0),o([be("#resizeBar")],uo.prototype,"_resizeBar",void 0),o([be("#rhs")],uo.prototype,"_rhs",void 0),uo=o([ue("playground-ide")],uo);const po=[$`
 .playground-theme-3024-day {
   --playground-code-background: rgb(247, 247, 247);
   --playground-code-default-color: rgb(58, 52, 50);
