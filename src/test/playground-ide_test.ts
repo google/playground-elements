@@ -649,4 +649,26 @@ suite('playground-ide', () => {
 
     assert.lengthOf(project.files ?? [], 0);
   });
+
+  test('uses custom htmlFile property', async () => {
+    const ide = document.createElement('playground-ide')!;
+    ide.sandboxBaseUrl = '/';
+    ide.htmlFile = 'src/index.html';
+    container.appendChild(ide);
+    ide.config = {
+      files: {
+        'src/index.html': {
+          content: 'Hello HTML',
+        },
+        'other.html': {
+          content: 'Other HTML',
+        },
+      },
+    };
+    await assertPreviewContains('Hello HTML');
+
+    // test that the preview updates when the htmlFile property changes
+    ide.htmlFile = 'other.html';
+    await assertPreviewContains('Other HTML');
+  });
 });

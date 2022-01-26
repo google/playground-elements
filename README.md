@@ -678,6 +678,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `sandboxBaseUrl`     | `string`                         | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
 | `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
 | `modified`           | `boolean`                        | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
+| `htmlFile`           | `string`                         | `"index.html"`            | The HTML file used in the preview.                                                                                                                                                                 |
 
 ### Slots
 
@@ -782,10 +783,11 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name       | Type                       | Default     | Description                                                                                                                    |
-| ---------- | -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `project`  | `string PlaygroundProject` | `undefined` | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
-| `location` | `string`                   | `""`        |                                                                                                                                |
+| Name       | Type                       | Default        | Description                                                                                                                    |
+| ---------- | -------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `project`  | `string PlaygroundProject` | `undefined`    | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
+| `location` | `string`                   | `""`           |                                                                                                                                |
+| `htmlFile` | `string`                   | `"index.html"` | The HTML file used in the preview.                                                                                             |
 
 ---
 
