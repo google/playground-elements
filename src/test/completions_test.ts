@@ -55,10 +55,11 @@ suite('completions', () => {
     while (chars.length > 0) {
       const c = chars.shift();
       if (c) {
+        await raf();
+        await raf();
         sendKeys({
           type: c,
         });
-        await raf();
       }
     }
   };
@@ -89,6 +90,71 @@ suite('completions', () => {
       check();
     });
   };
+  const waitForCompletionsToAppear = () =>
+    new Promise((resolve, reject) => {
+      // Make sure we can grab the focuscontainer for observing
+      if (!editor || !editor.shadowRoot) return reject();
+      const focusContainer = editor.shadowRoot.querySelector('#focusContainer');
+      if (!focusContainer) return reject();
+
+      const config = {childList: true};
+      // To avoid computer/dom specific timing errors in tests, we rely on mutations
+      const observer = new MutationObserver(async (mutationsList, obs) => {
+        if (addedNodesContainsCompletionsMenu(mutationsList)) {
+          obs.disconnect();
+          await waitMilli(100);
+          resolve('');
+        }
+      });
+
+      if (focusContainer) {
+        observer.observe(focusContainer, config);
+      }
+
+      setTimeout(() => {
+        observer.disconnect();
+        resolve('');
+      }, 10000);
+    });
+  const waitForCompletionsToDisappear = () =>
+    new Promise((resolve, reject) => {
+      // Make sure we can grab the focuscontainer for observing
+      if (!editor || !editor.shadowRoot) return reject();
+      const focusContainer = editor.shadowRoot.querySelector('#focusContainer');
+      if (!focusContainer) return reject();
+
+      const config = {childList: true};
+      // To avoid computer/dom specific timing errors in tests, we rely on mutations
+      const observer = new MutationObserver(async (mutationsList, obs) => {
+        if (removedNodesContainsCompletionsMenu(mutationsList)) {
+          obs.disconnect();
+          await waitMilli(100);
+          resolve('');
+        }
+      });
+
+      if (focusContainer) {
+        observer.observe(focusContainer, config);
+      }
+      setTimeout(() => {
+        observer.disconnect();
+        resolve('');
+      }, 10000);
+    });
+  const addedNodesContainsCompletionsMenu = (mutationsList: MutationRecord[]) =>
+    mutationsList.some((mut) =>
+      Array.from(mut.addedNodes).some((node) =>
+        (node as Element).classList.contains('CodeMirror-hints')
+      )
+    );
+  const removedNodesContainsCompletionsMenu = (
+    mutationsList: MutationRecord[]
+  ) =>
+    mutationsList.some((mut) =>
+      Array.from(mut.removedNodes).some((node) =>
+        (node as Element).classList.contains('CodeMirror-hints')
+      )
+    );
   const raf = async () => new Promise((r) => requestAnimationFrame(r));
   const waitMilli = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const pierce = async (...selectors: string[]) => {
@@ -108,7 +174,7 @@ suite('completions', () => {
       project?.addEventListener(
         'compileDone',
         async () => {
-          await waitMilli(500);
+          waitMilli(1000);
           resolve('');
         },
         {once: true}
@@ -119,9 +185,20 @@ suite('completions', () => {
     await waitForCompileDone();
     editor?.focus();
     await emulateUser('document.query');
+    await waitForCompletionsToAppear();
 
     const completionItemList =
       editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+
+    if (completionItemList?.children.length !== 7) {
+      // For debugging purposes, it's easier to debug if we know the invalid completions
+      console.log('Invalid completions: ');
+      for (const listItem of completionItemList?.children || []) {
+        console.log(
+          listItem?.querySelector<HTMLElement>('.hint-object-name')?.innerText
+        );
+      }
+    }
     assert.isNotNull(completionItemList);
     assert.isDefined(completionItemList);
     assert.equal(
@@ -135,6 +212,7 @@ suite('completions', () => {
     await waitForCompileDone();
     editor?.focus();
     await emulateUser('document.que');
+    await waitForCompletionsToAppear();
 
     sendKeys({
       press: 'ArrowDown',
@@ -156,11 +234,12 @@ suite('completions', () => {
     await waitForCompileDone();
     editor?.focus();
     await emulateUser('document.queryS');
+    await waitForCompletionsToAppear();
 
     sendKeys({
       press: 'Enter',
     });
-    await waitMilli(100);
+    await waitForCompletionsToDisappear();
 
     assert.equal(
       editor?.value,
