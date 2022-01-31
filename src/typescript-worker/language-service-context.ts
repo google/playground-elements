@@ -88,7 +88,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
   private _removeDeletedFiles(files: Map<string, string>) {
     this.getScriptFileNames().forEach((fileName) => {
       // Do not delete the dependency files, as then they will get re-applied every compilation.
-        // This is because the compilation step is aware of these files, but the completion step isn't.
+      // This is because the compilation step is aware of these files, but the completion step isn't.
       if (!fileName.includes('node_modules') && !files.has(fileName)) {
         this.files.delete(fileName);
       }
