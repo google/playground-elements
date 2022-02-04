@@ -330,6 +330,7 @@ export class PlaygroundConfigurator extends LitElement {
             .lineNumbers=${this.values.getValue('lineNumbers')}
             .resizable=${this.values.getValue('resizable')}
             .editableFileSystem=${this.values.getValue('editableFileSystem')}
+            .noCompletions=${this.values.getValue('noCompletions')}
             project-src="./project/project.json"
             sandbox-base-url="."
           >

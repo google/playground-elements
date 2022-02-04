@@ -77,7 +77,6 @@ export class PlaygroundIde extends LitElement {
       height: 100%;
       flex: 1;
       min-width: 100px;
-      overflow: hidden;
       border-radius: inherit;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
@@ -261,6 +260,12 @@ export class PlaygroundIde extends LitElement {
   htmlFile = 'index.html';
 
   /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
+  /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
    */
@@ -307,6 +312,7 @@ export class PlaygroundIde extends LitElement {
           .lineNumbers=${this.lineNumbers}
           .project=${projectId}
           .pragmas=${this.pragmas}
+          .noCompletions=${this.noCompletions}
         >
         </playground-file-editor>
       </div>

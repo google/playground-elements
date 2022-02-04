@@ -372,6 +372,69 @@ div.CodeMirror-dragcursors {
   background: var(--playground-code-selection-background, #d7d4f0);
 }
 
+/* Completions */
+
+.CodeMirror-hints {
+  position: absolute;
+  z-index: 10;
+  overflow: hidden;
+  list-style: none;
+
+  margin: 0;
+  padding: 2px;
+
+  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  border: 1px solid var(--playground-code-selection-background, silver);
+
+  background: var(--playground-code-background, white);
+  font-size: var(--playground-code-font-size, 14px);
+  font-family: monospace;
+
+  max-height: 20em;
+  width: 600px;
+  max-width: 600px;
+  overflow-y: auto;
+}
+
+.CodeMirror-hint {
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 2px;
+  white-space: pre;
+  color: var(--playground-code-cursor-color, black);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.CodeMirror-hint-active {
+  background: var(--playground-code-background, rgba(0, 0, 0, 0.2));
+  filter: brightness(1.2);
+}
+
+.CodeMirror-hint mark {
+  background: inherit;
+  color: var(--playground-code-qualifier-color, #555);
+}
+
+.CodeMirror-hint .hint-object-name {
+  padding-right: 2em;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.CodeMirror-hint .hint-object-details {
+  flex-basis: 80%;
+  font-size: calc(var(--playground-code-font-size, 14px) * 0.9);
+  color: var(--playground-code-string-2-color, white);
+  opacity: 0.8;
+  text-align: right;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Used to force a border model for a node */
 .cm-force-border {
   padding-right: 0.1px;

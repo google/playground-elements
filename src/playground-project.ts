@@ -20,12 +20,19 @@ import {
   ModuleImportMap,
   HttpError,
   UPDATE_SERVICE_WORKER,
+  CodeEditorChangeData,
+  CompletionInfoWithDetails,
 } from './shared/worker-api.js';
 import {
   getRandomString,
   endWithSlash,
   forceSkypackRawMode,
 } from './shared/util.js';
+import {
+  completionEntriesAsEditorCompletions,
+  populateCompletionInfoWithDetailGetters,
+  sortCompletionItems,
+} from './shared/completion-utils.js';
 import {npmVersion, serviceWorkerHash} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
@@ -169,6 +176,8 @@ export class PlaygroundProject extends LitElement {
   get diagnostics(): Map<string, Diagnostic[]> | undefined {
     return this._build?.diagnostics;
   }
+
+  private _completionInfo?: CompletionInfoWithDetails;
 
   /**
    * A pristine copy of the original project files, used for the `modified`
@@ -544,6 +553,75 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     this.dispatchEvent(new CustomEvent('compileDone'));
+  }
+
+  async getCompletions(changeData: CodeEditorChangeData) {
+    const tokenUnderCursorAsString = changeData.tokenUnderCursor.trim();
+    // If the user is starting a new word, we need to fetch relevant completion items
+    // from the TypeScript Language Service. If we are however building on top of
+    // a already fetched completions list, by narrowing keyword matches, we can
+    // just work with what we have fetched earlier.
+    if (!changeData.isRefinement) {
+      const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+      const completionInfo = await workerApi.getCompletions(
+        changeData.fileName,
+        changeData.fileContent,
+        tokenUnderCursorAsString,
+        changeData.cursorIndex,
+        {importMap: this._importMap}
+      );
+      if (completionInfo) {
+        const getCompletionDetailsFunction =
+          this._getCompletionDetails.bind(this);
+        // We pre-generate the getter for each completion item's details, so that
+        // if neeeded, they can fetch their details themselves.
+        this._completionInfo = populateCompletionInfoWithDetailGetters(
+          completionInfo,
+          changeData.fileName,
+          changeData.cursorIndex,
+          getCompletionDetailsFunction
+        );
+      }
+    }
+
+    const searchWordIsPeriod = changeData.tokenUnderCursor === '.';
+    // In the case that the search word is a period, we don't really
+    // have any material to fuzzy find with, so we don't have need
+    // for running the search results through a fuzzy search.
+    // For this case, we just return the entries as completion items as is.
+    let completions = [];
+    if (searchWordIsPeriod) {
+      completions = completionEntriesAsEditorCompletions(
+        this._completionInfo?.entries,
+        '.'
+      );
+    } else {
+      completions = sortCompletionItems(
+        this._completionInfo?.entries,
+        tokenUnderCursorAsString
+      );
+    }
+    // We want to pre-fetch the first completion item, if it's present
+    // so that when the data gets to the code-editor, the detail hopefully
+    // is already loaded.
+    completions[0]?.details;
+    return completions;
+  }
+
+  private async _getCompletionDetails(
+    filename: string,
+    cursorIndex: number,
+    completionWord: string
+  ) {
+    const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+    const completionItemDetails = await workerApi.getCompletionItemDetails(
+      filename,
+      cursorIndex,
+      {importMap: this._importMap},
+      completionWord
+    );
+
+    return completionItemDetails;
   }
 
   private lastSave = Promise.resolve();

@@ -12,6 +12,7 @@ import './playground-code-editor.js';
 import {PlaygroundProject} from './playground-project.js';
 import {PlaygroundCodeEditor} from './playground-code-editor.js';
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
+import {CodeEditorChangeData} from './shared/worker-api.js';
 
 /**
  * A text editor associated with a <playground-project>.
@@ -78,6 +79,12 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   @property({type: Boolean, reflect: true})
   readonly = false;
 
+  /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
   private get _files() {
     return this._project?.files ?? [];
   }
@@ -138,7 +145,9 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .diagnostics=${this._project?.diagnostics?.get(
                 this._currentFile?.name ?? ''
               )}
+              .noCompletions=${this.noCompletions}
               @change=${this._onEdit}
+              @request-completions=${this._onRequestCompletions}
             >
             </playground-code-editor>
           `
@@ -170,6 +179,17 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       return;
     }
     this._project.editFile(this._currentFile, this._editor.value);
+  }
+
+  private async _onRequestCompletions(e: CustomEvent) {
+    const codeEditorChangeData = e.detail as CodeEditorChangeData;
+    codeEditorChangeData.fileName = this.filename ?? '';
+    const completions = await this._project?.getCompletions(
+      codeEditorChangeData
+    );
+    if (completions) {
+      codeEditorChangeData.provideCompletions(completions);
+    }
   }
 }
 

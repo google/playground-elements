@@ -4,13 +4,36 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, PropertyValues, html, nothing} from 'lit';
+import {
+  LitElement,
+  css,
+  PropertyValues,
+  html,
+  nothing,
+  render,
+  TemplateResult,
+} from 'lit';
+import {DirectiveResult} from 'lit/directive.js';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
+import type {
+  Editor,
+  EditorChange,
+  Hint,
+  Hints,
+  Position,
+  ShowHintOptions,
+} from 'codemirror';
+import {
+  EditorCompletion,
+  EditorCompletionDetails,
+  EditorPosition,
+  EditorToken,
+} from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -23,18 +46,13 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
   entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
 }
 
-export interface EditorToken {
-  /** The character (on the given line) at which the token starts. */
-  start: number;
-  /** The character at which the token ends. */
-  end: number;
-  /** Code string under the cursor. */
-  string: string;
-}
-
-interface EditorPosition {
-  ch: number;
-  line: number;
+export interface CodeEditorHint {
+  details?: Promise<EditorCompletionDetails>;
+  text: string;
+  displayText?: string | undefined;
+  render?:
+    | ((element: HTMLLIElement, data: Hints, cur: Hint) => void)
+    | undefined;
 }
 
 const unreachable = (n: never) => n;
@@ -184,10 +202,25 @@ export class PlaygroundCodeEditor extends LitElement {
   readonly = false;
 
   /**
+   * If true, will disable code completions in the code-editor.
+   */
+  @property({type: Boolean, attribute: 'no-completions'})
+  noCompletions = false;
+
+  /**
    * Diagnostics to display on the current file.
    */
   @property({attribute: false})
   diagnostics?: Array<Diagnostic>;
+
+  @state()
+  _completions?: EditorCompletion[];
+
+  private _onCompletionSelectedChange?: () => void;
+
+  private _currentCompletionSelectionLabel = '';
+
+  private _currentCompletionRequestId = 0;
 
   /**
    * How to handle `playground-hide` and `playground-fold` comments.
@@ -264,7 +297,12 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'cursorPosition':
             cm.setCursor(this.cursorPosition ?? {ch: 0, line: 0});
             break;
+          case '_completions':
+            this._showCompletions();
+            break;
           case 'tokenUnderCursor':
+          case 'noCompletions':
+            // Ignored
             break;
           default:
             unreachable(prop);
@@ -371,7 +409,7 @@ export class PlaygroundCodeEditor extends LitElement {
         },
       }
     );
-    cm.on('change', () => {
+    cm.on('change', (_editorInstance: Editor, changeObject: EditorChange) => {
       if (this._ignoreValueChange) {
         return;
       }
@@ -384,15 +422,268 @@ export class PlaygroundCodeEditor extends LitElement {
         this._applyHideAndFoldRegions();
         this._showDiagnostics();
       } else {
-        // Change event is only for user input.
         this.dispatchEvent(new Event('change'));
+        this._requestCompletionsIfNeeded(changeObject);
       }
     });
     this._codemirror = cm;
   }
 
+  private _requestCompletionsIfNeeded(changeObject: EditorChange) {
+    if (
+      this.noCompletions ||
+      !this._currentFiletypeSupportsCompletion() ||
+      !this._codemirror
+    )
+      return;
+
+    const previousToken = this._codemirror.getTokenAt(changeObject.from);
+    const tokenUnderCursor = this.tokenUnderCursor.string.trim();
+    const tokenUnderCursorAsString = tokenUnderCursor.trim();
+    // To help reduce round trips to a language service or a completion provider, we
+    // are providing a flag if the completion is building on top of the earlier recommendations.
+    // If the flag is true, the completion system can just filter the already stored
+    // collection of completions again with the more precise input.
+    // On deletion events, we want to query the LS again, since we might be in a new context after
+    // removing characters from our code.
+    const isInputEvent = changeObject.origin === '+input';
+    const isRefinement =
+      (tokenUnderCursor.length > 1 || previousToken.string === '.') &&
+      isInputEvent;
+    const changeWasCodeCompletion = changeObject.origin === 'complete';
+
+    if (tokenUnderCursorAsString.length <= 0) return;
+
+    if (changeWasCodeCompletion) {
+      // If the case that the user triggered a code completion,
+      // we want to empty out the completions until
+      // a letter is input.
+      this._completions = [];
+      return;
+    }
+
+    const id = ++this._currentCompletionRequestId;
+    const cursorIndexOnRequest = this.cursorIndex;
+    this.dispatchEvent(
+      new CustomEvent('request-completions', {
+        detail: {
+          isRefinement,
+          fileContent: this.value,
+          tokenUnderCursor,
+          cursorIndex: this.cursorIndex,
+          provideCompletions: (completions: EditorCompletion[]) =>
+            this._onCompletionsProvided(id, completions, cursorIndexOnRequest),
+        },
+      })
+    );
+  }
+
+  private _onCompletionsProvided(
+    id: number,
+    completions: EditorCompletion[],
+    cursorIndex: number
+  ) {
+    // To prevent race conditioning, check that the completions provided
+    // are from the latest completions request.
+    // We also check that the cursor hasn't moved to another position since the
+    // completion request, causing the completion to be applied in a wrong spot.
+    if (
+      id !== this._currentCompletionRequestId ||
+      cursorIndex !== this.cursorIndex
+    ) {
+      return;
+    }
+
+    this._completions = completions;
+  }
+
+  private _currentFiletypeSupportsCompletion() {
+    // Currently we are only supporting code completion for TS. Change
+    // this in a case that we start to support it for other languages too.
+    return this.type === 'ts';
+  }
+
   focus() {
     this._codemirrorEditable?.focus();
+  }
+
+  private _completionsAsHints(cm: Editor): Hints {
+    const cursorPosition = cm.getCursor('start');
+    const token = cm.getTokenAt(cursorPosition);
+    const lineNumber = cursorPosition.line;
+
+    const hintList =
+      this._completions?.map(
+        (comp, i) =>
+          ({
+            text: comp.text,
+            displayText: comp.displayText,
+            render: (element, _data, hint) => {
+              const codeEditorHint = hint as CodeEditorHint;
+              this._renderHint(
+                element,
+                _data,
+                codeEditorHint,
+                i === 0 ? comp.details : undefined // Only render the detail on the first item
+              );
+            },
+            get details() {
+              return comp.details;
+            },
+          } as CodeEditorHint)
+      ) ?? [];
+
+    const hints: Hints = {
+      from: {line: lineNumber, ch: token.start} as Position,
+      to: {line: lineNumber, ch: token.end} as Position,
+      list: hintList,
+    };
+
+    CodeMirror.on(
+      hints,
+      'select',
+      async (hint: Hint | string, element: Element) => {
+        if (!this._isCodeEditorHint(hint)) return;
+        // If the current selection is the same, e.g. the completions were just
+        // updated by user input, instead of moving through completions, we don't
+        // want to re-render and re-fetch the details.
+        if (this._currentCompletionSelectionLabel === hint.text) return;
+
+        this._onCompletionSelectedChange?.();
+
+        this._renderHint(element as HTMLElement, hints, hint, hint.details);
+      }
+    );
+
+    return hints;
+  }
+
+  private _isCodeEditorHint(hint: Hint | string): hint is CodeEditorHint {
+    return (
+      typeof hint !== 'string' &&
+      Object.prototype.hasOwnProperty.call(hint, 'details')
+    );
+  }
+
+  private _renderHint(
+    element: HTMLElement | undefined,
+    _data: Hints,
+    hint: CodeEditorHint,
+    detail?: Promise<EditorCompletionDetails>
+  ) {
+    if (!element) return;
+
+    const itemIndex = _data.list.indexOf(hint);
+    const completionData = this._completions?.[itemIndex];
+    const objectName = this._buildHintObjectName(
+      hint.displayText,
+      completionData
+    );
+    // Render the actual completion item first
+    this._renderCompletionItem(objectName, element);
+
+    // And if we have the detail promise passed into this function,
+    // we want to asynchronously update the detail info into our completion
+    // item. We don't want to block the rendering, so we don't use await.
+    //
+    // The detail promise is passed into this function only for the item
+    // currently highlighted from the completions list.
+    if (detail !== undefined) {
+      detail.then((detailResult: EditorCompletionDetails) => {
+        this._renderCompletionItemWithDetails(
+          objectName,
+          detailResult,
+          element
+        );
+        // Set the current onSelectedChange to a callback to re-render
+        // the currently selected element, but without the details. This is
+        // then triggered when moving to another selection, removing the details
+        // text from the previously selected element.
+        this._onCompletionSelectedChange = () =>
+          this._renderHint(element, _data, hint);
+        this._currentCompletionSelectionLabel = hint.text;
+      });
+    }
+  }
+
+  private _renderCompletionItem(
+    objectName: string | TemplateResult,
+    target: HTMLElement
+  ) {
+    render(html`<span class="hint-object-name">${objectName}</span>`, target);
+  }
+
+  private _renderCompletionItemWithDetails(
+    objectName: DirectiveResult,
+    details: EditorCompletionDetails,
+    target: HTMLElement
+  ) {
+    render(
+      html`<span class="hint-object-name">${objectName}</span>
+        <span class="hint-object-details">${details.text}</span> `,
+      target
+    );
+  }
+
+  /**
+   * Builds the name of the completable item for use in the completion UI.
+   * Using marks, we can highlight the matching characters in the typed input
+   * matching with the completion suggestion.
+   */
+  private _buildHintObjectName(
+    objectName: string | undefined,
+    completionData: EditorCompletion | undefined
+  ): TemplateResult | string {
+    const markedObjectName = objectName ?? '';
+    const matches = completionData?.matches ?? [];
+    let padding = 0;
+    if (matches.length <= 0) {
+      // In the situation, that none of the input matches with the
+      // completion item suggestion, we exit early, leaving the objectName unmarked.
+      return markedObjectName;
+    }
+
+    const markedObjectHTML = html`
+      ${matches.map(
+        (match) => html`
+          ${match.indices.map((ind) => {
+            const start = ind[0];
+            const end = ind[1];
+            const markedHTML = html`
+              ${markedObjectName?.substring(
+                0,
+                start + padding
+              )}<mark>${markedObjectName?.substring(
+                start + padding,
+                end + padding + 1
+              )}</mark>${markedObjectName?.substring(end + padding + 1)}
+            `;
+            // As the matching is done in a fuzzy manner, we might have multiple matching
+            // indices in the completion word. In these situations, we need to pad out the
+            // matching positions, by the length of our already appended mark -tags.
+            padding += '<mark></mark>'.length;
+            return markedHTML;
+          })}
+        `
+      )}
+    `;
+    return markedObjectHTML;
+  }
+
+  private _showCompletions() {
+    const cm = this._codemirror;
+    if (!cm || !this._completions || this._completions.length <= 0) return;
+
+    const options: ShowHintOptions = {
+      hint: this._completionsAsHints.bind(this),
+      completeSingle: false,
+      closeOnPick: true,
+      closeOnUnfocus: false,
+      container: this._focusContainer,
+      alignWithWord: true,
+    };
+
+    cm.showHint(options);
   }
 
   private _onMousedown() {

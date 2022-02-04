@@ -11,6 +11,7 @@ import '../_codemirror/codemirror-bundle.js';
 // wrong runtime modules.
 import type CodeMirrorCore from 'codemirror';
 import type CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
+import type CodeMirrorHinting from 'codemirror/addon/hint/show-hint.js';
 
 /**
  * CodeMirror function.
@@ -20,6 +21,8 @@ import type CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
  */
 export const CodeMirror = (
   window as {
-    CodeMirror: typeof CodeMirrorCore & typeof CoreMirrorFolding;
+    CodeMirror: typeof CodeMirrorCore &
+      typeof CoreMirrorFolding &
+      typeof CodeMirrorHinting;
   }
 ).CodeMirror;

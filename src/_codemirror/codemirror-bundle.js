@@ -1,6 +1,9 @@
 // The main CodeMirror 5 editor.
 import 'codemirror/lib/codemirror.js';
 
+// Hints
+import 'codemirror/addon/hint/show-hint.js';
+
 // Folding.
 import 'codemirror/addon/fold/foldcode.js';
 

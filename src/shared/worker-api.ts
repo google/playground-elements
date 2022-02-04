@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
 import type {Diagnostic} from 'vscode-languageserver';
 
 /**
@@ -77,12 +78,69 @@ export interface WorkerConfig {
   cdnBaseUrl?: string;
 }
 
+export interface EditorToken {
+  /** The character (on the given line) at which the token starts. */
+  start: number;
+  /** The character at which the token ends. */
+  end: number;
+  /** Code string under the cursor. */
+  string: string;
+}
+
+export interface EditorPosition {
+  ch: number;
+  line: number;
+}
+
+type RangeTuple = [number, number];
+
+export type EditorCompletionMatch = {
+  indices: ReadonlyArray<RangeTuple>;
+};
+
+export interface EditorCompletion {
+  text: string;
+  displayText: string;
+  score: number;
+  matches?: EditorCompletionMatch[];
+  details: Promise<EditorCompletionDetails>;
+}
+
+export interface EditorTagInfo {
+  name: string;
+  text?: EditorTag[];
+}
+
+export interface EditorTag {
+  text: string;
+  kind: string;
+}
+
+export interface EditorCompletionDetails {
+  text: string;
+  tags: EditorTagInfo[];
+  documentation: string[];
+}
+
 export interface WorkerAPI {
   compileProject(
     files: Array<SampleFile>,
     config: WorkerConfig,
     emit: (result: BuildOutput) => void
   ): Promise<void>;
+  getCompletions(
+    filename: string,
+    fileContent: string,
+    tokenUnderCursor: string,
+    cursorIndex: number,
+    config: WorkerConfig
+  ): Promise<WithMetadata<CompletionInfo> | undefined>;
+  getCompletionItemDetails(
+    filename: string,
+    cursorIndex: number,
+    config: WorkerConfig,
+    completionWord: string
+  ): Promise<EditorCompletionDetails>;
 }
 
 export interface HttpError {
@@ -131,6 +189,25 @@ export interface ProjectManifest {
 export interface ModuleImportMap {
   imports?: {[name: string]: string};
   // No scopes for now.
+}
+
+export interface CodeEditorChangeData {
+  isRefinement: boolean;
+  fileName: string;
+  fileContent: string;
+  tokenUnderCursor: string;
+  cursorIndex: number;
+  provideCompletions: (completions: EditorCompletion[]) => void;
+}
+
+export interface CompletionEntryWithDetails extends CompletionEntry {
+  _details: undefined | Promise<EditorCompletionDetails>;
+  details: Promise<EditorCompletionDetails>;
+}
+
+export interface CompletionInfoWithDetails
+  extends WithMetadata<CompletionInfo> {
+  entries: CompletionEntryWithDetails[];
 }
 
 export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
