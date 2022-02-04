@@ -252,13 +252,19 @@ export class PlaygroundIde extends LitElement {
    */
   @property()
   pragmas: 'on' | 'off' | 'off-visible' = 'on';
-
+  
+  /**
+   * The HTML file used in the preview.
+   */
+  @property({attribute: 'html-file'})
+  htmlFile = 'index.html';
+  
   /**
    * If true, will disable code completions in the code-editor.
    */
   @property({type: Boolean, attribute: 'no-completions'})
   noCompletions = false;
-
+  
   /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
@@ -327,6 +333,7 @@ export class PlaygroundIde extends LitElement {
                        preview-loading-indicator,
                        diagnostic-tooltip,
                        dialog"
+          .htmlFile=${this.htmlFile}
           .project=${projectId}
         ></playground-preview>
       </div>

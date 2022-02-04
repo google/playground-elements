@@ -19,6 +19,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.14.8] - 2022-01-25
+
+### Added
+
+- Added `html-file` attribute (`htmlFile` property) to `playground-preview` and
+  `playground-ide` which allows configuring the project HTML file which should
+  be displayed in the preview. Defaults to `index.html` (which was previously
+  the only possible value)
+
+### Fixed
+
+- Remove nbsp characters from README.
+
+## [0.14.7] - 2021-12-07
+
+### Fixed
+
+- Fixed missing `aria-label` attributes on the reload button, file context menu
+  button, and new file button
+
 ## [0.14.6] - 2021-10-18
 
 ### Fixed
