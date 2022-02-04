@@ -174,7 +174,6 @@ suite('completions', () => {
       project?.addEventListener(
         'compileDone',
         async () => {
-          waitMilli(1000);
           resolve('');
         },
         {once: true}
