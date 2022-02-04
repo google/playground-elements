@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {assert} from '@esm-bundle/chai';
-import {html, ReactiveElement, render} from 'lit';
 import '../playground-ide.js';
 import '../playground-code-editor.js';
+
+import {assert} from '@esm-bundle/chai';
 import {sendKeys} from '@web/test-runner-commands';
+import {html, ReactiveElement, render} from 'lit';
+
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {PlaygroundProject} from '../playground-project.js';
 
@@ -57,7 +59,7 @@ suite('completions', () => {
       if (c) {
         await raf();
         await raf();
-        sendKeys({
+        await sendKeys({
           type: c,
         });
       }
@@ -90,6 +92,24 @@ suite('completions', () => {
       check();
     });
   };
+
+  const waitForElement = (
+    parent: ParentNode | null | undefined,
+    elementName: string
+  ) => {
+    return new Promise((resolve, reject) => {
+      (function tryToFindElem(attempt) {
+        if (parent?.querySelector(elementName)) {
+          return resolve('');
+        }
+        if (attempt > 10) {
+          return reject();
+        }
+        setTimeout(() => tryToFindElem(attempt + 1), 100);
+      })(1);
+    });
+  };
+
   const waitForCompletionsToAppear = () =>
     new Promise((resolve, reject) => {
       // Make sure we can grab the focuscontainer for observing
@@ -98,11 +118,11 @@ suite('completions', () => {
       if (!focusContainer) return reject();
 
       const config = {childList: true};
-      // To avoid computer/dom specific timing errors in tests, we rely on mutations
+      // To avoid computer/dom specific timing errors in tests, we rely on
+      // mutations
       const observer = new MutationObserver(async (mutationsList, obs) => {
         if (addedNodesContainsCompletionsMenu(mutationsList)) {
           obs.disconnect();
-          await waitMilli(100);
           resolve('');
         }
       });
@@ -111,31 +131,6 @@ suite('completions', () => {
         observer.observe(focusContainer, config);
       }
 
-      setTimeout(() => {
-        observer.disconnect();
-        resolve('');
-      }, 10000);
-    });
-  const waitForCompletionsToDisappear = () =>
-    new Promise((resolve, reject) => {
-      // Make sure we can grab the focuscontainer for observing
-      if (!editor || !editor.shadowRoot) return reject();
-      const focusContainer = editor.shadowRoot.querySelector('#focusContainer');
-      if (!focusContainer) return reject();
-
-      const config = {childList: true};
-      // To avoid computer/dom specific timing errors in tests, we rely on mutations
-      const observer = new MutationObserver(async (mutationsList, obs) => {
-        if (removedNodesContainsCompletionsMenu(mutationsList)) {
-          obs.disconnect();
-          await waitMilli(100);
-          resolve('');
-        }
-      });
-
-      if (focusContainer) {
-        observer.observe(focusContainer, config);
-      }
       setTimeout(() => {
         observer.disconnect();
         resolve('');
@@ -147,16 +142,7 @@ suite('completions', () => {
         (node as Element).classList.contains('CodeMirror-hints')
       )
     );
-  const removedNodesContainsCompletionsMenu = (
-    mutationsList: MutationRecord[]
-  ) =>
-    mutationsList.some((mut) =>
-      Array.from(mut.removedNodes).some((node) =>
-        (node as Element).classList.contains('CodeMirror-hints')
-      )
-    );
   const raf = async () => new Promise((r) => requestAnimationFrame(r));
-  const waitMilli = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const pierce = async (...selectors: string[]) => {
     let node = document.body;
     for (const selector of selectors) {
@@ -185,12 +171,15 @@ suite('completions', () => {
     editor?.focus();
     await emulateUser('document.query');
     await waitForCompletionsToAppear();
+    await waitForElement(editor?.shadowRoot, '.CodeMirror-hints');
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+    const completionItemList = editor?.shadowRoot?.querySelector(
+      '.CodeMirror-hints'
+    );
 
     if (completionItemList?.children.length !== 7) {
-      // For debugging purposes, it's easier to debug if we know the invalid completions
+      // For debugging purposes, it's easier to debug if we know the invalid
+      // completions
       console.log('Invalid completions: ');
       for (const listItem of completionItemList?.children || []) {
         console.log(
@@ -216,7 +205,10 @@ suite('completions', () => {
     sendKeys({
       press: 'ArrowDown',
     });
-    await waitMilli(100);
+    await waitForElement(
+      editor?.shadowRoot,
+      '.CodeMirror-hint-active#cm-complete-0-1'
+    );
 
     const activeHint = editor?.shadowRoot?.querySelector(
       '.CodeMirror-hint-active'
@@ -235,10 +227,19 @@ suite('completions', () => {
     await emulateUser('document.queryS');
     await waitForCompletionsToAppear();
 
+    const editorChange = new Promise((resolve) => {
+      editor?.addEventListener('change', () => {
+        resolve('');
+      });
+      setTimeout(() => {
+        resolve('');
+      }, 10000);
+    });
     sendKeys({
       press: 'Enter',
     });
-    await waitForCompletionsToDisappear();
+
+    await editorChange;
 
     assert.equal(
       editor?.value,
@@ -246,8 +247,9 @@ suite('completions', () => {
       'Completion should be visible in the code editor'
     );
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+    const completionItemList = editor?.shadowRoot?.querySelector(
+      '.CodeMirror-hints'
+    );
     assert.isNull(
       completionItemList,
       'Completion item list should disappear on completion confirmation'
@@ -263,13 +265,14 @@ suite('completions', () => {
     await sendKeys({press: 'Enter'});
     await emulateUser('reallySpecifi');
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+    const completionItemList = editor?.shadowRoot?.querySelector(
+      '.CodeMirror-hints'
+    );
     assert.isNotNull(completionItemList);
 
-    const completionItemText = (
-      completionItemList?.querySelector('.hint-object-name') as HTMLElement
-    ).innerText;
+    const completionItemText = (completionItemList?.querySelector(
+      '.hint-object-name'
+    ) as HTMLElement).innerText;
     assert.equal(
       completionItemText,
       'reallySpecificFunctionName',
