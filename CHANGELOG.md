@@ -19,6 +19,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.15.0-pre.1] - 2022-02-04
+
+### Added
+
+- Added interactive code completions for TypeScript files
+  ([#243](https://github.com/google/playground-elements/pull/243)).
+
+  Completions can be disabled by setting the `no-completions` attribute on
+  `<playground-ide>`, `<playground-file-editor>`, or `<playground-code-editor`>
+  components.
+
 ## [0.14.8] - 2022-01-25
 
 ### Added
