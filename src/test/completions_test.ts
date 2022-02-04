@@ -173,9 +173,8 @@ suite('completions', () => {
     await waitForCompletionsToAppear();
     await waitForElement(editor?.shadowRoot, '.CodeMirror-hints');
 
-    const completionItemList = editor?.shadowRoot?.querySelector(
-      '.CodeMirror-hints'
-    );
+    const completionItemList =
+      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
 
     if (completionItemList?.children.length !== 7) {
       // For debugging purposes, it's easier to debug if we know the invalid
@@ -247,9 +246,8 @@ suite('completions', () => {
       'Completion should be visible in the code editor'
     );
 
-    const completionItemList = editor?.shadowRoot?.querySelector(
-      '.CodeMirror-hints'
-    );
+    const completionItemList =
+      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
     assert.isNull(
       completionItemList,
       'Completion item list should disappear on completion confirmation'
@@ -265,14 +263,13 @@ suite('completions', () => {
     await sendKeys({press: 'Enter'});
     await emulateUser('reallySpecifi');
 
-    const completionItemList = editor?.shadowRoot?.querySelector(
-      '.CodeMirror-hints'
-    );
+    const completionItemList =
+      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
     assert.isNotNull(completionItemList);
 
-    const completionItemText = (completionItemList?.querySelector(
-      '.hint-object-name'
-    ) as HTMLElement).innerText;
+    const completionItemText = (
+      completionItemList?.querySelector('.hint-object-name') as HTMLElement
+    ).innerText;
     assert.equal(
       completionItemText,
       'reallySpecificFunctionName',
