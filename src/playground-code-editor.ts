@@ -21,6 +21,7 @@ import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
 import type {
+  Doc,
   Editor,
   EditorChange,
   Hint,
@@ -182,6 +183,18 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
+   * Alternative to `value`, and takes precedence over `value`. Use `docCache`
+   * to pass a CodeMirror document instance directly. If `docCache` is set,
+   * `value` will no longer update the contents of the editor. The document
+   * instance should be used if history needs to be preserved.
+   *
+   * Whenever a new document instance is created, a `newdocinstance` event is
+   * fired containing a `codeMirrorDoc` property.
+   */
+  @property({attribute: false})
+  docCache?: Doc;
+
+  /**
    * The type of the file being edited, as represented by its usual file
    * extension.
    */
@@ -267,13 +280,28 @@ export class PlaygroundCodeEditor extends LitElement {
       this._createView();
     } else {
       const changedTyped = changedProperties as TypedMap<
-        Omit<PlaygroundCodeEditor, keyof LitElement | 'render' | 'update'>
+        Omit<
+          PlaygroundCodeEditor,
+          keyof LitElement | 'render' | 'update' | 'createNewDocInstance'
+        >
       >;
       for (const prop of changedTyped.keys()) {
         switch (prop) {
+          case 'docCache':
+            if (this.docCache && cm.getDoc() !== this.docCache) {
+              this._valueChangingFromOutside = true;
+              cm.swapDoc(this.docCache);
+              this._valueChangingFromOutside = false;
+            }
+            break;
           case 'value':
+            // If there is a CodeMirror `docCache`, we prefer that instead of
+            // setting a value.
+            if (this.docCache) {
+              break;
+            }
             this._valueChangingFromOutside = true;
-            cm.setValue(this.value ?? '');
+            cm.swapDoc(this.createNewDocInstance(this.value ?? ''));
             this._valueChangingFromOutside = false;
             break;
           case 'lineNumbers':
@@ -310,6 +338,18 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     }
     super.update(changedProperties);
+  }
+
+  /**
+   * Create a new CodeMirror Doc instance.
+   * @param text Contents to pre-populate the CodeMirror Doc instance.
+   */
+  createNewDocInstance(text: string): Doc {
+    const codeMirrorDoc = new CodeMirror.Doc(text);
+    const changeEvt = new Event('newdocinstance');
+    (changeEvt as Event & {codeMirrorDoc: Doc}).codeMirrorDoc = codeMirrorDoc;
+    this.dispatchEvent(changeEvt);
+    return codeMirrorDoc;
   }
 
   render() {
@@ -422,7 +462,10 @@ export class PlaygroundCodeEditor extends LitElement {
         this._applyHideAndFoldRegions();
         this._showDiagnostics();
       } else {
-        this.dispatchEvent(new Event('change'));
+        const changeEvt = new Event('change');
+        (changeEvt as Event & {codeMirrorDoc: Doc}).codeMirrorDoc =
+          _editorInstance.getDoc();
+        this.dispatchEvent(changeEvt);
         this._requestCompletionsIfNeeded(changeObject);
       }
     });
