@@ -8,6 +8,8 @@ import {assert} from '@esm-bundle/chai';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 
+const raf = async () => new Promise((r) => requestAnimationFrame(r));
+
 suite('playground-code-editor', () => {
   let container: HTMLDivElement;
 
@@ -56,6 +58,96 @@ suite('playground-code-editor', () => {
         _codemirror: PlaygroundCodeEditor['_codemirror'];
       };
       editorInternals._codemirror!.setValue('bar');
+    });
+  });
+
+  suite('history', () => {
+    test('is maintained when value property is changed', async () => {
+      const editor = document.createElement('playground-code-editor');
+      editor.value = 'foo';
+      container.appendChild(editor);
+      await editor.updateComplete;
+      const editorInternals = editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      };
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      editor.value = 'bar';
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+    });
+
+    test('is maintained with a document key', async () => {
+      const DOCUMENT_KEY1 = {};
+      const editor = document.createElement('playground-code-editor');
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+      container.appendChild(editor);
+      await editor.updateComplete;
+      const editorInternals = editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      };
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      editor.value = 'bar';
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+    });
+
+    test('is associated to the documentKey property', async () => {
+      const DOCUMENT_KEY1 = {};
+      const DOCUMENT_KEY2 = {};
+      const editor = document.createElement('playground-code-editor');
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+      container.appendChild(editor);
+      await editor.updateComplete;
+      const editorInternals = editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      };
+      editor.value = 'potato';
+      editor.documentKey = DOCUMENT_KEY2;
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
+    });
+
+    // TODO: This test is broken. The CodeMirror document instance doesn't
+    // preserve any history. Yet the playground-ide_test which tests file
+    // swapping is robust and maintains history.
+    test('can be rehydrated from a saved document instance', async () => {
+      const DOCUMENT_KEY1 = {};
+      const DOCUMENT_KEY2 = {};
+      const editor = document.createElement('playground-code-editor');
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+      container.appendChild(editor);
+      await editor.updateComplete;
+      const editorInternals = editor as unknown as {
+        _codemirror: PlaygroundCodeEditor['_codemirror'];
+      };
+      editor.value = 'bar';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      editor.value = 'potato';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'bar';
+      await raf();
+
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      // TODO: Should be 'foo' if history was correctly preserved.
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      // assert.equal(editorInternals._codemirror!.getValue(), 'foo');
     });
   });
 

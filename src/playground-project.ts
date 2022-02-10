@@ -38,15 +38,6 @@ import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
 import type {Diagnostic} from 'vscode-languageserver';
-import type {Doc} from 'codemirror';
-
-/**
- * On the client each file contains a CodeMirror document instance, which keeps
- * file history separate for undo/redo operations.
- */
-interface ClientSampleFile extends SampleFile {
-  codeMirrorDoc?: Doc;
-}
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -108,7 +99,6 @@ export class PlaygroundProject extends LitElement {
           {
             ...file,
             name: undefined,
-            codeMirrorDoc: undefined,
           },
         ])
       ),
@@ -123,7 +113,7 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  get files(): ClientSampleFile[] | undefined {
+  get files(): SampleFile[] | undefined {
     return this._files;
   }
 
@@ -233,7 +223,7 @@ export class PlaygroundProject extends LitElement {
   /**
    * The active project files.
    */
-  private _files?: ClientSampleFile[];
+  private _files?: SampleFile[];
 
   @state()
   private _serviceWorkerAPI?: Remote<ServiceWorkerAPI>;
@@ -554,9 +544,7 @@ export class PlaygroundProject extends LitElement {
       return;
     }
     workerApi.compileProject(
-      this._files?.map(({codeMirrorDoc: _codeMirrorDoc, ...rest}) => ({
-        ...rest,
-      })) ?? [],
+      this._files ?? [],
       {importMap: this._importMap},
       proxy((result) => build.onOutput(result))
     );

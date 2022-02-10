@@ -14,7 +14,6 @@ import {PlaygroundCodeEditor} from './playground-code-editor.js';
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 import {CodeEditorChangeData} from './shared/worker-api.js';
 
-import type {Doc} from 'codemirror';
 /**
  * A text editor associated with a <playground-project>.
  */
@@ -137,7 +136,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 // content is not updated by user edits.
                 live(this._currentFile?.content ?? '')
               }
-              .docCache=${this._currentFile?.codeMirrorDoc}
+              .documentKey=${this._currentFile}
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
@@ -149,7 +148,6 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               )}
               .noCompletions=${this.noCompletions}
               @change=${this._onEdit}
-              @newdocinstance=${this._onNewDocInstance}
               @request-completions=${this._onRequestCompletions}
             >
             </playground-code-editor>
@@ -173,7 +171,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     this.requestUpdate();
   };
 
-  private _onEdit(e: Event & {codeMirrorDoc: Doc}) {
+  private _onEdit() {
     if (
       this._project === undefined ||
       this._currentFile === undefined ||
@@ -181,21 +179,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     ) {
       return;
     }
-    this._onNewDocInstance(e);
     this._project.editFile(this._currentFile, this._editor.value);
-  }
-
-  private _onNewDocInstance(e: Event & {codeMirrorDoc: Doc}) {
-    if (
-      this._project === undefined ||
-      this._currentFile === undefined ||
-      this._editor.value === undefined
-    ) {
-      return;
-    }
-    if (e.codeMirrorDoc) {
-      this._currentFile.codeMirrorDoc = e.codeMirrorDoc;
-    }
   }
 
   private async _onRequestCompletions(e: CustomEvent) {

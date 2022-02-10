@@ -183,16 +183,13 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
-   * Alternative to `value`, and takes precedence over `value`. Use `docCache`
-   * to pass a CodeMirror document instance directly. If `docCache` is set,
-   * `value` will no longer update the contents of the editor. The document
-   * instance should be used if history needs to be preserved.
-   *
-   * Whenever a new document instance is created, a `newdocinstance` event is
-   * fired containing a `codeMirrorDoc` property.
+   * Providing a `documentKey` creates a CodeMirror document instance which
+   * isolates history and text changes between documents.
    */
   @property({attribute: false})
-  docCache?: Doc;
+  documentKey?: object;
+
+  private readonly _privateDocCache = new WeakMap<object, Doc>();
 
   /**
    * The type of the file being edited, as represented by its usual file
@@ -280,28 +277,32 @@ export class PlaygroundCodeEditor extends LitElement {
       this._createView();
     } else {
       const changedTyped = changedProperties as TypedMap<
-        Omit<
-          PlaygroundCodeEditor,
-          keyof LitElement | 'render' | 'update' | 'createNewDocInstance'
-        >
+        Omit<PlaygroundCodeEditor, keyof LitElement | 'render' | 'update'>
       >;
       for (const prop of changedTyped.keys()) {
         switch (prop) {
-          case 'docCache':
-            if (this.docCache && cm.getDoc() !== this.docCache) {
-              this._valueChangingFromOutside = true;
-              cm.swapDoc(this.docCache);
-              this._valueChangingFromOutside = false;
+          case 'documentKey': {
+            if (!this.documentKey) {
+              break;
             }
+            let docInstance = this._privateDocCache.get(this.documentKey);
+            if (docInstance === undefined) {
+              docInstance = new CodeMirror.Doc(this.value ?? '');
+            }
+            this._privateDocCache.set(this.documentKey, docInstance);
+            this._valueChangingFromOutside = true;
+            cm.swapDoc(docInstance);
+            this._valueChangingFromOutside = false;
             break;
+          }
           case 'value':
-            // If there is a CodeMirror `docCache`, we prefer that instead of
-            // setting a value.
-            if (this.docCache) {
+            if (changedTyped.has('documentKey')) {
+              // We've already processed the `documentKey` and don't want to
+              // add history by applying the `value` again.
               break;
             }
             this._valueChangingFromOutside = true;
-            cm.swapDoc(this.createNewDocInstance(this.value ?? ''));
+            cm.setValue(this.value ?? '');
             this._valueChangingFromOutside = false;
             break;
           case 'lineNumbers':
@@ -338,18 +339,6 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     }
     super.update(changedProperties);
-  }
-
-  /**
-   * Create a new CodeMirror Doc instance.
-   * @param text Contents to pre-populate the CodeMirror Doc instance.
-   */
-  createNewDocInstance(text: string): Doc {
-    const codeMirrorDoc = new CodeMirror.Doc(text);
-    const changeEvt = new Event('newdocinstance');
-    (changeEvt as Event & {codeMirrorDoc: Doc}).codeMirrorDoc = codeMirrorDoc;
-    this.dispatchEvent(changeEvt);
-    return codeMirrorDoc;
   }
 
   render() {
@@ -462,10 +451,7 @@ export class PlaygroundCodeEditor extends LitElement {
         this._applyHideAndFoldRegions();
         this._showDiagnostics();
       } else {
-        const changeEvt = new Event('change');
-        (changeEvt as Event & {codeMirrorDoc: Doc}).codeMirrorDoc =
-          _editorInstance.getDoc();
-        this.dispatchEvent(changeEvt);
+        this.dispatchEvent(new Event('change'));
         this._requestCompletionsIfNeeded(changeObject);
       }
     });
