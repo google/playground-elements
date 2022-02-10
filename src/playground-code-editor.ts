@@ -183,12 +183,20 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
-   * Providing a `documentKey` creates a CodeMirror document instance which
-   * isolates history and text changes between documents.
+   * Provide a `documentKey` to create a CodeMirror document instance which
+   * isolates history and value changes per `documentKey`.
+   *
+   * Use to keep edit history separate between files while reusing the same
+   * playground-code-editor instance.
    */
   @property({attribute: false})
+  // eslint-disable-next-line @typescript-eslint/ban-types
   documentKey?: object;
 
+  /**
+   * WeakMap associating a `documentKey` with CodeMirror document instance.
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private readonly _privateDocCache = new WeakMap<object, Doc>();
 
   /**
@@ -286,10 +294,17 @@ export class PlaygroundCodeEditor extends LitElement {
               break;
             }
             let docInstance = this._privateDocCache.get(this.documentKey);
-            if (docInstance === undefined) {
+            if (!docInstance) {
               docInstance = new CodeMirror.Doc(this.value ?? '');
+              this._privateDocCache.set(this.documentKey, docInstance);
+            } else {
+              if (this.value && docInstance.getValue() !== this.value) {
+                // A `documentKey` and `value` have both been provided and the
+                // cached document instance doesn't match the passed in value.
+                // Set the new `value` on the document instance.
+                docInstance.setValue(this.value ?? '');
+              }
             }
-            this._privateDocCache.set(this.documentKey, docInstance);
             this._valueChangingFromOutside = true;
             cm.swapDoc(docInstance);
             this._valueChangingFromOutside = false;

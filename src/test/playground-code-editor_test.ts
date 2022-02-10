@@ -62,17 +62,71 @@ suite('playground-code-editor', () => {
   });
 
   suite('history', () => {
-    test('is maintained when value property is changed', async () => {
-      const editor = document.createElement('playground-code-editor');
-      editor.value = 'foo';
+    let editor: PlaygroundCodeEditor;
+    let editorInternals: {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+
+    setup(async () => {
+      editor = document.createElement('playground-code-editor');
+      // For correct history, CodeMirror needs to be initialized and attached to
+      // the DOM.
       container.appendChild(editor);
-      await editor.updateComplete;
-      const editorInternals = editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
-      };
+      await raf();
+      editorInternals = editor as unknown as typeof editorInternals;
+    });
+
+    teardown(() => {
+      editor.remove();
+    });
+
+    test(`and doc instance cache won't drive editor value`, async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      const DOCUMENT_KEY2 = {dockey: 2};
+      editor.value = 'document key 1';
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      editor.value = 'document key 2';
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      // If only the documentKey is changed, the current value is set on the
+      // document cache. The `value` property drives the CodeMirror contents.
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+    });
+
+    test('is updated if value gets changed with doc cache', async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      const DOCUMENT_KEY2 = {dockey: 2};
+      editor.value = 'document key 1';
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      editor.value = 'document key 2';
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'override document key 1';
+      await raf();
+      assert.equal(
+        editorInternals._codemirror!.getValue(),
+        'override document key 1'
+      );
+      editorInternals._codemirror?.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+    });
+
+    test('is maintained when value property is changed', async () => {
+      editor.value = 'foo';
+      await raf();
       assert.equal(editorInternals._codemirror!.getValue(), 'foo');
       editor.value = 'bar';
-      await editor.updateComplete;
+      await raf();
       assert.equal(editorInternals._codemirror!.getValue(), 'bar');
       editorInternals._codemirror!.undo();
       await raf();
@@ -81,14 +135,9 @@ suite('playground-code-editor', () => {
 
     test('is maintained with a document key', async () => {
       const DOCUMENT_KEY1 = {};
-      const editor = document.createElement('playground-code-editor');
       editor.documentKey = DOCUMENT_KEY1;
       editor.value = 'foo';
-      container.appendChild(editor);
       await editor.updateComplete;
-      const editorInternals = editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
-      };
       assert.equal(editorInternals._codemirror!.getValue(), 'foo');
       editor.value = 'bar';
       await editor.updateComplete;
@@ -101,14 +150,9 @@ suite('playground-code-editor', () => {
     test('is associated to the documentKey property', async () => {
       const DOCUMENT_KEY1 = {};
       const DOCUMENT_KEY2 = {};
-      const editor = document.createElement('playground-code-editor');
       editor.documentKey = DOCUMENT_KEY1;
       editor.value = 'foo';
-      container.appendChild(editor);
       await editor.updateComplete;
-      const editorInternals = editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
-      };
       editor.value = 'potato';
       editor.documentKey = DOCUMENT_KEY2;
       await editor.updateComplete;
@@ -118,20 +162,14 @@ suite('playground-code-editor', () => {
       assert.equal(editorInternals._codemirror!.getValue(), 'potato');
     });
 
-    // TODO: This test is broken. The CodeMirror document instance doesn't
-    // preserve any history. Yet the playground-ide_test which tests file
-    // swapping is robust and maintains history.
     test('can be rehydrated from a saved document instance', async () => {
       const DOCUMENT_KEY1 = {};
       const DOCUMENT_KEY2 = {};
-      const editor = document.createElement('playground-code-editor');
+
       editor.documentKey = DOCUMENT_KEY1;
       editor.value = 'foo';
-      container.appendChild(editor);
-      await editor.updateComplete;
-      const editorInternals = editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
-      };
+
+      await raf();
       editor.value = 'bar';
       await raf();
       editor.documentKey = DOCUMENT_KEY2;
@@ -145,9 +183,7 @@ suite('playground-code-editor', () => {
       assert.equal(editorInternals._codemirror!.getValue(), 'bar');
       editorInternals._codemirror!.undo();
       await raf();
-      // TODO: Should be 'foo' if history was correctly preserved.
-      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
-      // assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
     });
   });
 
