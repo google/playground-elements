@@ -195,6 +195,8 @@ export class PlaygroundCodeEditor extends LitElement {
 
   /**
    * WeakMap associating a `documentKey` with CodeMirror document instance.
+   * A WeakMap is used so that this component does not become the source of
+   * memory leaks.
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
   private readonly _docCache = new WeakMap<object, Doc>();
