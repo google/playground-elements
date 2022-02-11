@@ -96,6 +96,21 @@ suite('playground-code-editor', () => {
       editor.documentKey = DOCUMENT_KEY1;
       await raf();
       assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+
+      // Changing documentKey and unsetting the value should clear the editor.
+      editor.value = undefined;
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), '');
+
+      // Unset the cache should result in a
+      editor.documentKey = undefined;
+      editor.value = 'value with no cache';
+      await raf();
+      assert.equal(
+        editorInternals._codemirror!.getValue(),
+        'value with no cache'
+      );
     });
 
     test('is updated if value gets changed with doc cache', async () => {

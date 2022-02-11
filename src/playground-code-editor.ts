@@ -183,6 +183,11 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
+   * Fallback documentKey which is used for the default document instance.
+   */
+  private readonly _fallbackDocInstance = {};
+
+  /**
    * Provide a `documentKey` to create a CodeMirror document instance which
    * isolates history and value changes per `documentKey`.
    *
@@ -191,7 +196,7 @@ export class PlaygroundCodeEditor extends LitElement {
    */
   @property({attribute: false})
   // eslint-disable-next-line @typescript-eslint/ban-types
-  documentKey?: object;
+  documentKey?: object = this._fallbackDocInstance;
 
   /**
    * WeakMap associating a `documentKey` with CodeMirror document instance.
@@ -292,19 +297,15 @@ export class PlaygroundCodeEditor extends LitElement {
       for (const prop of changedTyped.keys()) {
         switch (prop) {
           case 'documentKey': {
-            if (!this.documentKey) {
-              break;
-            }
-            let docInstance = this._privateDocCache.get(this.documentKey);
+            const docKey = this.documentKey ?? this._fallbackDocInstance;
+            let docInstance = this._docCache.get(docKey);
             if (!docInstance) {
               docInstance = new CodeMirror.Doc(this.value ?? '');
-              this._privateDocCache.set(this.documentKey, docInstance);
-            } else if (this.value && docInstance.getValue() !== this.value) {
-                // A `documentKey` and `value` have both been provided and the
-                // cached document instance doesn't match the passed in value.
-                // Set the new `value` on the document instance.
-                docInstance.setValue(this.value ?? '');
-              }
+              this._docCache.set(docKey, docInstance);
+            } else if (docInstance.getValue() !== this.value) {
+              // The retrieved document instance has contents which don't
+              // match the currently set `value`.
+              docInstance.setValue(this.value ?? '');
             }
             this._valueChangingFromOutside = true;
             cm.swapDoc(docInstance);
@@ -313,8 +314,8 @@ export class PlaygroundCodeEditor extends LitElement {
           }
           case 'value':
             if (changedTyped.has('documentKey')) {
-              // We've already processed the `documentKey` and don't want to
-              // add history by applying the `value` again.
+              // If the `documentKey` has changed then all `value` change logic
+              // is handled in the documentKey case.
               break;
             }
             this._valueChangingFromOutside = true;
