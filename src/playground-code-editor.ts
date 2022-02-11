@@ -183,11 +183,6 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
-   * Fallback documentKey which is used for the default document instance.
-   */
-  private readonly _fallbackDocInstance = {};
-
-  /**
    * Provide a `documentKey` to create a CodeMirror document instance which
    * isolates history and value changes per `documentKey`.
    *
@@ -196,7 +191,7 @@ export class PlaygroundCodeEditor extends LitElement {
    */
   @property({attribute: false})
   // eslint-disable-next-line @typescript-eslint/ban-types
-  documentKey?: object = this._fallbackDocInstance;
+  documentKey?: object;
 
   /**
    * WeakMap associating a `documentKey` with CodeMirror document instance.
@@ -297,7 +292,7 @@ export class PlaygroundCodeEditor extends LitElement {
       for (const prop of changedTyped.keys()) {
         switch (prop) {
           case 'documentKey': {
-            const docKey = this.documentKey ?? this._fallbackDocInstance;
+            const docKey = this.documentKey ?? {};
             let docInstance = this._docCache.get(docKey);
             if (!docInstance) {
               docInstance = new CodeMirror.Doc(this.value ?? '');

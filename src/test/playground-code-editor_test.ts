@@ -113,6 +113,30 @@ suite('playground-code-editor', () => {
       );
     });
 
+    test(`is cleared on unsetting documentKey`, async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      editor.value = 'no cache';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      editor.value = 'update on cache';
+      await raf();
+      editor.documentKey = undefined;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      // No-op, because unsetting documentKey clears history.
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      await raf();
+      editor.value = 'changed';
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'changed');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+    });
+
     test('is updated if value gets changed with doc cache', async () => {
       const DOCUMENT_KEY1 = {dockey: 1};
       const DOCUMENT_KEY2 = {dockey: 2};
@@ -136,7 +160,7 @@ suite('playground-code-editor', () => {
       assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
     });
 
-    test('is maintained when value property is changed', async () => {
+    test('is maintained without using documentKey', async () => {
       editor.value = 'foo';
       await raf();
       assert.equal(editorInternals._codemirror!.getValue(), 'foo');
