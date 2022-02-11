@@ -297,8 +297,7 @@ export class PlaygroundCodeEditor extends LitElement {
             if (!docInstance) {
               docInstance = new CodeMirror.Doc(this.value ?? '');
               this._privateDocCache.set(this.documentKey, docInstance);
-            } else {
-              if (this.value && docInstance.getValue() !== this.value) {
+            } else if (this.value && docInstance.getValue() !== this.value) {
                 // A `documentKey` and `value` have both been provided and the
                 // cached document instance doesn't match the passed in value.
                 // Set the new `value` on the document instance.
