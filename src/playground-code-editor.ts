@@ -197,7 +197,7 @@ export class PlaygroundCodeEditor extends LitElement {
    * WeakMap associating a `documentKey` with CodeMirror document instance.
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
-  private readonly _privateDocCache = new WeakMap<object, Doc>();
+  private readonly _docCache = new WeakMap<object, Doc>();
 
   /**
    * The type of the file being edited, as represented by its usual file
