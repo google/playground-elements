@@ -8,6 +8,8 @@ import {assert} from '@esm-bundle/chai';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 
+const raf = async () => new Promise((r) => requestAnimationFrame(r));
+
 suite('playground-code-editor', () => {
   let container: HTMLDivElement;
 
@@ -56,6 +58,171 @@ suite('playground-code-editor', () => {
         _codemirror: PlaygroundCodeEditor['_codemirror'];
       };
       editorInternals._codemirror!.setValue('bar');
+    });
+  });
+
+  suite('history', () => {
+    let editor: PlaygroundCodeEditor;
+    let editorInternals: {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+
+    setup(async () => {
+      editor = document.createElement('playground-code-editor');
+      // For correct history, CodeMirror needs to be initialized and attached to
+      // the DOM.
+      container.appendChild(editor);
+      await raf();
+      editorInternals = editor as unknown as typeof editorInternals;
+    });
+
+    teardown(() => {
+      editor.remove();
+    });
+
+    test(`and doc instance cache won't drive editor value`, async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      const DOCUMENT_KEY2 = {dockey: 2};
+      editor.value = 'document key 1';
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      editor.value = 'document key 2';
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      // If only the documentKey is changed, the current value is set on the
+      // document cache. The `value` property drives the CodeMirror contents.
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+
+      // Changing documentKey and unsetting the value should clear the editor.
+      editor.value = undefined;
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), '');
+
+      // Unset the cache should result in a
+      editor.documentKey = undefined;
+      editor.value = 'value with no cache';
+      await raf();
+      assert.equal(
+        editorInternals._codemirror!.getValue(),
+        'value with no cache'
+      );
+    });
+
+    test(`is cleared on unsetting documentKey`, async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      editor.value = 'no cache';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      editor.value = 'update on cache';
+      await raf();
+      editor.documentKey = undefined;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      // No-op, because unsetting documentKey clears history.
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      await raf();
+      editor.value = 'changed';
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'changed');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+    });
+
+    test('is updated if value gets changed with doc cache', async () => {
+      const DOCUMENT_KEY1 = {dockey: 1};
+      const DOCUMENT_KEY2 = {dockey: 2};
+      editor.value = 'document key 1';
+      editor.documentKey = DOCUMENT_KEY1;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      editor.value = 'document key 2';
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'override document key 1';
+      await raf();
+      assert.equal(
+        editorInternals._codemirror!.getValue(),
+        'override document key 1'
+      );
+      editorInternals._codemirror?.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+    });
+
+    test('is maintained without using documentKey', async () => {
+      editor.value = 'foo';
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      editor.value = 'bar';
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+    });
+
+    test('is maintained with a document key', async () => {
+      const DOCUMENT_KEY1 = {};
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      editor.value = 'bar';
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+    });
+
+    test('is associated to the documentKey property', async () => {
+      const DOCUMENT_KEY1 = {};
+      const DOCUMENT_KEY2 = {};
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+      await editor.updateComplete;
+      editor.value = 'potato';
+      editor.documentKey = DOCUMENT_KEY2;
+      await editor.updateComplete;
+      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
+    });
+
+    test('can be rehydrated from a saved document instance', async () => {
+      const DOCUMENT_KEY1 = {};
+      const DOCUMENT_KEY2 = {};
+
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'foo';
+
+      await raf();
+      editor.value = 'bar';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY2;
+      await raf();
+      editor.value = 'potato';
+      await raf();
+      editor.documentKey = DOCUMENT_KEY1;
+      editor.value = 'bar';
+      await raf();
+
+      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
     });
   });
 

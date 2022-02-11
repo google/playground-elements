@@ -21,6 +21,7 @@ import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
 import type {Diagnostic} from 'vscode-languageserver';
 import type {
+  Doc,
   Editor,
   EditorChange,
   Hint,
@@ -182,6 +183,25 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   /**
+   * Provide a `documentKey` to create a CodeMirror document instance which
+   * isolates history and value changes per `documentKey`.
+   *
+   * Use to keep edit history separate between files while reusing the same
+   * playground-code-editor instance.
+   */
+  @property({attribute: false})
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  documentKey?: object;
+
+  /**
+   * WeakMap associating a `documentKey` with CodeMirror document instance.
+   * A WeakMap is used so that this component does not become the source of
+   * memory leaks.
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  private readonly _docCache = new WeakMap<object, Doc>();
+
+  /**
    * The type of the file being edited, as represented by its usual file
    * extension.
    */
@@ -271,7 +291,28 @@ export class PlaygroundCodeEditor extends LitElement {
       >;
       for (const prop of changedTyped.keys()) {
         switch (prop) {
+          case 'documentKey': {
+            const docKey = this.documentKey ?? {};
+            let docInstance = this._docCache.get(docKey);
+            if (!docInstance) {
+              docInstance = new CodeMirror.Doc(this.value ?? '');
+              this._docCache.set(docKey, docInstance);
+            } else if (docInstance.getValue() !== this.value) {
+              // The retrieved document instance has contents which don't
+              // match the currently set `value`.
+              docInstance.setValue(this.value ?? '');
+            }
+            this._valueChangingFromOutside = true;
+            cm.swapDoc(docInstance);
+            this._valueChangingFromOutside = false;
+            break;
+          }
           case 'value':
+            if (changedTyped.has('documentKey')) {
+              // If the `documentKey` has changed then all `value` change logic
+              // is handled in the documentKey case.
+              break;
+            }
             this._valueChangingFromOutside = true;
             cm.setValue(this.value ?? '');
             this._valueChangingFromOutside = false;

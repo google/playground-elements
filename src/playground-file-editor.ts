@@ -136,6 +136,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 // content is not updated by user edits.
                 live(this._currentFile?.content ?? '')
               }
+              .documentKey=${this._currentFile}
               .type=${this._currentFile
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}

@@ -13,6 +13,7 @@ import {sendKeys, executeServerCommand} from '@web/test-runner-commands';
 import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
+import type {PlaygroundFileEditor} from '../playground-file-editor.js';
 
 suite('playground-ide', () => {
   let container: HTMLDivElement;
@@ -670,5 +671,212 @@ suite('playground-ide', () => {
     // test that the preview updates when the htmlFile property changes
     ide.htmlFile = 'other.html';
     await assertPreviewContains('Other HTML');
+  });
+
+  test('undo/redo changes to a file', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            document.body.textContent = 'Hello JS';
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const codemirrorInternals = codemirror as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    await assertPreviewContains('Hello JS');
+    codemirrorInternals._codemirror!.setValue(
+      "document.body.textContent = 'Hello 2'"
+    );
+    await assertPreviewContains('Hello 2');
+    codemirrorInternals._codemirror!.undo();
+    await assertPreviewContains('Hello JS');
+    codemirrorInternals._codemirror!.redo();
+    await assertPreviewContains('Hello 2');
+  });
+
+  test('undo/redo should not cross project file boundaries', async () => {
+    const JS_CONTENT = `document.body.textContent = 'Hello JS';`;
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            ${JS_CONTENT}
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const editorInternals = editor as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+
+    await raf();
+    assert.equal(fileEditor.filename, 'hello.js');
+    assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+
+    fileEditor.filename = 'index.html';
+    await raf();
+    editorInternals._codemirror!.undo();
+
+    await raf();
+    // Expect to still be on the html page.
+    assert.notEqual(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+  });
+
+  test('undo/redo history persists when files change', async () => {
+    const JS_CONTENT = `document.body.textContent = 'Hello JS';`;
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            ${JS_CONTENT}
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const editorInternals = editor as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+
+    await raf();
+    assert.equal(fileEditor.filename, 'hello.js');
+    assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+
+    editorInternals._codemirror!.setValue(
+      "document.body.textContent = 'Hello 2'"
+    );
+
+    fileEditor.filename = 'index.html';
+    await raf();
+    assert.include(
+      editorInternals._codemirror!.getValue().trim(),
+      `<script src="hello.js">`
+    );
+    editorInternals._codemirror!.setValue(`<body>
+    <script src="hello.js">&lt;/script>
+    <p>Add this</p>
+    </body>`);
+    // assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
+    await raf();
+
+    fileEditor.filename = 'hello.js';
+    await raf();
+    // assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
+    assert.include(editorInternals._codemirror!.getValue(), `'Hello 2'`);
+
+    for (let i = 0; i < 6; i++) {
+      editorInternals._codemirror!.undo();
+      await raf();
+      assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+    }
+    editorInternals._codemirror!.redo();
+    await raf();
+    assert.include(editorInternals._codemirror!.getValue(), `'Hello 2'`);
+
+    fileEditor.filename = 'index.html';
+    await raf();
+
+    // index.html file still has history
+    assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
+    assert.include(editorInternals._codemirror!.getValue(), `<p>Add this</p>`);
+
+    editorInternals._codemirror!.undo();
+    await raf();
+    assert.isFalse(
+      editorInternals._codemirror!.getValue().includes(`<p>Add this</p>`)
+    );
+    assert.include(
+      editorInternals._codemirror!.getValue(),
+      `<script src="hello.js">`
+    );
+  });
+
+  test('rename file preserves history', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            document.body.textContent = 'Hello JS';
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const codemirrorInternals = codemirror as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    await raf();
+    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello JS');
+    codemirrorInternals._codemirror!.setValue(
+      "document.body.textContent = 'Hello 2'"
+    );
+    project.renameFile('hello.js', 'potato.js');
+    await raf();
+    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
+    codemirrorInternals._codemirror!.undo();
+    await raf();
+    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello JS');
+    codemirrorInternals._codemirror!.redo();
+    await raf();
+    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
   });
 });

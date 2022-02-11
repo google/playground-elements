@@ -763,13 +763,14 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name          | Type                              | Default     | Description                                                                                   |
-| ------------- | --------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
-| `value`       | `string`                          | `""`        | Code as string                                                                                |
-| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | Language of the file to syntax highlight                                                      |
-| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                            |
-| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                               |
-| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)). |
+| Name          | Type                              | Default     | Description                                                                                        |
+| ------------- | --------------------------------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| `value`       | `string`                          | `""`        | Code as string                                                                                     |
+| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | Language of the file to syntax highlight                                                           |
+| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                 |
+| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                    |
+| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).      |
+| `documentKey` | `object`                          | `undefined` | Editor history for undo/redo is isolated per `documentKey`. Default behavior is a single instance. |
 
 ### Events
 
