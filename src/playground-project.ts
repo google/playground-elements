@@ -386,8 +386,12 @@ export class PlaygroundProject extends LitElement {
         continue;
       }
       const fileType = typeAttr.substring('sample/'.length);
-      // TODO (justinfagnani): better entity unescaping
-      let content = s.textContent!.replace('&lt;', '<');
+      let content = s.textContent ?? '';
+      if (fileType === 'html') {
+        // Replace usages of `&lt;/script>` with `</script>`. Match against
+        // `&lt;/` so that other usages of &lt; aren't replaced.
+        content = content.replace(/&lt;\//g, '</');
+      }
       if (!s.hasAttribute('preserve-whitespace')) {
         content = outdent(content);
       }

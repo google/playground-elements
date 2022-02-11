@@ -169,7 +169,7 @@ your `<playground-ide>` or `<playground-project>`, using the following attribute
 | `hidden`              | If present, the file won't be visible in `playground-tab-bar`.                                                        |
 | `preserve-whitespace` | Disable the default behavior where leading whitespace that is common to all lines is removed.                         |
 
-Be sure to escape closing `</script>` tags within your source as `<&lt;script>`.
+Be sure to escape closing `</script>` tags within your source as `&lt;script>`.
 
 ```html
 <playground-project>

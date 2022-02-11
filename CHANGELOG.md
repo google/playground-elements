@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   sharing undo/redo history. Now each file has its own isolated internal
   document instance.
 
+- Fixed only a single closing script tag unescaping in html files using
+  playground-ide
+  ([#251](https://github.com/google/playground-elements/issues/251)).
+
 ## [0.15.0-pre.1] - 2022-02-04
 
 ### Added
