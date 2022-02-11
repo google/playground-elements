@@ -17,7 +17,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Added `documentKey` property to `<playground-code-editor>` which is
+  used to keep track of individual CodeMirror document instances internally.
+  Default behavior without setting a `documentKey` is unchanged.
+
+  Use `documentKey` for fine control over the CodeMirror document instance. For
+  example, to model changing a file.
+
+### Fixed
+
+- Fixed undo history applying across files
+  ([#154](https://github.com/google/playground-elements/issues/154)).
+
+  Previously all files shared the same document instance resulting in files
+  sharing undo/redo history. Now each file has its own isolated internal
+  document instance.
 
 ## [0.15.0-pre.1] - 2022-02-04
 
