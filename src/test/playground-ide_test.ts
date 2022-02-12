@@ -105,6 +105,40 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello HTML');
   });
 
+  test('handles multiple script tags', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/html" filename="index.html">
+            <script>console.log('hello');&lt;/script>
+            <script>console.log('potato');&lt;/script>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const editorInternals = editor as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    // Wait for the editor to instantiate.
+    await raf();
+
+    assert.include(
+      editorInternals._codemirror?.getValue(),
+      `<script>console.log('hello');</script>`
+    );
+    assert.include(
+      editorInternals._codemirror?.getValue(),
+      `<script>console.log('potato');</script>`
+    );
+  });
+
   test('renders JS', async () => {
     render(
       html`
