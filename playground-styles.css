@@ -388,7 +388,7 @@ div.CodeMirror-dragcursors {
 
   background: var(--playground-code-background, white);
   font-size: var(--playground-code-font-size, 14px);
-  font-family: inherit;
+  font-family: var(--playground-code-font-family, monospace);
 
   max-height: 20em;
   width: 600px;
@@ -399,7 +399,6 @@ div.CodeMirror-dragcursors {
 .CodeMirror-hint {
   margin: 0;
   padding: 0 6px;
-  border-radius: 2px;
   white-space: pre;
   color: var(--playground-code-cursor-color, black);
   cursor: pointer;
@@ -419,7 +418,6 @@ div.CodeMirror-dragcursors {
 
 .CodeMirror-hint .hint-object-name {
   padding-right: 2em;
-  font-weight: bold;
   white-space: nowrap;
 }
 
