@@ -683,34 +683,19 @@ export class PlaygroundCodeEditor extends LitElement {
       return markedObjectName;
     }
 
-    let padding = 0;
-    const markedObjectHTML = html`
-      ${matches.map((match) => {
-        const firstMatchingIndex = match.indices[0];
-        const start = firstMatchingIndex[0];
-        const end = firstMatchingIndex[1];
+    const firstMatch = matches[0];
 
-        const preMarkContent = markedObjectName?.substring(0, start + padding);
+    const firstMatchingIndex = firstMatch.indices[0];
+    const start = firstMatchingIndex[0];
+    const end = firstMatchingIndex[1];
 
-        const markedContent = markedObjectName?.substring(
-          start + padding,
-          end + padding + 1
-        );
+    const preMarkContent = markedObjectName?.substring(0, start);
+    const markedContent = markedObjectName?.substring(start, end + 1);
+    const postMarkedContent = markedObjectName?.substring(end + 1);
 
-        const postMarkedContent = markedObjectName?.substring(
-          end + padding + 1
-        );
-        const markedHTML = html`
-          ${preMarkContent}<mark>${markedContent}</mark>${postMarkedContent}
-        `;
-        // As the matching is done in a fuzzy manner, we might have multiple matching
-        // indices in the completion word. In these situations, we need to pad out the
-        // matching positions, by the length of our already appended mark -tags.
-        padding += '<mark></mark>'.length;
-        return markedHTML;
-      })}
+    return html`
+      ${preMarkContent}<mark>${markedContent}</mark>${postMarkedContent}
     `;
-    return markedObjectHTML;
   }
 
   private _showCompletions() {
