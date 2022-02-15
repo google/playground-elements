@@ -1533,26 +1533,24 @@ div.CodeMirror-dragcursors {
   list-style: none;
 
   margin: 0;
-  padding: 2px;
+  padding: 0;
 
   box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
   border: 1px solid var(--playground-code-selection-background, silver);
 
   background: var(--playground-code-background, white);
   font-size: var(--playground-code-font-size, 14px);
-  font-family: monospace;
+  font-family: var(--playground-code-font-family, monospace);
 
   max-height: 20em;
   width: 600px;
-  max-width: 600px;
+  max-width: min(600px, 80vw);
   overflow-y: auto;
 }
 
 .CodeMirror-hint {
   margin: 0;
-  padding: 0 4px;
-  border-radius: 2px;
+  padding: 0 6px;
   white-space: pre;
   color: var(--playground-code-cursor-color, black);
   cursor: pointer;
@@ -1572,7 +1570,6 @@ div.CodeMirror-dragcursors {
 
 .CodeMirror-hint .hint-object-name {
   padding-right: 2em;
-  font-weight: bold;
   white-space: nowrap;
 }
 
