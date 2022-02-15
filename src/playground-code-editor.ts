@@ -677,38 +677,25 @@ export class PlaygroundCodeEditor extends LitElement {
   ): TemplateResult | string {
     const markedObjectName = objectName ?? '';
     const matches = completionData?.matches ?? [];
-    let padding = 0;
     if (matches.length <= 0) {
       // In the situation, that none of the input matches with the
       // completion item suggestion, we exit early, leaving the objectName unmarked.
       return markedObjectName;
     }
 
-    const markedObjectHTML = html`
-      ${matches.map(
-        (match) => html`
-          ${match.indices.map((ind) => {
-            const start = ind[0];
-            const end = ind[1];
-            const markedHTML = html`
-              ${markedObjectName?.substring(
-                0,
-                start + padding
-              )}<mark>${markedObjectName?.substring(
-                start + padding,
-                end + padding + 1
-              )}</mark>${markedObjectName?.substring(end + padding + 1)}
-            `;
-            // As the matching is done in a fuzzy manner, we might have multiple matching
-            // indices in the completion word. In these situations, we need to pad out the
-            // matching positions, by the length of our already appended mark -tags.
-            padding += '<mark></mark>'.length;
-            return markedHTML;
-          })}
-        `
-      )}
+    const firstMatch = matches[0];
+
+    const firstMatchingIndex = firstMatch.indices[0];
+    const start = firstMatchingIndex[0];
+    const end = firstMatchingIndex[1];
+
+    const preMarkContent = markedObjectName?.substring(0, start);
+    const markedContent = markedObjectName?.substring(start, end + 1);
+    const postMarkedContent = markedObjectName?.substring(end + 1);
+
+    return html`
+      ${preMarkContent}<mark>${markedContent}</mark>${postMarkedContent}
     `;
-    return markedObjectHTML;
   }
 
   private _showCompletions() {
