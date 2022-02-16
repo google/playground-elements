@@ -295,7 +295,10 @@ export class PlaygroundCodeEditor extends LitElement {
             const docKey = this.documentKey ?? {};
             let docInstance = this._docCache.get(docKey);
             if (!docInstance) {
-              docInstance = new CodeMirror.Doc(this.value ?? '', this._getLanguageMode());
+              docInstance = new CodeMirror.Doc(
+                this.value ?? '',
+                this._getLanguageMode()
+              );
               this._docCache.set(docKey, docInstance);
             } else if (docInstance.getValue() !== this.value) {
               // The retrieved document instance has contents which don't
