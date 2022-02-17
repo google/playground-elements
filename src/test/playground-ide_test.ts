@@ -15,6 +15,12 @@ import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 import type {PlaygroundFileEditor} from '../playground-file-editor.js';
 
+// There is browser variability with zero width spaces. This makes tests
+// consistent.
+function innerTextWithoutZeroWidthSpace(el?: HTMLElement | null): string {
+  return el?.innerText.replace(/\u200B/g, '') ?? '';
+}
+
 suite('playground-ide', () => {
   let container: HTMLDivElement;
   let testRunning: boolean;
@@ -934,8 +940,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    // Folding inserts zero width spaces around the marker.
-    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…\n            console.log('potato');";
     const fileEditor = (await pierce(
       'playground-ide',
       'playground-file-editor'
@@ -947,19 +952,25 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       EXPECTED_FOLDED
     );
     fileEditor.filename = 'index.html';
     await raf();
     assert.include(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       `<script src="hello.js"></script>`
     );
     fileEditor.filename = 'hello.js';
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       EXPECTED_FOLDED
     );
   });
@@ -986,8 +997,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    // Folding inserts zero width spaces around the marker.
-    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…\n            console.log('potato');";
     const fileEditor = (await pierce(
       'playground-ide',
       'playground-file-editor'
@@ -999,19 +1009,25 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       EXPECTED_FOLDED
     );
     fileEditor.filename = 'index.html';
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
-      '<body>\n​…​</body>'
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      '<body>\n…</body>'
     );
     fileEditor.filename = 'hello.js';
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       EXPECTED_FOLDED
     );
   });
@@ -1038,8 +1054,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    // Folding inserts zero width spaces around the marker.
-    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…\n            console.log('potato');";
     const codemirror = (await pierce(
       'playground-ide',
       'playground-file-editor',
@@ -1050,7 +1065,9 @@ suite('playground-ide', () => {
     };
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       EXPECTED_FOLDED
     );
     codemirror.value = `/* playground-fold */
@@ -1060,17 +1077,21 @@ document.body.textContent = 'Hello JS';
 console.log('tomato');`;
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
-      "​…​​\nconsole.log('tomato');"
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      "…\nconsole.log('tomato');"
     );
 
     codemirrorInternals._codemirror?.undo();
     await raf();
     assert.equal(
-      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      innerTextWithoutZeroWidthSpace(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
       // This should be `EXPECTED_FOLDED`.
       // Issue: https://github.com/google/playground-elements/issues/267
-      '​'
+      ''
     );
   });
 });
