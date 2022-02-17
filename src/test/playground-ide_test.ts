@@ -15,6 +15,11 @@ import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 import type {PlaygroundFileEditor} from '../playground-file-editor.js';
 
+// There is browser variability with zero width spaces. This helper keeps tests
+// consistent.
+function innerTextWithoutSpaces(el?: HTMLElement | null): string {
+  return el?.innerText.replace(/[\u200B\s]/g, '') ?? '';
+}
 suite('playground-ide', () => {
   let container: HTMLDivElement;
   let testRunning: boolean;
@@ -912,5 +917,180 @@ suite('playground-ide', () => {
     codemirrorInternals._codemirror!.redo();
     await raf();
     assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
+  });
+
+  test('code remains folded when switching files', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const EXPECTED_FOLDED = "…console.log('potato');";
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
+    fileEditor.filename = 'index.html';
+    await raf();
+    assert.include(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      `src="hello.js"></script>`
+    );
+    fileEditor.filename = 'hello.js';
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
+  });
+
+  test('code remains folded when switching files that both have folds', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <!-- playground-fold -->
+              <script src="hello.js">&lt;/script>
+              <!-- playground-fold-end -->
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const EXPECTED_FOLDED = "…console.log('potato');";
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
+    fileEditor.filename = 'index.html';
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      '<body>…</body>'
+    );
+    fileEditor.filename = 'hello.js';
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
+  });
+
+  // Test currently reproduces a bug.
+  // Issue: https://github.com/google/playground-elements/issues/267
+  test('code remains folded on value change and undo', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const EXPECTED_FOLDED = "…console.log('potato');";
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const codemirrorInternals = codemirror as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
+    codemirror.value = `/* playground-fold */
+document.body.textContent = 'Hello JS';
+/* playground-fold-end */
+
+console.log('tomato');`;
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      "…console.log('tomato');"
+    );
+
+    codemirrorInternals._codemirror?.undo();
+    await raf();
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      // This should be `EXPECTED_FOLDED`.
+      // Issue: https://github.com/google/playground-elements/issues/267
+      ''
+    );
   });
 });
