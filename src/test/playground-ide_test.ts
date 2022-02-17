@@ -15,12 +15,11 @@ import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 import type {PlaygroundFileEditor} from '../playground-file-editor.js';
 
-// There is browser variability with zero width spaces. This makes tests
+// There is browser variability with zero width spaces. This helper keeps tests
 // consistent.
-function innerTextWithoutZeroWidthSpace(el?: HTMLElement | null): string {
-  return el?.innerText.replace(/\u200B/g, '') ?? '';
+function innerTextWithoutSpaces(el?: HTMLElement | null): string {
+  return el?.innerText.replace(/[\u200B\s]/g, '') ?? '';
 }
-
 suite('playground-ide', () => {
   let container: HTMLDivElement;
   let testRunning: boolean;
@@ -940,7 +939,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    const EXPECTED_FOLDED = "…\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…console.log('potato');";
     const fileEditor = (await pierce(
       'playground-ide',
       'playground-file-editor'
@@ -952,7 +951,7 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       EXPECTED_FOLDED
@@ -960,15 +959,15 @@ suite('playground-ide', () => {
     fileEditor.filename = 'index.html';
     await raf();
     assert.include(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
-      `<script src="hello.js"></script>`
+      `src="hello.js"></script>`
     );
     fileEditor.filename = 'hello.js';
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       EXPECTED_FOLDED
@@ -997,7 +996,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    const EXPECTED_FOLDED = "…\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…console.log('potato');";
     const fileEditor = (await pierce(
       'playground-ide',
       'playground-file-editor'
@@ -1009,7 +1008,7 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       EXPECTED_FOLDED
@@ -1017,15 +1016,15 @@ suite('playground-ide', () => {
     fileEditor.filename = 'index.html';
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
-      '<body>\n…</body>'
+      '<body>…</body>'
     );
     fileEditor.filename = 'hello.js';
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       EXPECTED_FOLDED
@@ -1054,7 +1053,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    const EXPECTED_FOLDED = "…\n            console.log('potato');";
+    const EXPECTED_FOLDED = "…console.log('potato');";
     const codemirror = (await pierce(
       'playground-ide',
       'playground-file-editor',
@@ -1065,7 +1064,7 @@ suite('playground-ide', () => {
     };
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       EXPECTED_FOLDED
@@ -1077,16 +1076,16 @@ document.body.textContent = 'Hello JS';
 console.log('tomato');`;
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
-      "…\nconsole.log('tomato');"
+      "…console.log('tomato');"
     );
 
     codemirrorInternals._codemirror?.undo();
     await raf();
     assert.equal(
-      innerTextWithoutZeroWidthSpace(
+      innerTextWithoutSpaces(
         codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
       ),
       // This should be `EXPECTED_FOLDED`.
