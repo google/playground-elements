@@ -34,6 +34,7 @@ import {
   EditorCompletionDetails,
   EditorPosition,
   EditorToken,
+  CodeEditorChangeData,
 } from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
@@ -458,6 +459,14 @@ export class PlaygroundCodeEditor extends LitElement {
               Array(cm.getOption('indentUnit') ?? 2).join(' ')
             );
           },
+          // Ctrl + Space requests code completions.
+          ['Ctrl-Space']: () => {
+            const tokenUnderCursor = this.tokenUnderCursor.string.trim();
+            this._requestCompletions({
+              isRefinement: false,
+              tokenUnderCursor,
+            });
+          },
         },
       }
     );
@@ -513,6 +522,23 @@ export class PlaygroundCodeEditor extends LitElement {
       this._completions = [];
       return;
     }
+
+    this._requestCompletions({
+      isRefinement,
+      tokenUnderCursor,
+    });
+  }
+
+  private _requestCompletions({
+    isRefinement,
+    tokenUnderCursor,
+  }: Pick<CodeEditorChangeData, 'isRefinement' | 'tokenUnderCursor'>) {
+    if (
+      this.noCompletions ||
+      !this._currentFiletypeSupportsCompletion() ||
+      !this._codemirror
+    )
+      return;
 
     const id = ++this._currentCompletionRequestId;
     const cursorIndexOnRequest = this.cursorIndex;

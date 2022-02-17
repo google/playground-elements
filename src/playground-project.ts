@@ -588,16 +588,17 @@ export class PlaygroundProject extends LitElement {
       }
     }
 
-    const searchWordIsPeriod = changeData.tokenUnderCursor === '.';
-    // In the case that the search word is a period, we don't really
+    const skipFuzzySearch =
+      changeData.tokenUnderCursor === '.' || changeData.tokenUnderCursor === '';
+    // In the case that the search word is a period or empty, we don't really
     // have any material to fuzzy find with, so we don't have need
     // for running the search results through a fuzzy search.
     // For this case, we just return the entries as completion items as is.
     let completions = [];
-    if (searchWordIsPeriod) {
+    if (skipFuzzySearch) {
       completions = completionEntriesAsEditorCompletions(
         this._completionInfo?.entries,
-        '.'
+        changeData.tokenUnderCursor
       );
     } else {
       completions = sortCompletionItems(
