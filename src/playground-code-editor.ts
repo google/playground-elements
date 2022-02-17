@@ -294,9 +294,11 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'documentKey': {
             const docKey = this.documentKey ?? {};
             let docInstance = this._docCache.get(docKey);
+            let createdNewDoc = false;
             if (!docInstance) {
               docInstance = new CodeMirror.Doc(this.value ?? '');
               this._docCache.set(docKey, docInstance);
+              createdNewDoc = true;
             } else if (docInstance.getValue() !== this.value) {
               // The retrieved document instance has contents which don't
               // match the currently set `value`.
@@ -304,6 +306,12 @@ export class PlaygroundCodeEditor extends LitElement {
             }
             this._valueChangingFromOutside = true;
             cm.swapDoc(docInstance);
+            if (createdNewDoc) {
+              // Swapping to a document instance doesn't trigger a change event
+              // which is required for document folding. Manually fold once on
+              // document instantiation.
+              this._applyHideAndFoldRegions();
+            }
             this._valueChangingFromOutside = false;
             break;
           }

@@ -913,4 +913,106 @@ suite('playground-ide', () => {
     await raf();
     assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
   });
+
+  test('code remains folded when switching files', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    // Folding inserts zero width spaces around the marker.
+    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      EXPECTED_FOLDED
+    );
+    fileEditor.filename = 'index.html';
+    await raf();
+    assert.include(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      `<script src="hello.js"></script>`
+    );
+    fileEditor.filename = 'hello.js';
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      EXPECTED_FOLDED
+    );
+  });
+
+  test('code remains folded when switching files that both have folds', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <!-- playground-fold -->
+              <script src="hello.js">&lt;/script>
+              <!-- playground-fold-end -->
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    // Folding inserts zero width spaces around the marker.
+    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const fileEditor = (await pierce(
+      'playground-ide',
+      'playground-file-editor'
+    )) as PlaygroundFileEditor;
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      EXPECTED_FOLDED
+    );
+    fileEditor.filename = 'index.html';
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      '<body>\n​…​</body>'
+    );
+    fileEditor.filename = 'hello.js';
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      EXPECTED_FOLDED
+    );
+  });
 });
