@@ -1015,4 +1015,62 @@ suite('playground-ide', () => {
       EXPECTED_FOLDED
     );
   });
+
+  // Test currently reproduces a bug.
+  // Issue: https://github.com/google/playground-elements/issues/267
+  test('code remains folded on value change and undo', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/js" filename="hello.js">
+            /* playground-fold */
+              document.body.textContent = 'Hello JS';
+            /* playground-fold-end */
+
+            console.log('potato');
+          </script>
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="hello.js">&lt;/script>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    // Folding inserts zero width spaces around the marker.
+    const EXPECTED_FOLDED = "​…​​\n            console.log('potato');";
+    const codemirror = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    const codemirrorInternals = codemirror as unknown as {
+      _codemirror: PlaygroundCodeEditor['_codemirror'];
+    };
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      EXPECTED_FOLDED
+    );
+    codemirror.value = `/* playground-fold */
+document.body.textContent = 'Hello JS';
+/* playground-fold-end */
+
+console.log('tomato');`;
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      "​…​​\nconsole.log('tomato');"
+    );
+
+    codemirrorInternals._codemirror?.undo();
+    await raf();
+    assert.equal(
+      codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')?.innerText,
+      // This should be `EXPECTED_FOLDED`.
+      // Issue: https://github.com/google/playground-elements/issues/267
+      '​'
+    );
+  });
 });
