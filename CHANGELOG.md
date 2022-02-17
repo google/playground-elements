@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.15.0-pre.4] - 2022-02-17
 
 ### Added
 
