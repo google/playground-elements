@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.15.0-pre.3] - 2022-02-16
+
+### Fixed
+
+- Fixed syntax highlighting and code folding regressions introduced when using
+  `documentKey`.
+
 ## [0.15.0-pre.2] - 2022-02-15
 
 ### Added
