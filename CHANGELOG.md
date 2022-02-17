@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Added `Ctrl-Space` hotkey for triggering interactive code completions.
 
 ## [0.15.0-pre.3] - 2022-02-16
 
