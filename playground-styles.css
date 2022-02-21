@@ -409,7 +409,7 @@ div.CodeMirror-dragcursors {
 
 @media (pointer: coarse) {
   .CodeMirror-hint {
-    padding: 1rem 6px;
+    padding: 1em 6px;
   }
 }
 
