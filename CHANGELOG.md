@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added `Ctrl-Space` hotkey for triggering interactive code completions.
 
+- More mobile friendly completion items via media query
+
+### Fixed
+
+- Pressing ESC to close completions menu doesn't de-focus the code-editor
+
+- Word wrapping on long completion item details doesn't extend to multiple lines
+
+- Elevation on completion items list matches other elevations on project
+
 ## [0.15.0-pre.3] - 2022-02-16
 
 ### Fixed
