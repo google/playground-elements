@@ -642,8 +642,8 @@ export class PlaygroundCodeEditor extends LitElement {
     // As CodeMirror doesn't let us directly query if the completion hints are shown,
     // we want to have our own local state following the completions menu state.
     CodeMirror.on(hints, 'shown', () => {
-        // Delay updating the status by a frame so that key listeners still have 
-        // access to the correct state for the current situation.
+      // Delay updating the status by a frame so that key listeners still have
+      // access to the correct state for the current situation.
       window.requestAnimationFrame(() => {
         this._completionsOpen = true;
       });
