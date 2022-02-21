@@ -407,6 +407,12 @@ div.CodeMirror-dragcursors {
   justify-content: space-between;
 }
 
+@media (pointer: coarse) {
+  .CodeMirror-hint {
+    padding: 1rem 6px;
+  }
+}
+
 .CodeMirror-hint-active {
   background: var(--playground-code-background, rgba(0, 0, 0, 0.2));
   filter: brightness(1.2);
