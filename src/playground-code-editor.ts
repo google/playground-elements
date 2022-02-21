@@ -237,6 +237,9 @@ export class PlaygroundCodeEditor extends LitElement {
   @state()
   _completions?: EditorCompletion[];
 
+  @state()
+  _completionsOpen = false;
+
   private _onCompletionSelectedChange?: () => void;
 
   private _currentCompletionSelectionLabel = '';
@@ -355,6 +358,7 @@ export class PlaygroundCodeEditor extends LitElement {
             break;
           case 'tokenUnderCursor':
           case 'noCompletions':
+          case '_completionsOpen':
             // Ignored
             break;
           default:
@@ -417,6 +421,7 @@ export class PlaygroundCodeEditor extends LitElement {
       });
       this._resizeObserver.observe(this);
     }
+
     super.connectedCallback();
   }
 
@@ -487,6 +492,7 @@ export class PlaygroundCodeEditor extends LitElement {
         this._requestCompletionsIfNeeded(changeObject);
       }
     });
+
     this._codemirror = cm;
   }
 
@@ -633,6 +639,22 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     );
 
+    // As CodeMirror doesn't let us directly query if the completion hints are shown,
+    // we want to have our own local state following the completions menu state.
+    CodeMirror.on(hints, 'shown', () => {
+        // Delay updating the status by a frame so that key listeners still have 
+        // access to the correct state for the current situation.
+      window.requestAnimationFrame(() => {
+        this._completionsOpen = true;
+      });
+    });
+
+    CodeMirror.on(hints, 'close', () => {
+      window.requestAnimationFrame(() => {
+        this._completionsOpen = false;
+      });
+    });
+
     return hints;
   }
 
@@ -777,7 +799,9 @@ export class PlaygroundCodeEditor extends LitElement {
       // Note there is no API for "select the next naturally focusable element",
       // so instead we just re-focus the outer container, from which point the
       // user can tab to move focus entirely elsewhere.
-      this._focusContainer?.focus();
+      if (!this._completionsOpen) {
+        this._focusContainer?.focus();
+      }
     }
   }
 
