@@ -796,10 +796,14 @@ export class PlaygroundCodeEditor extends LitElement {
       // Prevent typing a newline from this same event.
       event.preventDefault();
     } else if (event.key === 'Escape') {
-      // Note there is no API for "select the next naturally focusable element",
-      // so instead we just re-focus the outer container, from which point the
-      // user can tab to move focus entirely elsewhere.
+      // If the user has completions selection UI opened up, Escape's default action
+      // is to close the completion UI instead of escaping the code editor instance.
+      // Therefore we only focus on the focusContainer in situations where the completions
+      // UI is not open.
       if (!this._completionsOpen) {
+        // Note there is no API for "select the next naturally focusable element",
+        // so instead we just re-focus the outer container, from which point the
+        // user can tab to move focus entirely elsewhere.
         this._focusContainer?.focus();
       }
     }
