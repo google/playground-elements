@@ -19,11 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
-## [0.15.0-pre.4] - 2022-02-17
+## [0.15.0-pre.5] - 2022-02-23
 
 ### Added
-
-- Added `Ctrl-Space` hotkey for triggering interactive code completions.
 
 - More mobile friendly completion items via media query
 
@@ -34,6 +32,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Word wrapping on long completion item details doesn't extend to multiple lines
 
 - Elevation on completion items list matches other elevations on project
+
+## [0.15.0-pre.4] - 2022-02-17
+
+### Added
+
+- Added `Ctrl-Space` hotkey for triggering interactive code completions.
 
 ## [0.15.0-pre.3] - 2022-02-16
 
