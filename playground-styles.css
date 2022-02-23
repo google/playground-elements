@@ -383,7 +383,8 @@ div.CodeMirror-dragcursors {
   margin: 0;
   padding: 0;
 
-  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px,
+    rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
   border: 1px solid var(--playground-code-selection-background, silver);
 
   background: var(--playground-code-background, white);
@@ -404,6 +405,12 @@ div.CodeMirror-dragcursors {
   cursor: pointer;
   display: flex;
   justify-content: space-between;
+}
+
+@media (pointer: coarse) {
+  .CodeMirror-hint {
+    padding: 1em 6px;
+  }
 }
 
 .CodeMirror-hint-active {
@@ -430,6 +437,7 @@ div.CodeMirror-dragcursors {
 
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Used to force a border model for a node */
