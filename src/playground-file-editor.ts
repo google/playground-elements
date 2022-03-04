@@ -210,7 +210,7 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
   if (encodingSepIndex !== -1) {
     mimeType = mimeType.substring(0, encodingSepIndex);
   }
-  switch (mimeType.toLowerCase()) {
+  switch (mimeType) {
     // TypeScript: this is the mime-type returned by servers
     // .ts files aren't usually served to browsers, so they don't yet
     // have their own mime-type.

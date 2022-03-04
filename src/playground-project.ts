@@ -789,7 +789,8 @@ const expandProjectConfig = async (
             ...info,
             name: filename,
             content: await resp.text(),
-            contentType: resp.headers.get('Content-Type') ?? 'text/plain',
+            contentType:
+              resp.headers.get('Content-Type')?.toLowerCase() ?? 'text/plain',
           };
         })()
       );
