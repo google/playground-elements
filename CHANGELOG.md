@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Fixed
+
+- Normalize content-type response header to lowercase when matching filetypes.
 
 ## [0.15.0-pre.5] - 2022-02-23
 
