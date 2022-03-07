@@ -17,7 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.15.0] - 2022-03-07
+
+### Added
+
+- Added `noCompletions` property documentation to README.
 
 ### Fixed
 

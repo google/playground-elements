@@ -679,6 +679,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `pragmas`            | `"on" \| "off" \| "off-visible"` | `"on"`                    | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                                                                                      |
 | `modified`           | `boolean`                        | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
 | `htmlFile`           | `string`                         | `"index.html"`            | The HTML file used in the preview.                                                                                                                                                                 |
+| `noCompletions`      | `boolean`                        | `false`                   | If interactive code completions should be shown. This setting only applies to TypeScript files.                                                                                                    |
 
 ### Slots
 
@@ -746,14 +747,15 @@ project element.
 
 ### Properties
 
-| Name          | Type                              | Default     | Description                                                                                                                    |
-| ------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `project`     | `string \| PlaygroundProject`     | `undefined` | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
-| `filename`    | `string`                          | `undefined` | The name of the project file that is currently being displayed. Set when changing tabs. Does not reflect to attribute.         |
-| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
-| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
-| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
-| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
+| Name            | Type                              | Default     | Description                                                                                                                    |
+| --------------- | --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `project`       | `string \| PlaygroundProject`     | `undefined` | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
+| `filename`      | `string`                          | `undefined` | The name of the project file that is currently being displayed. Set when changing tabs. Does not reflect to attribute.         |
+| `type`          | `"js" \| "ts" \| "html" \| "css"` | `undefined` | File type.                                                                                                                     |
+| `lineNumbers`   | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                                                |
+| `pragmas`       | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
+| `readonly`      | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
+| `noCompletions` | `boolean`                         | `false`     | If interactive code completions should be shown. This setting only applies to TypeScript files.                                |
 
 ---
 
@@ -763,14 +765,15 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name          | Type                              | Default     | Description                                                                                        |
-| ------------- | --------------------------------- | ----------- | -------------------------------------------------------------------------------------------------- |
-| `value`       | `string`                          | `""`        | Code as string                                                                                     |
-| `type`        | `"js" \| "ts" \| "html" \| "css"` | `undefined` | Language of the file to syntax highlight                                                           |
-| `readonly`    | `boolean`                         | `false`     | Do not allow edits                                                                                 |
-| `lineNumbers` | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                    |
-| `pragmas`     | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).      |
-| `documentKey` | `object`                          | `undefined` | Editor history for undo/redo is isolated per `documentKey`. Default behavior is a single instance. |
+| Name            | Type                              | Default     | Description                                                                                        |
+| --------------- | --------------------------------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| `value`         | `string`                          | `""`        | Code as string                                                                                     |
+| `type`          | `"js" \| "ts" \| "html" \| "css"` | `undefined` | Language of the file to syntax highlight                                                           |
+| `readonly`      | `boolean`                         | `false`     | Do not allow edits                                                                                 |
+| `lineNumbers`   | `boolean`                         | `false`     | Render a gutter with line numbers in the editor                                                    |
+| `pragmas`       | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).      |
+| `documentKey`   | `object`                          | `undefined` | Editor history for undo/redo is isolated per `documentKey`. Default behavior is a single instance. |
+| `noCompletions` | `boolean`                         | `false`     | If interactive code completions should be shown. This setting only applies to TypeScript files.    |
 
 ### Events
 
