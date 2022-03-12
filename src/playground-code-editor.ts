@@ -860,6 +860,7 @@ export class PlaygroundCodeEditor extends LitElement {
     const hide = (fromIdx: number, toIdx: number) => {
       doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
         collapsed: true,
+        readOnly: true,
       });
       this._hideOrFoldRegionsActive = true;
     };

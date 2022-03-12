@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Make hidden code blocks readonly to prevent accidental erasure
 
 ## [0.15.0] - 2022-03-07
 
