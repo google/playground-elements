@@ -787,12 +787,12 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Properties
 
-| Name       | Type                       | Default        | Description                                                                                                                    |
-| ---------- | -------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `project`  | `string PlaygroundProject` | `undefined`    | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
-| `location` | `string`                   | `""`           |                                                                                                                                |
-| `htmlFile` | `string`                   | `"index.html"` | The HTML file used in the preview.                                                                                             |
-| `iframe`   | `HTMLIFrameElement\|null`  | `null`         | A reference to the internal iframe element that is used to render the preview.                                                 |
+| Name       | Type                        | Default        | Description                                                                                                                    |
+| ---------- | --------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `project`  | `string PlaygroundProject`  | `undefined`    | The project that this editor is associated with. Either the `<playground-project>` node itself, or its `id` in the host scope. |
+| `location` | `string`                    | `""`           |                                                                                                                                |
+| `htmlFile` | `string`                    | `"index.html"` | The HTML file used in the preview.                                                                                             |
+| `iframe`   | `HTMLIFrameElement \| null` | `null`         | A reference to the internal iframe element that is used to render the preview.                                                 |
 
 ---
 
