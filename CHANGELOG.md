@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- playgroun-preview now exposes the internal iframe via the `iframe` property.
 
 ## [0.15.0] - 2022-03-07
 
