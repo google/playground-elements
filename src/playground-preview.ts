@@ -108,7 +108,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   location = 'Result';
 
   @query('iframe', true)
-  iframe: HTMLIFrameElement | null = null;
+  iframe!: HTMLIFrameElement | null;
 
   @query('slot')
   private _slot?: HTMLSlotElement;
