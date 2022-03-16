@@ -1835,7 +1835,7 @@ const jo=ee`@keyframes mdc-linear-progress-primary-indeterminate-translate{0%{tr
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-let qo=class extends Lo{constructor(){super(),this.htmlFile="index.html",this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{const e=this._iframe;if(!e)return;const{parentNode:t,nextSibling:r}=e;t&&e.remove(),e.src="",e.src=this._indexUrl,t&&t.insertBefore(e,r),this._loading=!0,this._showLoadingBar=!0},void 0===navigator.serviceWorker&&(this._error=R`<p>
+let qo=class extends Lo{constructor(){super(),this.htmlFile="index.html",this.location="Result",this._loading=!0,this._showLoadingBar=!1,this._loadedAtLeastOnce=!1,this.reload=()=>{const e=this.iframe;if(!e)return;const{parentNode:t,nextSibling:r}=e;t&&e.remove(),e.src="",e.src=this._indexUrl,t&&t.insertBefore(e,r),this._loading=!0,this._showLoadingBar=!0},void 0===navigator.serviceWorker&&(this._error=R`<p>
           <b>Sorry!</b> Preview unavailable because this browser doesn't
           <a
             href="https://caniuse.com/serviceworkers"
@@ -1903,7 +1903,7 @@ let qo=class extends Lo{constructor(){super(),this.htmlFile="index.html",this.lo
               ${this._error}</playground-internal-overlay
             >
           `:N}
-    `}updated(){var e;(null===(e=this._iframe)||void 0===e?void 0:e.src)!==this._indexUrl&&(this._iframe.src=this._indexUrl)}async firstUpdated(){var e,t;this._loading&&!this._slotHasAnyVisibleChildren()&&(this._showLoadingBar=!0);const r=this.shadowRoot.querySelector("mwc-linear-progress");await r.updateComplete,null===(t=null===(e=r.shadowRoot)||void 0===e?void 0:e.querySelector("[role=progressbar]"))||void 0===t||t.setAttribute("aria-label","Preview is loading")}_slotHasAnyVisibleChildren(){var e;const t=null===(e=this._slot)||void 0===e?void 0:e.assignedNodes({flatten:!0});if(!t)return!1;for(const e of t)if(e.nodeType!==Node.COMMENT_NODE&&(e.nodeType!==Node.TEXT_NODE||""!==(e.textContent||"").trim()))return!0;return!1}_onIframeLoad(){this._indexUrl&&(this._loading=!1,this._loadedAtLeastOnce=!0,this._showLoadingBar=!1)}};qo.styles=ee`
+    `}updated(){this.iframe&&this.iframe.src!==this._indexUrl&&(this.iframe.src=this._indexUrl)}async firstUpdated(){var e,t;this._loading&&!this._slotHasAnyVisibleChildren()&&(this._showLoadingBar=!0);const r=this.shadowRoot.querySelector("mwc-linear-progress");await r.updateComplete,null===(t=null===(e=r.shadowRoot)||void 0===e?void 0:e.querySelector("[role=progressbar]"))||void 0===t||t.setAttribute("aria-label","Preview is loading")}_slotHasAnyVisibleChildren(){var e;const t=null===(e=this._slot)||void 0===e?void 0:e.assignedNodes({flatten:!0});if(!t)return!1;for(const e of t)if(e.nodeType!==Node.COMMENT_NODE&&(e.nodeType!==Node.TEXT_NODE||""!==(e.textContent||"").trim()))return!0;return!1}_onIframeLoad(){this._indexUrl&&(this._loading=!1,this._loadedAtLeastOnce=!0,this._showLoadingBar=!1)}};qo.styles=ee`
     :host {
       display: flex;
       flex-direction: column;
@@ -1975,7 +1975,7 @@ let qo=class extends Lo{constructor(){super(),this.htmlFile="index.html",this.lo
     [hidden] {
       display: none;
     }
-  `,o([ge({attribute:"html-file"})],qo.prototype,"htmlFile",void 0),o([ge()],qo.prototype,"location",void 0),o([ye("iframe")],qo.prototype,"_iframe",void 0),o([ye("slot")],qo.prototype,"_slot",void 0),o([me()],qo.prototype,"_loading",void 0),o([me()],qo.prototype,"_showLoadingBar",void 0),o([me()],qo.prototype,"_loadedAtLeastOnce",void 0),o([me()],qo.prototype,"_error",void 0),qo=o([pe("playground-preview")],qo);
+  `,o([ge({attribute:"html-file"})],qo.prototype,"htmlFile",void 0),o([ge()],qo.prototype,"location",void 0),o([ye("iframe",!0)],qo.prototype,"iframe",void 0),o([ye("slot")],qo.prototype,"_slot",void 0),o([me()],qo.prototype,"_loading",void 0),o([me()],qo.prototype,"_showLoadingBar",void 0),o([me()],qo.prototype,"_loadedAtLeastOnce",void 0),o([me()],qo.prototype,"_error",void 0),qo=o([pe("playground-preview")],qo);
 /**
  * @license
  * Copyright 2019 Google LLC
