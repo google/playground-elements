@@ -14,6 +14,7 @@ import type {ReactiveElement} from '@lit/reactive-element';
 import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import type {PlaygroundProject} from '../playground-project.js';
 import type {PlaygroundFileEditor} from '../playground-file-editor.js';
+import type {PlaygroundPreview} from '../playground-preview.js';
 
 // There is browser variability with zero width spaces. This helper keeps tests
 // consistent.
@@ -647,6 +648,65 @@ suite('playground-ide', () => {
 
     const historyLengthAfter = window.history.length;
     assert.equal(historyLengthAfter, historyLengthBefore);
+  });
+
+  test('reloading preview does not create a new iframe element', async () => {
+    const historyLengthBefore = window.history.length;
+
+    // NOTE: For some reason, the parent window's history only seems to be
+    // affected when the iframe origin is different.
+    const separateOrigin = (await executeServerCommand(
+      'separate-origin'
+    )) as string;
+
+    render(
+      html`
+        <playground-ide sandbox-base-url="${separateOrigin}">
+          <script type="sample/html" filename="index.html">
+            <body>
+              <p>Hello HTML 1</p>
+            </body>
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const preview = (await pierce(
+      'playground-ide',
+      'playground-preview'
+    )) as PlaygroundPreview;
+
+    const iframe = (await pierce(
+      'playground-ide',
+      'playground-preview',
+      'iframe'
+    )) as HTMLIFrameElement;
+
+    assert.equal(preview.iframe, iframe);
+    await waitForIframeLoad(iframe);
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+    updateCurrentFile(editor, 'Hello HTML 2');
+
+    const project = (await pierce(
+      'playground-ide',
+      'playground-project'
+    )) as PlaygroundProject;
+
+    await project.save();
+    await preview.updateComplete;
+
+    const newIframe = (await pierce(
+      'playground-ide',
+      'playground-preview',
+      'iframe'
+    )) as HTMLIFrameElement;
+
+    assert.equal(newIframe, iframe);
   });
 
   test('delete file using menu', async () => {
