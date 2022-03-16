@@ -651,15 +651,9 @@ suite('playground-ide', () => {
   });
 
   test('reloading preview does not create a new iframe element', async () => {
-    // NOTE: For some reason, the parent window's history only seems to be
-    // affected when the iframe origin is different.
-    const separateOrigin = (await executeServerCommand(
-      'separate-origin'
-    )) as string;
-
     render(
       html`
-        <playground-ide sandbox-base-url="${separateOrigin}">
+        <playground-ide>
           <script type="sample/html" filename="index.html">
             <body>
               <p>Hello HTML 1</p>
@@ -674,13 +668,8 @@ suite('playground-ide', () => {
       'playground-preview'
     )) as PlaygroundPreview;
 
-    const iframe = (await pierce(
-      'playground-ide',
-      'playground-preview',
-      'iframe'
-    )) as HTMLIFrameElement;
+    const iframe = preview.iframe!;
 
-    assert.equal(preview.iframe, iframe);
     await waitForIframeLoad(iframe);
 
     const editor = (await pierce(
