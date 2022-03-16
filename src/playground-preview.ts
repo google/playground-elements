@@ -107,8 +107,8 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
   @property()
   location = 'Result';
 
-  @query('iframe')
-  private _iframe!: HTMLIFrameElement;
+  @query('iframe', true)
+  iframe!: HTMLIFrameElement;
 
   @query('slot')
   private _slot?: HTMLSlotElement;
@@ -249,13 +249,13 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     // the template, then the preview loads twice. I must be doing something
     // dumb, but this hacky way of synchronizing the src works correctly for
     // now. Figure out the more elegant solution.
-    if (this._iframe?.src !== this._indexUrl) {
-      this._iframe.src = this._indexUrl;
+    if (this.iframe?.src !== this._indexUrl) {
+      this.iframe.src = this._indexUrl;
     }
   }
 
   reload = () => {
-    const iframe = this._iframe;
+    const iframe = this.iframe;
     if (!iframe) {
       return;
     }
