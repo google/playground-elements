@@ -7,6 +7,7 @@
 import {assert} from '@esm-bundle/chai';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
+import { sendKeys } from '@web/test-runner-commands';
 
 const raf = async () => new Promise((r) => requestAnimationFrame(r));
 
@@ -59,6 +60,28 @@ suite('playground-code-editor', () => {
       };
       editorInternals._codemirror!.setValue('bar');
     });
+  });
+
+  test('supports comment toggling', async () => {
+    const editor = document.createElement('playground-code-editor');
+    editor.value = 'foo';
+    container.appendChild(editor);
+    await editor.updateComplete;
+
+    editor.focus();
+    await raf();
+    await sendKeys({
+      down: 'Control',
+    });
+    await sendKeys({
+      press: 'Slash',
+    });
+    sendKeys({
+      up: 'Control',
+    });
+    await raf();
+
+    assert.include(editor.shadowRoot!.innerHTML, '// foo');
   });
 
   suite('history', () => {

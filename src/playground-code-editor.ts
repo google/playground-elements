@@ -432,7 +432,7 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _createView() {
-    const cm = CodeMirror(
+    const cm: Editor = CodeMirror(
       (dom) => {
         this._cmDom = dom;
         this._resizing = true;
@@ -472,6 +472,8 @@ export class PlaygroundCodeEditor extends LitElement {
               tokenUnderCursor,
             });
           },
+          ['Ctrl-/']: () => cm.toggleComment(),
+          ['Cmd-/']: () => cm.toggleComment(),
         },
       }
     );

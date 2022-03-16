@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Make hidden code blocks readonly to prevent accidental erasure.
 
+- Added `Ctrl+/` or `Cmd+/` hotkey for toggling line comments.
+
 ## [0.15.1] - 2022-03-16
 
 ### Changed
