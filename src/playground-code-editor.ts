@@ -432,7 +432,7 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _createView() {
-    const cm: Editor = CodeMirror(
+    const cm: CodeMirror.Editor = CodeMirror(
       (dom) => {
         this._cmDom = dom;
         this._resizing = true;

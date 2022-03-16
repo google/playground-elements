@@ -7,7 +7,7 @@
 import {assert} from '@esm-bundle/chai';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
-import { sendKeys } from '@web/test-runner-commands';
+import {sendKeys} from '@web/test-runner-commands';
 
 const raf = async () => new Promise((r) => requestAnimationFrame(r));
 
@@ -60,28 +60,6 @@ suite('playground-code-editor', () => {
       };
       editorInternals._codemirror!.setValue('bar');
     });
-  });
-
-  test('supports comment toggling', async () => {
-    const editor = document.createElement('playground-code-editor');
-    editor.value = 'foo';
-    container.appendChild(editor);
-    await editor.updateComplete;
-
-    editor.focus();
-    await raf();
-    await sendKeys({
-      down: 'Control',
-    });
-    await sendKeys({
-      press: 'Slash',
-    });
-    sendKeys({
-      up: 'Control',
-    });
-    await raf();
-
-    assert.include(editor.shadowRoot!.innerHTML, '// foo');
   });
 
   suite('history', () => {
@@ -316,5 +294,83 @@ suite('playground-code-editor', () => {
 
     test('json', async () =>
       assertHighlight('json', '{"foo": 123}', '"foo"', stringColor));
+  });
+
+  suite('comment toggle', () => {
+    async function assertToggle(
+      type: PlaygroundCodeEditor['type'],
+      value: string,
+      expect: string
+    ) {
+      const editor = document.createElement('playground-code-editor');
+      editor.type = type;
+      editor.value = value;
+      container.appendChild(editor);
+      await editor.updateComplete;
+      const focusContainer =
+        editor.shadowRoot!.querySelector<HTMLDivElement>('#focusContainer')!;
+
+      editor.focus();
+      await sendKeys({
+        down: 'Control',
+      });
+      await sendKeys({
+        press: 'Slash',
+      });
+      await sendKeys({
+        up: 'Control',
+      });
+
+      assert.include(focusContainer.innerText, expect);
+
+      await sendKeys({
+        down: 'Control',
+      });
+      await sendKeys({
+        press: 'Slash',
+      });
+      await sendKeys({
+        up: 'Control',
+      });
+
+      assert.include(focusContainer.innerText, value);
+    }
+
+    test('ts', async () =>
+      assertToggle('ts', 'const g = 3;', '// const g = 3;'));
+
+    test('js', async () =>
+      assertToggle('js', 'const g = 3;', '// const g = 3;'));
+
+    test('html', async () =>
+      assertToggle('html', '<p>foo</p>', '<!-- <p>foo</p> -->'));
+
+    test('css', async () =>
+      assertToggle('css', 'p { color: blue; }', '/* p { color: blue; } */'));
+
+    test('ignored when readonly', async () => {
+      const editor = document.createElement('playground-code-editor');
+      editor.type = 'ts';
+      editor.readonly = true;
+      editor.value = 'const g = 3;';
+      container.appendChild(editor);
+      await editor.updateComplete;
+
+      editor.focus();
+      await sendKeys({
+        down: 'Control',
+      });
+      await sendKeys({
+        press: 'Slash',
+      });
+      await sendKeys({
+        up: 'Control',
+      });
+
+      assert.include(
+        editor.shadowRoot!.querySelector<HTMLDivElement>('div')!.innerText,
+        'const g = 3;'
+      );
+    });
   });
 });
