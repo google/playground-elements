@@ -651,8 +651,6 @@ suite('playground-ide', () => {
   });
 
   test('reloading preview does not create a new iframe element', async () => {
-    const historyLengthBefore = window.history.length;
-
     // NOTE: For some reason, the parent window's history only seems to be
     // affected when the iframe origin is different.
     const separateOrigin = (await executeServerCommand(
