@@ -4,8 +4,11 @@ import 'codemirror/lib/codemirror.js';
 // Hints
 import 'codemirror/addon/hint/show-hint.js';
 
-// Folding.
+// Folding
 import 'codemirror/addon/fold/foldcode.js';
+
+// Comment
+import 'codemirror/addon/comment/comment.js';
 
 // Runtime dependency for all CodeMirror modes that are generated using
 // https://github.com/codemirror/grammar-mode (i.e. the google_modes).

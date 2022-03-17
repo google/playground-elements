@@ -887,12 +887,10 @@ suite('playground-ide', () => {
     <script src="hello.js">&lt;/script>
     <p>Add this</p>
     </body>`);
-    // assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
     await raf();
 
     fileEditor.filename = 'hello.js';
     await raf();
-    // assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
     assert.include(editorInternals._codemirror!.getValue(), `'Hello 2'`);
 
     for (let i = 0; i < 6; i++) {
