@@ -60,6 +60,13 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   lineNumbers = false;
 
   /**
+   * If true, wrap for long lines. Default false
+   * (hidden).
+   */
+  @property({ type: Boolean, attribute: 'line-wrapping' })
+  lineWrapping = false;
+
+  /**
    * How to handle `playground-hide` and `playground-fold` comments.
    *
    * See https://github.com/google/playground-elements#hiding--folding for
@@ -142,6 +149,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
                 ? mimeTypeToTypeEnum(this._currentFile.contentType)
                 : undefined}
               .lineNumbers=${this.lineNumbers}
+              .lineWrapping=${this.lineWrapping}
               .readonly=${this.readonly || !this._currentFile}
               .pragmas=${this.pragmas}
               .diagnostics=${this._project?.diagnostics?.get(

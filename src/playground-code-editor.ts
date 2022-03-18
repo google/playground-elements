@@ -217,6 +217,13 @@ export class PlaygroundCodeEditor extends LitElement {
   lineNumbers = false;
 
   /**
+   * If true, wrap for long lines. Default false
+   * (hidden).
+   */
+  @property({ type: Boolean, attribute: 'line-wrapping', reflect: true })
+  lineWrapping = false;
+
+  /**
    * If true, this editor is not editable.
    */
   @property({type: Boolean, reflect: true})
@@ -335,6 +342,9 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'lineNumbers':
             cm.setOption('lineNumbers', this.lineNumbers);
             break;
+          case 'lineWrapping':
+            cm.setOption('lineWrapping', this.lineWrapping);
+            break;
           case 'type':
             cm.setOption('mode', this._getLanguageMode());
             break;
@@ -450,6 +460,7 @@ export class PlaygroundCodeEditor extends LitElement {
       {
         value: this.value ?? '',
         lineNumbers: this.lineNumbers,
+        lineWrapping: this.lineWrapping,
         mode: this._getLanguageMode(),
         readOnly: this.readonly,
         inputStyle: 'contenteditable',
@@ -491,6 +502,20 @@ export class PlaygroundCodeEditor extends LitElement {
         this.dispatchEvent(new Event('change'));
         this._requestCompletionsIfNeeded(changeObject);
       }
+    });
+
+    cm.on('renderLine', (_editorInstance: Editor, line, elt) => {
+      if (!this.lineWrapping) {
+        return;
+      }
+
+      const basePadding = 4;
+      const charWidth = cm.defaultCharWidth();
+      const tabSize = cm.getOption('tabSize') || basePadding;
+      const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
+
+      elt.style.textIndent = `-${off}px`;
+      elt.style.paddingLeft = `${(basePadding + off)}px`;
     });
 
     this._codemirror = cm;
