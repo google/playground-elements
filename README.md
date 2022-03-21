@@ -791,7 +791,7 @@ with the following:
 | ----------------------- | -------------------------------------- |
 | `Ctrl + Space`          | Trigger code completion when supported |
 | `Ctrl + /` or `Cmd + /` | Toggle line comments                   |
-| `ESC`                   | Blur or de-focus the code editor       |
+| `ESC`                   | De-focus the code editor               |
 
 ---
 
