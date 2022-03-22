@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Added `lineWrapping` property (`line-wrapping` attribute) to `<playground-code-editor>`, `<playground-file-editor>` and `<playground-ide>` which when enabled wraps long lines, otherwise the editor will scroll. Off by default.
 
 ## [0.15.1] - 2022-03-16
 
@@ -66,7 +70,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added `documentKey` property to `<playground-code-editor>` which is
+- Added `documentKey` property to `<playground-code-editor>` which isumbe
   used to keep track of individual CodeMirror document instances internally.
   Default behavior without setting a `documentKey` is unchanged.
 
