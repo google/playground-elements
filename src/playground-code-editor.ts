@@ -218,9 +218,8 @@ export class PlaygroundCodeEditor extends LitElement {
 
   /**
    * If true, wrap for long lines. Default false
-   * (hidden).
    */
-  @property({ type: Boolean, attribute: 'line-wrapping', reflect: true })
+  @property({type: Boolean, attribute: 'line-wrapping', reflect: true})
   lineWrapping = false;
 
   /**
@@ -515,7 +514,7 @@ export class PlaygroundCodeEditor extends LitElement {
       const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
 
       elt.style.textIndent = `-${off}px`;
-      elt.style.paddingLeft = `${(basePadding + off)}px`;
+      elt.style.paddingLeft = `${basePadding + off}px`;
     });
 
     this._codemirror = cm;

@@ -61,9 +61,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
 
   /**
    * If true, wrap for long lines. Default false
-   * (hidden).
    */
-  @property({ type: Boolean, attribute: 'line-wrapping' })
+  @property({type: Boolean, attribute: 'line-wrapping'})
   lineWrapping = false;
 
   /**
