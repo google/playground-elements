@@ -296,12 +296,53 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
 
-    const codemirrorContainer = editor.shadowRoot!.querySelector('.CodeMirror') as HTMLElement;
-    const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll('.CodeMirror-line')[1];
+    const codemirrorContainer = editor.shadowRoot!.querySelector(
+      '.CodeMirror'
+    ) as HTMLElement;
+    const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
+      '.CodeMirror-line'
+    )[1] as HTMLElement;
 
-    assert.include(Array.from(codemirrorContainer?.classList), 'CodeMirror-wrap');
-    assert.equal(getComputedStyle(codeMirrorLongLine).textIndent, '-50.6px');
-    assert.equal(getComputedStyle(codeMirrorLongLine).paddingLeft, '54.6px;');
+    const getTextWidth = (text: string, font: string) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      if (font && context) {
+        context.font = font;
+        const metrics = context.measureText(text);
+        return metrics.width;
+      }
+
+      return 0;
+    };
+
+    const getCssStyle = (element: HTMLElement, prop: string) => {
+      return window.getComputedStyle(element, null).getPropertyValue(prop);
+    };
+
+    const getCanvasFontSize = (el = document.body) => {
+      const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+      const fontSize = getCssStyle(el, 'font-size') || '16px';
+      const fontFamily = getCssStyle(el, 'font-family') || 'monospace';
+
+      return `${fontWeight} ${fontSize} ${fontFamily}`;
+    };
+
+    const size = getTextWidth('    ', getCanvasFontSize(codeMirrorLongLine));
+    // Due to browsers calculations being different flooring the nearest pixel size
+    const indent = `${Math.floor(
+      parseInt(getComputedStyle(codeMirrorLongLine).textIndent.split('px')[0])
+    )}px`;
+    const padding = `${Math.floor(
+      parseInt(getComputedStyle(codeMirrorLongLine).paddingLeft.split('px')[0])
+    )}px`;
+
+    assert.include(
+      Array.from(codemirrorContainer?.classList),
+      'CodeMirror-wrap'
+    );
+    assert.equal(indent, `-${Math.floor(size)}px`);
+    assert.equal(padding, `${Math.floor(size + 4)}px`);
   });
 
   test('a11y: is contenteditable', async () => {
