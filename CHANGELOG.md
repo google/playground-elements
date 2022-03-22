@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added `documentKey` property to `<playground-code-editor>` which isumbe
+- Added `documentKey` property to `<playground-code-editor>` which is
   used to keep track of individual CodeMirror document instances internally.
   Default behavior without setting a `documentKey` is unchanged.
 
