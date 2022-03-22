@@ -171,6 +171,31 @@ export class MySecondElement extends LitElement {
     </playground-preview>
   </section>
 
+  <h2>Hidden parts</h2>
+  <p>Using <code>playground-hide</code> and <code>playground-fold</code>, you can hide some parts of a file's contents.</p>
+  <playground-ide>
+    <script type="sample/html" filename="index.html">
+<!doctype html>
+<html>
+  <head>
+    <script type="module" src="./my-element.js">&lt;/script>
+  </head>
+  <body>
+    <div>Here are the contents:</div>
+    <my-element myNumber="5">
+      <div>Element is not upgraded</div>
+    </my-element>
+  </body>
+</html>
+    </script>
+    <script type="sample/ts" filename="my-element.ts">
+        /* playground-hide */
+        const foo = "Bar";
+        let variable = "ShouldBeFound";
+        /* playground-hide-end */
+    </script>
+  </playground-ide>
+
   <h2 id="prerender">Pre-rendered editor</h2>
   <section id="prerender">
     <playground-project id="prerenderProject">

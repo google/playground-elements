@@ -21,7 +21,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Added `lineWrapping` property (`line-wrapping` attribute) to `<playground-code-editor>`, `<playground-file-editor>` and `<playground-ide>` which when enabled wraps long lines, otherwise the editor will scroll. Off by default.
+- Make hidden code blocks readonly to prevent accidental erasure.
+
+- Added `Ctrl+/` or `Cmd+/` hotkey for toggling line comments.
+
+- Added keyboard shortcut documentation to the playground-code-editor README.
+
+- Added `lineWrapping` property (`line-wrapping` attribute) to
+  `<playground-code-editor>`, `<playground-file-editor>` and `<playground-ide>`
+  which when enabled wraps long lines, otherwise the editor will scroll. Off by
+  default.
 
 ## [0.15.1] - 2022-03-16
 

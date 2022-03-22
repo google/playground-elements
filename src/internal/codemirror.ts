@@ -12,6 +12,7 @@ import '../_codemirror/codemirror-bundle.js';
 import type CodeMirrorCore from 'codemirror';
 import type CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
 import type CodeMirrorHinting from 'codemirror/addon/hint/show-hint.js';
+import type CodeMirrorComment from 'codemirror/addon/comment/comment.js';
 
 /**
  * CodeMirror function.
@@ -23,6 +24,7 @@ export const CodeMirror = (
   window as {
     CodeMirror: typeof CodeMirrorCore &
       typeof CoreMirrorFolding &
-      typeof CodeMirrorHinting;
+      typeof CodeMirrorHinting &
+      typeof CodeMirrorComment;
   }
 ).CodeMirror;

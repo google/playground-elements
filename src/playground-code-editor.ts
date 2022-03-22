@@ -441,7 +441,7 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _createView() {
-    const cm = CodeMirror(
+    const cm: CodeMirror.Editor = CodeMirror(
       (dom) => {
         this._cmDom = dom;
         this._resizing = true;
@@ -482,6 +482,8 @@ export class PlaygroundCodeEditor extends LitElement {
               tokenUnderCursor,
             });
           },
+          ['Ctrl-/']: () => cm.toggleComment(),
+          ['Cmd-/']: () => cm.toggleComment(),
         },
       }
     );
@@ -884,6 +886,7 @@ export class PlaygroundCodeEditor extends LitElement {
     const hide = (fromIdx: number, toIdx: number) => {
       doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
         collapsed: true,
+        readOnly: true,
       });
       this._hideOrFoldRegionsActive = true;
     };

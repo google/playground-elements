@@ -782,6 +782,18 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 | --------- | ------------------------------------ |
 | `changed` | User made an edit to the active file |
 
+### Keyboard shortcuts
+
+The playground code editor extends the
+[CodeMirror default keyboard shortcuts](https://github.com/codemirror/CodeMirror/blob/master/src/input/keymap.js)
+with the following:
+
+| Keyboard shortcut       | Description                            |
+| ----------------------- | -------------------------------------- |
+| `Ctrl + Space`          | Trigger code completion when supported |
+| `Ctrl + /` or `Cmd + /` | Toggle line comments                   |
+| `ESC`                   | De-focus the code editor               |
+
 ---
 
 ## `<playground-preview>`
