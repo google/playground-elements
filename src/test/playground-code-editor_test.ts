@@ -366,7 +366,7 @@ suite('playground-code-editor', () => {
       await sendKeys({
         up: 'Control',
       });
-      await raf();
+      await new Promise((resolve) => setTimeout(resolve));
 
       assert.include(
         // There isn't a focusContainer when the editor is in readonly mode.
