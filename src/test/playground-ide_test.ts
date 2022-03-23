@@ -684,8 +684,7 @@ suite('playground-ide', () => {
       'playground-project'
     )) as PlaygroundProject;
 
-    await project.save();
-    await waitForIframeLoad(iframe);
+    await Promise.all([waitForIframeLoad(iframe), project.save()]);
 
     const newIframe = (await pierce(
       'playground-ide',
