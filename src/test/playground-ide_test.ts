@@ -653,7 +653,7 @@ suite('playground-ide', () => {
   test('reloading preview does not create a new iframe element', async () => {
     render(
       html`
-        <playground-ide>
+        <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
               <p>Hello HTML 1</p>
@@ -663,6 +663,7 @@ suite('playground-ide', () => {
       `,
       container
     );
+
     const preview = (await pierce(
       'playground-ide',
       'playground-preview'
