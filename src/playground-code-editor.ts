@@ -859,10 +859,10 @@ export class PlaygroundCodeEditor extends LitElement {
       this._hideOrFoldRegionsActive = true;
     };
 
-    const hide = (fromIdx: number, toIdx: number) => {
+    const hide = (fromIdx: number, toIdx: number, readOnly: boolean) => {
       doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
         collapsed: true,
-        readOnly: true,
+        readOnly,
       });
       this._hideOrFoldRegionsActive = true;
     };
@@ -875,7 +875,7 @@ export class PlaygroundCodeEditor extends LitElement {
       }
 
       const openerEnd = openerStart + opener.length;
-      hide(openerStart, openerEnd);
+      hide(openerStart, openerEnd, false);
 
       const contentStart = openerEnd;
       let contentEnd;
@@ -883,7 +883,7 @@ export class PlaygroundCodeEditor extends LitElement {
         contentEnd = contentStart + content.length;
         const closerStart = contentEnd;
         const closerEnd = contentEnd + closer.length;
-        hide(closerStart, closerEnd);
+        hide(closerStart, closerEnd, false);
       } else {
         // No matching end comment. Include the entire rest of the file.
         contentEnd = value.length;
@@ -893,7 +893,7 @@ export class PlaygroundCodeEditor extends LitElement {
         if (kind === 'fold') {
           fold(contentStart, contentEnd);
         } else if (kind === 'hide') {
-          hide(contentStart, contentEnd);
+          hide(contentStart, contentEnd, true);
         }
       }
     }
