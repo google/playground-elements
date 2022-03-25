@@ -1076,8 +1076,6 @@ suite('playground-ide', () => {
     );
   });
 
-  // Test currently reproduces a bug.
-  // Issue: https://github.com/google/playground-elements/issues/267
   test('code remains folded on value change and undo', async () => {
     render(
       html`
@@ -1129,15 +1127,12 @@ console.log('tomato');`;
 
     codemirrorInternals._codemirror?.undo();
     await raf();
-    /*
-     * Comment out failing test for now. To be fixed in a future PR.
-     * Related issue: https://github.com/google/playground-elements/issues/267
-     * assert.equal(
-     * innerTextWithoutSpaces(
-     *    codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
-     *  ),
-     *  EXPECTED_FOLDED
-     *);
-     */
+
+    assert.equal(
+      innerTextWithoutSpaces(
+        codemirror?.shadowRoot?.querySelector<HTMLDivElement>('*')
+      ),
+      EXPECTED_FOLDED
+    );
   });
 });

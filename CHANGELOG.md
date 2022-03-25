@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## Unreleased
+
+### Fixed
+
+- Fixed the hiding of comments that surround a fold/hide code block from
+  creating invisible readonly regions.
+
+- Refactored fold/hide marker logic so it doesn't add document history when
+  clearing the prior fold/hide markers.
+
 ## [0.15.2] - 2022-03-24
 
 ### Added

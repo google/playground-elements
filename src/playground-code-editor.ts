@@ -279,8 +279,6 @@ export class PlaygroundCodeEditor extends LitElement {
   private _resizeObserver?: ResizeObserver;
   private _resizing = false;
   private _valueChangingFromOutside = false;
-  private _ignoreValueChange = false;
-  private _hideOrFoldRegionsActive = false;
   private _cmDom?: HTMLElement;
   private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
   private _diagnosticsMouseoverListenerActive = false;
@@ -478,9 +476,6 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     );
     cm.on('change', (_editorInstance: Editor, changeObject: EditorChange) => {
-      if (this._ignoreValueChange) {
-        return;
-      }
       this._value = cm.getValue();
 
       // External changes are usually things like the editor switching which
@@ -821,22 +816,10 @@ export class PlaygroundCodeEditor extends LitElement {
       return;
     }
 
-    const value = cm.getValue();
-    if (this._hideOrFoldRegionsActive) {
-      // We need to reset any existing hide/fold regions. Hacky, but prodding
-      // the value this way works. We need to defer to a microtask though,
-      // because if we're already inside a CodeMirror change event callback
-      // stack, then these setValue calls will queue up two async change events
-      // that would fire later, and throw us for a loop. This way, the change
-      // events fire synchronously, and we can use our loop guard property
-      // correctly.
-      await null;
-      this._ignoreValueChange = true;
-      cm.setValue('');
-      cm.setValue(value);
-      this._ignoreValueChange = false;
+    // Reset any existing hide/fold regions.
+    for (const mark of cm.getAllMarks()) {
+      mark.clear();
     }
-    this._hideOrFoldRegionsActive = false;
 
     if (this.pragmas === 'off-visible') {
       return;
@@ -856,17 +839,16 @@ export class PlaygroundCodeEditor extends LitElement {
           to: doc.posFromIndex(toIdx),
         }),
       });
-      this._hideOrFoldRegionsActive = true;
     };
 
-    const hide = (fromIdx: number, toIdx: number) => {
+    const hide = (fromIdx: number, toIdx: number, readOnly: boolean) => {
       doc.markText(doc.posFromIndex(fromIdx), doc.posFromIndex(toIdx), {
         collapsed: true,
-        readOnly: true,
+        readOnly,
       });
-      this._hideOrFoldRegionsActive = true;
     };
 
+    const value = cm.getValue();
     for (const match of value.matchAll(pattern)) {
       const [, opener, kind, content, closer] = match;
       const openerStart = match.index;
@@ -875,7 +857,7 @@ export class PlaygroundCodeEditor extends LitElement {
       }
 
       const openerEnd = openerStart + opener.length;
-      hide(openerStart, openerEnd);
+      hide(openerStart, openerEnd, false);
 
       const contentStart = openerEnd;
       let contentEnd;
@@ -883,7 +865,7 @@ export class PlaygroundCodeEditor extends LitElement {
         contentEnd = contentStart + content.length;
         const closerStart = contentEnd;
         const closerEnd = contentEnd + closer.length;
-        hide(closerStart, closerEnd);
+        hide(closerStart, closerEnd, false);
       } else {
         // No matching end comment. Include the entire rest of the file.
         contentEnd = value.length;
@@ -893,7 +875,7 @@ export class PlaygroundCodeEditor extends LitElement {
         if (kind === 'fold') {
           fold(contentStart, contentEnd);
         } else if (kind === 'hide') {
-          hide(contentStart, contentEnd);
+          hide(contentStart, contentEnd, true);
         }
       }
     }
