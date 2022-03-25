@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Refactored fold/hide marker logic so it doesn't add document history when
   clearing the prior fold/hide markers.
 
+- Fix typo and incorrectly documented event name in README. `changed` event
+  should instead be `change`.
+
 ## [0.15.2] - 2022-03-24
 
 ### Added
