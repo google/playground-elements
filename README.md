@@ -777,9 +777,9 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Events
 
-| Event     | Description                          |
-| --------- | ------------------------------------ |
-| `changed` | User made an edit to the active file |
+| Event    | Description                          |
+| -------- | ------------------------------------ |
+| `change` | User made an edit to the active file |
 
 ### Keyboard shortcuts
 
@@ -808,7 +808,7 @@ with the following:
 
 ---
 
-## `<playground-file-system-controls`
+## `<playground-file-system-controls>`
 
 Floating controls for adding, deleting, and renaming files.
 
