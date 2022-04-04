@@ -342,6 +342,7 @@ export class PlaygroundCodeEditor extends LitElement {
             cm.setOption('lineNumbers', this.lineNumbers);
             break;
           case 'lineWrapping':
+            this._indentingLine(cm);
             cm.setOption('lineWrapping', this.lineWrapping);
             break;
           case 'type':
@@ -505,21 +506,31 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
 
-    cm.on('renderLine', (_editorInstance: Editor, line, elt) => {
-      if (!this.lineWrapping) {
-        return;
-      }
-
-      const basePadding = 4;
-      const charWidth = cm.defaultCharWidth();
-      const tabSize = cm.getOption('tabSize') || basePadding;
-      const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
-
-      elt.style.textIndent = `-${off}px`;
-      elt.style.paddingLeft = `${basePadding + off}px`;
-    });
+    this._indentingLine(cm);
 
     this._codemirror = cm;
+  }
+
+  private _indentingLine(cm: CodeMirror.Editor) {
+    if (this.lineWrapping) {
+      cm.on('renderLine', this._onRenderLine);
+    } else {
+      cm.off('renderLine', this._onRenderLine);
+    }
+  }
+
+  private _onRenderLine(
+    _editorInstance: Editor,
+    line: CodeMirror.LineHandle,
+    elt: HTMLElement
+  ) {
+    const basePadding = 4;
+    const charWidth = _editorInstance.defaultCharWidth();
+    const tabSize = _editorInstance.getOption('tabSize') || basePadding;
+    const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
+
+    elt.style.textIndent = `-${off}px`;
+    elt.style.paddingLeft = `${basePadding + off}px`;
   }
 
   private _requestCompletionsIfNeeded(changeObject: EditorChange) {
