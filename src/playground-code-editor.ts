@@ -342,7 +342,11 @@ export class PlaygroundCodeEditor extends LitElement {
             cm.setOption('lineNumbers', this.lineNumbers);
             break;
           case 'lineWrapping':
-            this._indentingLine(cm);
+            if (this.lineWrapping) {
+              cm.on('renderLine', this._onRenderLine);
+            } else {
+              cm.off('renderLine', this._onRenderLine);
+            }
             cm.setOption('lineWrapping', this.lineWrapping);
             break;
           case 'type':
@@ -506,17 +510,11 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
 
-    this._indentingLine(cm);
-
-    this._codemirror = cm;
-  }
-
-  private _indentingLine(cm: CodeMirror.Editor) {
     if (this.lineWrapping) {
       cm.on('renderLine', this._onRenderLine);
-    } else {
-      cm.off('renderLine', this._onRenderLine);
     }
+
+    this._codemirror = cm;
   }
 
   private _onRenderLine(
