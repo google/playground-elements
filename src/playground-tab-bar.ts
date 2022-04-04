@@ -225,7 +225,18 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     `;
   }
 
-  private _onProjectFilesChanged = () => {
+  private _onProjectFilesChanged = (event?: Event) => {
+    const newProjectLoaded = (
+      event as unknown as {detail?: {projectLoaded: boolean}}
+    )?.detail?.projectLoaded;
+    if (newProjectLoaded) {
+      const fileToSelect = this._visibleFiles.find(
+        (file) => file.selected
+      )?.name;
+      if (fileToSelect !== undefined) {
+        this._activeFileName = fileToSelect;
+      }
+    }
     this._setNewActiveFile();
     this.requestUpdate();
   };

@@ -353,7 +353,9 @@ export class PlaygroundProject extends LitElement {
     this._pristineFiles =
       this._files && JSON.parse(JSON.stringify(this._files));
     this._modified = false;
-    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.dispatchEvent(
+      new CustomEvent('filesChanged', {detail: {projectLoaded: true}})
+    );
     this.save();
   }
 
