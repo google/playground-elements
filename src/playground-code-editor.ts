@@ -520,13 +520,13 @@ export class PlaygroundCodeEditor extends LitElement {
   }
 
   private _onRenderLine(
-    _editorInstance: Editor,
+    editorInstance: Editor,
     line: CodeMirror.LineHandle,
     elt: HTMLElement
   ) {
     const basePadding = 4;
-    const charWidth = _editorInstance.defaultCharWidth();
-    const tabSize = _editorInstance.getOption('tabSize') || basePadding;
+    const charWidth = editorInstance.defaultCharWidth();
+    const tabSize = editorInstance.getOption('tabSize') || basePadding;
     const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
 
     elt.style.textIndent = `-${off}px`;
