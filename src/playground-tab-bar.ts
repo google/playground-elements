@@ -146,7 +146,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         );
       }
       if (this._project) {
-        this._onProjectFilesChanged();
+        this._handleFilesChanged(true);
         this._project.addEventListener(
           'filesChanged',
           this._onProjectFilesChanged
@@ -229,6 +229,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     const newProjectLoaded = (
       event as unknown as {detail?: {projectLoaded: boolean}}
     )?.detail?.projectLoaded;
+    this._handleFilesChanged(newProjectLoaded);
+  };
+
+  private _handleFilesChanged(newProjectLoaded = false) {
     if (newProjectLoaded) {
       const fileToSelect = this._visibleFiles.find(
         (file) => file.selected
@@ -239,7 +243,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
     this._setNewActiveFile();
     this.requestUpdate();
-  };
+  }
 
   private _onTabchange(
     event: CustomEvent<{

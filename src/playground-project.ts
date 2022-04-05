@@ -411,6 +411,7 @@ export class PlaygroundProject extends LitElement {
         }
         // Note "" is an invalid label.
         const label = s.getAttribute('label') || undefined;
+        const selected = s.hasAttribute('selected');
         const contentType = typeEnumToMimeType(fileType);
         files.push({
           name,
@@ -418,6 +419,7 @@ export class PlaygroundProject extends LitElement {
           hidden: s.hasAttribute('hidden'),
           content,
           contentType,
+          selected,
         });
       }
     }

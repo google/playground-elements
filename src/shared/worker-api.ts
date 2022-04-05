@@ -179,6 +179,8 @@ export interface FileOptions {
   label?: string;
   /** Don't display in tab bar. */
   hidden?: boolean;
+  /** Whether the file should be selected when loaded */
+  selected?: boolean;
 }
 
 export interface ProjectManifest {
