@@ -17,7 +17,10 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
 import type {PlaygroundFileEditor} from './playground-file-editor.js';
 import type {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
-import type {PlaygroundProject} from './playground-project.js';
+import type {
+  FilesChangedEvent,
+  PlaygroundProject,
+} from './playground-project.js';
 import type {PlaygroundInternalTab} from './internal/tab.js';
 
 /**
@@ -146,7 +149,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         );
       }
       if (this._project) {
-        this._onProjectFilesChanged();
+        this._handleFilesChanged(true);
         this._project.addEventListener(
           'filesChanged',
           this._onProjectFilesChanged
@@ -225,10 +228,22 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     `;
   }
 
-  private _onProjectFilesChanged = () => {
+  private _onProjectFilesChanged = (event: FilesChangedEvent) => {
+    this._handleFilesChanged(event.projectLoaded);
+  };
+
+  private _handleFilesChanged(newProjectLoaded = false) {
+    if (newProjectLoaded) {
+      const fileToSelect = this._visibleFiles.find(
+        (file) => file.selected
+      )?.name;
+      if (fileToSelect !== undefined) {
+        this._activeFileName = fileToSelect;
+      }
+    }
     this._setNewActiveFile();
     this.requestUpdate();
-  };
+  }
 
   private _onTabchange(
     event: CustomEvent<{

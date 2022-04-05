@@ -96,6 +96,25 @@ suite('playground-ide', () => {
     });
   };
 
+  const assertTabSelected = async (filename: string) => {
+    await new Promise((r) => setTimeout(r));
+    const tabBar = await pierce('playground-ide', 'playground-tab-bar');
+    while (testRunning) {
+      const selectedTab = tabBar.shadowRoot!.querySelector(
+        'playground-internal-tab[active]'
+      );
+      if (selectedTab) {
+        assert.include(
+          selectedTab.textContent?.trim(),
+          filename,
+          `Selected tab did not contain '${filename}')`
+        );
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 10));
+    }
+  };
+
   test('renders HTML', async () => {
     render(
       html`
@@ -1134,5 +1153,113 @@ console.log('tomato');`;
       ),
       EXPECTED_FOLDED
     );
+  });
+
+  test('focuses file with selected flag, from config', async () => {
+    const ide = document.createElement('playground-ide')!;
+    ide.sandboxBaseUrl = '/';
+    container.appendChild(ide);
+    // Start with a.html selected
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'index',
+        },
+        'a.html': {
+          content: 'A',
+          selected: true,
+        },
+        'b.html': {
+          content: 'B',
+        },
+      },
+    };
+    await assertTabSelected('a.html');
+    // Change to b.html selected
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'index',
+        },
+        'a.html': {
+          content: 'A',
+        },
+        'b.html': {
+          content: 'B',
+          selected: true,
+        },
+      },
+    };
+    await assertTabSelected('b.html');
+    // Nothing selected; should stay on b.html
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'index',
+        },
+        'b.html': {
+          content: 'B',
+        },
+        'a.html': {
+          content: 'A',
+        },
+      },
+    };
+    await assertTabSelected('b.html');
+  });
+
+  test('focuses file with selected flag, from slots', async () => {
+    // Start with a.html selected
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/html" filename="index.html">
+            index
+          </script>
+          <script type="sample/html" filename="a.html" selected>
+            A
+          </script>
+          <script type="sample/html" filename="b.html">
+            B
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    const ide = container.firstElementChild as PlaygroundIde;
+    await assertTabSelected('a.html');
+    // Change to b.html selected
+    ide.textContent = '';
+    render(
+      html`
+        <script type="sample/html" filename="index.html">
+          index
+        </script>
+        <script type="sample/html" filename="a.html">
+          A
+        </script>
+        <script type="sample/html" filename="b.html" selected>
+          B
+        </script>
+      `,
+      ide
+    );
+    await assertTabSelected('b.html');
+    // Nothing selected; should stay on b.html
+    render(
+      html`
+        <script type="sample/html" filename="index.html">
+          index
+        </script>
+        <script type="sample/html" filename="a.html">
+          A
+        </script>
+        <script type="sample/html" filename="b.html">
+          B
+        </script>
+      `,
+      ide
+    );
+    await assertTabSelected('b.html');
   });
 });

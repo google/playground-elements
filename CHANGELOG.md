@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+<!-- ## Unreleased -->
+
+### Added
+
+- Add the ability to select a file by setting `selected: true` in a project
+  config, or by setting the `selected` attribute on slotted children.
+
 ## [0.15.3] - 2022-03-29
 
 ### Fixed

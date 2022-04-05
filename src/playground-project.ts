@@ -51,6 +51,20 @@ const generateUniqueSessionId = (): string => {
   return sessionId;
 };
 
+declare global {
+  interface HTMLElementEventMap {
+    filesChanged: FilesChangedEvent;
+  }
+}
+
+export class FilesChangedEvent extends Event {
+  projectLoaded: boolean;
+  constructor(projectLoaded = false) {
+    super('filesChanged');
+    this.projectLoaded = projectLoaded;
+  }
+}
+
 /**
  * Coordinates <playground-file-editor> and <playground-preview> elements.
  */
@@ -353,7 +367,7 @@ export class PlaygroundProject extends LitElement {
     this._pristineFiles =
       this._files && JSON.parse(JSON.stringify(this._files));
     this._modified = false;
-    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.dispatchEvent(new FilesChangedEvent(true));
     this.save();
   }
 
@@ -409,6 +423,7 @@ export class PlaygroundProject extends LitElement {
         }
         // Note "" is an invalid label.
         const label = s.getAttribute('label') || undefined;
+        const selected = s.hasAttribute('selected');
         const contentType = typeEnumToMimeType(fileType);
         files.push({
           name,
@@ -416,6 +431,7 @@ export class PlaygroundProject extends LitElement {
           hidden: s.hasAttribute('hidden'),
           content,
           contentType,
+          selected,
         });
       }
     }
@@ -684,7 +700,7 @@ export class PlaygroundProject extends LitElement {
     }
     this._modified = undefined;
     this.requestUpdate();
-    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.dispatchEvent(new FilesChangedEvent());
     this.save();
   }
 
@@ -698,7 +714,7 @@ export class PlaygroundProject extends LitElement {
     }
     this._files = [...this._files.slice(0, idx), ...this._files.slice(idx + 1)];
     this._modified = undefined;
-    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.dispatchEvent(new FilesChangedEvent());
     this.save();
   }
 
@@ -718,7 +734,7 @@ export class PlaygroundProject extends LitElement {
     file.contentType = typeFromFilename(newName);
     this._files = [...this._files];
     this._modified = undefined;
-    this.dispatchEvent(new CustomEvent('filesChanged'));
+    this.dispatchEvent(new FilesChangedEvent());
     this.save();
   }
 }
