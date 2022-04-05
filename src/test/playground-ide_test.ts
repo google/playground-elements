@@ -1262,5 +1262,4 @@ console.log('tomato');`;
     );
     await assertTabSelected('b.html');
   });
-
 });
