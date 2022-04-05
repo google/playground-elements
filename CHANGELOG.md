@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Removed -->
 
 <!-- ## Unreleased -->
+
 ### Added
 
 - Add the ability to select a file by setting `selected: true` in a project
