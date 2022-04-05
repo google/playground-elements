@@ -167,6 +167,7 @@ your `<playground-ide>` or `<playground-project>`, using the following attribute
 | `filename`            | Required filename.                                                                                                    |
 | `label`               | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                            |
 | `hidden`              | If present, the file won't be visible in `playground-tab-bar`.                                                        |
+| `selected`            | If present, this file's tab will be selected when the project is loaded. Only one file should have this attribute.    |
 | `preserve-whitespace` | Disable the default behavior where leading whitespace that is common to all lines is removed.                         |
 
 Be sure to escape closing `</script>` tags within your source as `&lt;script>`.
@@ -210,6 +211,7 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 | `files.contentType` | Optional MIME type of the file. If omitted, type is taken from either the `fetch` response `Content-Type` header, or inferred from the filename extension when `content` is set. |
 | `files.label`       | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                                                                                       |
 | `files.hidden`      | If `true`, the file won't be visible in `playground-tab-bar`.                                                                                                                    |
+| `files.selected`    | If `true`, this file's tab will be selected when the project is loaded. Only one file should have this field set.                                                                |
 | `extends`           | Optional URL to another JSON config file to extend from. Configs are deeply merged. URLs are interpreted relative to the URL of each extendee config.                            |
 
 ```html
