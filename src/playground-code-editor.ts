@@ -523,12 +523,16 @@ export class PlaygroundCodeEditor extends LitElement {
     elt: HTMLElement
   ) {
     const basePadding = 4;
-    const charWidth = editorInstance.defaultCharWidth();
+    const gutter = editorInstance.getOption('lineNumbers')
+      ? '0.7em'
+      : `${basePadding}px`;
     const tabSize = editorInstance.getOption('tabSize') || basePadding;
-    const off = CodeMirror.countColumn(line.text, null, tabSize) * charWidth;
+    const off = CodeMirror.countColumn(line.text, null, tabSize);
 
-    elt.style.textIndent = `-${off}px`;
-    elt.style.paddingLeft = `${basePadding + off}px`;
+    if (off > 0) {
+      elt.style.textIndent = `-${off}ch`;
+      elt.style.paddingLeft = `calc(${gutter} + ${off}ch)`;
+    }
   }
 
   private _requestCompletionsIfNeeded(changeObject: EditorChange) {

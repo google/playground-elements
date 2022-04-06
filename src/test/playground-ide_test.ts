@@ -303,46 +303,52 @@ suite('playground-ide', () => {
       '.CodeMirror-line'
     )[1] as HTMLElement;
 
-    const getTextWidth = (text: string, font: string) => {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+    assert.include(
+      Array.from(codemirrorContainer?.classList),
+      'CodeMirror-wrap'
+    );
 
-      if (font && context) {
-        context.font = font;
-        const metrics = context.measureText(text);
-        return metrics.width;
-      }
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4px');
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
+    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
+  });
 
-      return 0;
+  test('line wrapping enabled with line numbers', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\n    Bar that has an indent',
+        },
+      },
     };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo\n    Bar that has an indent');
 
-    const getCssStyle = (element: HTMLElement, prop: string) => {
-      return window.getComputedStyle(element, null).getPropertyValue(prop);
-    };
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
 
-    const getCanvasFontSize = (el = document.body) => {
-      const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-      const fontSize = getCssStyle(el, 'font-size') || '16px';
-      const fontFamily = getCssStyle(el, 'font-family') || 'monospace';
-
-      return `${fontWeight} ${fontSize} ${fontFamily}`;
-    };
-
-    const size = getTextWidth('    ', getCanvasFontSize(codeMirrorLongLine));
-    // Due to browsers calculations being different flooring the nearest pixel size
-    const indent = `${Math.floor(
-      parseInt(getComputedStyle(codeMirrorLongLine).textIndent.split('px')[0])
-    )}px`;
-    const padding = `${Math.floor(
-      parseInt(getComputedStyle(codeMirrorLongLine).paddingLeft.split('px')[0])
-    )}px`;
+    const codemirrorContainer = editor.shadowRoot!.querySelector(
+      '.CodeMirror'
+    ) as HTMLElement;
+    const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
+      '.CodeMirror-line'
+    )[1] as HTMLElement;
 
     assert.include(
       Array.from(codemirrorContainer?.classList),
       'CodeMirror-wrap'
     );
-    assert.equal(indent, `-${Math.floor(size)}px`);
-    assert.equal(padding, `${Math.floor(size + 4)}px`);
+
+    assert.include(codeMirrorLongLine.style.paddingLeft, '0.7em');
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
+    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
   });
 
   test('a11y: is contenteditable', async () => {
