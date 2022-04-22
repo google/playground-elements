@@ -522,6 +522,14 @@ export class PlaygroundCodeEditor extends LitElement {
     line: CodeMirror.LineHandle,
     elt: HTMLElement
   ) {
+    // When wrapping a line the subsequent wrapped code
+    // needs to keep the same formatting and have the
+    // same amount of indentation.
+    //
+    // Each line has an initial `padding-left`, this needs
+    // to be preserved with the indent:
+    // - playground-styles.css#L39 - standard padding.
+    // - playground-styles.css#L72 - extra with line numbers.
     const basePadding = 4;
     const gutter = editorInstance.getOption('lineNumbers')
       ? '0.7em'
