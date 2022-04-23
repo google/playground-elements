@@ -295,6 +295,81 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello HTML');
   });
 
+  test('line wrapping enabled', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\n    Bar that has an indent',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo\n    Bar that has an indent');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const codemirrorContainer = editor.shadowRoot!.querySelector(
+      '.CodeMirror'
+    ) as HTMLElement;
+    const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
+      '.CodeMirror-line'
+    )[1] as HTMLElement;
+
+    assert.include(
+      Array.from(codemirrorContainer?.classList),
+      'CodeMirror-wrap'
+    );
+
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4px');
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
+    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
+  });
+
+  test('line wrapping enabled with line numbers', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: 'Foo\n    Bar that has an indent',
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('Foo\n    Bar that has an indent');
+
+    const editor = (await pierce(
+      'playground-ide',
+      'playground-file-editor',
+      'playground-code-editor'
+    )) as PlaygroundCodeEditor;
+
+    const codemirrorContainer = editor.shadowRoot!.querySelector(
+      '.CodeMirror'
+    ) as HTMLElement;
+    const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
+      '.CodeMirror-line'
+    )[1] as HTMLElement;
+
+    assert.include(
+      Array.from(codemirrorContainer?.classList),
+      'CodeMirror-wrap'
+    );
+
+    assert.include(codeMirrorLongLine.style.paddingLeft, '0.7em');
+    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
+    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
+  });
+
   test('a11y: is contenteditable', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';

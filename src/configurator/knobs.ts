@@ -142,6 +142,13 @@ export const knobs = [
     htmlAttribute: 'line-numbers',
   }),
   checkbox({
+    id: 'lineWrapping',
+    label: 'Line wrapping',
+    section: 'features',
+    default: false,
+    htmlAttribute: 'line-wrapping',
+  }),
+  checkbox({
     id: 'noCompletions',
     label: 'No completions',
     section: 'features',

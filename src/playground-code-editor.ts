@@ -217,6 +217,12 @@ export class PlaygroundCodeEditor extends LitElement {
   lineNumbers = false;
 
   /**
+   * If true, wrap for long lines. Default false
+   */
+  @property({type: Boolean, attribute: 'line-wrapping', reflect: true})
+  lineWrapping = false;
+
+  /**
    * If true, this editor is not editable.
    */
   @property({type: Boolean, reflect: true})
@@ -333,6 +339,14 @@ export class PlaygroundCodeEditor extends LitElement {
           case 'lineNumbers':
             cm.setOption('lineNumbers', this.lineNumbers);
             break;
+          case 'lineWrapping':
+            if (this.lineWrapping) {
+              cm.on('renderLine', this._onRenderLine);
+            } else {
+              cm.off('renderLine', this._onRenderLine);
+            }
+            cm.setOption('lineWrapping', this.lineWrapping);
+            break;
           case 'type':
             cm.setOption('mode', this._getLanguageMode());
             break;
@@ -448,6 +462,7 @@ export class PlaygroundCodeEditor extends LitElement {
       {
         value: this.value ?? '',
         lineNumbers: this.lineNumbers,
+        lineWrapping: this.lineWrapping,
         mode: this._getLanguageMode(),
         readOnly: this.readonly,
         inputStyle: 'contenteditable',
@@ -490,7 +505,37 @@ export class PlaygroundCodeEditor extends LitElement {
       }
     });
 
+    if (this.lineWrapping) {
+      cm.on('renderLine', this._onRenderLine);
+    }
+
     this._codemirror = cm;
+  }
+
+  private _onRenderLine(
+    editorInstance: Editor,
+    line: CodeMirror.LineHandle,
+    elt: HTMLElement
+  ) {
+    // When wrapping a line the subsequent wrapped code
+    // needs to keep the same formatting and have the
+    // same amount of indentation.
+    //
+    // Each line has an initial `padding-left`, this needs
+    // to be preserved with the indent:
+    // - playground-styles.css#L39 - standard padding.
+    // - playground-styles.css#L72 - extra with line numbers.
+    const basePadding = 4;
+    const gutter = editorInstance.getOption('lineNumbers')
+      ? '0.7em'
+      : `${basePadding}px`;
+    const tabSize = editorInstance.getOption('tabSize') || basePadding;
+    const off = CodeMirror.countColumn(line.text, null, tabSize);
+
+    if (off > 0) {
+      elt.style.textIndent = `-${off}ch`;
+      elt.style.paddingLeft = `calc(${gutter} + ${off}ch)`;
+    }
   }
 
   private _requestCompletionsIfNeeded(changeObject: EditorChange) {

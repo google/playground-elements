@@ -49,6 +49,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added keyboard shortcut documentation to the playground-code-editor README.
 
+- Added `lineWrapping` property (`line-wrapping` attribute) to
+  `<playground-code-editor>`, `<playground-file-editor>` and `<playground-ide>`
+  which when enabled wraps long lines, otherwise the editor will scroll. Off by
+  default.
+
 ## [0.15.1] - 2022-03-16
 
 ### Changed

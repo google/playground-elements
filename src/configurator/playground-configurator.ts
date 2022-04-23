@@ -328,6 +328,7 @@ export class PlaygroundConfigurator extends LitElement {
             id="playground"
             class="playground-theme-${this.values.getValue('theme')}"
             .lineNumbers=${this.values.getValue('lineNumbers')}
+            .lineWrapping=${this.values.getValue('lineWrapping')}
             .resizable=${this.values.getValue('resizable')}
             .editableFileSystem=${this.values.getValue('editableFileSystem')}
             .noCompletions=${this.values.getValue('noCompletions')}

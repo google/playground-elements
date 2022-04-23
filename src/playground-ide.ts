@@ -232,6 +232,12 @@ export class PlaygroundIde extends LitElement {
   lineNumbers = false;
 
   /**
+   * If true, wrap for long lines. Default false
+   */
+  @property({type: Boolean, attribute: 'line-wrapping'})
+  lineWrapping = false;
+
+  /**
    * If true, allow the user to change the relative size of the LHS editor and
    * RHS preview by clicking and dragging in the space between them.
    */
@@ -310,6 +316,7 @@ export class PlaygroundIde extends LitElement {
           id=${editorId}
           part="editor"
           .lineNumbers=${this.lineNumbers}
+          .lineWrapping=${this.lineWrapping}
           .project=${projectId}
           .pragmas=${this.pragmas}
           .noCompletions=${this.noCompletions}
