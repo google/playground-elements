@@ -60,7 +60,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added keyboard shortcut documentation to the playground-code-editor README.
 
-
 ## [0.15.1] - 2022-03-16
 
 ### Changed
