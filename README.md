@@ -170,7 +170,7 @@ your `<playground-ide>` or `<playground-project>`, using the following attribute
 | `selected`            | If present, this file's tab will be selected when the project is loaded. Only one file should have this attribute.    |
 | `preserve-whitespace` | Disable the default behavior where leading whitespace that is common to all lines is removed.                         |
 
-Be sure to escape closing `</script>` tags within your source as `&lt;script>`.
+Be sure to escape closing `</script>` tags within your source as `&lt;/script>`.
 
 ```html
 <playground-project>
