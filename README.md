@@ -9,8 +9,8 @@
  <br><br>
   <a href="https://www.npmjs.com/package/playground-elements">
     <img height="20" src="https://img.shields.io/npm/v/playground-elements.svg"></img></a>
-  <a href="https://github.com/google/playground-elements/actions?query=workflow%3Atests+branch%3Amaster+event%3Apush">
-    <img height="20" src="https://github.com/google/code-sample-editor/workflows/Tests/badge.svg"></img></a>
+  <a href="https://github.com/google/playground-elements/actions/workflows/test.yml">
+    <img height="20" src="https://github.com/google/playground-elements/actions/workflows/test.yml/badge.svg"></img></a>
   <a href="https://www.npmtrends.com/playground-elements">
     <img height="20" src="https://img.shields.io/npm/dw/playground-elements"></a>
   <br><br>
