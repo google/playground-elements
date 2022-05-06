@@ -17,11 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-## Unreleased
+<!-- ## Unreleased -->
 
-### Fixed
-
-- Fix typo in README. Add missing forward slash in escaped script tag.
+## [0.15.5] - 2022-05-06
 
 ### Added
 
@@ -29,6 +27,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `<playground-code-editor>`, `<playground-file-editor>` and `<playground-ide>`
   which when enabled wraps long lines, otherwise the editor will scroll. Off by
   default.
+
+### Fixed
+
+- Fix typo in README. Add missing forward slash in escaped script tag.
 
 ## [0.15.4] - 2022-04-05
 
