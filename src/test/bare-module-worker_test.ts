@@ -1039,6 +1039,88 @@ suite('bare module worker', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
+  test('prefers "import" + "browser" condition exports over default', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.js',
+        content: `
+          import 'foo';
+          import 'foo/bar.js';
+        `,
+      },
+    ];
+
+    const cdn: CdnData = {
+      foo: {
+        versions: {
+          '1.0.0': {
+            files: {
+              'browser/index.js': {
+                content: 'BROWSER',
+              },
+              'browser/bar.js': {
+                content: 'BROWSER',
+              },
+              'default/index.js': {
+                content: 'DEFAULT',
+              },
+              'default/bar.js': {
+                content: 'DEFAULT',
+              },
+              'package.json': {
+                content: `{
+                  "exports": {
+                    ".": {
+                      "import": {
+                        "browser": "./browser/index.js"
+                      },
+                      "default": "./default/index.js"
+                    },
+                    "./bar.js": {
+                      "import": {
+                        "browser": "./browser/bar.js"
+                      },
+                      "default": "./default/bar.js"
+                    }
+                  }
+                }`,
+              },
+            },
+          },
+        },
+      },
+    };
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: `
+          import './node_modules/foo@1.0.0/browser/index.js';
+          import './node_modules/foo@1.0.0/browser/bar.js';
+        `,
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/browser/index.js',
+          content: 'BROWSER',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          name: 'node_modules/foo@1.0.0/browser/bar.js',
+          content: 'BROWSER',
+          contentType: 'text/javascript; charset=utf-8',
+        },
+      },
+    ];
+    await checkTransform(files, expected, {}, cdn);
+  });
+
   test('@lion/button style import', async () => {
     const files: SampleFile[] = [
       {
