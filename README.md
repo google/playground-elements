@@ -298,7 +298,7 @@ Playground supports Node-style [export
 conditions](https://nodejs.org/api/packages.html#packages_exports) when
 resolving modules in dependencies, and sets the following
 [conditions](https://nodejs.org/api/packages.html#packages_conditional_exports):
-`module`, `import`, `development`.
+`module`, `import`, `development`, and `browser`.
 
 ### Import maps
 
