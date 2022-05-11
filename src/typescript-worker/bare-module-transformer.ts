@@ -54,7 +54,7 @@ export class BareModuleTransformer {
   private _importMapResolver: ImportMapResolver;
   private _emittedExternalDependencies = new Set<string>();
   private _nodeResolver = new NodeModuleResolver({
-    conditions: ['module', 'import', 'development'],
+    conditions: ['module', 'import', 'development', 'browser'],
   });
 
   constructor(cdn: CachingCdn, importMapResolver: ImportMapResolver) {

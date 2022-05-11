@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- **BREAKING** Added `browser` to the set of export conditions used during
+  module resolution.
 
 ## [0.15.5] - 2022-05-06
 
