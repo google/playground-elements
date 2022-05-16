@@ -85,12 +85,12 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@material/mwc-button": "*",
-    "@material/mwc-icon-button": "*",
-    "@material/mwc-linear-progress": "*",
-    "@material/mwc-list": "*",
-    "@material/mwc-menu": "*",
-    "@material/mwc-textfield": "*",
+    "@material/mwc-button": "^0.26.1",
+    "@material/mwc-icon-button": "^0.26.1",
+    "@material/mwc-linear-progress": "^0.26.1",
+    "@material/mwc-list": "^0.26.1",
+    "@material/mwc-menu": "^0.26.1",
+    "@material/mwc-textfield": "^0.26.1",
     "@types/codemirror": "^5.60.0",
     "comlink": "=4.3.1",
     "fuse.js": "^6.4.6",
