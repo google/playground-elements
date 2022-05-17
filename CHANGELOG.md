@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.16.1] - 2022-05-17
+
+### Changed
+
+- Upgraded MWC dependencies.
+
 ## [0.16.0] - 2022-05-11
 
 ### Changed
