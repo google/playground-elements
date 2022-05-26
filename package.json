@@ -11,23 +11,183 @@
   "main": "playground-ide.js",
   "scripts": {
     "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
-    "prepack": "npm run clean && npm run build && npm run update-version-module",
-    "update-version-module": "node scripts/update-version-module.js",
-    "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
-    "nuke": "npm run clean && rm -rf node_modules && npm install",
-    "upgrade": "rm -rf node_modules package-lock.json && npm install",
-    "build": "npm run build:themes && npm run build:lib && npm run build:typescript && npm run bundle && npm run build:configurator",
-    "build:lib": "tsc --build",
-    "build:themes": "node scripts/theme-generator.js && rollup -c rollup.config.styles.js",
-    "build:configurator": "rollup -c rollup.config.configurator.js",
-    "build:typescript": "rollup -c rollup.config.typescript.js",
-    "bundle": "rollup -c rollup.config.js",
-    "test": "wtr && playwright test",
-    "lint": "eslint .",
-    "watch": "npm run build:lib -- --watch & NO_TERSER=1 rollup -c rollup.config.js -w",
-    "serve": "web-dev-server --node-resolve --watch --open=configurator/",
+    "prepack": "wireit",
+    "update-version-module": "wireit",
+    "build": "wireit",
+    "build:ts": "wireit",
+    "build:styles-module": "wireit",
+    "build:themes": "wireit",
+    "build:configurator": "wireit",
+    "build:typescript-module": "wireit",
+    "build:bundle": "wireit",
+    "test": "wireit",
+    "test:wtr": "wireit",
+    "test:playwright": "wireit",
+    "lint": "wireit",
+    "serve": "npm run build && (npm run build watch & web-dev-server --node-resolve --watch --open=configurator/)",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:ts",
+        "build:themes",
+        "build:bundle",
+        "build:configurator"
+      ]
+    },
+    "prepack": {
+      "dependencies": [
+        "update-version-module",
+        "build"
+      ]
+    },
+    "build:ts": {
+      "command": "tsc --build --pretty",
+      "clean": "if-file-deleted",
+      "dependencies": [
+        "build:styles-module",
+        "build:themes"
+      ],
+      "files": [
+        "tsconfig.json",
+        "src/**/tsconfig.json",
+        "src/**/*.ts"
+      ],
+      "output": [
+        "index-*.{js,d.ts,d.ts.map}",
+        "playground-*.{js,d.ts,d.ts.map}",
+        "service-worker/**",
+        "typescript-worker/**",
+        "internal/**",
+        "shared/**",
+        "test/**",
+        "themes/**",
+        "configurator/**/*.{js,d.ts,d.ts.map}",
+        "!configurator/playground-service-worker.js",
+        ".tsbuildinfo"
+      ]
+    },
+    "build:styles-module": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.styles.js",
+      "files": [
+        "playground-styles.css",
+        "rollup.config.styles.js"
+      ],
+      "output": [
+        "src/playground-styles.ts"
+      ]
+    },
+    "build:themes": {
+      "command": "node scripts/theme-generator.js",
+      "files": [
+        "scripts/theme-generator.js"
+      ],
+      "output": [
+        "themes/**/*.css",
+        "src/themes/**/*.css.ts",
+        "src/configurator/themes.ts"
+      ]
+    },
+    "build:typescript-module": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.typescript.js",
+      "files": [
+        "rollup.config.typescript.js"
+      ],
+      "output": [
+        "internal/typescript.js"
+      ]
+    },
+    "build:bundle": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.js",
+      "dependencies": [
+        "build:ts",
+        "build:typescript-module"
+      ],
+      "files": [
+        "playground-service-worker-proxy.js",
+        "src/_codemirror/codemirror-bundle.js",
+        "service-worker/playground-service-worker.js",
+        "typescript-worker/playground-typescript-worker.js"
+      ],
+      "output": [
+        "playground-service-worker-proxy.html",
+        "_codemirror/codemirror-bundle.js",
+        "playground-service-worker.js",
+        "playground-typescript-worker.js"
+      ]
+    },
+    "build:configurator": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.configurator.js",
+      "dependencies": [
+        "build:ts",
+        "build:bundle"
+      ],
+      "files": [
+        "rollup.config.configurator.js",
+        "configurator/**",
+        "!configurator/deploy/**"
+      ],
+      "output": [
+        "configurator/deploy/**"
+      ]
+    },
+    "test": {
+      "dependencies": [
+        "test:wtr",
+        "test:playwright"
+      ]
+    },
+    "test:wtr": {
+      "command": "wtr",
+      "dependencies": [
+        "build:ts",
+        "build:bundle"
+      ],
+      "files": [
+        "web-test-runner.config.js"
+      ],
+      "output": []
+    },
+    "test:playwright": {
+      "command": "playwright test",
+      "dependencies": [
+        "build:ts",
+        "build:bundle"
+      ],
+      "files": [
+        "playwright.config.ts"
+      ],
+      "output": []
+    },
+    "update-version-module": {
+      "command": "node scripts/update-version-module.js",
+      "dependencies": [
+        "build:bundle"
+      ],
+      "files": [
+        "scripts/update-version-module.js",
+        "package.json",
+        "playground-service-worker.js"
+      ],
+      "clean": false,
+      "output": [
+        "src/shared/version.ts"
+      ]
+    },
+    "lint": {
+      "command": "eslint --color --cache --cache-location .eslintcache .",
+      "files": [
+        ".eslintignore",
+        ".eslintrc.json",
+        "playwright.config.ts",
+        "scripts/**/*.js",
+        "src/**/*.{ts,js}",
+        "!src/themes/**"
+      ],
+      "output": []
+    }
   },
   "files": [
     "_codemirror/",
