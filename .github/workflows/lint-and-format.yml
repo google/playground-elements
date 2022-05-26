@@ -1,9 +1,9 @@
-name: lint
+name: lint-and-format
 
 on: [push, pull_request]
 
 jobs:
-  lint:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,6 +12,8 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v1
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
