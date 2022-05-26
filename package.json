@@ -20,7 +20,8 @@
     "build:codemirror": "wireit",
     "build:configurator": "wireit",
     "build:typescript-module": "wireit",
-    "build:bundle:workers": "wireit",
+    "build:service-worker": "wireit",
+    "build:web-worker": "wireit",
     "test": "wireit",
     "test:wtr": "wireit",
     "test:playwright": "wireit",
@@ -34,7 +35,8 @@
       "dependencies": [
         "build:ts",
         "build:themes",
-        "build:bundle:workers",
+        "build:service-worker",
+        "build:web-worker",
         "build:configurator",
         "build:codemirror"
       ]
@@ -101,19 +103,31 @@
         "internal/typescript.js"
       ]
     },
-    "build:bundle:workers": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.js",
+    "build:service-worker": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.service-worker.js",
+      "dependencies": [
+        "build:ts"
+      ],
+      "files": [
+        "rollup.config.service-worker.js",
+        "rollup.config.common.js"
+      ],
+      "output": [
+        "playground-service-worker-proxy.html",
+        "playground-service-worker.js"
+      ]
+    },
+    "build:web-worker": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.web-worker.js",
       "dependencies": [
         "build:ts",
         "build:typescript-module"
       ],
       "files": [
-        "rollup.config.js",
+        "rollup.config.web-worker.js",
         "rollup.config.common.js"
       ],
       "output": [
-        "playground-service-worker-proxy.html",
-        "playground-service-worker.js",
         "playground-typescript-worker.js"
       ]
     },
@@ -132,7 +146,8 @@
       "command": "FORCE_COLOR=1 rollup -c rollup.config.configurator.js",
       "dependencies": [
         "build:ts",
-        "build:bundle:workers",
+        "build:service-worker",
+        "build:web-worker",
         "build:codemirror"
       ],
       "files": [
@@ -154,7 +169,8 @@
       "command": "wtr",
       "dependencies": [
         "build:ts",
-        "build:bundle:workers",
+        "build:service-worker",
+        "build:web-worker",
         "build:codemirror"
       ],
       "files": [
@@ -166,7 +182,8 @@
       "command": "playwright test",
       "dependencies": [
         "build:ts",
-        "build:bundle:workers",
+        "build:service-worker",
+        "build:web-worker",
         "build:codemirror"
       ],
       "files": [
@@ -177,12 +194,11 @@
     "update-version-module": {
       "command": "node scripts/update-version-module.js",
       "dependencies": [
-        "build:bundle:workers"
+        "build:service-worker"
       ],
       "files": [
         "scripts/update-version-module.js",
-        "package.json",
-        "playground-service-worker.js"
+        "package.json"
       ],
       "clean": false,
       "output": [
