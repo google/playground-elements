@@ -17,9 +17,10 @@
     "build:ts": "wireit",
     "build:styles-module": "wireit",
     "build:themes": "wireit",
+    "build:codemirror": "wireit",
     "build:configurator": "wireit",
     "build:typescript-module": "wireit",
-    "build:bundle": "wireit",
+    "build:bundle:workers": "wireit",
     "test": "wireit",
     "test:wtr": "wireit",
     "test:playwright": "wireit",
@@ -33,8 +34,9 @@
       "dependencies": [
         "build:ts",
         "build:themes",
-        "build:bundle",
-        "build:configurator"
+        "build:bundle:workers",
+        "build:configurator",
+        "build:codemirror"
       ]
     },
     "prepack": {
@@ -99,30 +101,39 @@
         "internal/typescript.js"
       ]
     },
-    "build:bundle": {
+    "build:bundle:workers": {
       "command": "FORCE_COLOR=1 rollup -c rollup.config.js",
       "dependencies": [
         "build:ts",
         "build:typescript-module"
       ],
       "files": [
-        "playground-service-worker-proxy.js",
-        "src/_codemirror/codemirror-bundle.js",
-        "service-worker/playground-service-worker.js",
-        "typescript-worker/playground-typescript-worker.js"
+        "rollup.config.js",
+        "rollup.config.common.js"
       ],
       "output": [
         "playground-service-worker-proxy.html",
-        "_codemirror/codemirror-bundle.js",
         "playground-service-worker.js",
         "playground-typescript-worker.js"
+      ]
+    },
+    "build:codemirror": {
+      "command": "FORCE_COLOR=1 rollup -c rollup.config.codemirror.js",
+      "files": [
+        "rollup.config.codemirror.js",
+        "rollup.config.common.js",
+        "src/_codemirror/codemirror-bundle.js"
+      ],
+      "output": [
+        "_codemirror/codemirror-bundle.js"
       ]
     },
     "build:configurator": {
       "command": "FORCE_COLOR=1 rollup -c rollup.config.configurator.js",
       "dependencies": [
         "build:ts",
-        "build:bundle"
+        "build:bundle:workers",
+        "build:codemirror"
       ],
       "files": [
         "rollup.config.configurator.js",
@@ -143,7 +154,8 @@
       "command": "wtr",
       "dependencies": [
         "build:ts",
-        "build:bundle"
+        "build:bundle:workers",
+        "build:codemirror"
       ],
       "files": [
         "web-test-runner.config.js"
@@ -154,7 +166,8 @@
       "command": "playwright test",
       "dependencies": [
         "build:ts",
-        "build:bundle"
+        "build:bundle:workers",
+        "build:codemirror"
       ],
       "files": [
         "playwright.config.ts"
@@ -164,7 +177,7 @@
     "update-version-module": {
       "command": "node scripts/update-version-module.js",
       "dependencies": [
-        "build:bundle"
+        "build:bundle:workers"
       ],
       "files": [
         "scripts/update-version-module.js",
