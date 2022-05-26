@@ -82,7 +82,8 @@
     "rollup-plugin-terser": "^7.0.2",
     "semver": "^7.3.5",
     "tsc-watch": "^4.2.3",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "wireit": "^0.4.3"
   },
   "dependencies": {
     "@material/mwc-button": "^0.26.1",
