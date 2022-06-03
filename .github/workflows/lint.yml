@@ -1,9 +1,9 @@
-name: lint-and-format
+name: lint
 
 on: [push, pull_request]
 
 jobs:
-  format:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,4 +16,3 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run format:check
