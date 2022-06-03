@@ -27,3 +27,5 @@
 /playground-service-worker-proxy.*
 /src/playground-styles.ts
 /*.tgz
+/.wireit
+/.eslintcache

@@ -12,8 +12,9 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v1
 
       - run: npm ci
       - run: npx playwright install-deps
-      - run: npm run build
+      # This script automatically fails if the version module is not up-to-date.
       - run: npm run update-version-module

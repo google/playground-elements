@@ -356,6 +356,9 @@ suite('playground-code-editor', () => {
       container.appendChild(editor);
       await editor.updateComplete;
 
+      // TODO(aomarks) There's some flakiness here that requires a little pause.
+      await raf();
+
       editor.focus();
       await sendKeys({
         down: 'Control',

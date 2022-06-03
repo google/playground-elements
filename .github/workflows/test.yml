@@ -12,9 +12,8 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v1
 
       - run: npm ci
       - run: npx playwright install-deps
-      - run: npm run build
-      - run: npx wtr
-      - run: npx playwright test
+      - run: npm test
