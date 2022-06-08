@@ -13,6 +13,7 @@ const compilerOptions = {
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  jsx: 2,
   lib: ['dom', 'esnext'],
 };
 
