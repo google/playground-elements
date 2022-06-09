@@ -610,7 +610,7 @@ suite('typescript builder', () => {
         }`,
       },
     ];
-    
+
     const expected: BuildOutput[] = [
       {
         kind: 'file',
