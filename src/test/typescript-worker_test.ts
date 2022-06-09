@@ -615,44 +615,48 @@ suite('typescript builder', () => {
         kind: 'file',
         file: {
           name: 'index.js',
-          content: "import * as React from \"./node_modules/react@18.1.0/index.js\";\r\nexport const foo = (greeting) => React.createElement(\"div\", null, greeting);\r\n",
+          content:
+            'import * as React from "./node_modules/react@18.1.0/index.js";\r\nexport const foo = (greeting) => React.createElement("div", null, greeting);\r\n',
           contentType: 'text/javascript',
         },
       },
       {
+        kind: 'file',
         file: {
-          content: "export const createElement = (tag, props, children) => {};",
-          contentType: "text/javascript; charset=utf-8",
-          name: "node_modules/react@18.1.0/index.js",
+          content: 'export const createElement = (tag, props, children) => {};',
+          contentType: 'text/javascript; charset=utf-8',
+          name: 'node_modules/react@18.1.0/index.js',
         },
-        kind: "file"
       },
       {
-        kind: "file",
+        kind: 'file',
         file: {
-        content: "{\n          \"dependencies\": {\n            \"react\": \"^18.1.0\"\n          }\n        }",
-        name: "package.json"
-        }
-      }
+          content:
+            '{\n          "dependencies": {\n            "react": "^18.1.0"\n          }\n        }',
+          name: 'package.json',
+        },
+      },
     ];
 
     const cdn: CdnData = {
-      'react': {
+      react: {
         versions: {
           '18.1.0': {
             files: {
               'index.js': {
-                content: 'export const createElement = (tag, props, children) => {};',
+                content:
+                  'export const createElement = (tag, props, children) => {};',
               },
               'index.d.ts': {
-                content: 'declare export const createElement(tag: unknown, props: unknown, children: unknown) => unknown;',
+                content:
+                  'declare export const createElement(tag: unknown, props: unknown, children: unknown) => unknown;',
               },
             },
           },
         },
       },
-    }
-    
+    };
+
     await checkTransform(files, expected, {}, cdn);
   });
 });
