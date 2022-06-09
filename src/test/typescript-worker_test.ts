@@ -590,4 +590,31 @@ suite('typescript builder', () => {
     ];
     await checkTransform(files, expected, {}, cdn);
   });
+
+  /* TSX Compilation */
+  test('compiles tsx file to js', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.tsx',
+        content: `
+          import * as React from "react";
+          export const foo = ({greeting: string}) => <div>{greeting}</div>
+        `,
+      },
+    ];
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content: `
+            import * as React from "react";
+            export const foo = React.createElement(\'div\', {}, greeting)
+          `,
+          contentType: 'text/javascript',
+        },
+      },
+    ];
+    await checkTransform(files, expected, {imports: {react: "^18.1.0"}});
+  });
 });
