@@ -1,7 +1,7 @@
+/_codemirror/
+/.wireit
 /*.d.ts
 /*.js
-/.wireit
-/_codemirror/
 /configurator/
 /demo/
 /examples/
