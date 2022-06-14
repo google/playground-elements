@@ -203,6 +203,26 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
+  test('renders TSX', async () => {
+    render(
+      html`
+        <playground-ide sandbox-base-url="/">
+          <script type="sample/html" filename="index.html">
+            <body>
+              <script src="howdy.jsx">&lt;/script>
+            </body>
+          </script>
+          <script type="sample/tsx" filename="howdy.tsx">
+            const howdy: string = "Howdy TSX!";
+            document.body.textContent = howdy;
+          </script>
+        </playground-ide>
+      `,
+      container
+    );
+    await assertPreviewContains('Hello TSX');
+  });
+
   test('re-renders HTML', async () => {
     render(
       html`
