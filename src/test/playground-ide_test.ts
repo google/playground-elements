@@ -214,7 +214,10 @@ suite('playground-ide', () => {
           content: `
             <head>
               <script type="module">
+                import * as React from "./node_modules/react";
+                
                 window.process = {env: "development"};
+                window.React = React;
               </script>
               <script type="module" src="hello-react.js"></script>
             </head>
@@ -223,8 +226,8 @@ suite('playground-ide', () => {
         },
         'hello-react.jsx': {
           content: `
-            import * as React from "react";
-            import {createRoot} from "react-dom/client";
+            import * as React from "./node_modules/react";
+            import {createRoot} from "./node_modules/react-dom/client";
 
             const container = document.querySelector('body');
             const root = createRoot(container);
@@ -260,8 +263,8 @@ suite('playground-ide', () => {
         },
         'hello-react.tsx': {
           content: `
-            import * as React from "react";
-            import {createRoot} from "react-dom/client";
+            import * as React from "./node_modules/react";
+            import {createRoot} from "./node_modules/react-dom/client";
 
             const container = document.querySelector('body');
             const root = createRoot(container!);
