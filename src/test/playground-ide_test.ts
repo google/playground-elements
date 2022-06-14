@@ -232,7 +232,8 @@ suite('playground-ide', () => {
           `,
         },
         'package.json': {
-          content: '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+          content:
+            '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
           hidden: true,
         },
       },
@@ -270,7 +271,8 @@ suite('playground-ide', () => {
           `,
         },
         'package.json': {
-          content: '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+          content:
+            '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
           hidden: true,
         },
       },
