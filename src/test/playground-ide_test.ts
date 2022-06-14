@@ -216,9 +216,7 @@ suite('playground-ide', () => {
               <script type="module">window.process = {env: "development"};</script>
               <script type="module" src="hello-react.js"></script>
             </head>
-            <body>
-              <div id="root"></div>
-            </body>
+            <body></body>
           `,
         },
         'hello-react.jsx': {
@@ -226,9 +224,9 @@ suite('playground-ide', () => {
             import * as React from "react";
             import {createRoot} from "react-dom/client";
 
-            const container = document.getElementById('root');
+            const container = document.querySelector('body');
             const root = createRoot(container);
-            root.render(<div>hello react jsx!</div>);
+            root.render(<>hello react jsx!</>);
           `,
         },
         'package.json': {
@@ -255,9 +253,7 @@ suite('playground-ide', () => {
               <script type="module">window.process = {env: "development"};</script>
               <script type="module" src="hello-react.js"></script>
             </head>
-            <body>
-              <div id="root"></div>
-            </body>
+            <body></body>
           `,
         },
         'hello-react.tsx': {
@@ -265,7 +261,7 @@ suite('playground-ide', () => {
             import * as React from "react";
             import {createRoot} from "react-dom/client";
 
-            const container = document.getElementById('root');
+            const container = document.querySelector('body');
             const root = createRoot(container!);
             root.render(<>hello react tsx!</>);
           `,
