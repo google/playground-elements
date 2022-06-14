@@ -203,32 +203,6 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  // test('renders JSX', async () => {
-  //   render(
-  //     html`
-  //       <playground-ide sandbox-base-url="/">
-  //         <script type="sample/html" filename="index.html">
-  //           <body>
-  //             <script src="howdy.jsx">&lt;/script>
-  //           </body>
-  //         </script>
-  //         <script type="sample/jsx" filename="howdy.jsx">
-  //           const howdy: string = "Howdy JSX!";
-  //           document.body.textContent = howdy;
-  //         </script>
-  //       </playground-ide>
-  //     `,
-  //     container
-  //   );
-  //   await assertPreviewContains('Howdy JSX');
-  // });
-
-
-
-  // add react dependencies
-  // import react
-
-  // 
   test('renders JSX', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
