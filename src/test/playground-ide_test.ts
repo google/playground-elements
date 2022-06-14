@@ -213,7 +213,9 @@ suite('playground-ide', () => {
         'index.html': {
           content: `
             <head>
-              <script type="module">window.process = {env: "development"};</script>
+              <script type="module">
+                window.process = {env: "development"};
+              </script>
               <script type="module" src="hello-react.js"></script>
             </head>
             <body></body>
@@ -231,7 +233,7 @@ suite('playground-ide', () => {
         },
         'package.json': {
           content:
-            '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+            '{"dependencies":{ "react": "^18.1.0", "react-dom": "18.1.0"}}',
           hidden: true,
         },
       },
@@ -268,7 +270,7 @@ suite('playground-ide', () => {
         },
         'package.json': {
           content:
-            '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+            '{"dependencies":{ "react": "^18.1.0", "react-dom": "18.1.0"}}',
           hidden: true,
         },
       },
