@@ -220,7 +220,7 @@ suite('playground-ide', () => {
       `,
       container
     );
-    await assertPreviewContains('Hello TSX');
+    await assertPreviewContains('Howdy TSX');
   });
 
   test('re-renders HTML', async () => {
