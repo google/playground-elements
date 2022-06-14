@@ -203,24 +203,106 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  test('renders TSX', async () => {
-    render(
-      html`
-        <playground-ide sandbox-base-url="/">
-          <script type="sample/html" filename="index.html">
+  // test('renders JSX', async () => {
+  //   render(
+  //     html`
+  //       <playground-ide sandbox-base-url="/">
+  //         <script type="sample/html" filename="index.html">
+  //           <body>
+  //             <script src="howdy.jsx">&lt;/script>
+  //           </body>
+  //         </script>
+  //         <script type="sample/jsx" filename="howdy.jsx">
+  //           const howdy: string = "Howdy JSX!";
+  //           document.body.textContent = howdy;
+  //         </script>
+  //       </playground-ide>
+  //     `,
+  //     container
+  //   );
+  //   await assertPreviewContains('Howdy JSX');
+  // });
+
+
+
+  // add react dependencies
+  // import react
+
+  // 
+  test('renders JSX', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: `
+            <head>
+              <script type="module">window.process = {env: "development"};</script>
+              <script type="module" src="hello-react.js"></script>
+            </head>
             <body>
-              <script src="howdy.jsx">&lt;/script>
+              <div id="root"></div>
             </body>
-          </script>
-          <script type="sample/tsx" filename="howdy.tsx">
-            const howdy: string = "Howdy TSX!";
-            document.body.textContent = howdy;
-          </script>
-        </playground-ide>
-      `,
-      container
-    );
-    await assertPreviewContains('Howdy TSX');
+          `,
+        },
+        'hello-react.jsx': {
+          content: `
+            import * as React from "react";
+            import {createRoot} from "react-dom/client";
+
+            const container = document.getElementById('root');
+            const root = createRoot(container);
+            root.render(<div>hello react jsx!</div>);
+          `,
+        },
+        'package.json': {
+          content: '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+          hidden: true,
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('hello react jsx!');
+  });
+
+  test('renders TSX', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: `
+            <head>
+              <script type="module">window.process = {env: "development"};</script>
+              <script type="module" src="hello-react.js"></script>
+            </head>
+            <body>
+              <div id="root"></div>
+            </body>
+          `,
+        },
+        'hello-react.tsx': {
+          content: `
+            import * as React from "react";
+            import {createRoot} from "react-dom/client";
+
+            const container = document.getElementById('root');
+            const root = createRoot(container!);
+            root.render(<>hello react tsx!</>);
+          `,
+        },
+        'package.json': {
+          content: '{"dependencies":{ "react" "^18.1.0", "react-dom": "18.1.0"}}',
+          hidden: true,
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('hello react tsx!');
   });
 
   test('re-renders HTML', async () => {
