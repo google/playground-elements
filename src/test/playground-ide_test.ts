@@ -229,7 +229,7 @@ suite('playground-ide', () => {
           `,
         },
         // `mock-react.ts` avoids pulling `react` and `react-dom` from unpkg.
-        // It expressses the a minimum subset required of the React API to append
+        // It expresses the a minimum subset required of the React API to append
         // a `TextNode` to the `body` of the playground html document.
         //
         // If more in depth integration tests are required,
