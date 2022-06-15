@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Added support for compiling `jsx` and `tsx` modules in the playground.
 
+### Changed
+
+- Updated the tsconfig in `language-service-context.ts` to include `allowJs` and `jsx`.
+- Included `.jsx` and `.tsx` in the `typescript-builder.ts` file sieve.
+- Updated the tsconfig values described in README to include `allowJs` and `jsx`.
+
 ## [0.16.1] - 2022-05-17
 
 ### Changed
