@@ -1,7 +1,8 @@
 *.html
+/_codemirror/
+/.wireit
 /*.d.ts
 /*.js
-/_codemirror/
 /configurator/
 /demo/
 /examples/

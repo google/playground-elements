@@ -12,7 +12,9 @@ const compilerOptions = {
   experimentalDecorators: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
+  allowJs: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  jsx: ts.JsxEmit.React,
   lib: ['dom', 'esnext'],
 };
 

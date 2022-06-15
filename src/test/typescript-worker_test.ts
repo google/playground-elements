@@ -590,4 +590,138 @@ suite('typescript builder', () => {
     ];
     await checkTransform(files, expected, {}, cdn);
   });
+
+  test('compiles jsx file to js', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.jsx',
+        content: `
+          import React from "react";
+          export const foo = (greeting) => <div>{greeting}</div>
+        `,
+      },
+      {
+        name: 'package.json',
+        content: `{
+          "dependencies": {
+            "react": "^18.1.0"
+          }
+        }`,
+      },
+    ];
+
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content:
+            'import React from "./node_modules/react@18.1.0/index.js";\r\nexport const foo = (greeting) => React.createElement("div", null, greeting);\r\n',
+          contentType: 'text/javascript',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          content: 'export const createElement = (tag, props, children) => {};',
+          contentType: 'text/javascript; charset=utf-8',
+          name: 'node_modules/react@18.1.0/index.js',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          content:
+            '{\n          "dependencies": {\n            "react": "^18.1.0"\n          }\n        }',
+          name: 'package.json',
+        },
+      },
+    ];
+
+    const cdn: CdnData = {
+      react: {
+        versions: {
+          '18.1.0': {
+            files: {
+              'index.js': {
+                content:
+                  'export const createElement = (tag, props, children) => {};',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    await checkTransform(files, expected, {}, cdn);
+  });
+
+  test('compiles tsx file to js', async () => {
+    const files: SampleFile[] = [
+      {
+        name: 'index.tsx',
+        content: `
+          import * as React from "react";
+          export const foo = (greeting: string) => <div>{greeting}</div>
+        `,
+      },
+      {
+        name: 'package.json',
+        content: `{
+          "dependencies": {
+            "react": "^18.1.0"
+          }
+        }`,
+      },
+    ];
+
+    const expected: BuildOutput[] = [
+      {
+        kind: 'file',
+        file: {
+          name: 'index.js',
+          content:
+            'import * as React from "./node_modules/react@18.1.0/index.js";\r\nexport const foo = (greeting) => React.createElement("div", null, greeting);\r\n',
+          contentType: 'text/javascript',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          content: 'export const createElement = (tag, props, children) => {};',
+          contentType: 'text/javascript; charset=utf-8',
+          name: 'node_modules/react@18.1.0/index.js',
+        },
+      },
+      {
+        kind: 'file',
+        file: {
+          content:
+            '{\n          "dependencies": {\n            "react": "^18.1.0"\n          }\n        }',
+          name: 'package.json',
+        },
+      },
+    ];
+
+    const cdn: CdnData = {
+      react: {
+        versions: {
+          '18.1.0': {
+            files: {
+              'index.js': {
+                content:
+                  'export const createElement = (tag, props, children) => {};',
+              },
+              'index.d.ts': {
+                content:
+                  'declare export const createElement(tag: unknown, props: unknown, children: unknown) => unknown;',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    await checkTransform(files, expected, {}, cdn);
+  });
 });

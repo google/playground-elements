@@ -20,7 +20,12 @@ export async function* processTypeScriptFiles(
   let packageJson: PackageJson | undefined;
   const compilerInputs = [];
   for await (const result of results) {
-    if (result.kind === 'file' && result.file.name.endsWith('.ts')) {
+    if (
+      result.kind === 'file' &&
+      (result.file.name.endsWith('.ts') ||
+        result.file.name.endsWith('.jsx') ||
+        result.file.name.endsWith('.tsx'))
+    ) {
       compilerInputs.push(result.file);
     } else {
       yield result;

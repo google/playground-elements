@@ -339,7 +339,7 @@ then playground defaults to the `unpkg.com` URL.
 
 ## TypeScript
 
-Playground automatically compiles `.ts` files using
+Playground automatically compiles `.ts`, `.tsx`, and `.jsx` files using
 [TypeScript](https://www.typescriptlang.org/).
 
 The following compiler settings are used:
@@ -350,8 +350,10 @@ The following compiler settings are used:
 | [`module`](https://www.typescriptlang.org/tsconfig#module)                                 | `ESNext` |
 | [`moduleResolution`](https://www.typescriptlang.org/tsconfig#moduleResolution)             | `node`   |
 | [`experimentalDecorators`](https://www.typescriptlang.org/tsconfig#experimentalDecorators) | `true`   |
+| [`allowJs`](https://www.typescriptlang.org/tsconfig#allowJs)                               | `true`   |
+| [`jsx`](https://www.typescriptlang.org/tsconfig#jsx)                                       | `react`  |
 
-Note that when you import another project module from a `.ts` file, your import
+Note that when you import from another project module, the import
 statement should use the `.js` extension (the same as you would do when running
 `tsc` locally):
 
