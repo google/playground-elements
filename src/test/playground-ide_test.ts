@@ -203,6 +203,50 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
+  test('renders JSX', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.lineWrapping = true;
+    ide.lineNumbers = true;
+    ide.config = {
+      files: {
+        'index.html': {
+          content: `
+            <head>
+              <script type="module">
+                window.process = {env: {NODE_ENV: "development"}};
+              </script>
+              <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+              <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+            </head>
+            <body></body>
+          `,
+        },
+        'hello-react.jsx': {
+          content: `
+            import React from "react";
+            import ReactDOM from "react-dom/client";
+
+            const container = document.querySelector('body');
+            const root = ReactDOM.createRoot(container);
+            root.render(<>hello react jsx!</>);
+          `,
+        },
+        'package.json': {
+          content: `{
+            dependencies: {
+              "react": "^18.1.0",
+              "react-dom": "^18.1.0",
+            }
+          }`,
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('hello react jsx!');
+  });
+
+
   test('renders TSX', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
@@ -228,8 +272,8 @@ suite('playground-ide', () => {
             import * as ReactDOM from "react-dom/client";
 
             const container = document.querySelector('body');
-            const root = ReactDOM.createRoot(container);
-            root.render(<>hello react jsx!</>);
+            const root = ReactDOM.createRoot(container!);
+            root.render(<>hello react tsx!</>);
           `,
         },
         'package.json': {
@@ -245,44 +289,8 @@ suite('playground-ide', () => {
       },
     };
     container.appendChild(ide);
-    await assertPreviewContains('hello react jsx!');
+    await assertPreviewContains('hello react tsx!');
   });
-  
-  //
-  // can we even do this without webpack?
-  //
-  // test('renders TSX', async () => {
-  //   const ide = document.createElement('playground-ide');
-  //   ide.sandboxBaseUrl = '/';
-  //   ide.lineWrapping = true;
-  //   ide.lineNumbers = true;
-  //   ide.config = {
-  //     files: {
-  //       'index.html': {
-  //         content: `
-  //           <head>
-  //             <script type="module">
-  //               window.process = {env: {NODE_ENV: "development"}};
-  //             </script>
-  //             <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  //             <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  //             <script type="module" src="hello-react.js"></script>
-  //           </head>
-  //           <body></body>
-  //         `,
-  //       },
-  //       'hello-react.tsx': {
-  //         content: `
-  //           const container = document.querySelector('body');
-  //           const root = ReactDOM.createRoot(container!);
-  //           root.render(<>hello react tsx!</>);
-  //         `,
-  //       },
-  //     },
-  //   };
-  //   container.appendChild(ide);
-  //   await assertPreviewContains('hello react tsx!');
-  // });
 
   test('re-renders HTML', async () => {
     render(
