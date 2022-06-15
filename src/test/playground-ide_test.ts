@@ -232,7 +232,7 @@ suite('playground-ide', () => {
         // It expressses the a minimum subset required of the React API to append
         // a `TextNode` to the `body` of the playground html document.
         //
-        // If more in depth integration tests are required, 
+        // If more in depth integration tests are required,
         'mock-react.ts': {
           content: `
             class React {
@@ -263,8 +263,8 @@ suite('playground-ide', () => {
             }
             
             export {React, ReactDOM};
-          `
-        }
+          `,
+        },
       },
     };
     container.appendChild(ide);
