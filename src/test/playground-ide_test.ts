@@ -229,7 +229,8 @@ suite('playground-ide', () => {
         // It expresses the a minimum subset required of the React API to append
         // a `TextNode` to the `body` of the playground html document.
         //
-        // If more in depth integration tests are required.
+        // If more in depth integration tests are required, preact would be a
+        // more robust alternative.
         'mock-react.js': {
           content: `
             class React {
@@ -294,7 +295,8 @@ suite('playground-ide', () => {
         // It expresses the a minimum subset required of the React API to append
         // a `TextNode` to the `body` of the playground html document.
         //
-        // If more in depth integration tests are required.
+        // If more in depth integration tests are required, preact would be a
+        // more robust alternative.
         'mock-react.ts': {
           content: `
             class React {
