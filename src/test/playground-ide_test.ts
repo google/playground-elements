@@ -203,48 +203,6 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  test('renders JSX', async () => {
-    const ide = document.createElement('playground-ide');
-    ide.sandboxBaseUrl = '/';
-    ide.lineWrapping = true;
-    ide.lineNumbers = true;
-    ide.config = {
-      files: {
-        'index.html': {
-          content: `
-            <head>
-              <script type="module">
-                import * as React from "./node_modules/react.js";
-
-                window.process = {env: "development"};
-                window.React = React;
-              </script>
-              <script type="module" src="hello-react.js"></script>
-            </head>
-            <body></body>
-          `,
-        },
-        'hello-react.jsx': {
-          content: `
-            import * as React from "./node_modules/react.js";
-            import {createRoot} from "./node_modules/react-dom/client.js";
-
-            const container = document.querySelector('body');
-            const root = createRoot(container);
-            root.render(<>hello react jsx!</>);
-          `,
-        },
-        'package.json': {
-          content:
-            '{"dependencies":{ "react": "^18.1.0", "react-dom": "18.1.0"}}',
-          hidden: true,
-        },
-      },
-    };
-    container.appendChild(ide);
-    await assertPreviewContains('hello react jsx!');
-  });
-
   test('renders TSX', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
@@ -256,36 +214,75 @@ suite('playground-ide', () => {
           content: `
             <head>
               <script type="module">
-                import * as React from "./node_modules/react.js";
-
-                window.process = {env: "development"};
-                window.React = React;
+                window.process = {env: {NODE_ENV: "development"}};
               </script>
-              <script type="module" src="hello-react.js"></script>
+              <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+              <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
             </head>
             <body></body>
           `,
         },
         'hello-react.tsx': {
           content: `
-            import * as React from "./node_modules/react.js";
-            import {createRoot} from "./node_modules/react-dom/client.js";
+            import * as React from "react";
+            import * as ReactDOM from "react-dom/client";
 
             const container = document.querySelector('body');
-            const root = createRoot(container!);
-            root.render(<>hello react tsx!</>);
+            const root = ReactDOM.createRoot(container);
+            root.render(<>hello react jsx!</>);
           `,
         },
         'package.json': {
-          content:
-            '{"dependencies":{ "react": "^18.1.0", "react-dom": "18.1.0"}}',
-          hidden: true,
+          content: `{
+            dependencies: {
+              "react": "^18.1.0",
+              "@types/react": "^18.0.12",
+              "react-dom": "^18.1.0",
+              "@types/react-dom": "18.0.5"
+            }
+          }`,
         },
       },
     };
     container.appendChild(ide);
-    await assertPreviewContains('hello react tsx!');
+    await assertPreviewContains('hello react jsx!');
   });
+  
+  //
+  // can we even do this without webpack?
+  //
+  // test('renders TSX', async () => {
+  //   const ide = document.createElement('playground-ide');
+  //   ide.sandboxBaseUrl = '/';
+  //   ide.lineWrapping = true;
+  //   ide.lineNumbers = true;
+  //   ide.config = {
+  //     files: {
+  //       'index.html': {
+  //         content: `
+  //           <head>
+  //             <script type="module">
+  //               window.process = {env: {NODE_ENV: "development"}};
+  //             </script>
+  //             <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  //             <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  //             <script type="module" src="hello-react.js"></script>
+  //           </head>
+  //           <body></body>
+  //         `,
+  //       },
+  //       'hello-react.tsx': {
+  //         content: `
+  //           const container = document.querySelector('body');
+  //           const root = ReactDOM.createRoot(container!);
+  //           root.render(<>hello react tsx!</>);
+  //         `,
+  //       },
+  //     },
+  //   };
+  //   container.appendChild(ide);
+  //   await assertPreviewContains('hello react tsx!');
+  // });
 
   test('re-renders HTML', async () => {
     render(
