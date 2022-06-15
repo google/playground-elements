@@ -203,49 +203,19 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  test('renders JSX', async () => {
-    const ide = document.createElement('playground-ide');
-    ide.sandboxBaseUrl = '/';
-    ide.lineWrapping = true;
-    ide.lineNumbers = true;
-    ide.config = {
-      files: {
-        'index.html': {
-          content: `
-            <head>
-              <script type="module">
-                window.process = {env: {NODE_ENV: "development"}};
-              </script>
-              <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-              <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-            </head>
-            <body></body>
-          `,
-        },
-        'hello-react.jsx': {
-          content: `
-            import React from "react";
-            import ReactDOM from "react-dom/client";
-
-            const container = document.querySelector('body');
-            const root = ReactDOM.createRoot(container);
-            root.render(<>hello react jsx!</>);
-          `,
-        },
-        'package.json': {
-          content: `{
-            dependencies: {
-              "react": "^18.1.0",
-              "react-dom": "^18.1.0",
-            }
-          }`,
-        },
-      },
-    };
-    container.appendChild(ide);
-    await assertPreviewContains('hello react jsx!');
-  });
-
+  // Body should render `hello react tsx!`
+  //
+  // Need to know / test:
+  // - did JS compile from TSX file
+  // - make React available
+  // - confirm correlation between `node_modules` and relative imports
+  // - expose React as a relative import
+  //
+  //
+  // Fake react as a local module?
+  // 
+  //
+  //
 
   test('renders TSX', async () => {
     const ide = document.createElement('playground-ide');
@@ -268,7 +238,6 @@ suite('playground-ide', () => {
         },
         'hello-react.tsx': {
           content: `
-            import * as React from "react";
             import * as ReactDOM from "react-dom/client";
 
             const container = document.querySelector('body');
