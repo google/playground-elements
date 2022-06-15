@@ -203,20 +203,6 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  // Body should render `hello react tsx!`
-  //
-  // Need to know / test:
-  // - did JS compile from TSX file
-  // - make React available
-  // - confirm correlation between `node_modules` and relative imports
-  // - expose React as a relative import
-  //
-  //
-  // Fake react as a local module?
-  // 
-  //
-  //
-
   test('renders TSX', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
@@ -227,34 +213,58 @@ suite('playground-ide', () => {
         'index.html': {
           content: `
             <head>
-              <script type="module">
-                window.process = {env: {NODE_ENV: "development"}};
-              </script>
-              <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-              <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+              <script type="module" src="mock-react.js"></script>
+              <script type="module" src="hello-react.js"></script>
             </head>
             <body></body>
           `,
         },
         'hello-react.tsx': {
           content: `
-            import * as ReactDOM from "react-dom/client";
+            import { React, ReactDOM } from "./mock-react.js";
 
             const container = document.querySelector('body');
             const root = ReactDOM.createRoot(container!);
             root.render(<>hello react tsx!</>);
           `,
         },
-        'package.json': {
-          content: `{
-            dependencies: {
-              "react": "^18.1.0",
-              "@types/react": "^18.0.12",
-              "react-dom": "^18.1.0",
-              "@types/react-dom": "18.0.5"
+        // `mock-react.ts` avoids pulling `react` and `react-dom` from unpkg.
+        // It expressses the a minimum subset required of the React API to append
+        // a `TextNode` to the `body` of the playground html document.
+        //
+        // If more in depth integration tests are required, 
+        'mock-react.ts': {
+          content: `
+            class React {
+              static Fragment = 'fragment';
+              static createElement(
+                  tag: unknown,
+                  props: unknown,
+                  children: string,
+              ) {
+                return document.createTextNode(children);
+              }
             }
-          }`,
-        },
+            
+            class ReactRoot {
+              root: HTMLElement;
+              constructor(root: HTMLElement) {
+                this.root = root;
+              }
+              render(children: Element) {
+                this.root.appendChild(children);
+              }
+            }
+            
+            class ReactDOM {
+              static createRoot(root: HTMLElement): ReactRoot {
+                return new ReactRoot(root);
+              }
+            }
+            
+            export {React, ReactDOM};
+          `
+        }
       },
     };
     container.appendChild(ide);
