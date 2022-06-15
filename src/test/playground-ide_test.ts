@@ -203,17 +203,79 @@ suite('playground-ide', () => {
     await assertPreviewContains('Hello TS');
   });
 
-  test('renders TSX', async () => {
+  test('renders JSX', async () => {
     const ide = document.createElement('playground-ide');
     ide.sandboxBaseUrl = '/';
-    ide.lineWrapping = true;
-    ide.lineNumbers = true;
     ide.config = {
       files: {
         'index.html': {
           content: `
             <head>
-              <script type="module" src="mock-react.js"></script>
+              <script type="module" src="hello-react.js"></script>
+            </head>
+            <body></body>
+          `,
+        },
+        'hello-react.jsx': {
+          content: `
+            import { React, ReactDOM } from "./mock-react.js";
+
+            const container = document.querySelector('body');
+            const root = ReactDOM.createRoot(container);
+            root.render(<>hello react jsx!</>);
+          `,
+        },
+        // `mock-react.js` avoids pulling `react` and `react-dom` from unpkg.
+        // It expresses the a minimum subset required of the React API to append
+        // a `TextNode` to the `body` of the playground html document.
+        //
+        // If more in depth integration tests are required.
+        'mock-react.js': {
+          content: `
+            class React {
+              static Fragment = 'fragment';
+              static createElement(
+                  tag,
+                  props,
+                  children,
+              ) {
+                return document.createTextNode(children);
+              }
+            }
+            
+            class ReactRoot {
+              root;
+              constructor(root) {
+                this.root = root;
+              }
+              render(children) {
+                this.root.appendChild(children);
+              }
+            }
+            
+            class ReactDOM {
+              static createRoot(root) {
+                return new ReactRoot(root);
+              }
+            }
+            
+            export {React, ReactDOM};
+          `,
+        },
+      },
+    };
+    container.appendChild(ide);
+    await assertPreviewContains('hello react jsx!');
+  });
+
+  test('renders TSX', async () => {
+    const ide = document.createElement('playground-ide');
+    ide.sandboxBaseUrl = '/';
+    ide.config = {
+      files: {
+        'index.html': {
+          content: `
+            <head>
               <script type="module" src="hello-react.js"></script>
             </head>
             <body></body>

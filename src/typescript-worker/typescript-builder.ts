@@ -22,7 +22,7 @@ export async function* processTypeScriptFiles(
   for await (const result of results) {
     if (
       result.kind === 'file' &&
-      (result.file.name.endsWith('.ts') || result.file.name.endsWith('.tsx'))
+      (result.file.name.endsWith('.ts') || result.file.name.endsWith('.jsx') || result.file.name.endsWith('.tsx'))
     ) {
       compilerInputs.push(result.file);
     } else {
