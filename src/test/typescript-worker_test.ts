@@ -591,7 +591,6 @@ suite('typescript builder', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  /* JSX Compilation */
   test('compiles jsx file to js', async () => {
     const files: SampleFile[] = [
       {
@@ -657,7 +656,6 @@ suite('typescript builder', () => {
     await checkTransform(files, expected, {}, cdn);
   });
 
-  /* TSX Compilation */
   test('compiles tsx file to js', async () => {
     const files: SampleFile[] = [
       {
