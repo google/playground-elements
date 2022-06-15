@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.17.0] - 2021-08-09
+
+### Added
+
+- Added support for compiling `jsx` and `tsx` modules in the playground.
+
 ## [0.16.1] - 2022-05-17
 
 ### Changed
