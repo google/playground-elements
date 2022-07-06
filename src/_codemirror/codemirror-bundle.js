@@ -27,3 +27,9 @@ import 'google_modes/dist/html.js';
 
 // Stock CSS mode.
 import 'codemirror/mode/css/css.js';
+
+// Stock JSX mode.
+import 'codemirror/mode/jsx/jsx.js';
+
+// Stock TSX mode.
+// import 'codemirror/mode/css/css.js';

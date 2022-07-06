@@ -207,7 +207,7 @@ export class PlaygroundCodeEditor extends LitElement {
    * extension.
    */
   @property()
-  type: 'js' | 'ts' | 'html' | 'css' | 'json' | undefined;
+  type: 'js' | 'ts' | 'html' | 'css' | 'json' | 'jsx' | 'tsx' | undefined;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
@@ -960,6 +960,8 @@ export class PlaygroundCodeEditor extends LitElement {
         return 'google-html';
       case 'css':
         return 'css';
+      case 'jsx':
+        return 'jsx';
     }
     return undefined;
   }
