@@ -30,6 +30,3 @@ import 'codemirror/mode/css/css.js';
 
 // Stock JSX mode.
 import 'codemirror/mode/jsx/jsx.js';
-
-// Stock TSX mode.
-// import 'codemirror/mode/css/css.js';

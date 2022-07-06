@@ -207,7 +207,7 @@ export class PlaygroundCodeEditor extends LitElement {
    * extension.
    */
   @property()
-  type: 'js' | 'ts' | 'html' | 'css' | 'json' | 'jsx' | 'tsx' | undefined;
+  type: 'js' | 'ts' | 'html' | 'css' | 'json' | 'jsx' | undefined;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
@@ -931,6 +931,7 @@ export class PlaygroundCodeEditor extends LitElement {
       case 'js':
       case 'ts':
       case 'css':
+      case 'jsx':
         // We consume all leading whitespace and one trailing newline for each
         // start/end comment. This lets us put start/end comments on their own
         // line and indent them like the surrounding without affecting the
