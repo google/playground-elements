@@ -29,7 +29,7 @@
     "test:playwright": "wireit",
     "lint": "wireit",
     "lint:eslint": "wireit",
-    "serve": "npm run build && (npm run build watch & web-dev-server --node-resolve --watch --open=configurator/)",
+    "serve": "npm run build && (npm run build --watch & web-dev-server --node-resolve --watch --open=configurator/)",
     "format": "prettier --write .",
     "lint:format": "prettier --check ."
   },
@@ -282,7 +282,7 @@
     "semver": "^7.3.5",
     "tsc-watch": "^4.2.3",
     "typescript": "^4.4.3",
-    "wireit": "^0.5.0"
+    "wireit": "^0.7.1"
   },
   "dependencies": {
     "@material/mwc-button": "^0.26.1",
