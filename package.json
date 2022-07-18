@@ -65,6 +65,9 @@
       "output": [
         "index-*.{js,d.ts,d.ts.map}",
         "playground-*.{js,d.ts,d.ts.map}",
+        "!playground-service-worker-proxy.html",
+        "!playground-service-worker.js",
+        "!playground-typescript-worker.js",
         "service-worker/**",
         "typescript-worker/**",
         "internal/**",
@@ -72,8 +75,10 @@
         "shared/**",
         "test/**",
         "themes/**",
+        "!themes/**/*.css",
         "configurator/**/*.{js,d.ts,d.ts.map}",
         "!configurator/playground-service-worker.js",
+        "!configurator/deploy/**",
         ".tsbuildinfo"
       ]
     },
