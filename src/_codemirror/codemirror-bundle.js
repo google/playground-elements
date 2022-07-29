@@ -32,9 +32,6 @@ import 'codemirror/mode/css/css.js';
 // Both Javascript and XML need to be imported for JSX to function.
 // The Javascript mode is distict from 'google-javascript' and does not support
 // nested back ticks.
-//
-// + 24.64 KB uncompressed uniminified
-// + 6.83 KB Brottli
 import 'codemirror/mode/javascript/javascript.js';
 import 'codemirror/mode/xml/xml.js';
 import 'codemirror/mode/jsx/jsx.js';
