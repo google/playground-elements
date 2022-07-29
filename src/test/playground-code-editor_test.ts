@@ -358,12 +358,6 @@ suite('playground-code-editor', () => {
     test('html', async () =>
       assertToggle('html', '<p>foo</p>', '<!-- <p>foo</p> -->'));
 
-    // test('jsx', async () =>
-    // assertToggle('jsx', 'const foo = () => <p>foo</p>;', '<!-- <p>foo</p> -->'));
-
-    // test('tsx', async () =>
-    // assertToggle('tsx', 'const foo = () => <p>foo</p>;', '<!-- <p>foo</p> -->'));
-
     test('css', async () =>
       assertToggle('css', 'p { color: blue; }', '/* p { color: blue; } */'));
 
