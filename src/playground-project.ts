@@ -861,7 +861,7 @@ const typeEnumToMimeType = (type?: string) => {
   if (type === undefined) {
     return;
   }
-  
+
   switch (type) {
     // TypeScript
     case 'ts':
