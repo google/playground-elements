@@ -268,6 +268,8 @@ suite('playground-code-editor', () => {
     const keywordColor = 'rgb(119, 0, 136)';
     const stringColor = 'rgb(170, 17, 17)';
 
+    // const typeColorTsx = 'rgb(0, 0, 255)';
+
     test('html', async () =>
       assertHighlight('html', '<p>foo</p>', '<p>', tagColor));
 
@@ -279,6 +281,12 @@ suite('playground-code-editor', () => {
 
     test('ts', async () =>
       assertHighlight('ts', 'const x: string;', 'string', typeColor));
+
+    test('jsx', async () =>
+      assertHighlight('jsx', 'const foo = () => <p>foo</p>;', 'p', tagColor));
+
+    test('tsx', async () =>
+      assertHighlight('tsx', 'const x: () => unknown = () => <p>foo</p>;', 'p', tagColor));
 
     test('html-in-js', async () =>
       assertHighlight('js', 'html`<p>foo</p>`', '<p>', tagColor));
@@ -344,6 +352,12 @@ suite('playground-code-editor', () => {
 
     test('html', async () =>
       assertToggle('html', '<p>foo</p>', '<!-- <p>foo</p> -->'));
+    
+    // test('jsx', async () =>
+    // assertToggle('jsx', 'const foo = () => <p>foo</p>;', '<!-- <p>foo</p> -->'));
+
+    // test('tsx', async () =>
+    // assertToggle('tsx', 'const foo = () => <p>foo</p>;', '<!-- <p>foo</p> -->'));
 
     test('css', async () =>
       assertToggle('css', 'p { color: blue; }', '/* p { color: blue; } */'));
