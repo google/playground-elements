@@ -268,8 +268,6 @@ suite('playground-code-editor', () => {
     const keywordColor = 'rgb(119, 0, 136)';
     const stringColor = 'rgb(170, 17, 17)';
 
-    // const typeColorTsx = 'rgb(0, 0, 255)';
-
     test('html', async () =>
       assertHighlight('html', '<p>foo</p>', '<p>', tagColor));
 
