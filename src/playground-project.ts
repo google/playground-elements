@@ -858,10 +858,10 @@ const typeFromFilename = (filename: string) => {
 };
 
 const typeEnumToMimeType = (type?: string) => {
-  console.log("typeEnumToMimeType:", type);
   if (type === undefined) {
     return;
   }
+  
   switch (type) {
     // TypeScript
     case 'ts':
@@ -871,8 +871,9 @@ const typeEnumToMimeType = (type?: string) => {
     case 'json':
       return 'application/json; charset=utf-8';
     case 'jsx':
-    case 'tsx':
       return 'text/jsx; charset=utf-8';
+    case 'tsx':
+      return 'text/typescript-jsx; charset=utf-8';
     case 'html':
       return 'text/html; charset=utf-8';
     case 'css':

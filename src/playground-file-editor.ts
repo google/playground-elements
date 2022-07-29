@@ -217,7 +217,6 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
   if (encodingSepIndex !== -1) {
     mimeType = mimeType.substring(0, encodingSepIndex);
   }
-  console.log("mimeTypeToTypeEnum:", mimeType);
   switch (mimeType) {
     // TypeScript: this is the mime-type returned by servers
     // .ts files aren't usually served to browsers, so they don't yet
@@ -228,6 +227,8 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
     case 'application/javascript':
       return 'js';
     case 'text/jsx':
+      return 'jsx';
+    // tsx uses the same syntax highlighting as JSX
     case 'text/typescript-jsx':
       return 'jsx';
     case 'application/json':
