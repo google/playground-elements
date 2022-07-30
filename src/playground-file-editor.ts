@@ -228,7 +228,6 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
       return 'js';
     case 'text/jsx':
       return 'jsx';
-    // tsx uses the same syntax highlighting as JSX
     case 'text/typescript-jsx':
       return 'tsx';
     case 'application/json':
