@@ -801,17 +801,12 @@ const expandProjectConfig = async (
       filePromises.push(
         (async () => {
           const resp = await fetch(new URL(filename, baseUrl).href);
-          let contentType = resp.headers.get('Content-Type')?.toLowerCase() ?? 'text/plain';
-          // native fetch api will default to octet-stream for unknown filetypes
-          if (filename.endsWith('.tsx')) {
-            contentType = 'text/typescript-jsx';
-          }
 
           return {
             ...info,
             name: filename,
             content: await resp.text(),
-            contentType
+            contentType: resp.headers.get('Content-Type')?.toLowerCase() ?? 'text/plain';
           };
         })()
       );
