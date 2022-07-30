@@ -226,6 +226,10 @@ const mimeTypeToTypeEnum = (mimeType?: string) => {
     case 'text/javascript':
     case 'application/javascript':
       return 'js';
+    case 'text/jsx':
+      return 'jsx';
+    case 'text/typescript-jsx':
+      return 'tsx';
     case 'application/json':
       return 'json';
     case 'text/html':

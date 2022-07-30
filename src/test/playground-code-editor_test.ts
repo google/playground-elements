@@ -280,6 +280,17 @@ suite('playground-code-editor', () => {
     test('ts', async () =>
       assertHighlight('ts', 'const x: string;', 'string', typeColor));
 
+    test('jsx', async () =>
+      assertHighlight('jsx', 'const foo = () => <p>foo</p>;', 'p', tagColor));
+
+    test('tsx', async () =>
+      assertHighlight(
+        'tsx',
+        'const x: () => unknown = () => <p>foo</p>;',
+        'p',
+        tagColor
+      ));
+
     test('html-in-js', async () =>
       assertHighlight('js', 'html`<p>foo</p>`', '<p>', tagColor));
 

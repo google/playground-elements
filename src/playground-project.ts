@@ -801,6 +801,7 @@ const expandProjectConfig = async (
       filePromises.push(
         (async () => {
           const resp = await fetch(new URL(filename, baseUrl).href);
+
           return {
             ...info,
             name: filename,
@@ -861,6 +862,7 @@ const typeEnumToMimeType = (type?: string) => {
   if (type === undefined) {
     return;
   }
+
   switch (type) {
     // TypeScript
     case 'ts':
@@ -869,6 +871,10 @@ const typeEnumToMimeType = (type?: string) => {
       return 'application/javascript; charset=utf-8';
     case 'json':
       return 'application/json; charset=utf-8';
+    case 'jsx':
+      return 'text/jsx; charset=utf-8';
+    case 'tsx':
+      return 'text/typescript-jsx; charset=utf-8';
     case 'html':
       return 'text/html; charset=utf-8';
     case 'css':

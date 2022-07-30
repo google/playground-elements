@@ -27,3 +27,11 @@ import 'google_modes/dist/html.js';
 
 // Stock CSS mode.
 import 'codemirror/mode/css/css.js';
+
+// Stock JSX mode is a combination of Javascript and XML.
+// Both Javascript and XML need to be imported for JSX to function.
+// The Javascript mode is distict from 'google-javascript' and does not support
+// nested back ticks.
+import 'codemirror/mode/javascript/javascript.js';
+import 'codemirror/mode/xml/xml.js';
+import 'codemirror/mode/jsx/jsx.js';
