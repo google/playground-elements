@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## Unreleased -->
 
+## [0.16.3] - 2022-08-02
+
+### Added
+
+- Added styntax highlighting for `jsx` and `tsx` modules.
+
 ## [0.16.2] - 2022-06-16
 
 ### Added
