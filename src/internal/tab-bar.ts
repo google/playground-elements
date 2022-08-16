@@ -18,7 +18,7 @@ import {PlaygroundInternalTab} from './tab.js';
  */
 @customElement('playground-internal-tab-bar')
 export class PlaygroundInternalTabBar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       overflow-x: auto;
@@ -88,7 +88,7 @@ export class PlaygroundInternalTabBar extends LitElement {
   private _tabs: PlaygroundInternalTab[] = [];
   private _active: PlaygroundInternalTab | undefined = undefined;
 
-  render() {
+  override render() {
     return html`
       <div role="tablist" aria-label=${ifDefined(this.label)}>
         <slot

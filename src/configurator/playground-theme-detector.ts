@@ -12,7 +12,7 @@ import {tokens} from './highlight-tokens.js';
 
 @customElement('playground-theme-detector')
 export class PlaygroundThemeDetector extends LitElement {
-  static styles = css`
+  static override styles = css`
     ol {
       padding-left: 24px;
     }
@@ -86,7 +86,7 @@ export class PlaygroundThemeDetector extends LitElement {
   @query('playground-code-editor')
   private _playgroundWithUserText!: PlaygroundCodeEditor;
 
-  render() {
+  override render() {
     return html`
       <h2>Theme detector</h2>
 
@@ -176,7 +176,7 @@ export class PlaygroundThemeDetector extends LitElement {
     `;
   }
 
-  async firstUpdated() {
+  override async firstUpdated() {
     // CodeMirror only renders visible lines plus some margin. Force it to
     // render everything so we can query it.
     await this._playgroundWithUserText.updateComplete;

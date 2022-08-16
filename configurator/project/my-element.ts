@@ -6,7 +6,7 @@ export class MyElement extends LitElement {
   @property()
   greet = 'nobody';
 
-  render() {
+  override render() {
     return html`<p>Hello <b>${this.greet}</b>!</p>`;
   }
 }

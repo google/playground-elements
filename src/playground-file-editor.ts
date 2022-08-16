@@ -20,7 +20,7 @@ import {CodeEditorChangeData} from './shared/worker-api.js';
  */
 @customElement('playground-file-editor')
 export class PlaygroundFileEditor extends PlaygroundConnectedElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       /* Prevents scrollbars from changing container size and shifting layout
@@ -102,7 +102,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       : undefined;
   }
 
-  async update(changedProperties: PropertyValues) {
+  override async update(changedProperties: PropertyValues) {
     if (changedProperties.has('_project')) {
       const oldProject = changedProperties.get('_project') as PlaygroundProject;
       if (oldProject) {
@@ -132,7 +132,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`
       ${this._files
         ? html`

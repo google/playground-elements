@@ -64,7 +64,7 @@ const unreachable = (n: never) => n;
  */
 @customElement('playground-code-editor')
 export class PlaygroundCodeEditor extends LitElement {
-  static styles = [
+  static override styles = [
     css`
       :host {
         display: block;
@@ -289,7 +289,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
   private _diagnosticsMouseoverListenerActive = false;
 
-  update(changedProperties: PropertyValues) {
+  override update(changedProperties: PropertyValues) {
     const cm = this._codemirror;
     if (cm === undefined) {
       this._createView();
@@ -381,7 +381,7 @@ export class PlaygroundCodeEditor extends LitElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     if (this.readonly) {
       return this._cmDom;
     }
@@ -416,7 +416,7 @@ export class PlaygroundCodeEditor extends LitElement {
     `;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     // CodeMirror uses JavaScript to control whether scrollbars are visible. It
     // does so automatically on interaction, but won't notice container size
     // changes. If the browser doesn't have ResizeObserver, scrollbars will
@@ -437,7 +437,7 @@ export class PlaygroundCodeEditor extends LitElement {
     super.connectedCallback();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._resizeObserver?.disconnect();
     this._resizeObserver = undefined;
     super.disconnectedCallback();
@@ -629,7 +629,7 @@ export class PlaygroundCodeEditor extends LitElement {
     return this.type === 'ts';
   }
 
-  focus() {
+  override focus() {
     this._codemirrorEditable?.focus();
   }
 

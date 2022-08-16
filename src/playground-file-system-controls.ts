@@ -29,7 +29,7 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
  */
 @customElement('playground-file-system-controls')
 export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
-  static styles = css`
+  static override styles = css`
     mwc-menu-surface {
       --mdc-theme-primary: var(
         --playground-floating-controls-color,
@@ -100,14 +100,14 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private _postStateChangeRenderDone = false;
 
-  update(changedProperties: PropertyValues) {
+  override update(changedProperties: PropertyValues) {
     if (changedProperties.has('state')) {
       this._postStateChangeRenderDone = false;
     }
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`<mwc-menu-surface
       fixed
       quick
@@ -120,7 +120,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     >`;
   }
 
-  async updated() {
+  override async updated() {
     if (this._postStateChangeRenderDone) {
       return;
     }

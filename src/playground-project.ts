@@ -300,13 +300,13 @@ export class PlaygroundProject extends LitElement {
     ).href;
   }
 
-  static styles = css`
+  static override styles = css`
     iframe {
       display: none;
     }
   `;
 
-  async update(changedProperties: PropertyValues) {
+  override async update(changedProperties: PropertyValues) {
     if (changedProperties.has('_source')) {
       this._loadProjectFromSource();
     }
@@ -371,7 +371,7 @@ export class PlaygroundProject extends LitElement {
     this.save();
   }
 
-  render() {
+  override render() {
     return html`
       <slot @slotchange=${this._slotChange}></slot>
       <iframe
@@ -440,7 +440,7 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  async firstUpdated() {
+  override async firstUpdated() {
     const typescriptWorkerScriptUrl = forceSkypackRawMode(
       new URL('./playground-typescript-worker.js', import.meta.url)
     );
