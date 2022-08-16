@@ -7,7 +7,8 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2020,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "plugins": ["@typescript-eslint", "no-only-tests", "import"],
   "rules": {
@@ -15,13 +16,51 @@
     "import/extensions": ["error", "always"],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-non-null-assertion": "off"
+    "@typescript-eslint/no-non-null-assertion": "off",
+    // Google internally requires that floating promises are annotated with a
+    // special function. We use eslint-enable and eslint-disable comments for
+    // this rule to identify these spots for automated transform on import.
+    "@typescript-eslint/no-floating-promises": "error"
   },
   "overrides": [
     {
       "files": ["src/playground-styles.ts"],
       "rules": {
         "no-var": "off"
+      }
+    },
+    {
+      "files": ["src/typescript-worker/**"],
+      "parserOptions": {
+        "project": "./src/typescript-worker/tsconfig.json"
+      }
+    },
+    {
+      "files": ["src/service-worker/**"],
+      "parserOptions": {
+        "project": "./src/service-worker/tsconfig.json"
+      }
+    },
+    {
+      "files": ["src/shared/**"],
+      "parserOptions": {
+        "project": "./src/shared/tsconfig.json"
+      }
+    },
+    {
+      // These files aren't imported into Google so we don't care about floating
+      // promises.
+      "files": [
+        "scripts/**",
+        "playwright.config.ts",
+        "src/configurator/**",
+        "src/test/**"
+      ],
+      "parserOptions": {
+        "project": null
+      },
+      "rules": {
+        "@typescript-eslint/no-floating-promises": "off"
       }
     }
   ]
