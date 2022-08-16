@@ -6,11 +6,7 @@
 
 import {BareModuleTransformer} from './bare-module-transformer.js';
 
-import type {
-  SampleFile,
-  BuildOutput,
-  WorkerConfig,
-} from '../shared/worker-api.js';
+import {SampleFile, BuildOutput, WorkerConfig} from '../shared/worker-api.js';
 import {getWorkerContext} from './worker-context.js';
 import {processTypeScriptFiles} from './typescript-builder.js';
 

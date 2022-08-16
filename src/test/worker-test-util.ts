@@ -8,12 +8,12 @@ import {assert} from '@esm-bundle/chai';
 import {build} from '../typescript-worker/build.js';
 import {executeServerCommand} from '@web/test-runner-commands';
 
-import type {
+import {
   BuildOutput,
   ModuleImportMap,
   SampleFile,
 } from '../shared/worker-api.js';
-import type {CdnData} from './fake-cdn-plugin.js';
+import {CdnData} from './fake-cdn-plugin.js';
 
 export const configureFakeCdn = async (
   data: CdnData

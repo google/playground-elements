@@ -6,8 +6,8 @@
 
 import {checkTransform} from './worker-test-util.js';
 
-import type {BuildOutput, SampleFile} from '../shared/worker-api.js';
-import type {CdnData} from './fake-cdn-plugin.js';
+import {BuildOutput, SampleFile} from '../shared/worker-api.js';
+import {CdnData} from './fake-cdn-plugin.js';
 
 suite('typescript builder', () => {
   test('empty project', async () => {
@@ -279,7 +279,7 @@ suite('typescript builder', () => {
               },
               'index.d.ts': {
                 content: `
-                  import type {t} from './type.js';
+                  import {t} from './type.js';
                   export declare const foo: (s: t) => t;
                 `,
               },

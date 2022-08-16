@@ -15,13 +15,10 @@ import './playground-file-system-controls.js';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
-import type {PlaygroundFileEditor} from './playground-file-editor.js';
-import type {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
-import type {
-  FilesChangedEvent,
-  PlaygroundProject,
-} from './playground-project.js';
-import type {PlaygroundInternalTab} from './internal/tab.js';
+import {PlaygroundFileEditor} from './playground-file-editor.js';
+import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
+import {FilesChangedEvent, PlaygroundProject} from './playground-project.js';
+import {PlaygroundInternalTab} from './internal/tab.js';
 
 /**
  * A horizontal bar of tabs for switching between playground files, with

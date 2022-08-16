@@ -8,7 +8,7 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 
-import type {PlaygroundInternalTab} from './tab.js';
+import {PlaygroundInternalTab} from './tab.js';
 
 /**
  * A horizontal bar of tabs.

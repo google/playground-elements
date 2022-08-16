@@ -11,9 +11,9 @@ import {live} from 'lit/directives/live.js';
 import './playground-code-editor.js';
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
-import type {PlaygroundProject} from './playground-project.js';
-import type {PlaygroundCodeEditor} from './playground-code-editor.js';
-import type {CodeEditorChangeData} from './shared/worker-api.js';
+import {PlaygroundProject} from './playground-project.js';
+import {PlaygroundCodeEditor} from './playground-code-editor.js';
+import {CodeEditorChangeData} from './shared/worker-api.js';
 
 /**
  * A text editor associated with a <playground-project>.

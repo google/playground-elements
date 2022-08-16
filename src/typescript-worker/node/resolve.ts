@@ -15,7 +15,7 @@ import {
   InvalidPackageTargetError,
   PackagePathNotExportedError,
 } from './errors.js';
-import type {
+import {
   PackageExports,
   PackageExportsPathOrConditionMap,
   PackageExportsTarget,

@@ -10,11 +10,11 @@ import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
 import {sendKeys, executeServerCommand} from '@web/test-runner-commands';
 
-import type {ReactiveElement} from '@lit/reactive-element';
-import type {PlaygroundCodeEditor} from '../playground-code-editor.js';
-import type {PlaygroundProject} from '../playground-project.js';
-import type {PlaygroundFileEditor} from '../playground-file-editor.js';
-import type {PlaygroundPreview} from '../playground-preview.js';
+import {ReactiveElement} from '@lit/reactive-element';
+import {PlaygroundCodeEditor} from '../playground-code-editor.js';
+import {PlaygroundProject} from '../playground-project.js';
+import {PlaygroundFileEditor} from '../playground-file-editor.js';
+import {PlaygroundPreview} from '../playground-preview.js';
 
 // There is browser variability with zero width spaces. This helper keeps tests
 // consistent.
@@ -243,7 +243,7 @@ suite('playground-ide', () => {
                 return document.createTextNode(children);
               }
             }
-            
+
             class ReactRoot {
               root;
               constructor(root) {
@@ -253,13 +253,13 @@ suite('playground-ide', () => {
                 this.root.appendChild(children);
               }
             }
-            
+
             class ReactDOM {
               static createRoot(root) {
                 return new ReactRoot(root);
               }
             }
-            
+
             export {React, ReactDOM};
           `,
         },
@@ -309,7 +309,7 @@ suite('playground-ide', () => {
                 return document.createTextNode(children);
               }
             }
-            
+
             class ReactRoot {
               root: HTMLElement;
               constructor(root: HTMLElement) {
@@ -319,13 +319,13 @@ suite('playground-ide', () => {
                 this.root.appendChild(children);
               }
             }
-            
+
             class ReactDOM {
               static createRoot(root: HTMLElement): ReactRoot {
                 return new ReactRoot(root);
               }
             }
-            
+
             export {React, ReactDOM};
           `,
         },

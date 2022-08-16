@@ -6,12 +6,12 @@
 
 import {checkTransform} from './worker-test-util.js';
 
-import type {
+import {
   BuildOutput,
   ModuleImportMap,
   SampleFile,
 } from '../shared/worker-api.js';
-import type {CdnData} from './fake-cdn-plugin.js';
+import {CdnData} from './fake-cdn-plugin.js';
 
 const browser = (() => {
   const ua = navigator.userAgent;

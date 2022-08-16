@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import type {TestRunnerPlugin} from '@web/test-runner-core/dist/server/TestRunnerPlugin.js';
+import {TestRunnerPlugin} from '@web/test-runner-core/dist/server/TestRunnerPlugin.js';
 import semver from 'semver';
 
 /**

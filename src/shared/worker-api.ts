@@ -5,7 +5,7 @@
  */
 
 import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
-import type {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver';
 
 /**
  * Sent from the project to the proxy, with configuration and a port for further

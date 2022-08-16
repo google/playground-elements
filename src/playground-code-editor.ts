@@ -19,8 +19,8 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
-import type {Diagnostic} from 'vscode-languageserver';
-import type {
+import {Diagnostic} from 'vscode-languageserver';
+import {
   Doc,
   Editor,
   EditorChange,

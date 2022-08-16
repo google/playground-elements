@@ -7,7 +7,7 @@
 import {assert} from '@esm-bundle/chai';
 import {NodeModuleResolver} from '../typescript-worker/node-module-resolver.js';
 
-import type {PackageJson} from '../typescript-worker/util.js';
+import {PackageJson} from '../typescript-worker/util.js';
 
 suite('NodeModuleResolver', () => {
   const check = ({

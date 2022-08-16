@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import type {PlaywrightTestConfig} from '@playwright/test';
+import {PlaywrightTestConfig} from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
   testDir: 'src/test/playwright',

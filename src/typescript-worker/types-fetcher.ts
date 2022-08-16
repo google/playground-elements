@@ -16,9 +16,9 @@ import {
   trimLeadingSlash,
 } from './util.js';
 
-import type {Result} from '../shared/util.js';
-import type {CachingCdn} from './caching-cdn.js';
-import type {PackageJson, NpmFileLocation} from './util.js';
+import {Result} from '../shared/util.js';
+import {CachingCdn} from './caching-cdn.js';
+import {PackageJson, NpmFileLocation} from './util.js';
 import {
   PackageDependencies,
   DependencyGraph,

@@ -5,7 +5,7 @@
  */
 
 import ts from '../internal/typescript.js';
-import type * as lsp from 'vscode-languageserver';
+import * as lsp from 'vscode-languageserver';
 
 /**
  * Convert a diagnostic from TypeScript format to Language Server Protocol

@@ -13,7 +13,7 @@ import {
 } from './util.js';
 import {Deferred} from '../shared/deferred.js';
 
-import type {NpmFileLocation, PackageJson} from './util.js';
+import {NpmFileLocation, PackageJson} from './util.js';
 
 export interface CdnFile {
   content: string;
