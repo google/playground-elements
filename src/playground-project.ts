@@ -367,7 +367,7 @@ export class PlaygroundProject extends LitElement {
         break;
     }
     this._pristineFiles =
-      this._files && JSON.parse(JSON.stringify(this._files));
+      this._files && (JSON.parse(JSON.stringify(this._files)) as SampleFile[]);
     this._modified = false;
     this.dispatchEvent(new FilesChangedEvent(true));
     /* eslint-disable @typescript-eslint/no-floating-promises */
