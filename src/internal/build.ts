@@ -13,7 +13,7 @@ import {
   DiagnosticBuildOutput,
   HttpError,
 } from '../shared/worker-api.js';
-import {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 
 const unreachable = (n: never) => n;
 

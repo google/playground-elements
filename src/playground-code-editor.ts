@@ -19,7 +19,7 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
-import {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 import {
   Doc,
   Editor,

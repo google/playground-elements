@@ -37,7 +37,7 @@ import {npmVersion, serviceWorkerHash} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
-import {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.

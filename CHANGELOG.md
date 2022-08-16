@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- Removed `vscode-languageserver` dependency.
 
 ## [0.16.3] - 2022-08-02
 
