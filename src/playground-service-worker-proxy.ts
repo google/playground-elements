@@ -13,6 +13,7 @@ import {
   UPDATE_SERVICE_WORKER,
 } from './shared/worker-api.js';
 
+/* eslint-disable @typescript-eslint/no-floating-promises */
 (async () => {
   try {
     // Note we detect same-origin here by actually trying to access the parent
@@ -29,12 +30,7 @@ import {
   // Wait for our parent to send us:
   // 1. The URL and scope of the Service Worker to register.
   // 2. A MessagePort, on which we'll forward up new Service Worker ports.
-  const {
-    url,
-    scope,
-    port: parentPort,
-  } = await new Promise<{
-    url: string;
+  const {scope, port: parentPort} = await new Promise<{
     scope: string;
     port: MessagePort;
   }>((resolve) => {
@@ -48,7 +44,7 @@ import {
   });
 
   const registration = await navigator.serviceWorker.register(
-    new URL(url, import.meta.url).href,
+    new URL('playground-service-worker.js', import.meta.url).href,
     {scope}
   );
 
@@ -118,12 +114,16 @@ import {
     sw.postMessage(swMessage, [port2]);
   };
 
+  /* eslint-disable @typescript-eslint/no-floating-promises */
   connectToNewest();
+  /* eslint-enable @typescript-eslint/no-floating-promises */
 
   registration.addEventListener('updatefound', () => {
     // We can get a new service worker at any time, so we need to listen for
     // updates and connect to new workers on demand.
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     connectToNewest();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   });
 
   // A message from the service worker.
@@ -143,7 +143,9 @@ import {
         // Force required because we usually avoid connecting to a service
         // worker we've already connected to, but in this case that's exactly
         // what we must do.
+        /* eslint-disable @typescript-eslint/no-floating-promises */
         connectToNewest(true);
+        /* eslint-enable @typescript-eslint/no-floating-promises */
       }
     }
   );
@@ -175,3 +177,4 @@ import {
     }
   );
 })();
+/* eslint-enable @typescript-eslint/no-floating-promises */

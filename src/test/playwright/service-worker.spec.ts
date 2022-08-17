@@ -10,8 +10,8 @@ import {readFile} from 'fs/promises';
 // eslint-disable-next-line import/extensions
 import {Deferred} from '../../shared/deferred';
 
-import type {Page} from 'playwright';
-import type {DevServer, Plugin} from '@web/dev-server-core';
+import {Page} from 'playwright';
+import {DevServer, Plugin} from '@web/dev-server-core';
 
 const indexHtml = `
 <!DOCTYPE html>

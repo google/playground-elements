@@ -286,7 +286,8 @@
     "rollup-plugin-terser": "^7.0.2",
     "semver": "^7.3.5",
     "tsc-watch": "^4.2.3",
-    "typescript": "^4.4.3",
+    "typescript": "~4.7.4",
+    "vscode-languageserver-protocol": "^3.17.2",
     "wireit": "^0.7.1"
   },
   "dependencies": {
@@ -300,7 +301,6 @@
     "comlink": "=4.3.1",
     "fuse.js": "^6.4.6",
     "lit": "^2.0.0",
-    "tslib": "^2.0.3",
-    "vscode-languageserver": "^7.0.0"
+    "tslib": "^2.0.3"
   }
 }

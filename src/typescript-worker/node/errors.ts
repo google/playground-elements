@@ -9,7 +9,7 @@
 // and adapted for use in playground-elements.
 
 import {fileURLToPath} from './url.js';
-import type {PackageExportsTarget} from '../util.js';
+import {PackageExportsTarget} from '../util.js';
 
 export class InvalidModuleSpecifierError extends Error {
   constructor(request: string, reason: string, base?: string) {

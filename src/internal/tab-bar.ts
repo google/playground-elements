@@ -8,7 +8,7 @@ import {html, css, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 
-import type {PlaygroundInternalTab} from './tab.js';
+import {PlaygroundInternalTab} from './tab.js';
 
 /**
  * A horizontal bar of tabs.
@@ -18,7 +18,7 @@ import type {PlaygroundInternalTab} from './tab.js';
  */
 @customElement('playground-internal-tab-bar')
 export class PlaygroundInternalTabBar extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       overflow-x: auto;
@@ -88,7 +88,7 @@ export class PlaygroundInternalTabBar extends LitElement {
   private _tabs: PlaygroundInternalTab[] = [];
   private _active: PlaygroundInternalTab | undefined = undefined;
 
-  render() {
+  override render() {
     return html`
       <div role="tablist" aria-label=${ifDefined(this.label)}>
         <slot

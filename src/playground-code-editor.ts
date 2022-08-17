@@ -19,8 +19,8 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
-import type {Diagnostic} from 'vscode-languageserver';
-import type {
+import {Diagnostic} from 'vscode-languageserver-protocol';
+import {
   Doc,
   Editor,
   EditorChange,
@@ -64,7 +64,7 @@ const unreachable = (n: never) => n;
  */
 @customElement('playground-code-editor')
 export class PlaygroundCodeEditor extends LitElement {
-  static styles = [
+  static override styles = [
     css`
       :host {
         display: block;
@@ -289,7 +289,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _diagnosticMarkers: Array<CodeMirror.TextMarker> = [];
   private _diagnosticsMouseoverListenerActive = false;
 
-  update(changedProperties: PropertyValues) {
+  override update(changedProperties: PropertyValues) {
     const cm = this._codemirror;
     if (cm === undefined) {
       this._createView();
@@ -321,7 +321,9 @@ export class PlaygroundCodeEditor extends LitElement {
               // Swapping to a document instance doesn't trigger a change event
               // which is required for document folding. Manually fold once on
               // document instantiation.
+              /* eslint-disable @typescript-eslint/no-floating-promises */
               this._applyHideAndFoldRegions();
+              /* eslint-enable @typescript-eslint/no-floating-promises */
             }
             this._valueChangingFromOutside = false;
             break;
@@ -354,7 +356,9 @@ export class PlaygroundCodeEditor extends LitElement {
             cm.setOption('readOnly', this.readonly);
             break;
           case 'pragmas':
+            /* eslint-disable @typescript-eslint/no-floating-promises */
             this._applyHideAndFoldRegions();
+            /* eslint-enable @typescript-eslint/no-floating-promises */
             break;
           case 'diagnostics':
             this._showDiagnostics();
@@ -381,7 +385,7 @@ export class PlaygroundCodeEditor extends LitElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     if (this.readonly) {
       return this._cmDom;
     }
@@ -416,7 +420,7 @@ export class PlaygroundCodeEditor extends LitElement {
     `;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     // CodeMirror uses JavaScript to control whether scrollbars are visible. It
     // does so automatically on interaction, but won't notice container size
     // changes. If the browser doesn't have ResizeObserver, scrollbars will
@@ -437,7 +441,7 @@ export class PlaygroundCodeEditor extends LitElement {
     super.connectedCallback();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     this._resizeObserver?.disconnect();
     this._resizeObserver = undefined;
     super.disconnectedCallback();
@@ -497,7 +501,9 @@ export class PlaygroundCodeEditor extends LitElement {
       // file it is displaying.
       if (this._valueChangingFromOutside) {
         // Users can't change hide/fold regions.
+        /* eslint-disable @typescript-eslint/no-floating-promises */
         this._applyHideAndFoldRegions();
+        /* eslint-enable @typescript-eslint/no-floating-promises */
         this._showDiagnostics();
       } else {
         this.dispatchEvent(new Event('change'));
@@ -629,7 +635,7 @@ export class PlaygroundCodeEditor extends LitElement {
     return this.type === 'ts';
   }
 
-  focus() {
+  override focus() {
     this._codemirrorEditable?.focus();
   }
 
@@ -731,6 +737,7 @@ export class PlaygroundCodeEditor extends LitElement {
     // The detail promise is passed into this function only for the item
     // currently highlighted from the completions list.
     if (detail !== undefined) {
+      /* eslint-disable @typescript-eslint/no-floating-promises */
       detail.then((detailResult: EditorCompletionDetails) => {
         this._renderCompletionItemWithDetails(
           objectName,
@@ -745,6 +752,7 @@ export class PlaygroundCodeEditor extends LitElement {
           this._renderHint(element, _data, hint);
         this._currentCompletionSelectionLabel = hint.text;
       });
+      /* eslint-enable @typescript-eslint/no-floating-promises */
     }
   }
 

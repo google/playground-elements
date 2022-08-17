@@ -9,10 +9,10 @@ import '../_codemirror/codemirror-bundle.js';
 
 // Note it's critical we use `import type` here, or else we'll also import the
 // wrong runtime modules.
-import type CodeMirrorCore from 'codemirror';
-import type CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
-import type CodeMirrorHinting from 'codemirror/addon/hint/show-hint.js';
-import type CodeMirrorComment from 'codemirror/addon/comment/comment.js';
+import CodeMirrorCore from 'codemirror';
+import CoreMirrorFolding from 'codemirror/addon/fold/foldcode.js';
+import CodeMirrorHinting from 'codemirror/addon/hint/show-hint.js';
+import CodeMirrorComment from 'codemirror/addon/comment/comment.js';
 
 /**
  * CodeMirror function.

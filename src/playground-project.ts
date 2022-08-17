@@ -37,7 +37,7 @@ import {npmVersion, serviceWorkerHash} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
 
-import type {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -300,15 +300,17 @@ export class PlaygroundProject extends LitElement {
     ).href;
   }
 
-  static styles = css`
+  static override styles = css`
     iframe {
       display: none;
     }
   `;
 
-  async update(changedProperties: PropertyValues) {
+  override async update(changedProperties: PropertyValues) {
     if (changedProperties.has('_source')) {
+      /* eslint-disable @typescript-eslint/no-floating-promises */
       this._loadProjectFromSource();
+      /* eslint-enable @typescript-eslint/no-floating-promises */
     }
     if (
       changedProperties.has('sandboxScope') ||
@@ -365,13 +367,15 @@ export class PlaygroundProject extends LitElement {
         break;
     }
     this._pristineFiles =
-      this._files && JSON.parse(JSON.stringify(this._files));
+      this._files && (JSON.parse(JSON.stringify(this._files)) as SampleFile[]);
     this._modified = false;
     this.dispatchEvent(new FilesChangedEvent(true));
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     this.save();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 
-  render() {
+  override render() {
     return html`
       <slot @slotchange=${this._slotChange}></slot>
       <iframe
@@ -440,7 +444,7 @@ export class PlaygroundProject extends LitElement {
     }
   }
 
-  async firstUpdated() {
+  override async firstUpdated() {
     const typescriptWorkerScriptUrl = forceSkypackRawMode(
       new URL('./playground-typescript-worker.js', import.meta.url)
     );
@@ -479,7 +483,6 @@ export class PlaygroundProject extends LitElement {
     this._postMessageToServiceWorkerProxyIframe(
       {
         type: CONFIGURE_PROXY,
-        url: 'playground-service-worker.js',
         scope: this.sandboxScope,
         port: port2,
       },
@@ -493,12 +496,14 @@ export class PlaygroundProject extends LitElement {
         port.removeEventListener('message', onMessage);
         if (e.data.version === serviceWorkerHash) {
           this._serviceWorkerAPI = wrap<ServiceWorkerAPI>(port);
+          /* eslint-disable @typescript-eslint/no-floating-promises */
           this._serviceWorkerAPI.setFileAPI(
             proxy({
               getFile: (name: string) => this._getFile(name),
             }),
             this._sessionId
           );
+          /* eslint-enable @typescript-eslint/no-floating-promises */
         } else {
           // Version mismatch. Request the service worker be updated
           // immediately. We'll get back here again after it updates via a
@@ -563,11 +568,13 @@ export class PlaygroundProject extends LitElement {
     if (build.state() !== 'active') {
       return;
     }
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     workerApi.compileProject(
       this._files ?? [],
       {importMap: this._importMap},
       proxy((result) => build.onOutput(result))
     );
+    /* eslint-enable @typescript-eslint/no-floating-promises */
     await build.stateChange;
     if (build.state() !== 'done') {
       return;
@@ -679,7 +686,9 @@ export class PlaygroundProject extends LitElement {
     // want to be doing any searches.
     file.content = newContent;
     this._modified = undefined;
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     this.saveDebounced();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 
   addFile(name: string) {
@@ -701,7 +710,9 @@ export class PlaygroundProject extends LitElement {
     this._modified = undefined;
     this.requestUpdate();
     this.dispatchEvent(new FilesChangedEvent());
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     this.save();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 
   deleteFile(filename: string) {
@@ -715,7 +726,9 @@ export class PlaygroundProject extends LitElement {
     this._files = [...this._files.slice(0, idx), ...this._files.slice(idx + 1)];
     this._modified = undefined;
     this.dispatchEvent(new FilesChangedEvent());
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     this.save();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 
   renameFile(oldName: string, newName: string) {
@@ -735,7 +748,9 @@ export class PlaygroundProject extends LitElement {
     this._files = [...this._files];
     this._modified = undefined;
     this.dispatchEvent(new FilesChangedEvent());
+    /* eslint-disable @typescript-eslint/no-floating-promises */
     this.save();
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 }
 

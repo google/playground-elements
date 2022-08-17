@@ -16,9 +16,9 @@ import {
   trimLeadingSlash,
 } from './util.js';
 
-import type {Result} from '../shared/util.js';
-import type {CachingCdn} from './caching-cdn.js';
-import type {PackageJson, NpmFileLocation} from './util.js';
+import {Result} from '../shared/util.js';
+import {CachingCdn} from './caching-cdn.js';
+import {PackageJson, NpmFileLocation} from './util.js';
 import {
   PackageDependencies,
   DependencyGraph,
@@ -99,7 +99,7 @@ export class TypesFetcher {
       fetcher._rootDependencies,
       fetcher._dependencyGraph
     );
-    const files = new Map();
+    const files = new Map<string, string>();
     await fetcher._materializeNodeModulesTree(layout, files, '');
     // Note in practice we only really need "files", but it's useful to also
     // return the dependency graph and layout for testing.

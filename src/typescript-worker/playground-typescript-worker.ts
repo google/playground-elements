@@ -6,7 +6,7 @@
 
 import {expose} from 'comlink';
 import {build} from './build.js';
-import type {WorkerAPI} from '../shared/worker-api.js';
+import {WorkerAPI} from '../shared/worker-api.js';
 import {getCompletionItemDetails, queryCompletions} from './completions.js';
 
 const workerAPI: WorkerAPI = {

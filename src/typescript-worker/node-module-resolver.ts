@@ -5,11 +5,7 @@
  */
 
 import {packageExportsResolve} from './node/resolve.js';
-import type {
-  NpmFileLocation,
-  PackageJson,
-  PackageJsonWithExports,
-} from './util.js';
+import {NpmFileLocation, PackageJson, PackageJsonWithExports} from './util.js';
 
 /**
  * Resolves a path according to the Node package exports algorithm.

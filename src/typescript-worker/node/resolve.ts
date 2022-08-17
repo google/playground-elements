@@ -15,7 +15,7 @@ import {
   InvalidPackageTargetError,
   PackagePathNotExportedError,
 } from './errors.js';
-import type {
+import {
   PackageExports,
   PackageExportsPathOrConditionMap,
   PackageExportsTarget,
@@ -275,18 +275,21 @@ function resolvePackageTarget(
 }
 
 function isConditionalExportsMainSugar(
-  exports: PackageExports,
+  // Note we are avoiding locals called exactly "exports" because of
+  // incompatibilities with JS Compiler which can produce code that expects to
+  // be able to reference a global called "exports".
+  _exports: PackageExports,
   packageJSONUrl: URL,
   base: string
 ): boolean {
-  if (typeof exports === 'string' || Array.isArray(exports)) {
+  if (typeof _exports === 'string' || Array.isArray(_exports)) {
     return true;
   }
-  if (typeof exports !== 'object' || exports === null) {
+  if (typeof _exports !== 'object' || _exports === null) {
     return false;
   }
 
-  const keys = Object.getOwnPropertyNames(exports);
+  const keys = Object.getOwnPropertyNames(_exports);
   let isConditionalSugar = false;
   let i = 0;
   for (let j = 0; j < keys.length; j++) {
@@ -314,18 +317,18 @@ export function packageExportsResolve(
   base: string,
   conditions: Set<string>
 ): URL {
-  let exports = packageConfig.exports;
-  if (isConditionalExportsMainSugar(exports, packageJSONUrl, base)) {
-    exports = {'.': exports};
+  let _exports = packageConfig.exports;
+  if (isConditionalExportsMainSugar(_exports, packageJSONUrl, base)) {
+    _exports = {'.': _exports};
   }
-  exports = exports as PackageExportsPathOrConditionMap;
+  _exports = _exports as PackageExportsPathOrConditionMap;
 
   if (
-    Object.prototype.hasOwnProperty.call(exports, packageSubpath) &&
+    Object.prototype.hasOwnProperty.call(_exports, packageSubpath) &&
     !packageSubpath.includes('*') &&
     !packageSubpath.endsWith('/')
   ) {
-    const target = exports[packageSubpath];
+    const target = _exports[packageSubpath];
     const resolved = resolvePackageTarget(
       packageJSONUrl,
       target,
@@ -344,7 +347,7 @@ export function packageExportsResolve(
 
   let bestMatch = '';
   let bestMatchSubpath: string | undefined = undefined;
-  for (const key of Object.keys(exports)) {
+  for (const key of Object.keys(_exports)) {
     const patternIndex = key.indexOf('*');
     if (
       patternIndex !== -1 &&
@@ -374,7 +377,7 @@ export function packageExportsResolve(
   }
 
   if (bestMatch) {
-    const target = exports[bestMatch];
+    const target = _exports[bestMatch];
     const pattern = bestMatch.includes('*');
     const resolved = resolvePackageTarget(
       packageJSONUrl,

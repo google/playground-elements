@@ -15,13 +15,10 @@ import './playground-file-system-controls.js';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
-import type {PlaygroundFileEditor} from './playground-file-editor.js';
-import type {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
-import type {
-  FilesChangedEvent,
-  PlaygroundProject,
-} from './playground-project.js';
-import type {PlaygroundInternalTab} from './internal/tab.js';
+import {PlaygroundFileEditor} from './playground-file-editor.js';
+import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
+import {FilesChangedEvent, PlaygroundProject} from './playground-project.js';
+import {PlaygroundInternalTab} from './internal/tab.js';
 
 /**
  * A horizontal bar of tabs for switching between playground files, with
@@ -29,7 +26,7 @@ import type {PlaygroundInternalTab} from './internal/tab.js';
  */
 @customElement('playground-tab-bar')
 export class PlaygroundTabBar extends PlaygroundConnectedElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       font-size: var(--playground-tab-bar-font-size, 14px);
@@ -139,7 +136,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     return (this._project?.files ?? []).filter(({hidden}) => !hidden);
   }
 
-  update(changedProperties: PropertyValues) {
+  override update(changedProperties: PropertyValues) {
     if (changedProperties.has('_project')) {
       const oldProject = changedProperties.get('_project') as PlaygroundProject;
       if (oldProject) {
@@ -163,7 +160,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     super.update(changedProperties);
   }
 
-  render() {
+  override render() {
     return html`
       <playground-internal-tab-bar
         @tabchange=${this._onTabchange}

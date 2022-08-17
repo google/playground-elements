@@ -6,14 +6,14 @@
 
 import {Deferred} from '../shared/deferred.js';
 
-import type {
+import {
   SampleFile,
   BuildOutput,
   FileBuildOutput,
   DiagnosticBuildOutput,
   HttpError,
 } from '../shared/worker-api.js';
-import type {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 
 const unreachable = (n: never) => n;
 

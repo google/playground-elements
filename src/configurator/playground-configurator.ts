@@ -33,7 +33,7 @@ import {tokens} from './highlight-tokens.js';
  */
 @customElement('playground-configurator')
 export class PlaygroundConfigurator extends LitElement {
-  static styles = [
+  static override styles = [
     ...themeStyles,
     css`
       :host {
@@ -171,7 +171,7 @@ export class PlaygroundConfigurator extends LitElement {
   @query('playground-ide')
   private _ide!: PlaygroundIde;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.readUrlParams(new URL(document.location.href).searchParams);
   }
@@ -297,7 +297,7 @@ export class PlaygroundConfigurator extends LitElement {
     history.replaceState(null, '', '?' + params.toString());
   }
 
-  render() {
+  override render() {
     return html`
       <style>
         ${this.cssText}

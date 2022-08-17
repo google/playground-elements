@@ -5,7 +5,7 @@
  */
 
 import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
-import type {Diagnostic} from 'vscode-languageserver';
+import {Diagnostic} from 'vscode-languageserver-protocol';
 
 /**
  * Sent from the project to the proxy, with configuration and a port for further
@@ -46,7 +46,6 @@ export const UPDATE_SERVICE_WORKER = 6;
 export type PlaygroundMessage =
   | {
       type: typeof CONFIGURE_PROXY;
-      url: string;
       scope: string;
       port: MessagePort;
     }

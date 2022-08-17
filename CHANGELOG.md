@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- Removed `vscode-languageserver` dependency.
+- TypeScript version upgraded from `4.4.4` to `4.7.4`.
 
 ## [0.16.3] - 2022-08-02
 

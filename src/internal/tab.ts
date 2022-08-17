@@ -18,7 +18,7 @@ import {customElement, property, query} from 'lit/decorators.js';
  */
 @customElement('playground-internal-tab')
 export class PlaygroundInternalTab extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
     }
@@ -89,7 +89,7 @@ export class PlaygroundInternalTab extends LitElement {
    */
   index = 0;
 
-  render() {
+  override render() {
     return html`<button
       role="tab"
       part="button"
@@ -100,7 +100,7 @@ export class PlaygroundInternalTab extends LitElement {
     </button>`;
   }
 
-  updated(changes: PropertyValues) {
+  override updated(changes: PropertyValues) {
     if (changes.has('active') && this.active) {
       this.dispatchEvent(
         new CustomEvent<{tab?: PlaygroundInternalTab}>('tabchange', {
@@ -111,7 +111,7 @@ export class PlaygroundInternalTab extends LitElement {
     }
   }
 
-  focus() {
+  override focus() {
     this._button.focus();
   }
 }

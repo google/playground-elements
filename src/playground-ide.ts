@@ -59,7 +59,7 @@ import {npmVersion, serviceWorkerHash} from './shared/version.js';
  */
 @customElement('playground-ide')
 export class PlaygroundIde extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       height: 350px;
@@ -291,7 +291,7 @@ export class PlaygroundIde extends LitElement {
   private _configSetBeforeRender?: ProjectManifest;
   private _projectSrcSetBeforeRender?: string;
 
-  render() {
+  override render() {
     const projectId = 'project';
     const editorId = 'editor';
     return html`
@@ -347,7 +347,7 @@ export class PlaygroundIde extends LitElement {
     `;
   }
 
-  firstUpdated() {
+  override firstUpdated() {
     if (this._configSetBeforeRender) {
       this._project!.config = this._configSetBeforeRender;
       this._configSetBeforeRender = undefined;
@@ -358,7 +358,7 @@ export class PlaygroundIde extends LitElement {
     }
   }
 
-  async update(changedProperties: PropertyValues<this>) {
+  override async update(changedProperties: PropertyValues<this>) {
     if (changedProperties.has('resizable') && this.resizable === false) {
       // Note we set this property on the RHS element instead of the host so
       // that when "resizable" is toggled, we don't reset a host value that the

@@ -17,15 +17,15 @@ import {
 import {Deferred} from '../shared/deferred.js';
 import {NodeModuleResolver} from './node-module-resolver.js';
 
-import type {
+import {
   BuildOutput,
   DiagnosticBuildOutput,
   FileBuildOutput,
   SampleFile,
 } from '../shared/worker-api.js';
-import type {ImportMapResolver} from './import-map-resolver.js';
-import type {CachingCdn} from './caching-cdn.js';
-import type {NpmFileLocation, PackageJson} from './util.js';
+import {ImportMapResolver} from './import-map-resolver.js';
+import {CachingCdn} from './caching-cdn.js';
+import {NpmFileLocation, PackageJson} from './util.js';
 
 /**
  * Transforms bare module specifiers in .js files to canonical local paths, and

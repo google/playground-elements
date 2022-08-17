@@ -21,7 +21,7 @@ import './internal/overlay.js';
  */
 @customElement('playground-preview')
 export class PlaygroundPreview extends PlaygroundConnectedElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: flex;
       flex-direction: column;
@@ -165,7 +165,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     }
   }
 
-  update(changedProperties: PropertyValues) {
+  override update(changedProperties: PropertyValues) {
     if (changedProperties.has('_project')) {
       const oldProject = changedProperties.get('_project') as PlaygroundProject;
       if (oldProject) {
@@ -191,7 +191,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     return url.toString();
   }
 
-  render() {
+  override render() {
     return html`
       <div id="toolbar" part="preview-toolbar">
         <span id="location" part="preview-location"> ${this.location}</span>
@@ -244,7 +244,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     `;
   }
 
-  updated() {
+  override updated() {
     // TODO(aomarks) If we instead use an `ifDefined(this._indexUrl)` binding in
     // the template, then the preview loads twice. I must be doing something
     // dumb, but this hacky way of synchronizing the src works correctly for
@@ -278,7 +278,7 @@ export class PlaygroundPreview extends PlaygroundConnectedElement {
     this._showLoadingBar = true;
   };
 
-  async firstUpdated() {
+  override async firstUpdated() {
     // Loading should be initially indicated only when we're not pre-rendering,
     // because in that case there should be no visible change once the actual
     // iframe loads, and the indicator is distracting.

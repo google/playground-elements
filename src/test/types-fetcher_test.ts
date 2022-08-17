@@ -10,10 +10,10 @@ import {configureFakeCdn} from './worker-test-util.js';
 import {assert} from '@esm-bundle/chai';
 import {CachingCdn} from '../typescript-worker/caching-cdn.js';
 
-import type {ModuleImportMap} from '../shared/worker-api.js';
-import type {CdnData} from './fake-cdn-plugin.js';
-import type {PackageJson} from '../typescript-worker/util.js';
-import type {
+import {ModuleImportMap} from '../shared/worker-api.js';
+import {CdnData} from './fake-cdn-plugin.js';
+import {PackageJson} from '../typescript-worker/util.js';
+import {
   DependencyGraph,
   NodeModulesDirectory,
   PackageDependencies,

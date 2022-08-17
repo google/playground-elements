@@ -5,7 +5,7 @@
  */
 
 import ts from '../internal/typescript.js';
-import type * as lsp from 'vscode-languageserver';
+import * as lsp from 'vscode-languageserver-protocol';
 
 /**
  * Convert a diagnostic from TypeScript format to Language Server Protocol
@@ -35,7 +35,7 @@ export function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
 }
 
 /**
- * We don't want a runtime import of 'vscode-languageserver' just for the
+ * We don't want a runtime import of 'vscode-languageserver-protocol' just for the
  * DiagnosticSeverity constants. We can duplicate the values instead, and assert
  * we got them right with a type constraint.
  */
