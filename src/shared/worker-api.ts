@@ -46,7 +46,6 @@ export const UPDATE_SERVICE_WORKER = 6;
 export type PlaygroundMessage =
   | {
       type: typeof CONFIGURE_PROXY;
-      url: string;
       scope: string;
       port: MessagePort;
     }

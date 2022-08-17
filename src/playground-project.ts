@@ -483,7 +483,6 @@ export class PlaygroundProject extends LitElement {
     this._postMessageToServiceWorkerProxyIframe(
       {
         type: CONFIGURE_PROXY,
-        url: 'playground-service-worker.js',
         scope: this.sandboxScope,
         port: port2,
       },

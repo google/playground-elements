@@ -30,12 +30,7 @@ import {
   // Wait for our parent to send us:
   // 1. The URL and scope of the Service Worker to register.
   // 2. A MessagePort, on which we'll forward up new Service Worker ports.
-  const {
-    url,
-    scope,
-    port: parentPort,
-  } = await new Promise<{
-    url: string;
+  const {scope, port: parentPort} = await new Promise<{
     scope: string;
     port: MessagePort;
   }>((resolve) => {
@@ -49,7 +44,7 @@ import {
   });
 
   const registration = await navigator.serviceWorker.register(
-    new URL(url, import.meta.url).href,
+    new URL('playground-service-worker.js', import.meta.url).href,
     {scope}
   );
 
