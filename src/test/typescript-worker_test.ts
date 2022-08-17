@@ -279,7 +279,7 @@ suite('typescript builder', () => {
               },
               'index.d.ts': {
                 content: `
-                  import {t} from './type.js';
+                  import type {t} from './type.js';
                   export declare const foo: (s: t) => t;
                 `,
               },
