@@ -26,7 +26,8 @@
     // TODO(aomarks) Remove when
     // https://github.com/material-components/material-web/issues/2715 is fixed.
     "skipLibCheck": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": [
     "src/**/*.ts",

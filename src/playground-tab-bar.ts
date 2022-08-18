@@ -252,7 +252,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     if (!tab) {
       return;
     }
-    const name = tab.dataset.filename!;
+    const name = tab.dataset['filename']!;
     const index = tab.index!;
     if (name !== this._activeFileName) {
       this._activeFileName = name;
@@ -279,8 +279,8 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     // Between MWC v0.25.1 and v0.25.2, when clicking on an <mwc-icon-button>,
     // the target changed from the <mwc-icon-button> to its internal <svg>.
     for (const el of event.composedPath()) {
-      if (el instanceof HTMLElement && el.dataset.filename) {
-        controls.filename = el.dataset.filename;
+      if (el instanceof HTMLElement && el.dataset['filename']) {
+        controls.filename = el.dataset['filename'];
         break;
       }
     }
