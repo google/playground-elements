@@ -639,7 +639,8 @@ export class PlaygroundCodeEditor extends LitElement {
     this._codemirrorEditable?.focus();
   }
 
-  private _completionsAsHints(cm: Editor): Hints {
+  private _completionsAsHints(): Hints {
+    const cm = this._codemirror!;
     const cursorPosition = cm.getCursor('start');
     const token = cm.getTokenAt(cursorPosition);
     const lineNumber = cursorPosition.line;
