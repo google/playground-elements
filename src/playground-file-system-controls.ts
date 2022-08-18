@@ -112,9 +112,9 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       fixed
       quick
       .open=${this.state !== 'closed'}
-      .anchor=${this.anchorElement}
+      .anchor=${this.anchorElement ?? null}
       corner="BOTTOM_START"
-      .classList=${this.state}
+      class="${this.state}"
       @closed=${this._onSurfaceClosed}
       ><div class="wrapper">${this._surfaceContents}</div></mwc-menu-surface
     >`;
