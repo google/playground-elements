@@ -135,7 +135,7 @@ export class PlaygroundCodeEditor extends LitElement {
     playgroundStyles,
   ];
 
-  protected _codemirror?: ReturnType<typeof CodeMirror>;
+  protected _codemirror?: CodeMirror.Editor;
 
   get cursorPosition(): EditorPosition {
     const cursor = this._codemirror?.getCursor('start');
