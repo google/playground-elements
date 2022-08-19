@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Removed `vscode-languageserver` dependency.
 - TypeScript version upgraded from `4.4.4` to `4.7.4`.
+- `PlaygroundConnectedElement` `project` is now permitted to be `undefined` according to TypeScript.
 
 ## [0.16.3] - 2022-08-02
 

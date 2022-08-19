@@ -90,7 +90,7 @@ test.describe('service worker', () => {
           `Found ${versionMatches.length}.`
       );
     }
-    const hex = versionMatches[0].groups?.hex;
+    const hex = versionMatches[0].groups?.['hex'];
     if (!hex) {
       throw new Error('Could not find "hex" capture group in regexp match.');
     }

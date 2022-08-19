@@ -17,7 +17,7 @@ export class PlaygroundConnectedElement extends LitElement {
    * `<playground-project>` node itself, or its `id` in the host scope.
    */
   @property()
-  set project(elementOrId: PlaygroundProject | string) {
+  set project(elementOrId: PlaygroundProject | string | undefined) {
     if (typeof elementOrId === 'string') {
       // Defer querying the host to a rAF because if the host renders this
       // element before the one we're querying for, it might not quite exist
