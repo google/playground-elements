@@ -1,0 +1,49 @@
+<!doctype html>
+
+<script type="module" src="index.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+  }
+  section {
+    height: 100vh;
+    max-width: 50vw;
+    width: 50vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid black;
+  }
+  #container {
+    position: fixed;
+    width: 50vw;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+<section id="initial">
+  Code right in the browser, with live previews.
+</section>
+
+<section id="exploded">
+  Each piece is its own component
+</section>
+
+<section id="vertical">
+  So you can compose them into different layouts
+</section>
+
+<section id="themes">
+  And there are lots of themes
+</section>
+
+<div id="container">
+  <exploding-playground></exploding-playground>
+</div>
