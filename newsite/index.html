@@ -2,26 +2,43 @@
 
 <script type="module" src="index.js"></script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nabla&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Patua+One&display=swap" rel="stylesheet">
+
 <style>
   body {
     font-family: Arial, sans-serif;
     font-size: 18px;
     margin: 0;
+    background: white;
   }
   header {
-    background: #eee;
-    border-bottom: 1px solid #ddd;
     position: fixed;
     width: 100vw;
     padding: 4px 24px;
     display: flex;
     align-items: center;
     height: 48px;
+    border-bottom: 1px solid #c9c9c9;
+    background: rgb(255, 255, 255);
   }
   header > h1 {
-    font-size: 18px;
+    font-size: 28px;
     display: inline-block;
     font-weight: normal;
+    font-family: "Patua One", sans-serif;
+    color: #4285f4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 > span {
+    font-weight: 300;
+    color: #2e2e2e;
+    padding-left: 15px;
+    padding-right: 10px;
   }
   header > nav {
     margin-left: 48px;
@@ -37,7 +54,8 @@
   header > nav a {
     display: inline-block;
     font-size: 16px;
-    color: #555;
+    color: #707070;
+    font-weight: bold;
     text-decoration: none;
     padding: 5px 10px;
     margin: 0 10px;
@@ -55,7 +73,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid black;
+    font-size: 24px;
+    color: #000000de;
   }
   #container {
     position: fixed;
@@ -67,10 +86,29 @@
     align-items: center;
     justify-content: center;
   }
+  section > p {
+  }
+  section:nth-of-type(1) {
+    background: #fff;
+  }
+  section:nth-of-type(2) {
+    background: #f3f3f3;
+  }
+  section:nth-of-type(3) {
+    background: #fff;
+  }
+  section:nth-of-type(4) {
+    background: #f3f3f3;
+  }
+  section:nth-of-type(5) {
+    background: #fff;
+  }
 </style>
 
 <header>
-  <h1>🛝 Playground Elements</h1>
+  <h1>
+    <img src="./playground-logo.svg" width="40px" >
+    <span>Playground</span> Elements</h1>
   <nav>
     <span id="navLeft">
       <a href="/docs/">Docs</a>
@@ -98,7 +136,7 @@
 </header>
 
 <section id="initial">
-  Code in the browser, with live previews.
+  <p>Code in the browser, with live previews.</p>
 </section>
 
 <section id="exploded">
