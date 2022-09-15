@@ -13,6 +13,7 @@ const compilerOptions = {
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   allowJs: true,
+  checkJs: true,
   moduleResolution: ts.ModuleResolutionKind.NodeJs,
   jsx: ts.JsxEmit.React,
   lib: ['dom', 'esnext'],
