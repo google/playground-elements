@@ -53,6 +53,7 @@ class ExplodingPlayground extends LitElement {
       }
       :host([state='themes']) > div {
         grid-template-columns: 600px 0;
+        margin-top: -300px;
       }
       :host([state='themes']) > div > playground-tab-bar,
       :host([state='themes']) > div > playground-preview {
