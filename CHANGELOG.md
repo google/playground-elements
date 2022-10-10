@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - TypeScript version upgraded from `4.4.4` to `4.7.4`.
 - `PlaygroundConnectedElement` `project` is now permitted to be `undefined` according to TypeScript.
 
+### Added
+
+- The service worker now sets the [`Cross-Origin-Embedder-Policy: require-corp`](https://html.spec.whatwg.org/multipage/origin.html#coep-require-corp)
+  heading on all responses.
+
 ## [0.16.3] - 2022-08-02
 
 ### Added
