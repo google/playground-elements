@@ -8,10 +8,10 @@ import {test, expect} from '@playwright/test';
 import {startDevServer} from '@web/dev-server';
 import {readFile} from 'fs/promises';
 // eslint-disable-next-line import/extensions
-import {Deferred} from '../../shared/deferred';
+import {Deferred} from '../../shared/deferred.js';
 
-import {Page} from 'playwright';
-import {DevServer, Plugin} from '@web/dev-server-core';
+import type {Page} from 'playwright';
+import type {DevServer, Plugin} from '@web/dev-server-core';
 
 const indexHtml = `
 <!DOCTYPE html>
