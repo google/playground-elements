@@ -5,7 +5,6 @@
  */
 
 import resolve from '@rollup/plugin-node-resolve';
-import summary from 'rollup-plugin-summary';
 
 import {maybeTerser} from './rollup.config.common.js';
 
@@ -51,7 +50,6 @@ Distributed under an MIT license: https://codemirror.net/LICENSE */
       [/typeof exports ?===? ?['"`]object['"`]/g, 'false'],
       [/typeof define ?===? ?['"`]function['"`]/g, 'false'],
     ]),
-    ...maybeTerser,
-    summary(),
+    ...maybeTerser
   ],
 };
