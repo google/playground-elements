@@ -819,7 +819,7 @@ suite('bare module worker', () => {
           message:
             'Invalid package.json: ' +
             {
-              chrome: 'SyntaxError: Unexpected token X in JSON at position 29',
+              chrome: 'SyntaxError: Unexpected token \'X\', ..."dencies": XXX\n      "... is not valid JSON',
               firefox:
                 'SyntaxError: JSON.parse: unexpected character at line 2 column 28 of the JSON data',
               safari:
@@ -827,7 +827,7 @@ suite('bare module worker', () => {
             }[browser],
           range: {
             start:
-              browser === 'safari'
+              browser === 'safari' || browser === 'chrome'
                 ? {line: 0, character: 0}
                 : {line: 1, character: 27},
             end: {line: 2, character: 10},
