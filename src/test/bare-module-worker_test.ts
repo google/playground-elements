@@ -819,7 +819,8 @@ suite('bare module worker', () => {
           message:
             'Invalid package.json: ' +
             {
-              chrome: 'SyntaxError: Unexpected token \'X\', ..."dencies": XXX\n      "... is not valid JSON',
+              chrome:
+                'SyntaxError: Unexpected token \'X\', ..."dencies": XXX\n      "... is not valid JSON',
               firefox:
                 'SyntaxError: JSON.parse: unexpected character at line 2 column 28 of the JSON data',
               safari:
