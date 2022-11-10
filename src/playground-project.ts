@@ -629,9 +629,12 @@ export class PlaygroundProject extends LitElement {
         tokenUnderCursorAsString
       );
     }
-    // TODO We should pre-fetch the first completion item, if it's present so
-    // that when the data gets to the code-editor, the detail hopefully is
-    // already loaded.
+    // We want to pre-fetch the first completion item, if it's present
+    // so that when the data gets to the code-editor, the detail hopefully
+    // is already loaded.
+    //
+    // Note invoking this getter actually triggers the fetch.
+    void completions[0]?.details;
     return completions;
   }
 
