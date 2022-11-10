@@ -29,7 +29,7 @@
     "test:playwright": "wireit",
     "lint": "wireit",
     "lint:eslint": "wireit",
-    "serve": "npm run build && (npm run build --watch & web-dev-server --node-resolve --watch --open=configurator/)",
+    "serve": "wireit",
     "format": "prettier --write .",
     "lint:format": "prettier --check ."
   },
@@ -231,6 +231,16 @@
         "!src/themes/**"
       ],
       "output": []
+    },
+    "serve": {
+      "command": "web-dev-server --node-resolve --watch --open=configurator/",
+      "service": true,
+      "dependencies": [
+        {
+          "script": "build",
+          "cascade": false
+        }
+      ]
     }
   },
   "files": [
@@ -287,7 +297,7 @@
     "tsc-watch": "^5.0.3",
     "typescript": "~4.8.4",
     "vscode-languageserver-protocol": "^3.17.2",
-    "wireit": "^0.7.1"
+    "wireit": "^0.7.3-pre.3"
   },
   "dependencies": {
     "@material/mwc-button": "^0.27.0",

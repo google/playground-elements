@@ -980,16 +980,10 @@ npm i
 npm run build
 ```
 
-Build continuously:
+Launch the configurator/demo locally and build continuously:
 
 ```sh
-npm run watch
-```
-
-Launch the configurator/demo locally:
-
-```sh
-npm run serve
+npm run serve --watch
 ```
 
 ## FAQ
