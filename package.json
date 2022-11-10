@@ -291,12 +291,12 @@
     "wireit": "^0.7.1"
   },
   "dependencies": {
-    "@material/mwc-button": "^0.26.1",
-    "@material/mwc-icon-button": "^0.26.1",
-    "@material/mwc-linear-progress": "^0.26.1",
-    "@material/mwc-list": "^0.26.1",
-    "@material/mwc-menu": "^0.26.1",
-    "@material/mwc-textfield": "^0.26.1",
+    "@material/mwc-button": "^0.27.0",
+    "@material/mwc-icon-button": "^0.27.0",
+    "@material/mwc-linear-progress": "^0.27.0",
+    "@material/mwc-list": "^0.27.0",
+    "@material/mwc-menu": "^0.27.0",
+    "@material/mwc-textfield": "^0.27.0",
     "@types/codemirror": "^5.60.0",
     "comlink": "=4.3.1",
     "fuse.js": "^6.4.6",
