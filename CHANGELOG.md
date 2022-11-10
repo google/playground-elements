@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Upgrade `codemirror` from `5.63.0` to `5.65.9`.
 - **BREAKING** Switched TypeScript `moduleResolution` from `esnext` to `nodenext`.
 - **BREAKING** Bumped TypeScript `target` from `es2017` to `es2021`.
+- **BREAKING** The local `package.json` is now passed to TypeScript for
+  compilation, and the default value of the `type` field is modified to
+  `module`.
 
 ## [0.16.3] - 2022-08-02
 

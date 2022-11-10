@@ -56,6 +56,23 @@ export async function* processTypeScriptFiles(
     loadedFiles.set(url, file.content);
   }
 
+  // TypeScript needs the local package.json because it's interested in the
+  // "types" and "imports" fields.
+  //
+  // We also change the default "type" field from "commonjs" to "module" because
+  // we're pretty much always in a web context, and wanting standard module
+  // semantics.
+  const defaultPackageJson =
+    packageJson === undefined
+      ? {type: 'module'}
+      : packageJson.type === 'module'
+      ? packageJson
+      : {...packageJson, type: 'module'};
+  loadedFiles.set(
+    new URL('package.json', self.origin).href,
+    JSON.stringify(defaultPackageJson)
+  );
+
   // Sync the new loaded files with the servicehost.
   // If the file is missing, it's added, if the file is modified,
   // the modification data and versioning will be handled by the servicehost.
