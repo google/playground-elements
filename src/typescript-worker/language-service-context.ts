@@ -7,13 +7,13 @@
 import ts from '../internal/typescript.js';
 
 const compilerOptions = {
-  target: ts.ScriptTarget.ES2017,
+  target: ts.ScriptTarget.ES2021,
   module: ts.ModuleKind.ESNext,
   experimentalDecorators: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   allowJs: true,
-  moduleResolution: ts.ModuleResolutionKind.NodeJs,
+  moduleResolution: ts.ModuleResolutionKind.NodeNext,
   jsx: ts.JsxEmit.React,
   lib: ['dom', 'esnext'],
 };
