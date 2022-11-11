@@ -632,7 +632,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _currentFiletypeSupportsCompletion() {
     // Currently we are only supporting code completion for TS. Change
     // this in a case that we start to support it for other languages too.
-    return this.type === 'ts';
+    return this.type === 'ts' || this.type === 'js';
   }
 
   override focus() {

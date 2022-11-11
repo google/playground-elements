@@ -10,6 +10,8 @@ import {PackageJson} from './util.js';
 import {makeLspDiagnostic} from './diagnostic.js';
 import {WorkerContext} from './worker-context.js';
 
+const PROCESSED_FILE_ENDINGS = ['.ts', '.jsx', '.tsx'];
+
 export async function* processTypeScriptFiles(
   workerContext: WorkerContext,
   results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
@@ -20,22 +22,32 @@ export async function* processTypeScriptFiles(
   let packageJson: PackageJson | undefined;
   const compilerInputs = [];
   for await (const result of results) {
+    if (result.kind !== 'file') continue;
+
+    // Collect filetypes that need to be compiled. They will be handled later on in the process.
     if (
-      result.kind === 'file' &&
-      (result.file.name.endsWith('.ts') ||
-        result.file.name.endsWith('.jsx') ||
-        result.file.name.endsWith('.tsx'))
+      PROCESSED_FILE_ENDINGS.some((ending) => result.file.name.endsWith(ending))
     ) {
       compilerInputs.push(result.file);
-    } else {
-      yield result;
-      if (result.kind === 'file' && result.file.name === 'package.json') {
-        try {
-          packageJson = JSON.parse(result.file.content) as PackageJson;
-        } catch (e) {
-          // A bit hacky, but BareModuleTransformer already emits a diagnostic
-          // for this case, so we don't need another one.
-        }
+      continue;
+    }
+    // Everything that reaches this point should be usable out of the box without compiling.
+    // Therefore we can just yield the result to the caller.
+    yield result;
+
+    // Even though we don't need to compile javascript files, we want to append them to our
+    // compilerinputs to get completions and diagnostics for those files.
+    if (result.file.name.endsWith('.js')) {
+      compilerInputs.push(result.file);
+      continue;
+    }
+
+    if (result.file.name === 'package.json') {
+      try {
+        packageJson = JSON.parse(result.file.content) as PackageJson;
+      } catch (e) {
+        // A bit hacky, but BareModuleTransformer already emits a diagnostic
+        // for this case, so we don't need another one.
       }
     }
   }
