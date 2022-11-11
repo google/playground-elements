@@ -344,14 +344,14 @@ Playground automatically compiles `.ts`, `.tsx`, and `.jsx` files using
 
 The following compiler settings are used:
 
-| Name                                                                                       | Value    |
-| ------------------------------------------------------------------------------------------ | -------- |
-| [`target`](https://www.typescriptlang.org/tsconfig#target)                                 | `ES2017` |
-| [`module`](https://www.typescriptlang.org/tsconfig#module)                                 | `ESNext` |
-| [`moduleResolution`](https://www.typescriptlang.org/tsconfig#moduleResolution)             | `node`   |
-| [`experimentalDecorators`](https://www.typescriptlang.org/tsconfig#experimentalDecorators) | `true`   |
-| [`allowJs`](https://www.typescriptlang.org/tsconfig#allowJs)                               | `true`   |
-| [`jsx`](https://www.typescriptlang.org/tsconfig#jsx)                                       | `react`  |
+| Name                                                                                       | Value      |
+| ------------------------------------------------------------------------------------------ | ---------- |
+| [`target`](https://www.typescriptlang.org/tsconfig#target)                                 | `es2021`   |
+| [`module`](https://www.typescriptlang.org/tsconfig#module)                                 | `esnext`   |
+| [`moduleResolution`](https://www.typescriptlang.org/tsconfig#moduleResolution)             | `nodenext` |
+| [`experimentalDecorators`](https://www.typescriptlang.org/tsconfig#experimentalDecorators) | `true`     |
+| [`allowJs`](https://www.typescriptlang.org/tsconfig#allowJs)                               | `true`     |
+| [`jsx`](https://www.typescriptlang.org/tsconfig#jsx)                                       | `react`    |
 
 Note that when you import from another project module, the import
 statement should use the `.js` extension (the same as you would do when running
