@@ -170,7 +170,7 @@ suite('playground-ide', () => {
         <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
           <script type="sample/js" filename="hello.js">
@@ -189,7 +189,7 @@ suite('playground-ide', () => {
         <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
           <script type="sample/ts" filename="hello.ts">
@@ -374,7 +374,7 @@ suite('playground-ide', () => {
         <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html" hidden>
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
           <script type="sample/js" filename="hello.js">
@@ -396,7 +396,7 @@ suite('playground-ide', () => {
         <playground-ide sandbox-base-url="/">
           <script type="sample/html" filename="index.html" label="HTML">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
           <script type="sample/js" filename="hello.js" label="JS">
@@ -994,7 +994,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
@@ -1030,7 +1030,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
@@ -1074,7 +1074,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
@@ -1107,10 +1107,10 @@ suite('playground-ide', () => {
     await raf();
     assert.include(
       editorInternals._codemirror!.getValue().trim(),
-      `<script src="hello.js">`
+      `<script type="module" src="hello.js">`
     );
     editorInternals._codemirror!.setValue(`<body>
-    <script src="hello.js">&lt;/script>
+    <script type="module" src="hello.js">&lt;/script>
     <p>Add this</p>
     </body>`);
     await raf();
@@ -1142,7 +1142,7 @@ suite('playground-ide', () => {
     );
     assert.include(
       editorInternals._codemirror!.getValue(),
-      `<script src="hello.js">`
+      `<script type="module" src="hello.js">`
     );
   });
 
@@ -1155,7 +1155,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
@@ -1203,7 +1203,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
@@ -1259,7 +1259,7 @@ suite('playground-ide', () => {
           <script type="sample/html" filename="index.html">
             <body>
               <!-- playground-fold -->
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
               <!-- playground-fold-end -->
             </body>
           </script>
@@ -1315,7 +1315,7 @@ suite('playground-ide', () => {
           </script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>
