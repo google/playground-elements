@@ -237,6 +237,7 @@ export interface PackageJson {
   module?: string;
   types?: string;
   typings?: string;
+  type?: string;
   dependencies?: {[key: string]: string};
 }
 

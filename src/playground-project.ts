@@ -362,8 +362,8 @@ export class PlaygroundProject extends LitElement {
           this._importMap = importMap;
         }
         break;
-      default:
-        source as void; // Exhaustive check.
+      default: // Exhaustive check.
+        source as void;
         break;
     }
     this._pristineFiles =
@@ -632,7 +632,9 @@ export class PlaygroundProject extends LitElement {
     // We want to pre-fetch the first completion item, if it's present
     // so that when the data gets to the code-editor, the detail hopefully
     // is already loaded.
-    completions[0]?.details;
+    //
+    // Note invoking this getter actually triggers the fetch.
+    void completions[0]?.details;
     return completions;
   }
 

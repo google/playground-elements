@@ -29,7 +29,7 @@ suite('completions', () => {
           <script type="sample/ts" filename="hello.ts"></script>
           <script type="sample/html" filename="index.html">
             <body>
-              <script src="hello.js">&lt;/script>
+              <script type="module" src="hello.js">&lt;/script>
             </body>
           </script>
         </playground-ide>

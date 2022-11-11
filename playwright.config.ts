@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {PlaywrightTestConfig} from '@playwright/test';
-
-const config: PlaywrightTestConfig = {
+const config = {
   testDir: 'src/test/playwright',
   // There is some flakiness, especially in webkit.
   //

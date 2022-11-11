@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {terser} from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 
 const terserOptions = {
   warnings: true,
