@@ -175,7 +175,7 @@
       ]
     },
     "test:wtr": {
-      "command": "wtr",
+      "command": "wtr test/playground-ide_test.js",
       "dependencies": [
         "build:ts",
         "build:service-worker",

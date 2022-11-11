@@ -830,7 +830,8 @@ suite('playground-ide', () => {
     assert.equal(tokenUnderCursor.string, 'console');
   });
 
-  test('reloading preview does not modify history', async () => {
+  test.only('reloading preview does not modify history', async () => {
+    await new Promise((resolve) => setTimeout(resolve));
     const historyLengthBefore = window.history.length;
 
     // NOTE: For some reason, the parent window's history only seems to be

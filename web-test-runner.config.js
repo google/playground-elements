@@ -37,7 +37,7 @@ export default {
   nodeResolve: true,
   browsers: [
     playwrightLauncher({product: 'chromium'}),
-    playwrightLauncher({product: 'webkit'}),
+    // playwrightLauncher({product: 'webkit'}),
     // Playwright Firefox does not currently work with service workers, see
     // https://github.com/microsoft/playwright/issues/7288.
     //

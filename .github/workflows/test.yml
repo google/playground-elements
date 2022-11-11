@@ -15,7 +15,7 @@ jobs:
       - uses: google/wireit@setup-github-actions-caching/v1
 
       - run: npm ci
-      - run: npx playwright install-deps
-      - run: npm test
+      # - run: npx playwright install-deps
+      - run: npm run test:wtr
         env:
           WIREIT_FAILURES: continue
