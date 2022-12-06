@@ -83,7 +83,10 @@
       ]
     },
     "build:styles-module": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.styles.js",
+      "command": "rollup -c rollup.config.styles.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "files": [
         "playground-styles.css",
         "rollup.config.styles.js"
@@ -104,7 +107,10 @@
       ]
     },
     "build:typescript-module": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.typescript.js",
+      "command": "rollup -c rollup.config.typescript.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "files": [
         "rollup.config.typescript.js"
       ],
@@ -113,7 +119,10 @@
       ]
     },
     "build:service-worker": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.service-worker.js",
+      "command": "rollup -c rollup.config.service-worker.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "dependencies": [
         "build:ts"
       ],
@@ -127,7 +136,10 @@
       ]
     },
     "build:web-worker": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.web-worker.js",
+      "command": "rollup -c rollup.config.web-worker.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "dependencies": [
         "build:ts",
         "build:typescript-module"
@@ -141,7 +153,10 @@
       ]
     },
     "build:codemirror": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.codemirror.js",
+      "command": "rollup -c rollup.config.codemirror.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "files": [
         "rollup.config.codemirror.js",
         "rollup.config.common.js",
@@ -152,7 +167,10 @@
       ]
     },
     "build:configurator": {
-      "command": "FORCE_COLOR=1 rollup -c rollup.config.configurator.js",
+      "command": "rollup -c rollup.config.configurator.js",
+      "env": {
+        "FORCE_COLOR": "1"
+      },
       "dependencies": [
         "build:ts",
         "build:service-worker",
