@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext"],
+    "outDir": "lib/",
+    "rootDir": "upstream/src/",
+    "skipLibCheck": true,
+    "declaration": true,
+    "emitDeclarationOnly": true
+  },
+  "include": [
+    "upstream/src/compiler/**/*.ts",
+    "upstream/src/services/**/*.ts",
+  ],
+  "exclude": [],
+  "types": []
+}

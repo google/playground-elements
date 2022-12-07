@@ -10,7 +10,8 @@
     "upstream:install": "wireit",
     "upstream:generate": "wireit",
     "build": "wireit",
-    "build:js": "wireit"
+    "build:js": "wireit",
+    "build:types": "wireit"
   },
   "wireit": {
     "upstream:init": {
@@ -39,7 +40,8 @@
     },
     "build": {
       "dependencies": [
-        "build:js"
+        "build:js",
+        "build:types"
       ]
     },
     "build:js": {
@@ -47,6 +49,18 @@
       "files": [],
       "output": [
         "lib/**/*.js"
+      ],
+      "dependencies": [
+        "upstream:generate"
+      ]
+    },
+    "build:types": {
+      "command": "tsc --pretty > /dev/null || true",
+      "files": [
+        "tsconfig.json"
+      ],
+      "output": [
+        "lib/**/*.d.ts"
       ],
       "dependencies": [
         "upstream:generate"
