@@ -88,7 +88,10 @@
     "build:styles-module": {
       "command": "rollup -c rollup.config.styles.js",
       "env": {
-        "FORCE_COLOR": "1"
+        "FORCE_COLOR": "1",
+        "NO_TERSER": {
+          "external": true
+        }
       },
       "files": [
         "playground-styles.css",
@@ -112,7 +115,10 @@
     "build:service-worker": {
       "command": "rollup -c rollup.config.service-worker.js",
       "env": {
-        "FORCE_COLOR": "1"
+        "FORCE_COLOR": "1",
+        "NO_TERSER": {
+          "external": true
+        }
       },
       "dependencies": [
         "build:ts"
@@ -129,7 +135,10 @@
     "build:web-worker": {
       "command": "rollup -c rollup.config.web-worker.js",
       "env": {
-        "FORCE_COLOR": "1"
+        "FORCE_COLOR": "1",
+        "NO_TERSER": {
+          "external": true
+        }
       },
       "dependencies": [
         "build:ts",
@@ -146,7 +155,10 @@
     "build:codemirror": {
       "command": "rollup -c rollup.config.codemirror.js",
       "env": {
-        "FORCE_COLOR": "1"
+        "FORCE_COLOR": "1",
+        "NO_TERSER": {
+          "external": true
+        }
       },
       "files": [
         "rollup.config.codemirror.js",
@@ -160,7 +172,10 @@
     "build:configurator": {
       "command": "rollup -c rollup.config.configurator.js",
       "env": {
-        "FORCE_COLOR": "1"
+        "FORCE_COLOR": "1",
+        "NO_TERSER": {
+          "external": true
+        }
       },
       "dependencies": [
         "build:ts",
