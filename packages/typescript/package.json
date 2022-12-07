@@ -6,7 +6,11 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
-    "upstream:init": "wireit"
+    "upstream:init": "wireit",
+    "upstream:install": "wireit",
+    "upstream:generate": "wireit",
+    "build": "wireit",
+    "build:js": "wireit"
   },
   "wireit": {
     "upstream:init": {
@@ -16,6 +20,37 @@
       },
       "files": [],
       "output": []
+    },
+    "upstream:install": {
+      "command": "cd upstream && npm ci",
+      "files": [],
+      "output": [],
+      "dependencies": [
+        "upstream:init"
+      ]
+    },
+    "upstream:generate": {
+      "command": "cd upstream && npx hereby generate-diagnostics",
+      "files": [],
+      "output": [],
+      "dependencies": [
+        "upstream:install"
+      ]
+    },
+    "build": {
+      "dependencies": [
+        "build:js"
+      ]
+    },
+    "build:js": {
+      "command": "find upstream/src/{compiler,services} -name \"*.ts\" -not -name \"*.d.ts\" | xargs esbuild --color --outdir=lib --outbase=upstream/src --format=esm --bundle --splitting",
+      "files": [],
+      "output": [
+        "lib/**/*.js"
+      ],
+      "dependencies": [
+        "upstream:generate"
+      ]
     }
   }
 }
