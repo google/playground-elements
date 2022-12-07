@@ -1,0 +1,10 @@
+{
+  "name": "@playground-elements/internal-typescript",
+  "version": "0.0.1",
+  "description": "Custom ESM build for the TypeScript compiler",
+  "author": "Google LLC",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "scripts": {},
+  "wireit": {}
+}

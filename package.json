@@ -9,6 +9,9 @@
   "type": "module",
   "module": "playground-ide.js",
   "main": "playground-ide.js",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
     "prepack": "wireit",
