@@ -5,6 +5,17 @@
   "author": "Google LLC",
   "license": "BSD-3-Clause",
   "type": "module",
-  "scripts": {},
-  "wireit": {}
+  "scripts": {
+    "upstream:init": "wireit"
+  },
+  "wireit": {
+    "upstream:init": {
+      "command": "git submodule deinit --force upstream && git submodule update --init --depth=0 && cd upstream && git fetch origin $COMMIT && git checkout FETCH_HEAD",
+      "env": {
+        "COMMIT": "1d96eb489e559f4f61522edb3c8b5987bbe948af"
+      },
+      "files": [],
+      "output": []
+    }
+  }
 }
