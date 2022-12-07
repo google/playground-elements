@@ -9,7 +9,7 @@ import {
   GetCompletionsAtPositionOptions,
   SymbolDisplayPart,
   WithMetadata,
-} from 'typescript';
+} from '../../packages/typescript/lib/services/types.js';
 import {EditorCompletionDetails, WorkerConfig} from '../shared/worker-api.js';
 import {getWorkerContext} from './worker-context.js';
 

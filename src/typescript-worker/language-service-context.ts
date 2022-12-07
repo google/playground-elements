@@ -4,17 +4,30 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import ts from '../internal/typescript.js';
+import {createLanguageService} from '../../packages/typescript/lib/services/services.js';
+import {createDocumentRegistry} from '../../packages/typescript/lib/services/documentRegistry.js';
+import {
+  ScriptTarget,
+  ModuleKind,
+  ModuleResolutionKind,
+  JsxEmit,
+  CompilerOptions,
+} from '../../packages/typescript/lib/compiler/types.js';
+import {
+  LanguageServiceHost,
+  ScriptSnapshot,
+  IScriptSnapshot,
+} from '../../packages/typescript/lib/services/types.js';
 
 const compilerOptions = {
-  target: ts.ScriptTarget.ES2021,
-  module: ts.ModuleKind.ESNext,
+  target: ScriptTarget.ES2021,
+  module: ModuleKind.ESNext,
   experimentalDecorators: true,
   skipDefaultLibCheck: true,
   skipLibCheck: true,
   allowJs: true,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
-  jsx: ts.JsxEmit.React,
+  moduleResolution: ModuleResolutionKind.NodeNext,
+  jsx: JsxEmit.React,
   lib: ['dom', 'esnext'],
 };
 
@@ -34,9 +47,9 @@ export class LanguageServiceContext {
     compilerOptions
   );
 
-  readonly service = ts.createLanguageService(
+  readonly service = createLanguageService(
     this.serviceHost,
-    ts.createDocumentRegistry()
+    createDocumentRegistry()
   );
 }
 
@@ -45,12 +58,12 @@ interface VersionedFile {
   content: string;
 }
 
-class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
-  readonly compilerOptions: ts.CompilerOptions;
+class WorkerLanguageServiceHost implements LanguageServiceHost {
+  readonly compilerOptions: CompilerOptions;
   readonly packageRoot: string;
   readonly files: Map<string, VersionedFile> = new Map<string, VersionedFile>();
 
-  constructor(packageRoot: string, compilerOptions: ts.CompilerOptions) {
+  constructor(packageRoot: string, compilerOptions: CompilerOptions) {
     this.packageRoot = packageRoot;
     this.compilerOptions = compilerOptions;
   }
@@ -97,7 +110,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     });
   }
 
-  getCompilationSettings(): ts.CompilerOptions {
+  getCompilationSettings(): CompilerOptions {
     return this.compilerOptions;
   }
 
@@ -117,11 +130,11 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
     return this.files.get(fileName)?.content;
   }
 
-  getScriptSnapshot(fileName: string): ts.IScriptSnapshot | undefined {
+  getScriptSnapshot(fileName: string): IScriptSnapshot | undefined {
     if (!this.fileExists(fileName)) {
       return undefined;
     }
-    return ts.ScriptSnapshot.fromString(this.readFile(fileName)!);
+    return ScriptSnapshot.fromString(this.readFile(fileName)!);
   }
 
   getCurrentDirectory(): string {

@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
+import {
+  CompletionEntry,
+  CompletionInfo,
+  WithMetadata,
+} from '../../packages/typescript/lib/services/types.js';
 import {Diagnostic} from 'vscode-languageserver-protocol';
 
 /**

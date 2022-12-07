@@ -5,7 +5,8 @@
  */
 
 import Fuse from 'fuse.js';
-import {CompletionInfo} from 'typescript';
+
+import {CompletionInfo} from '../../packages/typescript/lib/services/types.js';
 import {
   EditorCompletion,
   EditorCompletionMatch,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import ts from '../internal/typescript.js';
+import {preProcessFile} from '../../packages/typescript/lib/services/preProcess.js';
 import {ImportMapResolver} from './import-map-resolver.js';
 import {Deferred} from '../shared/deferred.js';
 import {
@@ -134,7 +134,7 @@ export class TypesFetcher {
     sourceText: string,
     referrer: NpmFileLocation | typeof root
   ): Promise<void> {
-    const fileInfo = ts.preProcessFile(sourceText, undefined, true);
+    const fileInfo = preProcessFile(sourceText, undefined, true);
     const promises = [];
     for (const {fileName: specifier} of fileInfo.importedFiles) {
       const kind = classifySpecifier(specifier);

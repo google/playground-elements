@@ -4,18 +4,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import ts from '../internal/typescript.js';
+import {DiagnosticCategory} from '../../packages/typescript/lib/compiler/types.js';
+import {Diagnostic} from '../../packages/typescript/lib/compiler/types.js';
+import {flattenDiagnosticMessageText} from '../../packages/typescript/lib/compiler/program.js';
 import * as lsp from 'vscode-languageserver-protocol';
 
 /**
  * Convert a diagnostic from TypeScript format to Language Server Protocol
  * format.
  */
-export function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
+export function makeLspDiagnostic(tsDiagnostic: Diagnostic): lsp.Diagnostic {
   return {
     code: tsDiagnostic.code,
     source: tsDiagnostic.source ?? 'typescript',
-    message: ts.flattenDiagnosticMessageText(tsDiagnostic.messageText, '\n'),
+    message: flattenDiagnosticMessageText(tsDiagnostic.messageText, '\n'),
     severity: diagnosticCategoryMapping[tsDiagnostic.category],
     range: {
       start:
@@ -40,13 +42,13 @@ export function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
  * we got them right with a type constraint.
  */
 const diagnosticCategoryMapping: {
-  [ts.DiagnosticCategory.Error]: typeof lsp.DiagnosticSeverity['Error'];
-  [ts.DiagnosticCategory.Warning]: typeof lsp.DiagnosticSeverity['Warning'];
-  [ts.DiagnosticCategory.Message]: typeof lsp.DiagnosticSeverity['Information'];
-  [ts.DiagnosticCategory.Suggestion]: typeof lsp.DiagnosticSeverity['Hint'];
+  [DiagnosticCategory.Error]: typeof lsp.DiagnosticSeverity['Error'];
+  [DiagnosticCategory.Warning]: typeof lsp.DiagnosticSeverity['Warning'];
+  [DiagnosticCategory.Message]: typeof lsp.DiagnosticSeverity['Information'];
+  [DiagnosticCategory.Suggestion]: typeof lsp.DiagnosticSeverity['Hint'];
 } = {
-  [ts.DiagnosticCategory.Error]: 1,
-  [ts.DiagnosticCategory.Warning]: 2,
-  [ts.DiagnosticCategory.Message]: 3,
-  [ts.DiagnosticCategory.Suggestion]: 4,
+  [DiagnosticCategory.Error]: 1,
+  [DiagnosticCategory.Warning]: 2,
+  [DiagnosticCategory.Message]: 3,
+  [DiagnosticCategory.Suggestion]: 4,
 };

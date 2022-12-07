@@ -7,6 +7,16 @@
 import resolve from '@rollup/plugin-node-resolve';
 import {maybeTerser} from './rollup.config.common.js';
 
+const resolveTypeScript = () => {
+  return {
+    resolveId: (file) => {
+      if (file.startsWith('../../packages/typescript/')) {
+        return file.slice('../../'.length);
+      }
+    },
+  };
+}
+
 export default {
   input: 'typescript-worker/playground-typescript-worker.js',
   output: {
@@ -14,5 +24,5 @@ export default {
     format: 'iife',
     exports: 'none',
   },
-  plugins: [resolve(), ...maybeTerser],
+  plugins: [resolveTypeScript(), resolve(), ...maybeTerser],
 };
