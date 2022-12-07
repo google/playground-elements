@@ -304,6 +304,7 @@
     "codemirror": "^5.65.9",
     "codemirror-grammar-mode": "^0.1.10",
     "es-module-lexer": "^1.1.0",
+    "esbuild": "^0.16.1",
     "eslint": "^8.27.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-no-only-tests": "^3.1.0",
