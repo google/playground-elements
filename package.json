@@ -24,7 +24,6 @@
     "build:themes": "wireit",
     "build:codemirror": "wireit",
     "build:configurator": "wireit",
-    "build:typescript-module": "wireit",
     "build:service-worker": "wireit",
     "build:web-worker": "wireit",
     "test": "wireit",
@@ -58,7 +57,8 @@
       "clean": "if-file-deleted",
       "dependencies": [
         "build:styles-module",
-        "build:themes"
+        "build:themes",
+        "./packages/typescript:build:types"
       ],
       "files": [
         "tsconfig.json",
@@ -109,18 +109,6 @@
         "src/configurator/themes.ts"
       ]
     },
-    "build:typescript-module": {
-      "command": "rollup -c rollup.config.typescript.js",
-      "env": {
-        "FORCE_COLOR": "1"
-      },
-      "files": [
-        "rollup.config.typescript.js"
-      ],
-      "output": [
-        "internal/typescript.js"
-      ]
-    },
     "build:service-worker": {
       "command": "rollup -c rollup.config.service-worker.js",
       "env": {
@@ -145,7 +133,7 @@
       },
       "dependencies": [
         "build:ts",
-        "build:typescript-module"
+        "./packages/typescript:build:js"
       ],
       "files": [
         "rollup.config.web-worker.js",
