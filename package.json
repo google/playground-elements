@@ -133,20 +133,9 @@
       ]
     },
     "build:web-worker": {
-      "command": "rollup -c rollup.config.web-worker.js",
-      "env": {
-        "FORCE_COLOR": "1",
-        "NO_TERSER": {
-          "external": true
-        }
-      },
-      "dependencies": [
-        "build:ts",
-        "./packages/typescript:build:js"
-      ],
+      "command": "esbuild src/typescript-worker/playground-typescript-worker.ts --color --outfile=playground-typescript-worker.js --format=iife --bundle --minify",
       "files": [
-        "rollup.config.web-worker.js",
-        "rollup.config.common.js"
+        "src/**/*.ts"
       ],
       "output": [
         "playground-typescript-worker.js"
