@@ -1,14 +1,15 @@
 {
-  "name": "playground-elements",
+  "name": "@connectedhomes/playground-elements",
   "version": "0.17.0",
   "description": "Serverless coding environments for the web",
-  "homepage": "https://github.com/google/playground-elements#readme",
-  "repository": "github:google/playground-elements",
   "author": "Google LLC",
   "license": "BSD-3-Clause",
   "type": "module",
   "module": "playground-ide.js",
   "main": "playground-ide.js",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "scripts": {
     "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
     "prepack": "wireit",
