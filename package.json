@@ -287,7 +287,7 @@
     "eslint": "^8.27.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-no-only-tests": "^3.1.0",
-    "google_modes": "git+https://github.com/codemirror/google-modes.git#247b63cee78b3775f8a3173184bf706c5b006d25",
+    "google_modes": "github:codemirror/google-modes#247b63cee78b3775f8a3173184bf706c5b006d25",
     "playwright": "^1.15.1",
     "prettier": "^2.0.5",
     "rollup": "^3.2.5",
