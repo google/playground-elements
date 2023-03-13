@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, html, css, PropertyValues, nothing} from 'lit';
-import {customElement, query, property} from 'lit/decorators.js';
+import { LitElement, html, css, PropertyValues, nothing } from 'lit';
+import { customElement, query, property } from 'lit/decorators.js';
 
 import './playground-project.js';
 import './playground-tab-bar.js';
 import './playground-file-editor.js';
 import './playground-preview.js';
-import {PlaygroundProject} from './playground-project.js';
-import {ProjectManifest} from './shared/worker-api.js';
-import {npmVersion, serviceWorkerHash} from './shared/version.js';
+import { PlaygroundProject } from './playground-project.js';
+import { ProjectManifest } from './shared/worker-api.js';
+import { serviceWorkerHash } from './shared/version.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -142,7 +142,7 @@ export class PlaygroundIde extends LitElement {
    * When both `projectSrc` and `files` are set, the one set most recently wins.
    * Slotted children win only if both `projectSrc` and `files` are undefined.
    */
-  @property({attribute: 'project-src', hasChanged: () => false})
+  @property({ attribute: 'project-src', hasChanged: () => false })
   get projectSrc(): string | undefined {
     // To minimize synchronization complexity, we delegate the `projectSrc` and
     // `files` getters/setters directly to our <playground-project>. The only
@@ -174,7 +174,7 @@ export class PlaygroundIde extends LitElement {
    * wins. Slotted children win only if both `projectSrc` and `config` are
    * undefined.
    */
-  @property({attribute: false, hasChanged: () => false})
+  @property({ attribute: false, hasChanged: () => false })
   get config(): ProjectManifest | undefined {
     // Note this is declared a @property only to capture properties set before
     // upgrade. Attribute reflection and update lifecycle disabled because they
@@ -207,41 +207,41 @@ export class PlaygroundIde extends LitElement {
    * on the same origin (typically something like
    * "/node_modules/playground-elements/").
    */
-  @property({attribute: 'sandbox-base-url'})
-  sandboxBaseUrl = `https://unpkg.com/playground-elements@${npmVersion}/`;
+  @property({ attribute: 'sandbox-base-url' })
+  sandboxBaseUrl = `https://sw.pl.nucleus.design/`;
 
   /**
    * The service worker scope to register on
    */
   // TODO: generate this?
-  @property({attribute: 'sandbox-scope'})
+  @property({ attribute: 'sandbox-scope' })
   sandboxScope = `__playground_swfs_${serviceWorkerHash}/`;
 
   /**
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
-  @property({type: Boolean, attribute: 'editable-file-system'})
+  @property({ type: Boolean, attribute: 'editable-file-system' })
   editableFileSystem = false;
 
   /**
    * If true, display a left-hand-side gutter with line numbers. Default false
    * (hidden).
    */
-  @property({type: Boolean, attribute: 'line-numbers'})
+  @property({ type: Boolean, attribute: 'line-numbers' })
   lineNumbers = false;
 
   /**
    * If true, wrap for long lines. Default false
    */
-  @property({type: Boolean, attribute: 'line-wrapping'})
+  @property({ type: Boolean, attribute: 'line-wrapping' })
   lineWrapping = false;
 
   /**
    * If true, allow the user to change the relative size of the LHS editor and
    * RHS preview by clicking and dragging in the space between them.
    */
-  @property({type: Boolean})
+  @property({ type: Boolean })
   resizable = false;
 
   /**
@@ -262,13 +262,13 @@ export class PlaygroundIde extends LitElement {
   /**
    * The HTML file used in the preview.
    */
-  @property({attribute: 'html-file'})
+  @property({ attribute: 'html-file' })
   htmlFile = 'index.html';
 
   /**
    * If true, will disable code completions in the code-editor.
    */
-  @property({type: Boolean, attribute: 'no-completions'})
+  @property({ type: Boolean, attribute: 'no-completions' })
   noCompletions = false;
 
   /**
@@ -326,11 +326,11 @@ export class PlaygroundIde extends LitElement {
 
       <div id="rhs">
         ${this.resizable
-          ? html`<div
+        ? html`<div
               id="resizeBar"
               @pointerdown=${this._onResizeBarPointerdown}
             ></div>`
-          : nothing}
+        : nothing}
 
         <playground-preview
           part="preview"
@@ -368,12 +368,12 @@ export class PlaygroundIde extends LitElement {
     super.update(changedProperties);
   }
 
-  private _onResizeBarPointerdown({pointerId}: PointerEvent) {
+  private _onResizeBarPointerdown({ pointerId }: PointerEvent) {
     const bar = this._resizeBar;
     bar.setPointerCapture(pointerId);
 
     const rhsStyle = this._rhs.style;
-    const {left: hostLeft, right: hostRight} = this.getBoundingClientRect();
+    const { left: hostLeft, right: hostRight } = this.getBoundingClientRect();
     const hostWidth = hostRight - hostLeft;
     const rhsMinWidth = 100;
     const rhsMaxWidth = hostWidth - 100;

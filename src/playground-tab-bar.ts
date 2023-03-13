@@ -4,21 +4,23 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {html, css, PropertyValues, nothing} from 'lit';
-import {customElement, property, state, query} from 'lit/decorators.js';
+import { html, css, PropertyValues, nothing } from 'lit';
+import { customElement, property, state, query } from 'lit/decorators.js';
 
 import '@material/mwc-icon-button';
 
 import './internal/tab-bar.js';
 import './internal/tab.js';
 import './playground-file-system-controls.js';
+import '@material/mwc-menu/mwc-menu-surface.js';
 
-import {PlaygroundConnectedElement} from './playground-connected-element.js';
+import { MenuSurface } from '@material/mwc-menu/mwc-menu-surface.js';
+import { PlaygroundConnectedElement } from './playground-connected-element.js';
 
-import {PlaygroundFileEditor} from './playground-file-editor.js';
-import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
-import {FilesChangedEvent, PlaygroundProject} from './playground-project.js';
-import {PlaygroundInternalTab} from './internal/tab.js';
+import { PlaygroundFileEditor } from './playground-file-editor.js';
+import { PlaygroundFileSystemControls } from './playground-file-system-controls.js';
+import { FilesChangedEvent, PlaygroundProject } from './playground-project.js';
+import { PlaygroundInternalTab } from './internal/tab.js';
 
 /**
  * A horizontal bar of tabs for switching between playground files, with
@@ -56,7 +58,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       background: var(--playground-tab-bar-active-background, transparent);
     }
 
-    :host([editable-file-system]) playground-internal-tab::part(button) {
+    :host([editable-file-system]) playground-internal-tab:not([data-filename="index.html"])::part(button) {
       /* The 24px menu button with opacity 0 now serves as padding-right. */
       padding-right: 0;
     }
@@ -86,13 +88,17 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     .add-file-button:hover {
       opacity: 1;
     }
+
+    playground-internal-tab::part(button) {
+      width: max-content;
+    }
   `;
 
   /**
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
-  @property({type: Boolean, attribute: 'editable-file-system', reflect: true})
+  @property({ type: Boolean, attribute: 'editable-file-system', reflect: true })
   editableFileSystem = false;
 
   @state()
@@ -103,6 +109,9 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   @query('playground-file-system-controls')
   private _fileSystemControls?: PlaygroundFileSystemControls;
+
+  @query('mwc-menu-surface')
+  private _tabPanel?: MenuSurface;
 
   /**
    * The actual `<playground-file-editor>` node, determined by the `editor`
@@ -133,7 +142,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   }
 
   private get _visibleFiles() {
-    return (this._project?.files ?? []).filter(({hidden}) => !hidden);
+    return (this._project?.files ?? []).filter(({ hidden }) => !hidden);
   }
 
   override update(changedProperties: PropertyValues) {
@@ -167,14 +176,14 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         label="File selector"
       >
         ${this._visibleFiles.map(
-          ({name, label}) =>
-            html`<playground-internal-tab
+      ({ name, label }) =>
+        html`<playground-internal-tab
               .active=${name === this._activeFileName}
               data-filename=${name}
             >
               ${label || name}
-              ${this.editableFileSystem
-                ? html`<mwc-icon-button
+              ${this.editableFileSystem && name !== 'index.html'
+            ? html`<mwc-icon-button
                     aria-label="File menu"
                     class="menu-button"
                     @click=${this._onOpenMenu}
@@ -191,37 +200,58 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
                       />
                     </svg>
                   </mwc-icon-button>`
-                : nothing}
+            : nothing}
             </playground-internal-tab>`
-        )}
+    )}
       </playground-internal-tab-bar>
+
+      <mwc-icon-button
+        aria-label="View tabs"
+        @click=${this._onOpenTabPanel}
+      >
+        <!-- Source: https://material.io/resources/icons/?icon=menu&style=baseline -->
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="currentcolor"
+        >
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+        </svg>
+      </mwc-icon-button>
+      
+
+      <mwc-menu-surface
+      fixed
+      quick
+      .open=${false}
+      corner="BOTTOM_START"
+      ><div class="wrapper">
+      <mwc-list class="menu-list">
+      ${this._visibleFiles.map(({ name }) =>
+      html`
+        <mwc-list-item @click=${this._updateActive}>
+          ${name}
+        </mwc-list-item>
+      `
+    )}
+      </mwc-list>
+      </div></mwc-menu-surface>
+
+      
+
 
       ${this.editableFileSystem
         ? html`
-            <mwc-icon-button
-              class="add-file-button"
-              aria-label="New file"
-              @click=${this._onClickAddFile}
-            >
-              <!-- Source: https://material.io/resources/icons/?icon=add&style=baseline -->
-              <svg
-                fill="currentcolor"
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                shape-rendering="crispEdges"
-              >
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
-            </mwc-icon-button>
-
             <playground-file-system-controls
               .project=${this._project}
               @newFile=${this._onNewFile}
             >
             </playground-file-system-controls>
           `
-        : nothing}
+        : nothing
+      }
     `;
   }
 
@@ -260,8 +290,32 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
   }
 
+  private _onOpenTabPanel(
+    event: CustomEvent<{ index: number; anchor: HTMLElement }>
+  ) {
+    const panel = this._tabPanel;
+    if (!panel) {
+      return;
+    }
+    panel.open = true;
+
+    panel.anchor = event.target as HTMLElement;
+    event.stopPropagation();
+  }
+
+  private _updateActive(event: Event) {
+    const target = event.target as HTMLElement;
+    const name = target.innerText;
+    this._activeFileName = name;
+    this._setNewActiveFile();
+
+    if (this._tabPanel) {
+      this._tabPanel.open = false;
+    }
+  }
+
   private _onOpenMenu(
-    event: CustomEvent<{index: number; anchor: HTMLElement}>
+    event: CustomEvent<{ index: number; anchor: HTMLElement }>
   ) {
     const controls = this._fileSystemControls;
     if (!controls) {
@@ -288,16 +342,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     event.stopPropagation();
   }
 
-  private _onClickAddFile(event: Event) {
-    const controls = this._fileSystemControls;
-    if (!controls) {
-      return;
-    }
-    controls.state = 'newfile';
-    controls.anchorElement = event.target as HTMLElement;
-  }
-
-  private _onNewFile(event: CustomEvent<{filename: string}>) {
+  private _onNewFile(event: CustomEvent<{ filename: string }>) {
     this._activeFileName = event.detail.filename;
     // TODO(aomarks) We should focus the editor here. However,
     // CodeMirror.focus() isn't working for some reason.

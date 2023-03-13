@@ -6,8 +6,8 @@
 
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
-import {dirname, join} from 'path';
-import {fileURLToPath} from 'url';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
 // This script is automatically run before pack/publish to ensure that the
 // src/shared/version.ts module contains the current NPM package version and
@@ -39,7 +39,7 @@ const getServiceWorkerHash = async () => {
   if (matches.length !== 1) {
     throw new Error(
       'Expected exactly one version string in playground-service-worker.js. ' +
-        `Found ${matches.length}.`
+      `Found ${matches.length}.`
     );
   }
   // We must remove the version string itself from the service worker code
