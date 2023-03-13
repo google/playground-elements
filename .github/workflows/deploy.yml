@@ -18,7 +18,7 @@ jobs:
           scope: "@centrica-engineering"
       - name: Publish to GPR
         run: |
-          git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf ssh://git@github.com/
           npm ci
           npm run build
           npm publish
