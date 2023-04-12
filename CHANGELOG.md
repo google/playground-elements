@@ -17,7 +17,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Added
+
+- Fetch all `@types` packages listed in the project's `package.json` file and
+  include them for TypeScript compilation. This allows type-checking packages
+  that do not ship their own types but do have a DefinitelyTyped package
+  available. Note: This does not automatically download the `@types` package for
+  a package. It must be manually listed in `package.json`.
 
 ## [0.17.0] - 2022-11-11
 
