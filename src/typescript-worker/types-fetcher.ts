@@ -94,6 +94,7 @@ export class TypesFetcher {
         fetcher._handleBareAndRelativeSpecifiers(source, root)
       ),
       ...tsLibs.map((lib) => fetcher._addTypeScriptStandardLib(lib)),
+      fetcher._fetchTypesPackages(),
     ]);
     const layout = new NodeModulesLayoutMaker().layout(
       fetcher._rootDependencies,
@@ -121,6 +122,27 @@ export class TypesFetcher {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
     this._rootPackageJson = rootPackageJson;
+  }
+
+  private async _fetchTypesPackages(): Promise<void> {
+    if (
+      this._rootPackageJson === undefined ||
+      this._rootPackageJson.dependencies === undefined
+    ) {
+      return;
+    }
+
+    const typesPackages = Object.keys(
+      this._rootPackageJson.dependencies
+    ).filter((k) => k.startsWith('@types/'));
+
+    if (typesPackages.length === 0) {
+      return;
+    }
+
+    await Promise.allSettled(
+      typesPackages.map((k) => this._handleBareSpecifier(k, root))
+    );
   }
 
   private async _addTypeScriptStandardLib(lib: string): Promise<void> {
