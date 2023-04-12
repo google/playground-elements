@@ -45,8 +45,9 @@ export default {
     // only one or the other can be installed at once (see our "postinstall" NPM
     // script). See
     // https://modern-web.dev/docs/test-runner/browser-launchers/puppeteer/.
-    puppeteerLauncher({launchOptions: {product: 'firefox'}}),
+    puppeteerLauncher({launchOptions: {product: 'firefox'}, concurrency: 1}),
   ],
+  concurrentBrowsers: Number(process.env.CONCURRENT_BROWSERS) || 2, // default 2
   browserStartTimeout: 30000, // default 30000
   testsStartTimeout: 20000, // default 10000
   testsFinishTimeout: 90000, // default 20000
