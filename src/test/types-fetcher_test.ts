@@ -630,6 +630,52 @@ suite('types fetcher', () => {
     });
   });
 
+  test('@types package', async () => {
+    const sourceTexts: string[] = [];
+    const packageJson: PackageJson = {
+      dependencies: {
+        '@types/a': '1.0.0',
+      },
+    };
+    const cdnData: CdnData = {
+      '@types/a': {
+        versions: {
+          '1.0.0': {
+            files: {
+              'index.d.ts': {
+                content: 'declare module a { export const a: 1; }',
+              },
+            },
+          },
+        },
+      },
+    };
+    const expectedDependencyGraph: ExpectedDependencyGraph = {
+      root: {
+        '@types/a': '1.0.0',
+      },
+      deps: {},
+    };
+    const expectedLayout: NodeModulesDirectory = {
+      '@types/a': {
+        version: '1.0.0',
+        nodeModules: {},
+      },
+    };
+    const expectedFiles = new Map([
+      ['@types/a/index.d.ts', 'declare module a { export const a: 1; }'],
+      ['@types/a/package.json', '{}'],
+    ]);
+    await checkTypesFetcher({
+      sourceTexts,
+      packageJson,
+      cdnData,
+      expectedFiles,
+      expectedDependencyGraph,
+      expectedLayout,
+    });
+  });
+
   test('declare module', async () => {
     // Declaring a module should not count as an import, but anything imported
     // from within the declare module block should.
