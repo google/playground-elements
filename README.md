@@ -361,6 +361,10 @@ statement should use the `.js` extension (the same as you would do when running
 import './my-other-module.js';
 ```
 
+You may also include any Definitely Typed (`@types`) packages for type checking
+during compilation by listing it as a dependency in the project's
+[`package.json` file](#packagejson).
+
 ## Hiding & folding
 
 If a region of code in a Playground project file is surrounded by
