@@ -75,7 +75,10 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
 
     mwc-icon-button {
-      color: var(--playground-tab-bar-foreground-color);
+      color: var(
+        --playground-tab-bar-active-color,
+        var(--playground-highlight-color, #6200ee)
+      );
     }
 
     .add-file-button {
