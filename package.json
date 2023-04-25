@@ -31,7 +31,8 @@
     "lint:eslint": "wireit",
     "serve": "wireit",
     "format": "prettier --write .",
-    "lint:format": "prettier --check ."
+    "lint:format": "prettier --check .",
+    "version": "npm run update-version-module || git add src/shared/version.ts"
   },
   "wireit": {
     "build": {
