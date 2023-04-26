@@ -1,6 +1,6 @@
 {
   "name": "playground-elements",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "description": "Serverless coding environments for the web",
   "homepage": "https://github.com/google/playground-elements#readme",
   "repository": "github:google/playground-elements",
@@ -31,7 +31,8 @@
     "lint:eslint": "wireit",
     "serve": "wireit",
     "format": "prettier --write .",
-    "lint:format": "prettier --check ."
+    "lint:format": "prettier --check .",
+    "version": "npm run update-version-module || git add src/shared/version.ts"
   },
   "wireit": {
     "build": {
