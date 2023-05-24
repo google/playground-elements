@@ -28,7 +28,7 @@ suite('typescript builder', () => {
         kind: 'file',
         file: {
           name: 'index.js',
-          content: 'export const foo = 3;\r\n',
+          content: 'export const foo = 3;\n',
           contentType: 'text/javascript',
         },
       },
@@ -89,7 +89,7 @@ suite('typescript builder', () => {
           name: 'index.js',
           // TODO(aomarks) This should probably return a 400 error instead of an
           // empty but valid file.
-          content: 'export {};\r\n',
+          content: 'export {};\n',
           contentType: 'text/javascript',
         },
       },
@@ -132,7 +132,7 @@ suite('typescript builder', () => {
         kind: 'file',
         file: {
           name: 'index.js',
-          content: 'let foo = 3;\r\n' + 'foo = "foo";\r\nexport {};\r\n',
+          content: 'let foo = 3;\n' + 'foo = "foo";\nexport {};\n',
           contentType: 'text/javascript',
         },
       },
@@ -225,7 +225,7 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import { strFn } from "./node_modules/foo@2.0.0/index.js";\r\nimport { numFn } from "./node_modules/foo@2.0.0/bar.js";\r\nstrFn(123);\r\nnumFn("str");\r\n',
+            'import { strFn } from "./node_modules/foo@2.0.0/index.js";\nimport { numFn } from "./node_modules/foo@2.0.0/bar.js";\nstrFn(123);\nnumFn("str");\n',
           contentType: 'text/javascript',
         },
       },
@@ -328,7 +328,7 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import { foo } from "./node_modules/foo@1.0.0/index.js";\r\nfoo(123);\r\n',
+            'import { foo } from "./node_modules/foo@1.0.0/index.js";\nfoo(123);\n',
           contentType: 'text/javascript',
         },
       },
@@ -452,7 +452,7 @@ suite('typescript builder', () => {
         kind: 'file',
         file: {
           name: 'index.js',
-          content: `export const str = "foo";\r\n`,
+          content: `export const str = "foo";\n`,
           contentType: 'text/javascript',
         },
       },
@@ -551,7 +551,7 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import { num } from "./node_modules/foo@1.0.0/index.js";\r\nimport { str } from "./node_modules/str-or-num@1.0.0/index.js";\r\nconst a = str;\r\nconst b = num;\r\n',
+            'import { num } from "./node_modules/foo@1.0.0/index.js";\nimport { str } from "./node_modules/str-or-num@1.0.0/index.js";\nconst a = str;\nconst b = num;\n',
           contentType: 'text/javascript',
         },
       },
@@ -616,7 +616,7 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import React from "./node_modules/react@18.1.0/index.js";\r\nexport const foo = (greeting) => React.createElement("div", null, greeting);\r\n',
+            'import React from "./node_modules/react@18.1.0/index.js";\nexport const foo = (greeting) => React.createElement("div", null, greeting);\n',
           contentType: 'text/javascript',
         },
       },
@@ -681,7 +681,7 @@ suite('typescript builder', () => {
         file: {
           name: 'index.js',
           content:
-            'import * as React from "./node_modules/react@18.1.0/index.js";\r\nexport const foo = (greeting) => React.createElement("div", null, greeting);\r\n',
+            'import * as React from "./node_modules/react@18.1.0/index.js";\nexport const foo = (greeting) => React.createElement("div", null, greeting);\n',
           contentType: 'text/javascript',
         },
       },
