@@ -17,7 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
-<!-- ## Unreleased -->
+## Unreleased
+
+### Changed
+
+- Update bundled version of TypeScript from `4.8.4` to `5.0.4`.
 
 ## [0.17.1] - 2023-04-25
 
