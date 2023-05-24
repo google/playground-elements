@@ -13,13 +13,22 @@ let workerContext: WorkerContext | undefined;
 let cacheKey = '';
 
 /**
- * Acquire the existing worker instance, or create a fresh one if missing.
- * If the config differs from the existing instance's config, a new WorkerContext is
- * instantiated and made the new instance.
+ * Acquire the existing worker instance, or create a fresh one if missing. If
+ * the config differs from the existing instance's config, a new WorkerContext
+ * is instantiated and made the new instance.
+ *
+ * @param forceFreshWorkerContext - When true will return a new WorkerContext instance ignoring cache.
  */
-export function getWorkerContext(config: WorkerConfig) {
+export function getWorkerContext(
+  config: WorkerConfig,
+  forceFreshWorkerContext = false
+) {
   const configCacheKey = JSON.stringify(config);
-  if (workerContext && cacheKey === configCacheKey) {
+  if (
+    workerContext &&
+    cacheKey === configCacheKey &&
+    !forceFreshWorkerContext
+  ) {
     return workerContext;
   }
 

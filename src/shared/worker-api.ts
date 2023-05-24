@@ -140,6 +140,15 @@ export interface WorkerAPI {
     config: WorkerConfig,
     completionWord: string
   ): Promise<EditorCompletionDetails>;
+  /**
+   * `getFreshWorkerContext` can be used to guarantee a fresh TypeScript
+   * context.
+   *
+   * By default the worker context is persistent and incremental for a given
+   * config. This function can be used to gracefully handle rare cases where the
+   * TypeScript compiler is crashing due to bad incremental state.
+   */
+  getFreshWorkerContext(config: WorkerConfig): void;
 }
 
 export interface HttpError {
@@ -213,7 +222,11 @@ export interface CompletionInfoWithDetails
   entries: CompletionEntryWithDetails[];
 }
 
-export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
+export type BuildOutput =
+  | FileBuildOutput
+  | DiagnosticBuildOutput
+  | DoneOutput
+  | TypeScriptCompilerCrash;
 
 export type FileBuildOutput = {
   kind: 'file';
@@ -228,4 +241,9 @@ export type DiagnosticBuildOutput = {
 
 export type DoneOutput = {
   kind: 'done';
+};
+
+export type TypeScriptCompilerCrash = {
+  kind: 'crash';
+  msg: string;
 };

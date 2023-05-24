@@ -79,7 +79,13 @@ export async function* processTypeScriptFiles(
   // If a file is removed, it will be removed from the file list
   langServiceHost.sync(loadedFiles);
 
-  const program = langService.getProgram();
+  let program;
+  try {
+    program = langService.getProgram();
+  } catch (e) {
+    yield {kind: 'crash', msg: String(e)};
+    throw e;
+  }
   if (program === undefined) {
     throw new Error('Unexpected error: program was undefined');
   }

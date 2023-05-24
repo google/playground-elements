@@ -557,7 +557,7 @@ export class PlaygroundProject extends LitElement {
   /**
    * Build this project immediately, cancelling any previous build.
    */
-  async save() {
+  async save(retrying = false): Promise<void> {
     this._build?.cancel();
     const build = new PlaygroundBuild(() => {
       this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
@@ -576,6 +576,12 @@ export class PlaygroundProject extends LitElement {
     );
     /* eslint-enable @typescript-eslint/no-floating-promises */
     await build.stateChange;
+    // Only retry once, preventing infinite retries.
+    if (build.state() === 'crashed' && !retrying) {
+      // Get a fresh worker context.
+      await workerApi.getFreshWorkerContext({importMap: this._importMap});
+      return this.save(true);
+    }
     if (build.state() !== 'done') {
       return;
     }

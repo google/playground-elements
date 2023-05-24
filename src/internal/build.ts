@@ -17,7 +17,7 @@ import {Diagnostic} from 'vscode-languageserver-protocol';
 
 const unreachable = (n: never) => n;
 
-type State = 'active' | 'done' | 'cancelled';
+type State = 'active' | 'done' | 'cancelled' | 'crashed';
 
 const errorNotFound: HttpError = {
   status: /* Not Found */ 404,
@@ -106,6 +106,10 @@ export class PlaygroundBuild {
       this._onDiagnostic(output);
     } else if (output.kind === 'done') {
       this._onDone();
+    } else if (output.kind === 'crash') {
+      this.cancel();
+      console.warn('TypeScript worker crashed with message: ', output.msg);
+      this._changeState('crashed');
     } else {
       throw new Error(
         `Unexpected BuildOutput kind: ${
