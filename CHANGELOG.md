@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Update bundled version of TypeScript from `4.8.4` to `5.0.4`.
+- **BREAKING** Update bundled version of TypeScript from `4.8.4` to `5.0.4`. See [TypeScript 5 breaking changes](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#breaking-changes-and-deprecations).
 
 ## [0.17.1] - 2023-04-25
 
