@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Fixed -->
 <!-- ### Removed -->
 
+## [Unreleased]
+
 ## [0.18.0] - 2023-05-25
 
 ### Changed
@@ -1145,6 +1147,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release.
 
+[unreleased]: https://github.com/google/playground-elements/compare/v0.18.0...HEAD
 [0.18.0]: https://github.com/google/playground-elements/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/google/playground-elements/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/google/playground-elements/compare/v0.16.3...v0.17.0
@@ -1184,7 +1187,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 [0.9.2]: https://github.com/google/playground-elements/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/google/playground-elements/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/google/playground-elements/compare/v0.8.0...v0.9.0
-[0.8.0]: https://github.com/google/playground-elements/compare/v0.7.0...v0.8.0   
+[0.8.0]: https://github.com/google/playground-elements/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/google/playground-elements/compare/v0.6.6...v0.7.0
 [0.6.6]: https://github.com/google/playground-elements/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/google/playground-elements/compare/v0.6.4...v0.6.5
@@ -1211,15 +1214,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 [0.1.0]: https://github.com/google/playground-elements/compare/v0.1.0-pre.4...v0.1.0
 [0.1.0-pre.4]: https://github.com/google/playground-elements/compare/v0.1.0-pre.3...v0.1.0-pre.4
 [0.1.0-pre.3]: https://github.com/google/playground-elements/releases/tag/v0.1.0-pre.3
-   
-   
-   
-   
-  
-   
-   
-   
-
-   
-   
-   
