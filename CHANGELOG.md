@@ -1165,7 +1165,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 [0.15.0-pre.4]: https://github.com/google/playground-elements/compare/v0.15.0-pre.3...v0.15.0-pre.4
 [0.15.0-pre.3]: https://github.com/google/playground-elements/compare/v0.15.0-pre.2...v0.15.0-pre.3
 [0.15.0-pre.2]: https://github.com/google/playground-elements/compare/v0.15.0-pre.1...v0.15.0-pre.2
-[0.15.0-pre.1]: https://github.com/google/playground-elements/compare/v0.14.8...v0.15.0
+[0.15.0-pre.1]: https://github.com/google/playground-elements/compare/v0.14.8...v0.15.0-pre.1
 [0.14.8]: https://github.com/google/playground-elements/compare/v0.14.7...v0.14.8
 [0.14.7]: https://github.com/google/playground-elements/compare/v0.14.6...v0.14.7
 [0.14.6]: https://github.com/google/playground-elements/compare/v0.14.5...v0.14.6
