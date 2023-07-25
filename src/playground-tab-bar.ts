@@ -48,6 +48,8 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
     playground-internal-tab {
       color: var(--playground-tab-bar-foreground-color, #000);
+      border-left: 4px solid var(--playground-tab-bar-background, #eaeaea);
+      border-right: 4px solid var(--playground-tab-bar-background, #eaeaea);
     }
 
     playground-internal-tab[active] {
@@ -56,6 +58,14 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         var(--playground-highlight-color, #6200ee)
       );
       background: var(--playground-tab-bar-active-background, transparent);
+    }
+
+    .drop-left {
+      border-left: 4px solid #6200ee;
+    }
+
+    .drop-right {
+      border-right: 4px solid #6200ee
     }
 
     :host([editable-file-system]) playground-internal-tab:not([data-filename="index.html"])::part(button) {
@@ -106,6 +116,9 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
   @state()
   private _activeFileIndex = 0;
+
+  @state()
+  private _dragged: HTMLElement | null = null;
 
   @query('playground-file-system-controls')
   private _fileSystemControls?: PlaygroundFileSystemControls;
@@ -180,6 +193,74 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
         html`<playground-internal-tab
               .active=${name === this._activeFileName}
               data-filename=${name}
+              draggable="true"
+
+              @dragstart=${(event: DragEvent) => {
+            this._dragged = event.target as HTMLElement;
+            event.dataTransfer!.effectAllowed = "move";
+          }}
+
+              @dragend=${() => {
+            this._dragged = null;
+          }}
+
+              @dragover=${(event: DragEvent) => {
+            const target = event.target as HTMLElement;
+            const rect = target.getBoundingClientRect();
+            const dropLeft = event.clientX < rect.left + rect.width / 2;
+
+            if (dropLeft) {
+              if (!target.classList.contains("drop-left")) {
+                target.classList.add("drop-left");
+              }
+              if (target.classList.contains("drop-right")) {
+                target.classList.remove("drop-right");
+              }
+            } else {
+              if (!target.classList.contains("drop-right")) {
+                target.classList.add("drop-right");
+              }
+              if (target.classList.contains("drop-left")) {
+                target.classList.remove("drop-left");
+              }
+            }
+
+            event.preventDefault(); // Must do to allow the @drop event to fire.
+          }}
+
+              @dragleave=${(event: DragEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.classList.contains("drop-left")) {
+              target.classList.remove("drop-left");
+            }
+            if (target.classList.contains("drop-right")) {
+              target.classList.remove("drop-right");
+            }
+          }}
+
+              @drop=${(event: DragEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.classList.contains("drop-left")) {
+              target.classList.remove("drop-left");
+            }
+            if (target.classList.contains("drop-right")) {
+              target.classList.remove("drop-right");
+            }
+
+            // 1. Get the dragged file name and the target file name.
+            const draggedFileName = this._dragged!.dataset["filename"]!;
+            const targetFileName = target.dataset["filename"]!;
+
+            // 2. Determine if the dragged file should be dropped to the left or right of the target file.
+            const rect = target.getBoundingClientRect();
+            const dropLeft = event.clientX < rect.left + rect.width / 2;
+
+            if (this._project) {
+              this._project.moveFileTo(draggedFileName, targetFileName, dropLeft);
+            }
+
+            event.preventDefault();
+          }}
             >
               ${label || name}
               ${this.editableFileSystem && name !== 'index.html'
