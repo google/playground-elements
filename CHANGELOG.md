@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix tab-to-spaces conversion in the code editor which was resulting in one less space being produced on tab than desired.
+
 ## [0.18.0] - 2023-05-25
 
 ### Changed
