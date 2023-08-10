@@ -478,7 +478,7 @@ export class PlaygroundCodeEditor extends LitElement {
         extraKeys: {
           Tab: () => {
             cm.replaceSelection(
-              Array(cm.getOption('indentUnit') ?? 2).join(' ')
+              Array((cm.getOption('indentUnit') ?? 2) + 1).join(' ')
             );
           },
           // Ctrl + Space requests code completions.
