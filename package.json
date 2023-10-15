@@ -295,7 +295,7 @@
     "rollup-plugin-lit-css": "^4.0.0",
     "semver": "^7.3.5",
     "typescript": "~5.2.2",
-    "wireit": "^0.7.3-pre.3"
+    "wireit": "^0.14.0"
   },
   "dependencies": {
     "@material/mwc-button": "^0.27.0",
