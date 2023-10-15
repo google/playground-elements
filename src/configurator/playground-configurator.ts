@@ -24,7 +24,6 @@ import {
 } from './knobs.js';
 import {themeStyles} from './themes.js';
 import '@material/mwc-dialog';
-import '@material/mwc-button';
 import './playground-theme-detector.js';
 import {tokens} from './highlight-tokens.js';
 

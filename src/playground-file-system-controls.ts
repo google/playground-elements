@@ -12,14 +12,15 @@ import {customElement, property, query} from 'lit/decorators.js';
 // it, and this causes a duplicate registration error on unpkg.com because of
 // redirects.
 import '@material/mwc-list';
-import '@material/mwc-button';
+import '@material/web/button/outlined-button.js';
+import '@material/web/button/filled-button.js';
 import '@material/mwc-textfield';
 import '@material/mwc-menu/mwc-menu-surface.js';
 
 import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
 import {TextField} from '@material/mwc-textfield';
 import {List} from '@material/mwc-list';
-import {Button} from '@material/mwc-button';
+import type {MdOutlinedButton} from '@material/web/button/outlined-button.js';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
 
@@ -96,7 +97,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   private _filenameInput?: TextField;
 
   @query('.submit-button')
-  private _submitButton?: Button;
+  private _submitButton?: MdOutlinedButton;
 
   private _postStateChangeRenderDone = false;
 
@@ -205,13 +206,14 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
         @keydown=${this._onFilenameInputKeydown}
       ></mwc-textfield>
       <div class="actions">
-        <mwc-button outlined @click=${this._onClickCancel}>Cancel</mwc-button>
-        <mwc-button
-          raised
+        <md-outlined-button @click=${this._onClickCancel}
+          >Cancel</md-outlined-button
+        >
+        <md-filled-button
           class="submit-button"
           .disabled=${!this._filenameInputValid}
           @click=${this._onSubmitRename}
-          >Rename</mwc-button
+          >Rename</md-filled-button
         >
       </div>
     `;
@@ -226,13 +228,14 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
         @keydown=${this._onFilenameInputKeydown}
       ></mwc-textfield>
       <div class="actions">
-        <mwc-button outlined @click=${this._onClickCancel}>Cancel</mwc-button>
-        <mwc-button
-          raised
+        <md-outlined-button @click=${this._onClickCancel}
+          >Cancel</md-outlined-button
+        >
+        <md-filled-button
           class="submit-button"
           .disabled=${!this._filenameInputValid}
           @click=${this._onSubmitNewFile}
-          >Create</mwc-button
+          >Create</md-filled-button
         >
       </div>
     `;
