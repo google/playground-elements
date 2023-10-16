@@ -23,7 +23,7 @@ import {
   knobsBySection,
 } from './knobs.js';
 import {themeStyles} from './themes.js';
-import '@material/mwc-dialog';
+import '@material/web/dialog/dialog.js';
 import './playground-theme-detector.js';
 import {tokens} from './highlight-tokens.js';
 
@@ -38,6 +38,12 @@ export class PlaygroundConfigurator extends LitElement {
       :host {
         display: flex;
         font-family: Roboto, Arial, Helvetica, sans-serif;
+
+        --md-dialog-container-shape-start-start: 4px;
+        --md-dialog-container-shape-start-end: 4px;
+        --md-dialog-container-shape-end-end: 4px;
+        --md-dialog-container-shape-end-start: 4px;
+        --md-dialog-container-color: white;
       }
 
       #lhs {
@@ -302,19 +308,19 @@ export class PlaygroundConfigurator extends LitElement {
         ${this.cssText}
       </style>
 
-      <mwc-dialog
-        hideActions
+      <md-dialog
         id="detectorDialog"
         .open=${this._themeDetectorOpen}
         @closed=${this._closeThemeDetector}
       >
         ${this._themeDetectorOpen
           ? html`<playground-theme-detector
+              slot="content"
               @apply=${this._onThemeDetectorApply}
               @cancel=${this._closeThemeDetector}
             ></playground-theme-detector>`
           : nothing}
-      </mwc-dialog>
+      </md-dialog>
 
       <div id="lhs">${this.knobs}</div>
 

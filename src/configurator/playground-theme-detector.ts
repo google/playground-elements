@@ -13,6 +13,11 @@ import {tokens} from './highlight-tokens.js';
 @customElement('playground-theme-detector')
 export class PlaygroundThemeDetector extends LitElement {
   static override styles = css`
+    :host {
+      display: block;
+      padding: 20px 24px;
+    }
+
     ol {
       padding-left: 24px;
     }
@@ -32,6 +37,7 @@ export class PlaygroundThemeDetector extends LitElement {
 
     iframe {
       width: 100%;
+      height: 4em;
       pointer-events: none;
       margin-bottom: 1em;
     }
