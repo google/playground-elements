@@ -947,12 +947,10 @@ suite('playground-ide', () => {
     )) as PlaygroundProject;
     assert.lengthOf(project.files ?? [], 1);
 
-    // Between MWC v0.25.1 and v0.25.2, when clicking on an <mwc-icon-button>,
-    // the target changed from the <mwc-icon-button> to its internal <svg>.
     const menuButtonSvg = await pierce(
       'playground-ide',
       'playground-tab-bar',
-      '.menu-button > svg'
+      '.menu-button'
     );
     menuButtonSvg.dispatchEvent(new Event('click', {bubbles: true}));
 

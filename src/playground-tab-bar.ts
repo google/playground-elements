@@ -7,7 +7,7 @@
 import {html, css, PropertyValues, nothing} from 'lit';
 import {customElement, property, state, query} from 'lit/decorators.js';
 
-import '@material/mwc-icon-button';
+import '@material/web/iconbutton/icon-button.js';
 
 import './internal/tab-bar.js';
 import './internal/tab.js';
@@ -72,8 +72,11 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       visibility: visible;
     }
 
-    mwc-icon-button {
+    md-icon-button {
       color: var(--playground-tab-bar-foreground-color);
+      --md-icon-button-icon-size: 18px;
+      --md-icon-button-state-layer-width: 30px;
+      --md-icon-button-state-layer-height: 30px;
     }
 
     .add-file-button {
@@ -174,7 +177,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
             >
               ${label || name}
               ${this.editableFileSystem
-                ? html`<mwc-icon-button
+                ? html`<md-icon-button
                     aria-label="File menu"
                     class="menu-button"
                     @click=${this._onOpenMenu}
@@ -190,7 +193,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
                         d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
                       />
                     </svg>
-                  </mwc-icon-button>`
+                  </md-icon-button>`
                 : nothing}
             </playground-internal-tab>`
         )}
@@ -198,7 +201,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
 
       ${this.editableFileSystem
         ? html`
-            <mwc-icon-button
+            <md-icon-button
               class="add-file-button"
               aria-label="New file"
               @click=${this._onClickAddFile}
@@ -213,7 +216,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
               >
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
               </svg>
-            </mwc-icon-button>
+            </md-icon-button>
 
             <playground-file-system-controls
               .project=${this._project}
@@ -260,9 +263,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     }
   }
 
-  private _onOpenMenu(
-    event: CustomEvent<{index: number; anchor: HTMLElement}>
-  ) {
+  private _onOpenMenu(event: PointerEvent) {
     const controls = this._fileSystemControls;
     if (!controls) {
       return;
@@ -271,20 +272,9 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     // Figure out which file the open menu should be associated with. It's not
     // necessarily the active tab, since you can click on the menu button for a
     // tab without activating that tab.
-    //
-    // We're looking for a "data-filename" attribute in the event path, which
-    // should be on the <playground-internal-tab>.
-    //
-    // Note that we can't be sure what the target of the click event will be.
-    // Between MWC v0.25.1 and v0.25.2, when clicking on an <mwc-icon-button>,
-    // the target changed from the <mwc-icon-button> to its internal <svg>.
-    for (const el of event.composedPath()) {
-      if (el instanceof HTMLElement && el.dataset['filename']) {
-        controls.filename = el.dataset['filename'];
-        break;
-      }
-    }
-    controls.anchorElement = event.target as HTMLElement;
+    const button = (controls.anchorElement = event.target as HTMLElement);
+    const tab = button.closest('playground-internal-tab')!;
+    controls.filename = tab.dataset['filename'];
     event.stopPropagation();
   }
 
