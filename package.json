@@ -299,8 +299,6 @@
   "dependencies": {
     "@material/mwc-linear-progress": "^0.27.0",
     "@material/mwc-list": "^0.27.0",
-    "@material/mwc-menu": "^0.27.0",
-    "@material/mwc-textfield": "^0.27.0",
     "@material/web": "^1.0.0",
     "@types/codemirror": "^5.60.0",
     "comlink": "=4.3.1",

@@ -14,11 +14,12 @@ import {customElement, property, query} from 'lit/decorators.js';
 import '@material/mwc-list';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/filled-button.js';
-import '@material/mwc-textfield';
-import '@material/mwc-menu/mwc-menu-surface.js';
+import '@material/web/textfield/filled-text-field.js';
+import '@material/web/menu/menu.js';
 
-import {MenuSurface} from '@material/mwc-menu/mwc-menu-surface.js';
-import {TextField} from '@material/mwc-textfield';
+import {Menu} from '@material/web/menu/menu.js';
+
+import {MdFilledTextField} from '@material/web/textfield/filled-text-field.js';
 import {List} from '@material/mwc-list';
 import type {MdOutlinedButton} from '@material/web/button/outlined-button.js';
 
@@ -31,14 +32,27 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 @customElement('playground-file-system-controls')
 export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   static override styles = css`
-    mwc-menu-surface {
+    :host {
+      position: relative;
+      --md-outlined-button-container-shape-start-start: 4px;
+      --md-outlined-button-container-shape-start-end: 4px;
+      --md-outlined-button-container-shape-end-start: 4px;
+      --md-outlined-button-container-shape-end-end: 4px;
+      --md-filled-button-container-shape-start-start: 4px;
+      --md-filled-button-container-shape-start-end: 4px;
+      --md-filled-button-container-shape-end-start: 4px;
+      --md-filled-button-container-shape-end-end: 4px;
+    }
+
+    md-menu {
+      --md-menu-container-color: white;
       --mdc-theme-primary: var(
         --playground-floating-controls-color,
         var(--playground-highlight-color, #6200ee)
       );
     }
 
-    mwc-menu-surface.menu {
+    md-menu.menu {
       --mdc-typography-subtitle1-font-size: 13px;
       --mdc-list-item-graphic-margin: 14px;
     }
@@ -48,8 +62,8 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       height: 40px;
     }
 
-    mwc-menu-surface.rename > .wrapper,
-    mwc-menu-surface.newfile > .wrapper {
+    md-menu.rename > .wrapper,
+    md-menu.newfile > .wrapper {
       padding: 18px;
     }
 
@@ -87,14 +101,14 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   @property()
   filename?: string;
 
-  @query('mwc-menu-surface')
-  private _surface!: MenuSurface;
+  @query('md-menu')
+  private _surface!: Menu;
 
   @query('.menu-list')
   private _menuList?: List;
 
   @query('.filename-input')
-  private _filenameInput?: TextField;
+  private _filenameInput?: MdFilledTextField;
 
   @query('.submit-button')
   private _submitButton?: MdOutlinedButton;
@@ -109,15 +123,15 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   override render() {
-    return html`<mwc-menu-surface
-      fixed
+    return html`<md-menu
       quick
+      positioning="fixed"
       .open=${this.state !== 'closed'}
-      .anchor=${this.anchorElement ?? null}
-      corner="BOTTOM_START"
+      .anchorElement=${this.anchorElement ?? null}
+      anchor-corner="end-start"
       class="${this.state}"
       @closed=${this._onSurfaceClosed}
-      ><div class="wrapper">${this._surfaceContents}</div></mwc-menu-surface
+      ><div class="wrapper">${this._renderMenuContents()}</div></md-menu
     >`;
   }
 
@@ -148,20 +162,21 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     this._postStateChangeRenderDone = true;
   }
 
-  private get _surfaceContents() {
+  private _renderMenuContents() {
+    console.log('_renderMenuContents', this.state);
     switch (this.state) {
       case 'closed':
         return nothing;
       case 'menu':
-        return this._menu;
+        return this._renderMenuItems();
       case 'rename':
-        return this._rename;
+        return this._renderRenameDialog();
       case 'newfile':
-        return this._newFile;
+        return this._renderNewFileDialog();
     }
   }
 
-  private get _menu() {
+  private _renderMenuItems() {
     return html`
       <mwc-list class="menu-list" @action=${this._onMenuAction}>
         <mwc-list-item graphic="icon" id="renameButton">
@@ -196,15 +211,15 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     `;
   }
 
-  private get _rename() {
+  private _renderRenameDialog() {
     return html`
-      <mwc-textfield
+      <md-filled-text-field
         class="filename-input"
         label="Filename"
         .value=${this.filename || ''}
         @input=${this._onFilenameInputChange}
         @keydown=${this._onFilenameInputKeydown}
-      ></mwc-textfield>
+      ></md-filled-text-field>
       <div class="actions">
         <md-outlined-button @click=${this._onClickCancel}
           >Cancel</md-outlined-button
@@ -219,14 +234,14 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
     `;
   }
 
-  private get _newFile() {
+  private _renderNewFileDialog() {
     return html`
-      <mwc-textfield
+      <md-filled-text-field
         class="filename-input"
         label="Filename"
         @input=${this._onFilenameInputChange}
         @keydown=${this._onFilenameInputKeydown}
-      ></mwc-textfield>
+      ></md-filled-text-field>
       <div class="actions">
         <md-outlined-button @click=${this._onClickCancel}
           >Cancel</md-outlined-button
@@ -242,20 +257,30 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   }
 
   private _onSurfaceClosed() {
-    this.state = 'closed';
+    if (!this._handlingMenuAction) {
+      this.state = 'closed';
+    } else {
+      this._surface.open = true;
+    }
   }
 
   private _onClickCancel() {
     this._surface.close();
   }
 
+  private _handlingMenuAction = false;
+
   private _onMenuAction(event: CustomEvent<{index: number}>) {
+    this._handlingMenuAction = true;
     switch (event.detail.index) {
       case 0:
         return this._onMenuSelectRename();
       case 1:
         return this._onMenuSelectDelete();
     }
+    setTimeout(() => {
+      this._handlingMenuAction = false;
+    }, 0);
   }
 
   private _onMenuSelectRename() {
