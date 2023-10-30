@@ -11,16 +11,22 @@ import {customElement, property, query} from 'lit/decorators.js';
 // @material/mwc-list-item directly, because @material/mwc-list already imports
 // it, and this causes a duplicate registration error on unpkg.com because of
 // redirects.
-import '@material/mwc-list';
+// import '@material/mwc-list';
+// import '@material/web/list/list.js';
+
+import '@material/web/menu/menu-item.js';
 import '@material/web/button/outlined-button.js';
 import '@material/web/button/filled-button.js';
 import '@material/web/textfield/filled-text-field.js';
 import '@material/web/menu/menu.js';
 
-import {Menu} from '@material/web/menu/menu.js';
+import {Menu, CloseMenuEvent} from '@material/web/menu/menu.js';
 
 import {MdFilledTextField} from '@material/web/textfield/filled-text-field.js';
-import {List} from '@material/mwc-list';
+// import {MdList} from '@material/web/list/list.js';
+
+// import {List} from '@material/mwc-list';
+
 import type {MdOutlinedButton} from '@material/web/button/outlined-button.js';
 
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
@@ -42,6 +48,10 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       --md-filled-button-container-shape-start-end: 4px;
       --md-filled-button-container-shape-end-start: 4px;
       --md-filled-button-container-shape-end-end: 4px;
+
+      --md-menu-item-top-space: 4px;
+      --md-menu-item-bottom-space: 4px;
+      --md-menu-item-one-line-container-height: 40px;
     }
 
     md-menu {
@@ -57,9 +67,8 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       --mdc-list-item-graphic-margin: 14px;
     }
 
-    mwc-list-item {
+    md-list-item {
       min-width: 100px;
-      height: 40px;
     }
 
     md-menu.rename > .wrapper,
@@ -104,8 +113,8 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
   @query('md-menu')
   private _surface!: Menu;
 
-  @query('.menu-list')
-  private _menuList?: List;
+  // @query('.menu-list')
+  // private _menuList?: MdList;
 
   @query('.filename-input')
   private _filenameInput?: MdFilledTextField;
@@ -131,8 +140,10 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       anchor-corner="end-start"
       class="${this.state}"
       @closed=${this._onSurfaceClosed}
-      ><div class="wrapper">${this._renderMenuContents()}</div></md-menu
-    >`;
+      @close-menu=${this._onMenuAction}
+    >
+      ${this._renderMenuContents()}
+    </md-menu>`;
   }
 
   override async updated() {
@@ -140,12 +151,12 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       return;
     }
     if (this.state === 'menu') {
-      // Focus the first item  so that keyboard controls work.
-      const menuList = this._menuList;
-      if (menuList) {
-        await menuList.updateComplete;
-        menuList.focusItemAtIndex(0);
-      }
+      // Focus the first item so that keyboard controls work.
+      // const menuList = this._menuList;
+      // if (menuList) {
+      //   await menuList.updateComplete;
+      //   menuList.focusItemAtIndex(0);
+      // }
     } else if (this.state === 'rename' || this.state === 'newfile') {
       // Focus the filename input.
       const input = this._filenameInput;
@@ -178,80 +189,82 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private _renderMenuItems() {
     return html`
-      <mwc-list class="menu-list" @action=${this._onMenuAction}>
-        <mwc-list-item graphic="icon" id="renameButton">
-          Rename
-          <svg
-            slot="graphic"
-            height="24"
-            viewBox="0 0 24 24"
-            width="24"
-            fill="currentcolor"
-          >
-            <path
-              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-            />
-          </svg>
-        </mwc-list-item>
-        <mwc-list-item graphic="icon" id="deleteButton">
-          Delete
-          <svg
-            slot="graphic"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="currentcolor"
-          >
-            <path
-              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-            />
-          </svg>
-        </mwc-list-item>
-      </mwc-list>
+      <md-menu-item id="renameButton">
+        Rename
+        <svg
+          slot="start"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          fill="currentcolor"
+        >
+          <path
+            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+          />
+        </svg>
+      </md-menu-item>
+      <md-menu-item id="deleteButton">
+        Delete
+        <svg
+          slot="start"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentcolor"
+        >
+          <path
+            d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+          />
+        </svg>
+      </md-menu-item>
     `;
   }
 
   private _renderRenameDialog() {
     return html`
-      <md-filled-text-field
-        class="filename-input"
-        label="Filename"
-        .value=${this.filename || ''}
-        @input=${this._onFilenameInputChange}
-        @keydown=${this._onFilenameInputKeydown}
-      ></md-filled-text-field>
-      <div class="actions">
-        <md-outlined-button @click=${this._onClickCancel}
-          >Cancel</md-outlined-button
-        >
-        <md-filled-button
-          class="submit-button"
-          .disabled=${!this._filenameInputValid}
-          @click=${this._onSubmitRename}
-          >Rename</md-filled-button
-        >
+      <div class="wrapper">
+        <md-filled-text-field
+          class="filename-input"
+          label="Filename"
+          .value=${this.filename || ''}
+          @input=${this._onFilenameInputChange}
+          @keydown=${this._onFilenameInputKeydown}
+        ></md-filled-text-field>
+        <div class="actions">
+          <md-outlined-button @click=${this._onClickCancel}
+            >Cancel</md-outlined-button
+          >
+          <md-filled-button
+            class="submit-button"
+            .disabled=${!this._filenameInputValid}
+            @click=${this._onSubmitRename}
+            >Rename</md-filled-button
+          >
+        </div>
       </div>
     `;
   }
 
   private _renderNewFileDialog() {
     return html`
-      <md-filled-text-field
-        class="filename-input"
-        label="Filename"
-        @input=${this._onFilenameInputChange}
-        @keydown=${this._onFilenameInputKeydown}
-      ></md-filled-text-field>
-      <div class="actions">
-        <md-outlined-button @click=${this._onClickCancel}
-          >Cancel</md-outlined-button
-        >
-        <md-filled-button
-          class="submit-button"
-          .disabled=${!this._filenameInputValid}
-          @click=${this._onSubmitNewFile}
-          >Create</md-filled-button
-        >
+      <div class="wrapper">
+        <md-filled-text-field
+          class="filename-input"
+          label="Filename"
+          @input=${this._onFilenameInputChange}
+          @keydown=${this._onFilenameInputKeydown}
+        ></md-filled-text-field>
+        <div class="actions">
+          <md-outlined-button @click=${this._onClickCancel}
+            >Cancel</md-outlined-button
+          >
+          <md-filled-button
+            class="submit-button"
+            .disabled=${!this._filenameInputValid}
+            @click=${this._onSubmitNewFile}
+            >Create</md-filled-button
+          >
+        </div>
       </div>
     `;
   }
@@ -270,12 +283,13 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
 
   private _handlingMenuAction = false;
 
-  private _onMenuAction(event: CustomEvent<{index: number}>) {
+  private _onMenuAction(event: CloseMenuEvent) {
+    console.log('_onMenuAction', event);
     this._handlingMenuAction = true;
-    switch (event.detail.index) {
-      case 0:
+    switch (event.detail.itemPath[0].id) {
+      case 'renameButton':
         return this._onMenuSelectRename();
-      case 1:
+      case 'deleteButton':
         return this._onMenuSelectDelete();
     }
     setTimeout(() => {
