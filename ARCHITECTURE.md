@@ -16,26 +16,26 @@ These workers and iframes are controlled by various Playground elements like `<p
 
 ```mermaid
 flowchart TD
-    IDE{{&lt;playground-ide>}};
+    IDE{{playground-ide}};
     subgraph Project;
-    ProjectElement{{&lt;playground-project>}};
+    ProjectElement{{playground-project}};
     WebWorker(Build Worker);
-    ProxyIframe[Proxy &lt;iframe>];
+    ProxyIframe[Proxy iframe];
     end;
     subgraph Editors;
-    FileEditor1{{&lt;playground-file-editor>}};
-    FileEditor2{{&lt;playground-file-editor>}};
+    FileEditor1{{playground-file-editor}};
+    FileEditor2{{playground-file-editor}};
     end;
     subgraph Preview;
-    PreviewElement{{&lt;playground-preview>}};
-    PreviewIframe[Preview &lt;iframe>];
+    PreviewElement{{playground-preview}};
+    PreviewIframe[Preview iframe];
     end;
     subgraph Network;
     ServiceWorker(Service Worker);
     CDN([CDN]);
     end;
 
-    IDE -...-> Project;
+    IDE -.-> Project;
     IDE -.-> Editors;
     IDE -.-> Preview;
     WebWorker -- Built Project Files --> ProjectElement;
