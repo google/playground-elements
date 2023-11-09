@@ -16,36 +16,36 @@ These workers and iframes are controlled by various Playground elements like `<p
 
 ```mermaid
 flowchart TD
-    IDE{{&lt;playground-ide>}}
-    subgraph Project
-    ProjectElement{{&lt;playground-project>}}
-    WebWorker(Build Worker)
-    ProxyIframe[Proxy &lt;iframe>]
-    end
-    subgraph Editors
-    FileEditor1{{&lt;playground-file-editor>}}
-    FileEditor2{{&lt;playground-file-editor>}}
-    end
-    subgraph Preview
-    PreviewElement{{&lt;playground-preview>}}
-    PreviewIframe[Preview &lt;iframe>]
-    end
-    subgraph Network
-    ServiceWorker(Service Worker)
-    CDN([CDN])
-    end
+    IDE{{&lt;playground-ide>}};
+    subgraph Project;
+    ProjectElement{{&lt;playground-project>}};
+    WebWorker(Build Worker);
+    ProxyIframe[Proxy &lt;iframe>];
+    end;
+    subgraph Editors;
+    FileEditor1{{&lt;playground-file-editor>}};
+    FileEditor2{{&lt;playground-file-editor>}};
+    end;
+    subgraph Preview;
+    PreviewElement{{&lt;playground-preview>}};
+    PreviewIframe[Preview &lt;iframe>];
+    end;
+    subgraph Network;
+    ServiceWorker(Service Worker);
+    CDN([CDN]);
+    end;
 
-    IDE -...-> Project
-    IDE -.-> Editors
-    IDE -.-> Preview
-    WebWorker -- Built Project Files --> ProjectElement
-    ProjectElement -- Project Files --> WebWorker
-    ProjectElement -- Built Project Files --> ProxyIframe
-    Editors -- Project Files --> ProjectElement
-    ProjectElement --> PreviewElement
-    PreviewElement <--> PreviewIframe
-    ProxyIframe -- Built Project Files --> ServiceWorker
-    ServiceWorker -- All Files --> PreviewIframe
-    CDN -- NPM Dependencies --> ServiceWorker
-    CDN -- TypeScript Types --> WebWorker
+    IDE -...-> Project;
+    IDE -.-> Editors;
+    IDE -.-> Preview;
+    WebWorker -- Built Project Files --> ProjectElement;
+    ProjectElement -- Project Files --> WebWorker;
+    ProjectElement -- Built Project Files --> ProxyIframe;
+    Editors -- Project Files --> ProjectElement;
+    ProjectElement --> PreviewElement;
+    PreviewElement <--> PreviewIframe;
+    ProxyIframe -- Built Project Files --> ServiceWorker;
+    ServiceWorker -- All Files --> PreviewIframe;
+    CDN -- NPM Dependencies --> ServiceWorker;
+    CDN -- TypeScript Types --> WebWorker;
 ```
