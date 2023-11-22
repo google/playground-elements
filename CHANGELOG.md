@@ -12,12 +12,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 <!-- ## [Unreleased] -->
-<!-- ### Changed -->
+
+## [Unreleased]
+
+### Changed
+
+- Upgraded to TypeScript 5.2 and Lit 3.0
+
 <!-- ### Added -->
 <!-- ### Fixed -->
 <!-- ### Removed -->
-
-<!-- ## [Unreleased] -->
 
 ## [0.18.1] - 2023-08-10
 
