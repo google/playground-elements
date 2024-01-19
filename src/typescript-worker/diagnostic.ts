@@ -40,10 +40,11 @@ export function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
  * we got them right with a type constraint.
  */
 const diagnosticCategoryMapping: {
-  [ts.DiagnosticCategory.Error]: typeof lsp.DiagnosticSeverity['Error'];
-  [ts.DiagnosticCategory.Warning]: typeof lsp.DiagnosticSeverity['Warning'];
-  [ts.DiagnosticCategory.Message]: typeof lsp.DiagnosticSeverity['Information'];
-  [ts.DiagnosticCategory.Suggestion]: typeof lsp.DiagnosticSeverity['Hint'];
+  [ts.DiagnosticCategory.Error]: (typeof lsp.DiagnosticSeverity)['Error'];
+  [ts.DiagnosticCategory.Warning]: (typeof lsp.DiagnosticSeverity)['Warning'];
+  [ts.DiagnosticCategory
+    .Message]: (typeof lsp.DiagnosticSeverity)['Information'];
+  [ts.DiagnosticCategory.Suggestion]: (typeof lsp.DiagnosticSeverity)['Hint'];
 } = {
   [ts.DiagnosticCategory.Error]: 1,
   [ts.DiagnosticCategory.Warning]: 2,
