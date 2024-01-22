@@ -16,6 +16,7 @@ jobs:
 
       - run: npm ci
       - run: npx playwright install-deps
+      - run: npx playwright install
       - run: npm test
         env:
           WIREIT_FAILURES: continue

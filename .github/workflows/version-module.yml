@@ -16,5 +16,6 @@ jobs:
 
       - run: npm ci
       - run: npx playwright install-deps
+      - run: npx playwright install
       # This script automatically fails if the version module is not up-to-date.
       - run: npm run update-version-module

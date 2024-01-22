@@ -244,7 +244,7 @@ export const knobs = [
   }),
 ] as const;
 
-export type Knob = typeof knobs[number];
+export type Knob = (typeof knobs)[number];
 export type KnobId = Knob['id'];
 
 type KnobsById = {[K in Knob as K['id']]: K};
@@ -253,7 +253,7 @@ export const knobsBySection = {} as {[section: string]: Knob[]};
 for (const knob of knobs) {
   // Cast to an arbitrary specific Knob type here because TypeScript isn't quite
   // clever enough to know that the id will match the type.
-  knobsById[(knob as typeof knobs[0]).id] = knob as typeof knobs[0];
+  knobsById[(knob as (typeof knobs)[0]).id] = knob as (typeof knobs)[0];
   let catArr = knobsBySection[knob.section];
   if (catArr === undefined) {
     catArr = knobsBySection[knob.section] = [];
