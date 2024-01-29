@@ -232,20 +232,3 @@ export interface FileResult {
   file?: File;
   diagnostics: Array<Diagnostic>;
 }
-
-// export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
-
-// export type FileBuildOutput = {
-//   kind: 'file';
-//   file: SampleFile;
-// };
-
-// export type DiagnosticBuildOutput = {
-//   kind: 'diagnostic';
-//   filename: string;
-//   diagnostic: Diagnostic;
-// };
-
-// export type DoneOutput = {
-//   kind: 'done';
-// };
