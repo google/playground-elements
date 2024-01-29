@@ -8,12 +8,13 @@ import {assert} from '@esm-bundle/chai';
 import {build} from '../typescript-worker/build.js';
 import {executeServerCommand} from '@web/test-runner-commands';
 
-import {
-  BuildOutput,
+import type {
+  BuildResult,
   ModuleImportMap,
-  SampleFile,
+  File,
+  FileDiagnostic,
 } from '../shared/worker-api.js';
-import {CdnData} from './fake-cdn-plugin.js';
+import type {CdnData} from './fake-cdn-plugin.js';
 
 export const configureFakeCdn = async (
   data: CdnData
@@ -32,55 +33,57 @@ export const configureFakeCdn = async (
 };
 
 export const checkTransform = async (
-  files: SampleFile[],
-  expected: BuildOutput[],
+  files: File[],
+  expected: BuildResult,
   importMap: ModuleImportMap = {},
   cdnData: CdnData = {}
 ) => {
   const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
   try {
-    const results: BuildOutput[] = [];
-    await new Promise<void>((resolve) => {
-      const emit = (result: BuildOutput) => {
-        if (result.kind === 'done') {
-          resolve();
-        } else {
-          results.push(result);
-        }
-      };
-      build(files, {importMap, cdnBaseUrl}, emit);
-    });
+    const result = await build(files, {importMap, cdnBaseUrl});
 
-    for (const result of results) {
-      if (result.kind === 'diagnostic') {
-        // Sometimes diagnostics contain a CDN URL to help with debugging
-        // (usually the unpkg.com URL). But that will be a local dynamic URL in
-        // testing, so we'll substitute a static string so that we can do a
-        // simple equality test.
-        while (result.diagnostic.message.includes(cdnBaseUrl)) {
-          result.diagnostic.message = result.diagnostic.message.replace(
-            cdnBaseUrl,
-            '<CDN-BASE-URL>/'
-          );
-        }
+    // console.log('build result', result);
+
+    for (const {diagnostic} of result.diagnostics) {
+      // Sometimes diagnostics contain a CDN URL to help with debugging
+      // (usually the unpkg.com URL). But that will be a local dynamic URL in
+      // testing, so we'll substitute a static string so that we can do a
+      // simple equality test.
+      while (diagnostic.message.includes(cdnBaseUrl)) {
+        diagnostic.message = diagnostic.message.replace(
+          cdnBaseUrl,
+          '<CDN-BASE-URL>/'
+        );
       }
     }
 
     assert.deepEqual(
-      results.sort(sortBuildOutput),
-      expected.sort(sortBuildOutput)
+      result.files.sort(compareFiles),
+      expected.files.sort(compareFiles)
     );
+    assert.deepEqual(
+      result.diagnostics.sort(compareDiagnostics),
+      expected.diagnostics.sort(compareDiagnostics)
+    );
+    if (expected.semanticDiagnostics !== undefined) {
+      assert.isDefined(result.semanticDiagnostics);
+      assert.deepEqual(
+        (await result.semanticDiagnostics!).sort(compareDiagnostics),
+        (await expected.semanticDiagnostics).sort(compareDiagnostics)
+      );
+    }
   } finally {
     await deleteCdnData();
   }
 };
 
-const sortBuildOutput = (a: BuildOutput, b: BuildOutput) => {
-  if (a.kind === 'file' && b.kind === 'file') {
-    return a.file.name.localeCompare(b.file.name);
-  }
-  if (a.kind === 'diagnostic' && b.kind === 'diagnostic') {
-    return a.diagnostic.message.localeCompare(b.diagnostic.message);
-  }
-  return a.kind.localeCompare(b.kind);
+const compareFiles = (a: File, b: File) => {
+  return a.name.localeCompare(b.name);
+};
+
+const compareDiagnostics = (a: FileDiagnostic, b: FileDiagnostic) => {
+  return (
+    a.filename.localeCompare(b.filename) ||
+    a.diagnostic.message.localeCompare(b.diagnostic.message)
+  );
 };

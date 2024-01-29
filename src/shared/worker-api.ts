@@ -5,7 +5,8 @@
  */
 
 import {CompletionEntry, CompletionInfo, WithMetadata} from 'typescript';
-import {Diagnostic} from 'vscode-languageserver-protocol';
+import type {Diagnostic} from 'vscode-languageserver-protocol';
+export type {Diagnostic} from 'vscode-languageserver-protocol';
 
 /**
  * Sent from the project to the proxy, with configuration and a port for further
@@ -123,10 +124,10 @@ export interface EditorCompletionDetails {
 
 export interface WorkerAPI {
   compileProject(
-    files: Array<SampleFile>,
+    files: Array<File>,
     config: WorkerConfig,
-    emit: (result: BuildOutput) => void
-  ): Promise<void>;
+    onSemanticDiagnostics?: (diagnostics?: Array<FileDiagnostic>) => void
+  ): Promise<BuildResult>;
   getCompletions(
     filename: string,
     fileContent: string,
@@ -142,6 +143,15 @@ export interface WorkerAPI {
   ): Promise<EditorCompletionDetails>;
 }
 
+export interface File {
+  /** Filename. */
+  name: string;
+  /** File contents. */
+  content: string;
+  /** MIME type. */
+  contentType?: string;
+}
+
 export interface HttpError {
   status: number;
   body: string;
@@ -151,15 +161,9 @@ export interface FileAPI {
   getFile(name: string): Promise<SampleFile | HttpError>;
 }
 
-export interface SampleFile {
-  /** Filename. */
-  name: string;
+export interface SampleFile extends File {
   /** Optional display label. */
   label?: string;
-  /** File contents. */
-  content: string;
-  /** MIME type. */
-  contentType?: string;
   /** Don't display in tab bar. */
   hidden?: boolean;
   /** Whether the file should be selected when loaded */
@@ -213,19 +217,35 @@ export interface CompletionInfoWithDetails
   entries: CompletionEntryWithDetails[];
 }
 
-export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
-
-export type FileBuildOutput = {
-  kind: 'file';
-  file: SampleFile;
-};
-
-export type DiagnosticBuildOutput = {
-  kind: 'diagnostic';
+export interface FileDiagnostic {
   filename: string;
   diagnostic: Diagnostic;
-};
+}
 
-export type DoneOutput = {
-  kind: 'done';
-};
+export interface BuildResult {
+  files: Array<File>;
+  diagnostics: Array<FileDiagnostic>;
+  semanticDiagnostics?: Promise<Array<FileDiagnostic>>;
+}
+
+export interface FileResult {
+  file?: File;
+  diagnostics: Array<Diagnostic>;
+}
+
+// export type BuildOutput = FileBuildOutput | DiagnosticBuildOutput | DoneOutput;
+
+// export type FileBuildOutput = {
+//   kind: 'file';
+//   file: SampleFile;
+// };
+
+// export type DiagnosticBuildOutput = {
+//   kind: 'diagnostic';
+//   filename: string;
+//   diagnostic: Diagnostic;
+// };
+
+// export type DoneOutput = {
+//   kind: 'done';
+// };
