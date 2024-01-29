@@ -120,7 +120,7 @@ suite('typescript builder', () => {
       ],
       semanticDiagnostics: Promise.resolve([
         {
-          fileName: 'index.ts',
+          filename: 'index.ts',
           diagnostic: {
             code: 2322,
             message: "Type 'string' is not assignable to type 'number'.",
@@ -203,7 +203,7 @@ suite('typescript builder', () => {
 
       semanticDiagnostics: Promise.resolve([
         {
-          fileName: 'index.ts',
+          filename: 'index.ts',
           diagnostic: {
             code: 2345,
             message:
@@ -223,7 +223,7 @@ suite('typescript builder', () => {
           },
         },
         {
-          fileName: 'index.ts',
+          filename: 'index.ts',
           diagnostic: {
             code: 2345,
             message:
