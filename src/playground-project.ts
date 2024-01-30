@@ -451,7 +451,7 @@ export class PlaygroundProject extends LitElement {
     let worker: Worker;
     if (typescriptWorkerScriptUrl.origin === window.location.origin) {
       // Easy case.
-      worker = new Worker(typescriptWorkerScriptUrl);
+      worker = new Worker(typescriptWorkerScriptUrl, {type: 'module'});
     } else {
       // If the worker script is different-origin, we need to fetch it ourselves
       // and create a blob URL.
