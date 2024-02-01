@@ -303,7 +303,7 @@ export class PlaygroundIde extends LitElement {
         <slot></slot>
       </playground-project>
 
-      <div id="lhs">
+      <div id="lhs" part="lhs">
         <playground-tab-bar
           part="tab-bar"
           .project=${projectId}
@@ -324,7 +324,7 @@ export class PlaygroundIde extends LitElement {
         </playground-file-editor>
       </div>
 
-      <div id="rhs">
+      <div id="rhs" part="rhs">
         ${this.resizable
           ? html`<div
               id="resizeBar"
