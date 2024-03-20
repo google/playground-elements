@@ -23,9 +23,8 @@ import commonjs from '@rollup/plugin-commonjs';
  *   because we don't need to run the commonjs transform every time we build the
  *   worker.
  *
- * - We may want to use module imports in the worker at some point, for a faster
- *   development mode that doesn't bundle. Having only module sources will make
- *   this easier too.
+ * - We use module imports in the worker, for a faster development mode that
+ *   doesn't bundle. Having only module sources makes this easier too.
  */
 export default [
   {

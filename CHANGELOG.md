@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Upgraded to TypeScript 5.2 and Lit 3.0
+- **BREAKING** Use modules in workers. See [caniuse.com's support table](https://caniuse.com/mdn-api_worker_worker_ecmascript_modules) for browser support information.
 
 <!-- ### Added -->
 <!-- ### Fixed -->

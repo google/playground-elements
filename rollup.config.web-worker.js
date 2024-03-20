@@ -6,12 +6,21 @@
 
 import resolve from '@rollup/plugin-node-resolve';
 import {maybeTerser} from './rollup.config.common.js';
+import * as path from 'path';
+
+const internalTypescriptPath = path.resolve(process.cwd(), 'internal/typescript.js');
 
 export default {
   input: 'typescript-worker/playground-typescript-worker.js',
+  external(id, parentId, isResolved) {
+    if (!isResolved && parentId !== undefined) {
+      id = path.resolve(path.dirname(parentId), id);
+    }
+    return id === internalTypescriptPath;
+  },
   output: {
     file: 'playground-typescript-worker.js',
-    format: 'iife',
+    format: 'esm',
     exports: 'none',
   },
   plugins: [resolve(), ...maybeTerser],
