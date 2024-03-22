@@ -19,7 +19,6 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 import {CodeMirror} from './internal/codemirror.js';
 import playgroundStyles from './playground-styles.js';
 import './internal/overlay.js';
-import {Diagnostic} from 'vscode-languageserver-protocol';
 import {
   Doc,
   Editor,
@@ -35,6 +34,7 @@ import {
   EditorPosition,
   EditorToken,
   CodeEditorChangeData,
+  type Diagnostic,
 } from './shared/worker-api.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
