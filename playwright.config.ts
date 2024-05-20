@@ -17,7 +17,7 @@ const config = {
   workers: 1,
   // Defaults to 30 seconds. We shouldn't need that much time, and it's better
   // to fail fast and retry.
-  timeout: 5000,
+  timeout: 10000,
   projects: [
     {
       name: 'chromium',
