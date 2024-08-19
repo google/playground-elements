@@ -59,6 +59,7 @@
       ],
       "files": [
         "tsconfig.json",
+        "tsconfig-typescript-worker.json",
         "src/**/tsconfig.json",
         "src/**/*.ts"
       ],

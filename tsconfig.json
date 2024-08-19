@@ -34,7 +34,12 @@
     "src/internal/worker-api.ts",
     "src/shared/util.ts"
   ],
-  "exclude": ["src/service-worker", "src/shared", "src/typescript-worker"],
+  "exclude": [
+    "src/service-worker",
+    "src/shared",
+    "src/typescript-worker",
+    "src/playground-typescript-worker-entrypoint.ts"
+  ],
   "references": [
     {
       "path": "src/service-worker"
@@ -43,7 +48,7 @@
       "path": "src/shared"
     },
     {
-      "path": "src/typescript-worker"
+      "path": "./tsconfig-typescript-worker.json"
     }
   ]
 }

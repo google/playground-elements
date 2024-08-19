@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./typescript-worker/.tsbuildinfo",
+    "target": "es2019",
+    "lib": ["ES2020", "WebWorker"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  },
+  "include": [
+    "src/typescript-worker/*.ts",
+    "src/typescript-worker/**/*.ts",
+    "src/playground-typescript-worker-entrypoint.ts"
+  ],
+  "exclude": [],
+  "references": [
+    {
+      "path": "./src/shared"
+    }
+  ]
+}
