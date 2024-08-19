@@ -10,7 +10,6 @@
   "module": "playground-ide.js",
   "main": "playground-ide.js",
   "scripts": {
-    "prepare": "if [ -f './web-test-runner.config.js' ]; then cd node_modules/puppeteer && PUPPETEER_PRODUCT=firefox node install.js; fi",
     "prepack": "wireit",
     "update-version-module": "wireit",
     "nuke": "npm run clean && rm -rf node_modules && npm install",
