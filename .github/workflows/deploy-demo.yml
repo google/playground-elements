@@ -18,6 +18,8 @@ jobs:
       - uses: google/wireit@setup-github-actions-caching/v1
 
       - run: npm ci
+      - run: npx playwright install-deps
+      - run: npx playwright install
       - run: npm run build
 
       - name: Deploy to gh-pages
