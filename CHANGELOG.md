@@ -13,12 +13,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 <!-- ## [Unreleased] -->
 
-## [Unreleased]
+## [0.19.0] - 2024-08-19
 
 ### Changed
 
 - Upgraded to TypeScript 5.2 and Lit 3.0
 - **BREAKING** Use modules in workers. See [caniuse.com's support table](https://caniuse.com/mdn-api_worker_worker_ecmascript_modules) for browser support information.
+- Updated `comlink`, `fuse.js`, and `tslib` dependencies.
 
 <!-- ### Added -->
 <!-- ### Fixed -->
