@@ -4,44 +4,34 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {BuildOutput, SampleFile} from '../shared/worker-api.js';
+import {BuildResult, File, FileDiagnostic} from '../shared/worker-api.js';
 import {TypesFetcher} from './types-fetcher.js';
 import {PackageJson} from './util.js';
 import {makeLspDiagnostic} from './diagnostic.js';
 import {WorkerContext} from './worker-context.js';
 
-export async function* processTypeScriptFiles(
+const isTypeScriptInput = (file: File) =>
+  file.name.endsWith('.ts') ||
+  file.name.endsWith('.jsx') ||
+  file.name.endsWith('.tsx');
+
+export const buildTypeScript = async (
   workerContext: WorkerContext,
-  results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
-): AsyncIterable<BuildOutput> {
+  files: Array<File>,
+  packageJson?: PackageJson | undefined
+): Promise<BuildResult> => {
   // Instantiate langservice variables for ease of access
   const langService = workerContext.languageServiceContext.service;
   const langServiceHost = workerContext.languageServiceContext.serviceHost;
-  let packageJson: PackageJson | undefined;
-  const compilerInputs = [];
-  for await (const result of results) {
-    if (
-      result.kind === 'file' &&
-      (result.file.name.endsWith('.ts') ||
-        result.file.name.endsWith('.jsx') ||
-        result.file.name.endsWith('.tsx'))
-    ) {
-      compilerInputs.push(result.file);
-    } else {
-      yield result;
-      if (result.kind === 'file' && result.file.name === 'package.json') {
-        try {
-          packageJson = JSON.parse(result.file.content) as PackageJson;
-        } catch (e) {
-          // A bit hacky, but BareModuleTransformer already emits a diagnostic
-          // for this case, so we don't need another one.
-        }
-      }
-    }
-  }
+
+  const diagnostics: Array<FileDiagnostic> = [];
+
+  // Initialize output files with all non-TypeScript files:
+  const outputFiles: Array<File> = files.filter((f) => !isTypeScriptInput(f));
+  const compilerInputs = files.filter(isTypeScriptInput);
 
   if (compilerInputs.length === 0) {
-    return;
+    return {files, diagnostics};
   }
 
   // Immediately resolve local project files, and begin fetching types (but
@@ -86,14 +76,13 @@ export async function* processTypeScriptFiles(
 
   for (const {file, url} of inputFiles) {
     for (const tsDiagnostic of langService.getSyntacticDiagnostics(url)) {
-      yield {
-        kind: 'diagnostic',
+      diagnostics.push({
         filename: file.name,
         diagnostic: makeLspDiagnostic(tsDiagnostic),
-      };
+      });
     }
     const sourceFile = program.getSourceFile(url);
-    let compiled: SampleFile | undefined = undefined;
+    let compiled: File | undefined = undefined;
     program!.emit(sourceFile, (url, content) => {
       compiled = {
         name: new URL(url).pathname.slice(1),
@@ -102,32 +91,38 @@ export async function* processTypeScriptFiles(
       };
     });
     if (compiled !== undefined) {
-      yield {kind: 'file', file: compiled};
+      outputFiles.push(compiled);
     }
   }
+  const semanticDiagnostics: Promise<Array<FileDiagnostic>> = (async () => {
+    // Wait for all typings to be fetched, and then retrieve slower semantic
+    // diagnostics.
+    const typings = await TypesFetcher.fetchTypes(
+      workerContext.cdn,
+      workerContext.importMapResolver,
+      packageJson,
+      inputFiles.map((file) => file.file.content),
+      workerContext.languageServiceContext.compilerOptions.lib
+    );
 
-  // Wait for all typings to be fetched, and then retrieve slower semantic
-  // diagnostics.
-  const typings = await TypesFetcher.fetchTypes(
-    workerContext.cdn,
-    workerContext.importMapResolver,
-    packageJson,
-    inputFiles.map((file) => file.file.content),
-    workerContext.languageServiceContext.compilerOptions.lib
-  );
-  for (const [path, content] of typings.files) {
-    // TypeScript is going to look for these files as paths relative to our
-    // source files, so we need to add them to our filesystem with those URLs.
-    const url = new URL(`node_modules/${path}`, self.origin).href;
-    langServiceHost.updateFileContentIfNeeded(url, content);
-  }
-  for (const {file, url} of inputFiles) {
-    for (const tsDiagnostic of langService.getSemanticDiagnostics(url)) {
-      yield {
-        kind: 'diagnostic',
-        filename: file.name,
-        diagnostic: makeLspDiagnostic(tsDiagnostic),
-      };
+    for (const [path, content] of typings.files) {
+      // TypeScript is going to look for these files as paths relative to our
+      // source files, so we need to add them to our filesystem with those URLs.
+      const url = new URL(`node_modules/${path}`, self.origin).href;
+      langServiceHost.updateFileContentIfNeeded(url, content);
     }
-  }
-}
+
+    const diagnostics: Array<FileDiagnostic> = [];
+    for (const {file, url} of inputFiles) {
+      for (const tsDiagnostic of langService.getSemanticDiagnostics(url)) {
+        diagnostics.push({
+          filename: file.name,
+          diagnostic: makeLspDiagnostic(tsDiagnostic),
+        });
+      }
+    }
+    return diagnostics;
+  })();
+
+  return {files: outputFiles, diagnostics, semanticDiagnostics};
+};

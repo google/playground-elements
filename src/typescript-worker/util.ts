@@ -138,6 +138,12 @@ export const parseNpmStyleSpecifier = (
   return {pkg, version: version ?? '', path};
 };
 
+export const npmFileLocationToString = ({
+  pkg,
+  version,
+  path,
+}: NpmFileLocation) => `${pkg}${version === '' ? '' : `@${version}`}/${path}`;
+
 /**
  * Return the file extension of the given URL path. Does not include the leading
  * ".". Note this only considers the final ".", so e.g. given "foo.d.ts" this

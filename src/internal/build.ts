@@ -6,16 +6,13 @@
 
 import {Deferred} from '../shared/deferred.js';
 
-import {
-  SampleFile,
-  BuildOutput,
-  FileBuildOutput,
-  DiagnosticBuildOutput,
+import type {
+  File,
+  FileDiagnostic,
+  Diagnostic,
   HttpError,
+  BuildResult,
 } from '../shared/worker-api.js';
-import {Diagnostic} from 'vscode-languageserver-protocol';
-
-const unreachable = (n: never) => n;
 
 type State = 'active' | 'done' | 'cancelled';
 
@@ -36,7 +33,7 @@ export class PlaygroundBuild {
   diagnostics = new Map<string, Diagnostic[]>();
   private _state: State = 'active';
   private _stateChange = new Deferred<void>();
-  private _files = new Map<string, Deferred<SampleFile | HttpError>>();
+  private _files = new Map<string, Deferred<File | HttpError>>();
   private _diagnosticsCallback: () => void;
   private _diagnosticsDebounceId: number | undefined;
 
@@ -44,7 +41,7 @@ export class PlaygroundBuild {
    * @param diagnosticsCallback Function that will be invoked when one or more
    * new diagnostics have been received. Fires at most once per animation frame.
    */
-  constructor(diagnosticsCallback: () => void) {
+  constructor({diagnosticsCallback}: {diagnosticsCallback: () => void}) {
     this._diagnosticsCallback = diagnosticsCallback;
   }
 
@@ -79,10 +76,14 @@ export class PlaygroundBuild {
    * received before the build is completed or cancelled, this promise will be
    * rejected.
    */
-  async getFile(name: string): Promise<SampleFile | HttpError> {
+  async getFile(name: string): Promise<File | HttpError> {
     let deferred = this._files.get(name);
     if (deferred === undefined) {
       if (this._state === 'done') {
+        // TODO (justinfagnani): If the file is a package dependency (in
+        // 'node_modules/'), get the file from the TypeScript worker here
+        // rather than assuming that it is present in the files cache.
+        // Let the worker handle the error if the file is not found.
         return errorNotFound;
       } else if (this._state === 'cancelled') {
         return errorCancelled;
@@ -94,24 +95,25 @@ export class PlaygroundBuild {
   }
 
   /**
-   * Handle a worker build output.
+   * Handle a worker build result.
    */
-  onOutput(output: BuildOutput) {
+  onResult(output: BuildResult) {
     if (this._state !== 'active') {
       return;
     }
-    if (output.kind === 'file') {
-      this._onFile(output);
-    } else if (output.kind === 'diagnostic') {
-      this._onDiagnostic(output);
-    } else if (output.kind === 'done') {
-      this._onDone();
-    } else {
-      throw new Error(
-        `Unexpected BuildOutput kind: ${
-          (unreachable(output) as BuildOutput).kind
-        }`
-      );
+    for (const file of output.files) {
+      this._onFile(file);
+    }
+    for (const fileDiagnostic of output.diagnostics) {
+      this._onDiagnostic(fileDiagnostic);
+    }
+  }
+
+  onSemanticDiagnostics(semanticDiagnostics?: Array<FileDiagnostic>) {
+    if (semanticDiagnostics !== undefined) {
+      for (const fileDiagnostic of semanticDiagnostics) {
+        this._onDiagnostic(fileDiagnostic);
+      }
     }
   }
 
@@ -121,22 +123,22 @@ export class PlaygroundBuild {
     this._stateChange = new Deferred();
   }
 
-  private _onFile(output: FileBuildOutput) {
-    let deferred = this._files.get(output.file.name);
+  private _onFile(file: File) {
+    let deferred = this._files.get(file.name);
     if (deferred === undefined) {
       deferred = new Deferred();
-      this._files.set(output.file.name, deferred);
+      this._files.set(file.name, deferred);
     }
-    deferred.resolve(output.file);
+    deferred.resolve(file);
   }
 
-  private _onDiagnostic(output: DiagnosticBuildOutput) {
-    let arr = this.diagnostics.get(output.filename);
+  private _onDiagnostic(fileDiagnostic: FileDiagnostic) {
+    let arr = this.diagnostics.get(fileDiagnostic.filename);
     if (arr === undefined) {
       arr = [];
-      this.diagnostics.set(output.filename, arr);
+      this.diagnostics.set(fileDiagnostic.filename, arr);
     }
-    arr.push(output.diagnostic);
+    arr.push(fileDiagnostic.diagnostic);
     if (this._diagnosticsDebounceId === undefined) {
       this._diagnosticsDebounceId = requestAnimationFrame(() => {
         if (this._state !== 'cancelled') {
@@ -147,7 +149,13 @@ export class PlaygroundBuild {
     }
   }
 
-  private _onDone() {
+  /**
+   * Completes a build. Must be called after onResult() and
+   * onSemanticDiagnostics().
+   *
+   * TODO (justinfagnani): do this automatically?
+   */
+  onDone() {
     this._errorPendingFileRequests(errorNotFound);
     this._changeState('done');
   }

@@ -9,19 +9,21 @@ import {customElement, property, query, state} from 'lit/decorators.js';
 import {wrap, Remote, proxy} from 'comlink';
 
 import {
-  SampleFile,
-  ServiceWorkerAPI,
-  ProjectManifest,
-  PlaygroundMessage,
-  WorkerAPI,
+  type SampleFile,
+  type ServiceWorkerAPI,
+  type ProjectManifest,
+  type PlaygroundMessage,
+  type WorkerAPI,
   CONFIGURE_PROXY,
   CONNECT_PROJECT_TO_SW,
   ACKNOWLEDGE_SW_CONNECTION,
-  ModuleImportMap,
-  HttpError,
+  type ModuleImportMap,
+  type HttpError,
   UPDATE_SERVICE_WORKER,
-  CodeEditorChangeData,
-  CompletionInfoWithDetails,
+  type CodeEditorChangeData,
+  type CompletionInfoWithDetails,
+  type Diagnostic,
+  FileDiagnostic,
 } from './shared/worker-api.js';
 import {
   getRandomString,
@@ -36,8 +38,6 @@ import {
 import {npmVersion, serviceWorkerHash} from './shared/version.js';
 import {Deferred} from './shared/deferred.js';
 import {PlaygroundBuild} from './internal/build.js';
-
-import {Diagnostic} from 'vscode-languageserver-protocol';
 
 // Each <playground-project> has a unique session ID used to scope requests from
 // the preview iframes.
@@ -559,26 +559,30 @@ export class PlaygroundProject extends LitElement {
    */
   async save() {
     this._build?.cancel();
-    const build = new PlaygroundBuild(() => {
-      this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
-    });
-    this._build = build;
-    this.dispatchEvent(new CustomEvent('compileStart'));
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
+    const build = (this._build = new PlaygroundBuild({
+      diagnosticsCallback: () => {
+        this.dispatchEvent(new CustomEvent('diagnosticsChanged'));
+      },
+    }));
+    this.dispatchEvent(new CustomEvent('compileStart'));
     if (build.state() !== 'active') {
       return;
     }
-    /* eslint-disable @typescript-eslint/no-floating-promises */
-    workerApi.compileProject(
+    const receivedSemanticDiagnostics = new Deferred<void>();
+    const result = await workerApi.compileProject(
       this._files ?? [],
-      {importMap: this._importMap},
-      proxy((result) => build.onOutput(result))
+      {
+        importMap: this._importMap,
+      },
+      proxy((diagnostics?: Array<FileDiagnostic>) => {
+        build.onSemanticDiagnostics(diagnostics);
+        receivedSemanticDiagnostics.resolve();
+      })
     );
-    /* eslint-enable @typescript-eslint/no-floating-promises */
-    await build.stateChange;
-    if (build.state() !== 'done') {
-      return;
-    }
+    build.onResult(result);
+    await receivedSemanticDiagnostics.promise;
+    build.onDone();
     this.dispatchEvent(new CustomEvent('compileDone'));
   }
 
