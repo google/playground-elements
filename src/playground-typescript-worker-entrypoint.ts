@@ -5,9 +5,12 @@
  */
 
 import {expose} from 'comlink';
-import {build} from './build.js';
-import {WorkerAPI} from '../shared/worker-api.js';
-import {getCompletionItemDetails, queryCompletions} from './completions.js';
+import {build} from './typescript-worker/build.js';
+import {WorkerAPI} from './shared/worker-api.js';
+import {
+  getCompletionItemDetails,
+  queryCompletions,
+} from './typescript-worker/completions.js';
 
 const workerAPI: WorkerAPI = {
   compileProject: build,

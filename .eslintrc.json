@@ -30,9 +30,12 @@
       }
     },
     {
-      "files": ["src/typescript-worker/**"],
+      "files": [
+        "src/typescript-worker/**",
+        "src/playground-typescript-worker-entrypoint.ts"
+      ],
       "parserOptions": {
-        "project": "./src/typescript-worker/tsconfig.json"
+        "project": "./tsconfig-typescript-worker.json"
       }
     },
     {

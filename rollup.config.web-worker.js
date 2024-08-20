@@ -11,7 +11,7 @@ import * as path from 'path';
 const internalTypescriptPath = path.resolve(process.cwd(), 'internal/typescript.js');
 
 export default {
-  input: 'typescript-worker/playground-typescript-worker.js',
+  input: 'playground-typescript-worker-entrypoint.js',
   external(id, parentId, isResolved) {
     if (!isResolved && parentId !== undefined) {
       id = path.resolve(path.dirname(parentId), id);
