@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 <!-- ## [Unreleased] -->
 
+## [0.19.1] - 2024-08-19
+
+### Fixed
+
+- Fix broken import of typescript.js module
+
 ## [0.19.0] - 2024-08-19
 
 ### Changed
