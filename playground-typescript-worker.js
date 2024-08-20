@@ -1,4 +1,4 @@
-import A from"../internal/typescript.js";
+import A from"./internal/typescript.js";
 /**
  * @license
  * Copyright 2019 Google LLC
