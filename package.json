@@ -294,7 +294,7 @@
     "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-lit-css": "^4.0.0",
     "semver": "^7.3.5",
-    "typescript": "~5.4.5",
+    "typescript": "~5.6.2",
     "wireit": "^0.14.0"
   },
   "dependencies": {
