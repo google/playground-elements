@@ -89,7 +89,7 @@ suite('typescript builder', () => {
           name: 'index.js',
           // TODO(aomarks) This should probably return a 400 error instead of an
           // empty but valid file.
-          content: 'export {};\n',
+          content: '',
           contentType: 'text/javascript',
         },
       },
@@ -132,7 +132,7 @@ suite('typescript builder', () => {
         kind: 'file',
         file: {
           name: 'index.js',
-          content: 'let foo = 3;\n' + 'foo = "foo";\nexport {};\n',
+          content: 'let foo = 3;\n' + 'foo = "foo";\n',
           contentType: 'text/javascript',
         },
       },

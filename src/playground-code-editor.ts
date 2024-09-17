@@ -43,9 +43,9 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
   get<K extends keyof T>(key: K): T[K];
   set<K extends keyof T>(key: K, value: T[K]): this;
   delete<K extends keyof T>(key: K): boolean;
-  keys(): IterableIterator<keyof T>;
-  values(): IterableIterator<T[keyof T]>;
-  entries(): IterableIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
+  keys(): MapIterator<keyof T>;
+  values(): MapIterator<T[keyof T]>;
+  entries(): MapIterator<{[K in keyof T]: [K, T[K]]}[keyof T]>;
 }
 
 export interface CodeEditorHint {
