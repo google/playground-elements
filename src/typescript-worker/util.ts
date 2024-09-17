@@ -37,8 +37,7 @@ export class MergedAsyncIterables<T> {
       );
     }
     this._numSources++;
-    /* eslint-disable @typescript-eslint/no-floating-promises */
-    (async () => {
+    void (async () => {
       for await (const value of iterable) {
         // Wait for this value to be emitted before continuing
         await new Promise<void>((emitted) => {
@@ -49,7 +48,6 @@ export class MergedAsyncIterables<T> {
       this._numSources--;
       this._notify?.();
     })();
-    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 }
 
