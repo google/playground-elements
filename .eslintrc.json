@@ -17,9 +17,6 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
-    // Google internally requires that floating promises are annotated with a
-    // special function. We use eslint-enable and eslint-disable comments for
-    // this rule to identify these spots for automated transform on import.
     "@typescript-eslint/no-floating-promises": "error"
   },
   "overrides": [

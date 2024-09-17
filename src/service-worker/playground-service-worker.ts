@@ -151,9 +151,7 @@ const parseScopedUrl = (url: string) => {
 const onInstall = () => {
   // Force this service worker to become the active service worker, in case
   // it's an updated worker and waiting.
-  /* eslint-disable @typescript-eslint/no-floating-promises */
-  self.skipWaiting();
-  /* eslint-enable @typescript-eslint/no-floating-promises */
+  void self.skipWaiting();
 };
 
 const onActivate = (event: ExtendableEvent) => {

@@ -321,9 +321,7 @@ export class PlaygroundCodeEditor extends LitElement {
               // Swapping to a document instance doesn't trigger a change event
               // which is required for document folding. Manually fold once on
               // document instantiation.
-              /* eslint-disable @typescript-eslint/no-floating-promises */
-              this._applyHideAndFoldRegions();
-              /* eslint-enable @typescript-eslint/no-floating-promises */
+              void this._applyHideAndFoldRegions();
             }
             this._valueChangingFromOutside = false;
             break;
@@ -356,9 +354,7 @@ export class PlaygroundCodeEditor extends LitElement {
             cm.setOption('readOnly', this.readonly);
             break;
           case 'pragmas':
-            /* eslint-disable @typescript-eslint/no-floating-promises */
-            this._applyHideAndFoldRegions();
-            /* eslint-enable @typescript-eslint/no-floating-promises */
+            void this._applyHideAndFoldRegions();
             break;
           case 'diagnostics':
             this._showDiagnostics();
@@ -501,9 +497,7 @@ export class PlaygroundCodeEditor extends LitElement {
       // file it is displaying.
       if (this._valueChangingFromOutside) {
         // Users can't change hide/fold regions.
-        /* eslint-disable @typescript-eslint/no-floating-promises */
-        this._applyHideAndFoldRegions();
-        /* eslint-enable @typescript-eslint/no-floating-promises */
+        void this._applyHideAndFoldRegions();
         this._showDiagnostics();
       } else {
         this.dispatchEvent(new Event('change'));
@@ -738,8 +732,7 @@ export class PlaygroundCodeEditor extends LitElement {
     // The detail promise is passed into this function only for the item
     // currently highlighted from the completions list.
     if (detail !== undefined) {
-      /* eslint-disable @typescript-eslint/no-floating-promises */
-      detail.then((detailResult: EditorCompletionDetails) => {
+      void detail.then((detailResult: EditorCompletionDetails) => {
         this._renderCompletionItemWithDetails(
           objectName,
           detailResult,
@@ -753,7 +746,6 @@ export class PlaygroundCodeEditor extends LitElement {
           this._renderHint(element, _data, hint);
         this._currentCompletionSelectionLabel = hint.text;
       });
-      /* eslint-enable @typescript-eslint/no-floating-promises */
     }
   }
 
