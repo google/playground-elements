@@ -108,23 +108,23 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       if (oldProject) {
         oldProject.removeEventListener(
           'filesChanged',
-          this._onProjectFilesChanged
+          this._onProjectFilesChanged,
         );
         oldProject.removeEventListener('compileDone', this._onCompileDone);
         oldProject.removeEventListener(
           'diagnosticsChanged',
-          this._onDiagnosticsChanged
+          this._onDiagnosticsChanged,
         );
       }
       if (this._project) {
         this._project.addEventListener(
           'filesChanged',
-          this._onProjectFilesChanged
+          this._onProjectFilesChanged,
         );
         this._project.addEventListener('compileDone', this._onCompileDone);
         this._project.addEventListener(
           'diagnosticsChanged',
-          this._onDiagnosticsChanged
+          this._onDiagnosticsChanged,
         );
       }
       this._onProjectFilesChanged();
@@ -152,7 +152,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .readonly=${this.readonly || !this._currentFile}
               .pragmas=${this.pragmas}
               .diagnostics=${this._project?.diagnostics?.get(
-                this._currentFile?.name ?? ''
+                this._currentFile?.name ?? '',
               )}
               .noCompletions=${this.noCompletions}
               @change=${this._onEdit}
@@ -193,9 +193,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
   private async _onRequestCompletions(e: CustomEvent) {
     const codeEditorChangeData = e.detail as CodeEditorChangeData;
     codeEditorChangeData.fileName = this.filename ?? '';
-    const completions = await this._project?.getCompletions(
-      codeEditorChangeData
-    );
+    const completions =
+      await this._project?.getCompletions(codeEditorChangeData);
     if (completions) {
       codeEditorChangeData.provideCompletions(completions);
     }

@@ -13,19 +13,19 @@ import {processTypeScriptFiles} from './typescript-builder.js';
 export const build = async (
   files: Array<SampleFile>,
   config: WorkerConfig,
-  emit: (result: BuildOutput) => void
+  emit: (result: BuildOutput) => void,
 ): Promise<void> => {
   const workerContext = getWorkerContext(config);
   const bareModuleBuilder = new BareModuleTransformer(
     workerContext.cdn,
-    workerContext.importMapResolver
+    workerContext.importMapResolver,
   );
 
   const results = bareModuleBuilder.process(
     processTypeScriptFiles(
       workerContext,
-      files.map((file) => ({kind: 'file', file}))
-    )
+      files.map((file) => ({kind: 'file', file})),
+    ),
   );
   for await (const result of results) {
     emit(result);

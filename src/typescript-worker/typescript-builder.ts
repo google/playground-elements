@@ -12,7 +12,7 @@ import {WorkerContext} from './worker-context.js';
 
 export async function* processTypeScriptFiles(
   workerContext: WorkerContext,
-  results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
+  results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>,
 ): AsyncIterable<BuildOutput> {
   // Instantiate langservice variables for ease of access
   const langService = workerContext.languageServiceContext.service;
@@ -66,11 +66,11 @@ export async function* processTypeScriptFiles(
     packageJson === undefined
       ? {type: 'module'}
       : packageJson.type === 'module'
-      ? packageJson
-      : {...packageJson, type: 'module'};
+        ? packageJson
+        : {...packageJson, type: 'module'};
   loadedFiles.set(
     new URL('package.json', self.origin).href,
-    JSON.stringify(defaultPackageJson)
+    JSON.stringify(defaultPackageJson),
   );
 
   // Sync the new loaded files with the servicehost.
@@ -113,7 +113,7 @@ export async function* processTypeScriptFiles(
     workerContext.importMapResolver,
     packageJson,
     inputFiles.map((file) => file.file.content),
-    workerContext.languageServiceContext.compilerOptions.lib
+    workerContext.languageServiceContext.compilerOptions.lib,
   );
   for (const [path, content] of typings.files) {
     // TypeScript is going to look for these files as paths relative to our

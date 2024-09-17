@@ -63,7 +63,7 @@ export class BareModuleTransformer {
   }
 
   async *process(
-    results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>
+    results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>,
   ): AsyncIterable<BuildOutput> {
     // This "output" iterable helps us emit all build outputs as soon as they
     // are available as we asynchronously walk the dependency tree.
@@ -77,7 +77,7 @@ export class BareModuleTransformer {
    */
   private async *_handleProjectFiles(
     results: AsyncIterable<BuildOutput> | Iterable<BuildOutput>,
-    output: MergedAsyncIterables<BuildOutput>
+    output: MergedAsyncIterables<BuildOutput>,
   ): AsyncIterable<BuildOutput> {
     // The project might contain a package.json, which will determine our
     // top-level version constraints. Resolve it lazily.
@@ -115,7 +115,7 @@ export class BareModuleTransformer {
   private async *_handleModule(
     file: FileBuildOutput,
     getPackageJson: () => Promise<PackageJson | undefined>,
-    output: MergedAsyncIterables<BuildOutput>
+    output: MergedAsyncIterables<BuildOutput>,
   ): AsyncIterable<BuildOutput> {
     let js = file.file.content;
     let specifiers;
@@ -126,7 +126,7 @@ export class BareModuleTransformer {
       yield file;
       const diagnostic = makeEsModuleLexerDiagnostic(
         e as Error,
-        file.file.name
+        file.file.name,
       );
       if (diagnostic !== undefined) {
         yield diagnostic;
@@ -149,7 +149,7 @@ export class BareModuleTransformer {
           oldSpecifier,
           file.file.name,
           getPackageJson,
-          output
+          output,
         ),
       });
     }
@@ -199,7 +199,7 @@ export class BareModuleTransformer {
     specifier: string,
     referrer: string,
     getPackageJson: () => Promise<PackageJson | undefined>,
-    output: MergedAsyncIterables<BuildOutput>
+    output: MergedAsyncIterables<BuildOutput>,
   ): Promise<string> {
     const fromImportMap = this._importMapResolver.resolve(specifier);
     if (fromImportMap !== null) {
@@ -214,7 +214,7 @@ export class BareModuleTransformer {
         specifier,
         referrer,
         getPackageJson,
-        output
+        output,
       );
     }
     // Anything else is a relative specifier.
@@ -243,7 +243,7 @@ export class BareModuleTransformer {
         // wouldn't want to pass this scope's `getPackageJson`, because it would
         // be the wrong one.
         async () => undefined,
-        output
+        output,
       );
     }
     // This relative specifier is good as-is, since it has an extension. We just
@@ -264,7 +264,7 @@ export class BareModuleTransformer {
     specifier: string,
     referrer: string,
     getPackageJson: () => Promise<PackageJson | undefined>,
-    output: MergedAsyncIterables<BuildOutput>
+    output: MergedAsyncIterables<BuildOutput>,
   ): Promise<string> {
     let location = parseNpmStyleSpecifier(specifier);
     if (location === undefined) {
@@ -302,7 +302,7 @@ export class BareModuleTransformer {
    */
   private async *_fetchExternalDependency(
     location: NpmFileLocation,
-    output: MergedAsyncIterables<BuildOutput>
+    output: MergedAsyncIterables<BuildOutput>,
   ) {
     const path = `${location.pkg}@${location.version}/${location.path}`;
     if (this._emittedExternalDependencies.has(path)) {
@@ -345,7 +345,7 @@ export class BareModuleTransformer {
         },
       },
       getPackageJson,
-      output
+      output,
     );
   }
 }
@@ -355,7 +355,7 @@ export class BareModuleTransformer {
  */
 const makeEsModuleLexerDiagnostic = (
   e: Error,
-  filename: string
+  filename: string,
 ): DiagnosticBuildOutput | undefined => {
   const match = e.message.match(/@:(\d+):(\d+)$/);
   if (match === null) {
@@ -381,7 +381,7 @@ const makeEsModuleLexerDiagnostic = (
  */
 const makeJsonParseDiagnostic = (
   e: Error,
-  file: SampleFile
+  file: SampleFile,
 ): DiagnosticBuildOutput => {
   const start = extractPositionFromJsonParseError(e.message, file.content) ?? {
     line: 0,
@@ -409,7 +409,7 @@ const makeJsonParseDiagnostic = (
  */
 const extractPositionFromJsonParseError = (
   message: string,
-  json: string
+  json: string,
 ): {line: number; character: number} | undefined => {
   const chrome = message.match(/at position (\d+)/);
   if (chrome !== null) {

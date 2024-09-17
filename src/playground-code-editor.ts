@@ -306,7 +306,7 @@ export class PlaygroundCodeEditor extends LitElement {
             if (!docInstance) {
               docInstance = new CodeMirror.Doc(
                 this.value ?? '',
-                this._getLanguageMode()
+                this._getLanguageMode(),
               );
               this._docCache.set(docKey, docInstance);
               createdNewDoc = true;
@@ -474,7 +474,7 @@ export class PlaygroundCodeEditor extends LitElement {
         extraKeys: {
           Tab: () => {
             cm.replaceSelection(
-              Array((cm.getOption('indentUnit') ?? 2) + 1).join(' ')
+              Array((cm.getOption('indentUnit') ?? 2) + 1).join(' '),
             );
           },
           // Ctrl + Space requests code completions.
@@ -488,7 +488,7 @@ export class PlaygroundCodeEditor extends LitElement {
           ['Ctrl-/']: () => cm.toggleComment(),
           ['Cmd-/']: () => cm.toggleComment(),
         },
-      }
+      },
     );
     cm.on('change', (_editorInstance: Editor, changeObject: EditorChange) => {
       this._value = cm.getValue();
@@ -515,7 +515,7 @@ export class PlaygroundCodeEditor extends LitElement {
   private _onRenderLine(
     editorInstance: Editor,
     line: CodeMirror.LineHandle,
-    elt: HTMLElement
+    elt: HTMLElement,
   ) {
     // When wrapping a line the subsequent wrapped code
     // needs to keep the same formatting and have the
@@ -600,14 +600,14 @@ export class PlaygroundCodeEditor extends LitElement {
           provideCompletions: (completions: EditorCompletion[]) =>
             this._onCompletionsProvided(id, completions, cursorIndexOnRequest),
         },
-      })
+      }),
     );
   }
 
   private _onCompletionsProvided(
     id: number,
     completions: EditorCompletion[],
-    cursorIndex: number
+    cursorIndex: number,
   ) {
     // To prevent race conditioning, check that the completions provided
     // are from the latest completions request.
@@ -651,13 +651,13 @@ export class PlaygroundCodeEditor extends LitElement {
                 element,
                 _data,
                 codeEditorHint,
-                i === 0 ? comp.details : undefined // Only render the detail on the first item
+                i === 0 ? comp.details : undefined, // Only render the detail on the first item
               );
             },
             get details() {
               return comp.details;
             },
-          } as CodeEditorHint)
+          }) as CodeEditorHint,
       ) ?? [];
 
     const hints: Hints = {
@@ -679,7 +679,7 @@ export class PlaygroundCodeEditor extends LitElement {
         this._onCompletionSelectedChange?.();
 
         this._renderHint(element as HTMLElement, hints, hint, hint.details);
-      }
+      },
     );
 
     // As CodeMirror doesn't let us directly query if the completion hints are shown,
@@ -712,7 +712,7 @@ export class PlaygroundCodeEditor extends LitElement {
     element: HTMLElement | undefined,
     _data: Hints,
     hint: CodeEditorHint,
-    detail?: Promise<EditorCompletionDetails>
+    detail?: Promise<EditorCompletionDetails>,
   ) {
     if (!element) return;
 
@@ -720,7 +720,7 @@ export class PlaygroundCodeEditor extends LitElement {
     const completionData = this._completions?.[itemIndex];
     const objectName = this._buildHintObjectName(
       hint.displayText,
-      completionData
+      completionData,
     );
     // Render the actual completion item first
     this._renderCompletionItem(objectName, element);
@@ -736,7 +736,7 @@ export class PlaygroundCodeEditor extends LitElement {
         this._renderCompletionItemWithDetails(
           objectName,
           detailResult,
-          element
+          element,
         );
         // Set the current onSelectedChange to a callback to re-render
         // the currently selected element, but without the details. This is
@@ -751,7 +751,7 @@ export class PlaygroundCodeEditor extends LitElement {
 
   private _renderCompletionItem(
     objectName: string | TemplateResult,
-    target: HTMLElement
+    target: HTMLElement,
   ) {
     render(html`<span class="hint-object-name">${objectName}</span>`, target);
   }
@@ -759,12 +759,12 @@ export class PlaygroundCodeEditor extends LitElement {
   private _renderCompletionItemWithDetails(
     objectName: DirectiveResult,
     details: EditorCompletionDetails,
-    target: HTMLElement
+    target: HTMLElement,
   ) {
     render(
       html`<span class="hint-object-name">${objectName}</span>
         <span class="hint-object-details">${details.text}</span> `,
-      target
+      target,
     );
   }
 
@@ -775,7 +775,7 @@ export class PlaygroundCodeEditor extends LitElement {
    */
   private _buildHintObjectName(
     objectName: string | undefined,
-    completionData: EditorCompletion | undefined
+    completionData: EditorCompletion | undefined,
   ): TemplateResult | string {
     const markedObjectName = objectName ?? '';
     const matches = completionData?.matches ?? [];
@@ -984,7 +984,7 @@ export class PlaygroundCodeEditor extends LitElement {
         if (this._diagnosticsMouseoverListenerActive) {
           this._cmDom?.removeEventListener(
             'mouseover',
-            this._onMouseOverWithDiagnostics
+            this._onMouseOverWithDiagnostics,
           );
           this._diagnosticsMouseoverListenerActive = false;
         }
@@ -993,7 +993,7 @@ export class PlaygroundCodeEditor extends LitElement {
       if (!this._diagnosticsMouseoverListenerActive) {
         this._cmDom?.addEventListener(
           'mouseover',
-          this._onMouseOverWithDiagnostics
+          this._onMouseOverWithDiagnostics,
         );
         this._diagnosticsMouseoverListenerActive = true;
       }
@@ -1011,8 +1011,8 @@ export class PlaygroundCodeEditor extends LitElement {
             },
             {
               className: `diagnostic diagnostic-${i}`,
-            }
-          )
+            },
+          ),
         );
       }
     });
@@ -1029,7 +1029,7 @@ export class PlaygroundCodeEditor extends LitElement {
     // encoded the diagnostic index into a class, we can just extract it
     // directly from the target.
     const idxMatch = (event.target as Element).className?.match(
-      /diagnostic-(\d+)/
+      /diagnostic-(\d+)/,
     );
     if (idxMatch === null) {
       this._tooltipDiagnostic = undefined;

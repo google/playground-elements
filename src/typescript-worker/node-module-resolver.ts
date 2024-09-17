@@ -40,7 +40,7 @@ export class NodeModuleResolver {
   resolve(
     location: NpmFileLocation,
     packageJson: PackageJson,
-    base: string
+    base: string,
   ): string {
     const packageSubpath = addRelativePrefix(location.path);
 
@@ -68,11 +68,11 @@ export class NodeModuleResolver {
       packageSubpath,
       packageJson as PackageJsonWithExports,
       base,
-      this._conditions
+      this._conditions,
     );
     if (!resolved.pathname.startsWith(packageBase)) {
       throw new Error(
-        `Unexpected error: ${resolved.pathname} expected to start with ${packageBase}`
+        `Unexpected error: ${resolved.pathname} expected to start with ${packageBase}`,
       );
     }
     return resolved.pathname.slice(packageBase.length);

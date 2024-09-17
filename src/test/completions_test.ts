@@ -34,7 +34,7 @@ suite('completions', () => {
           </script>
         </playground-ide>
       `,
-      container
+      container,
     );
     await assertPreviewContains('');
 
@@ -75,7 +75,7 @@ suite('completions', () => {
     const iframe = (await pierce(
       'playground-ide',
       'playground-preview',
-      'iframe'
+      'iframe',
     )) as HTMLIFrameElement;
     await waitForIframeLoad(iframe);
     // TODO(aomarks) Chromium and Webkit both fire iframe "load" after the
@@ -95,7 +95,7 @@ suite('completions', () => {
 
   const waitForElement = (
     parent: ParentNode | null | undefined,
-    elementName: string
+    elementName: string,
   ) => {
     return new Promise((resolve, reject) => {
       (function tryToFindElem(attempt) {
@@ -139,8 +139,8 @@ suite('completions', () => {
   const addedNodesContainsCompletionsMenu = (mutationsList: MutationRecord[]) =>
     mutationsList.some((mut) =>
       Array.from(mut.addedNodes).some((node) =>
-        (node as Element).classList.contains('CodeMirror-hints')
-      )
+        (node as Element).classList.contains('CodeMirror-hints'),
+      ),
     );
   const raf = async () => new Promise((r) => requestAnimationFrame(r));
   const pierce = async (...selectors: string[]) => {
@@ -162,7 +162,7 @@ suite('completions', () => {
         async () => {
           resolve('');
         },
-        {once: true}
+        {once: true},
       );
     });
 
@@ -182,7 +182,7 @@ suite('completions', () => {
       console.log('Invalid completions: ');
       for (const listItem of completionItemList?.children || []) {
         console.log(
-          listItem?.querySelector<HTMLElement>('.hint-object-name')?.innerText
+          listItem?.querySelector<HTMLElement>('.hint-object-name')?.innerText,
         );
       }
     }
@@ -191,7 +191,7 @@ suite('completions', () => {
     assert.equal(
       completionItemList?.children.length,
       7,
-      'Completion item list length'
+      'Completion item list length',
     );
   });
 
@@ -206,17 +206,17 @@ suite('completions', () => {
     });
     await waitForElement(
       editor?.shadowRoot,
-      '.CodeMirror-hint-active#cm-complete-0-1'
+      '.CodeMirror-hint-active#cm-complete-0-1',
     );
 
     const activeHint = editor?.shadowRoot?.querySelector(
-      '.CodeMirror-hint-active'
+      '.CodeMirror-hint-active',
     );
 
     assert.equal(
       activeHint?.id,
       'cm-complete-0-1',
-      'Active hint should have the ID cm-complete-0-1 marking the second hint'
+      'Active hint should have the ID cm-complete-0-1 marking the second hint',
     );
   });
 
@@ -243,14 +243,14 @@ suite('completions', () => {
     assert.equal(
       editor?.value,
       'document.querySelector',
-      'Completion should be visible in the code editor'
+      'Completion should be visible in the code editor',
     );
 
     const completionItemList =
       editor?.shadowRoot?.querySelector('.CodeMirror-hints');
     assert.isNull(
       completionItemList,
-      'Completion item list should disappear on completion confirmation'
+      'Completion item list should disappear on completion confirmation',
     );
   });
 
@@ -273,7 +273,7 @@ suite('completions', () => {
     assert.equal(
       completionItemText,
       'reallySpecificFunctionName',
-      'Completion item should be the created function'
+      'Completion item should be the created function',
     );
   });
 });

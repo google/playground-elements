@@ -43,7 +43,7 @@ const workerAPI: ServiceWorkerAPI = {
 };
 
 const findSessionProxyClient = async (
-  sessionId: string
+  sessionId: string,
 ): Promise<Client | undefined> => {
   for (const client of await self.clients.matchAll({
     includeUncontrolled: true,
@@ -161,7 +161,7 @@ const onActivate = (event: ExtendableEvent) => {
 };
 
 const onMessage = (
-  e: Omit<ExtendableMessageEvent, 'data'> & {data: PlaygroundMessage}
+  e: Omit<ExtendableMessageEvent, 'data'> & {data: PlaygroundMessage},
 ) => {
   // Receive a handshake message from a page and setup Comlink.
   if (e.data.type === CONNECT_SW_TO_PROJECT) {

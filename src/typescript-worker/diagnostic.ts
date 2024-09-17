@@ -27,7 +27,7 @@ export function makeLspDiagnostic(tsDiagnostic: ts.Diagnostic): lsp.Diagnostic {
         tsDiagnostic.start !== undefined &&
         tsDiagnostic.length !== undefined
           ? tsDiagnostic.file.getLineAndCharacterOfPosition(
-              tsDiagnostic.start + tsDiagnostic.length
+              tsDiagnostic.start + tsDiagnostic.length,
             )
           : {character: 0, line: 0},
     },

@@ -44,7 +44,7 @@ const checkTypesFetcher = async (opts: {
 
 const checkTypesFetcherImpl = async (
   opts: Parameters<typeof checkTypesFetcher>[0],
-  cdnBaseUrl: string
+  cdnBaseUrl: string,
 ) => {
   const cdn = new CachingCdn(cdnBaseUrl);
   const importMapResolver = new ImportMapResolver(opts.importMap ?? {});
@@ -53,7 +53,7 @@ const checkTypesFetcherImpl = async (
     importMapResolver,
     opts.packageJson,
     opts.sourceTexts,
-    opts.tsLibs ?? []
+    opts.tsLibs ?? [],
   );
   if (opts.expectedDependencyGraph !== undefined) {
     assert.deepEqual(actual.dependencyGraph, opts.expectedDependencyGraph);
@@ -65,7 +65,7 @@ const checkTypesFetcherImpl = async (
   // "{}" as the difference in the error message, hence this conversion :(
   assert.deepEqual(
     [...actual.files].sort(([keyA], [keyB]) => keyA.localeCompare(keyB)),
-    [...opts.expectedFiles].sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+    [...opts.expectedFiles].sort(([keyA], [keyB]) => keyA.localeCompare(keyB)),
   );
 };
 
@@ -932,7 +932,7 @@ suite('types fetcher', () => {
           importMap,
           expectedFiles,
         },
-        cdnBaseUrl
+        cdnBaseUrl,
       );
     } finally {
       await deleteCdnData();
@@ -981,7 +981,7 @@ suite('types fetcher', () => {
           importMap,
           expectedFiles,
         },
-        cdnBaseUrl
+        cdnBaseUrl,
       );
     } finally {
       await deleteCdnData();
@@ -1039,7 +1039,7 @@ suite('types fetcher', () => {
           importMap,
           expectedFiles,
         },
-        cdnBaseUrl
+        cdnBaseUrl,
       );
     } finally {
       await deleteCdnData();

@@ -306,7 +306,7 @@ export class PlaygroundFileSystemControls extends PlaygroundConnectedElement {
       this.dispatchEvent(
         new CustomEvent<{filename: string}>('newFile', {
           detail: {filename},
-        })
+        }),
       );
     }
   }

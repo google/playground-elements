@@ -51,14 +51,14 @@ suite('MergedAsyncIterables', () => {
     merged.add(
       (async function* () {
         yield 'a';
-      })()
+      })(),
     );
     await flush(merged);
     assert.throws(() => {
       merged.add(
         (async function* () {
           yield 'b';
-        })()
+        })(),
       );
     });
   });
@@ -126,11 +126,11 @@ suite('MergedAsyncIterables', () => {
           merged.add(
             (async function* () {
               yield 'c0';
-            })()
+            })(),
           );
           await raf();
           yield 'b1';
-        })()
+        })(),
       );
       yield 'a1';
     })();
@@ -147,7 +147,7 @@ suite('MergedAsyncIterables', () => {
       (async function* () {
         await raf();
         yield 'slow';
-      })()
+      })(),
     );
 
     // The key thing about this test is that we've started iterating before
@@ -162,7 +162,7 @@ suite('MergedAsyncIterables', () => {
     merged.add(
       (async function* () {
         yield 'fast';
-      })()
+      })(),
     );
 
     await done;

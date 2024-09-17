@@ -87,7 +87,7 @@ test.describe('service worker', () => {
     if (versionMatches.length !== 1) {
       throw new Error(
         'Expected 1 version string in playground-service-worker.js. ' +
-          `Found ${versionMatches.length}.`
+          `Found ${versionMatches.length}.`,
       );
     }
     const hex = versionMatches[0].groups?.['hex'];
@@ -169,7 +169,7 @@ test.describe('service worker', () => {
 
   const expectIframeServesVersion = async (
     page: Page,
-    version: string
+    version: string,
   ): Promise<void> => {
     const text = await getIframeBodyText(page);
     expect(text).toEqual(`${version} index.html`);
@@ -186,7 +186,7 @@ test.describe('service worker', () => {
         if (text === expect) {
           resolve();
         }
-      })
+      }),
     );
 
   test('simple fresh load', async ({browser}) => {
@@ -276,7 +276,7 @@ test.describe('service worker', () => {
     setExpectedVersion('new');
     const loggedAboutUpdate = expectConsoleLog(
       page,
-      'Playground service worker is outdated. Want new but got old. Waiting for update.'
+      'Playground service worker is outdated. Want new but got old. Waiting for update.',
     );
     await page.goto(indexUrl);
     await oldServedAndNewSwappedIn;

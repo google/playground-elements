@@ -32,7 +32,7 @@ import CleanCSS from 'clean-css';
 
 const rootDir = pathlib.resolve(
   pathlib.dirname(url.fileURLToPath(import.meta.url)),
-  '..'
+  '..',
 );
 
 const mkdirAndWriteUtf8 = async (path, data) => {
@@ -63,7 +63,7 @@ const postMinifyCss = (css) => {
   // most of it.
   css = css.replace(
     / none repeat scroll 0% 0%\s*\/\s*auto padding-box border-box/g,
-    ''
+    '',
   );
   // The computed value of a `border` property includes all values even when
   // width is 0. We can strip off the rest when width is 0.
@@ -73,12 +73,12 @@ const postMinifyCss = (css) => {
 
 const makeThemeCss = (themeName, results, defaultResults) => {
   const excludeDefaults = Object.values(results).filter(
-    (r) => defaultResults[r.to].value !== r.value
+    (r) => defaultResults[r.to].value !== r.value,
   );
   return postMinifyCss(
     minifyCss(`.playground-theme-${themeName} {
 ${excludeDefaults.map(({to, value}) => `  ${to}: ${value};`).join('\n')}
-}`)
+}`),
   );
 };
 
@@ -121,7 +121,7 @@ const main = async () => {
   ]);
   const themeFilenames = fs
     .readdirSync(
-      pathlib.resolve(rootDir, 'node_modules', 'codemirror', 'theme')
+      pathlib.resolve(rootDir, 'node_modules', 'codemirror', 'theme'),
     )
     .filter((name) => !excludeThemes.has(name));
   const themeNames = [];
@@ -131,17 +131,17 @@ const main = async () => {
     const styleUrl = `/node_modules/codemirror/theme/${filename}`;
     const results = await page.evaluate(
       ([themeName, styleUrl]) => window.probe(themeName, styleUrl),
-      [themeName, styleUrl]
+      [themeName, styleUrl],
     );
     const css = makeThemeCss(themeName, results, defaultResults);
     writes.push(
-      mkdirAndWriteUtf8(pathlib.join(rootDir, 'themes', filename), css)
+      mkdirAndWriteUtf8(pathlib.join(rootDir, 'themes', filename), css),
     );
     writes.push(
       mkdirAndWriteUtf8(
         pathlib.join(rootDir, 'src', 'themes', `${filename}.ts`),
-        makeCssModule(css)
-      )
+        makeCssModule(css),
+      ),
     );
   }
 
@@ -156,8 +156,8 @@ ${themeNames
     (themeName) =>
       `import t${themeName.replace(
         /-/g,
-        '_'
-      )} from '../themes/${themeName}.css.js';`
+        '_',
+      )} from '../themes/${themeName}.css.js';`,
   )
   .join('\n')}
 
@@ -171,8 +171,8 @@ ${themeNames
   writes.push(
     mkdirAndWriteUtf8(
       pathlib.join(rootDir, 'src', 'configurator', 'themes.ts'),
-      allThemesTs
-    )
+      allThemesTs,
+    ),
   );
 
   await Promise.all([browser.close(), server.stop(), ...writes]);

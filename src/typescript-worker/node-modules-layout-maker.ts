@@ -82,7 +82,7 @@ interface GraphTraversalState {
 export class NodeModulesLayoutMaker {
   layout(
     rootDeps: PackageDependencies,
-    depGraph: DependencyGraph
+    depGraph: DependencyGraph,
   ): NodeModulesDirectory {
     const rootNodeModulesDir: NodeModulesDirectory = {};
     // Traverse the dependency graph using breadth-first search so that we

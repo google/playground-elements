@@ -22,7 +22,7 @@ export const queryCompletions = async (
   fileContent: string,
   tokenUnderCursor: string,
   cursorIndex: number,
-  config: WorkerConfig
+  config: WorkerConfig,
 ): Promise<WithMetadata<CompletionInfo> | undefined> => {
   const workerContext = getWorkerContext(config);
 
@@ -46,7 +46,7 @@ export const queryCompletions = async (
   const completions = languageService.getCompletionsAtPosition(
     filename,
     cursorIndex,
-    options
+    options,
   );
 
   return completions;
@@ -63,7 +63,7 @@ export const getCompletionItemDetails = async (
   filename: string,
   cursorIndex: number,
   config: WorkerConfig,
-  completionWord: string
+  completionWord: string,
 ): Promise<EditorCompletionDetails> => {
   const workerContext = getWorkerContext(config);
   const languageService = workerContext.languageServiceContext.service;
@@ -77,7 +77,7 @@ export const getCompletionItemDetails = async (
     undefined,
     undefined,
     undefined,
-    undefined
+    undefined,
   );
 
   const detailInformation: EditorCompletionDetails = {
@@ -89,7 +89,7 @@ export const getCompletionItemDetails = async (
 };
 
 function displayPartsToString(
-  displayParts: SymbolDisplayPart[] | undefined
+  displayParts: SymbolDisplayPart[] | undefined,
 ): string {
   if (!displayParts || displayParts.length === 0) return '';
 
@@ -101,7 +101,7 @@ function displayPartsToString(
 }
 
 function getDocumentations(
-  documentation: SymbolDisplayPart[] | undefined
+  documentation: SymbolDisplayPart[] | undefined,
 ): string[] {
   return documentation?.map((doc) => doc.text) ?? [];
 }

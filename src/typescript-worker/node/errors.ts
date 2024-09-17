@@ -16,7 +16,7 @@ export class InvalidModuleSpecifierError extends Error {
     super(
       `Invalid module "${request}" ${reason}${
         base ? ` imported from ${base}` : ''
-      }`
+      }`,
     );
   }
 }
@@ -26,7 +26,7 @@ export class InvalidPackageConfigError extends Error {
     super(
       `Invalid package config ${path}${base ? ` while importing ${base}` : ''}${
         message ? `. ${message}` : ''
-      }`
+      }`,
     );
   }
 }
@@ -37,7 +37,7 @@ export class InvalidPackageTargetError extends Error {
     key: string,
     target: PackageExportsTarget,
     isImport = false,
-    base?: string
+    base?: string,
   ) {
     const relError =
       typeof target === 'string' &&
@@ -55,9 +55,9 @@ export class InvalidPackageTargetError extends Error {
       msg = `Invalid "${
         isImport ? 'imports' : 'exports'
       }" target ${JSON.stringify(
-        target
+        target,
       )} defined for '${key}' in the package config ${fileURLToPath(
-        pkgPath
+        pkgPath,
       )}package.json${base ? ` imported from ${base}` : ''}${
         relError ? '; targets must start with "./"' : ''
       }`;
@@ -71,13 +71,13 @@ export class PackagePathNotExportedError extends Error {
       super(
         `No "exports" main defined in ${pkgPath}package.json${
           base ? ` imported from ${base}` : ''
-        }`
+        }`,
       );
     } else {
       super(
         `Package subpath '${subpath}' is not defined by "exports" in ${pkgPath}package.json${
           base ? ` imported from ${base}` : ''
-        }`
+        }`,
       );
     }
   }

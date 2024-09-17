@@ -110,7 +110,7 @@ export class PlaygroundBuild {
       throw new Error(
         `Unexpected BuildOutput kind: ${
           (unreachable(output) as BuildOutput).kind
-        }`
+        }`,
       );
     }
   }

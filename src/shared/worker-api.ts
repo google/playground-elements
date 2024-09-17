@@ -125,20 +125,20 @@ export interface WorkerAPI {
   compileProject(
     files: Array<SampleFile>,
     config: WorkerConfig,
-    emit: (result: BuildOutput) => void
+    emit: (result: BuildOutput) => void,
   ): Promise<void>;
   getCompletions(
     filename: string,
     fileContent: string,
     tokenUnderCursor: string,
     cursorIndex: number,
-    config: WorkerConfig
+    config: WorkerConfig,
   ): Promise<WithMetadata<CompletionInfo> | undefined>;
   getCompletionItemDetails(
     filename: string,
     cursorIndex: number,
     config: WorkerConfig,
-    completionWord: string
+    completionWord: string,
   ): Promise<EditorCompletionDetails>;
 }
 

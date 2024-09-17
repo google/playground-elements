@@ -26,7 +26,7 @@ suite('playground-code-editor', () => {
   test('is registered', () => {
     assert.instanceOf(
       document.createElement('playground-code-editor'),
-      PlaygroundCodeEditor
+      PlaygroundCodeEditor,
     );
   });
 
@@ -110,7 +110,7 @@ suite('playground-code-editor', () => {
       await raf();
       assert.equal(
         editorInternals._codemirror!.getValue(),
-        'value with no cache'
+        'value with no cache',
       );
     });
 
@@ -154,7 +154,7 @@ suite('playground-code-editor', () => {
       await raf();
       assert.equal(
         editorInternals._codemirror!.getValue(),
-        'override document key 1'
+        'override document key 1',
       );
       editorInternals._codemirror?.undo();
       await raf();
@@ -249,7 +249,7 @@ suite('playground-code-editor', () => {
       type: PlaygroundCodeEditor['type'],
       value: string,
       text: string,
-      color: string
+      color: string,
     ) => {
       const editor = document.createElement('playground-code-editor');
       editor.type = type;
@@ -288,7 +288,7 @@ suite('playground-code-editor', () => {
         'tsx',
         'const x: () => unknown = () => <p>foo</p>;',
         'p',
-        tagColor
+        tagColor,
       ));
 
     test('html-in-js', async () =>
@@ -311,7 +311,7 @@ suite('playground-code-editor', () => {
     async function assertToggle(
       type: PlaygroundCodeEditor['type'],
       value: string,
-      expect: string
+      expect: string,
     ) {
       const editor = document.createElement('playground-code-editor');
       editor.type = type;
@@ -385,7 +385,7 @@ suite('playground-code-editor', () => {
       assert.include(
         // There isn't a focusContainer when the editor is in readonly mode.
         editor.shadowRoot!.querySelector<HTMLDivElement>('div')!.innerText,
-        'const g = 3;'
+        'const g = 3;',
       );
     });
   });

@@ -19,7 +19,7 @@ export const forceSkypackRawMode = (url: URL): URL => {
   if (url.hostname === 'cdn.skypack.dev') {
     url.pathname = url.pathname.replace(
       /mode=imports\/(un)?optimized/,
-      'mode=raw'
+      'mode=raw',
     );
   }
   return url;

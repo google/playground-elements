@@ -142,14 +142,14 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
       if (oldProject) {
         oldProject.removeEventListener(
           'filesChanged',
-          this._onProjectFilesChanged
+          this._onProjectFilesChanged,
         );
       }
       if (this._project) {
         this._handleFilesChanged(true);
         this._project.addEventListener(
           'filesChanged',
-          this._onProjectFilesChanged
+          this._onProjectFilesChanged,
         );
       }
     }
@@ -192,7 +192,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
                     </svg>
                   </mwc-icon-button>`
                 : nothing}
-            </playground-internal-tab>`
+            </playground-internal-tab>`,
         )}
       </playground-internal-tab-bar>
 
@@ -232,7 +232,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   private _handleFilesChanged(newProjectLoaded = false) {
     if (newProjectLoaded) {
       const fileToSelect = this._visibleFiles.find(
-        (file) => file.selected
+        (file) => file.selected,
       )?.name;
       if (fileToSelect !== undefined) {
         this._activeFileName = fileToSelect;
@@ -246,7 +246,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     event: CustomEvent<{
       tab?: PlaygroundInternalTab;
       previous?: PlaygroundInternalTab;
-    }>
+    }>,
   ) {
     const tab = event.detail.tab;
     if (!tab) {
@@ -261,7 +261,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
   }
 
   private _onOpenMenu(
-    event: CustomEvent<{index: number; anchor: HTMLElement}>
+    event: CustomEvent<{index: number; anchor: HTMLElement}>,
   ) {
     const controls = this._fileSystemControls;
     if (!controls) {
@@ -312,7 +312,7 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     // might have changed.
     if (this._activeFileName) {
       const index = this._visibleFiles.findIndex(
-        (file) => file.name === this._activeFileName
+        (file) => file.name === this._activeFileName,
       );
       if (index >= 0) {
         this._activeFileIndex = index;

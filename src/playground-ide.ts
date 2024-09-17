@@ -381,7 +381,7 @@ export class PlaygroundIde extends LitElement {
     const onPointermove = (event: PointerEvent) => {
       const rhsWidth = Math.min(
         rhsMaxWidth,
-        Math.max(rhsMinWidth, hostRight - event.clientX)
+        Math.max(rhsMinWidth, hostRight - event.clientX),
       );
       const percent = (rhsWidth / hostWidth) * 100;
       rhsStyle.setProperty('--playground-preview-width', `${percent}%`);

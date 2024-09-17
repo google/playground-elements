@@ -106,7 +106,7 @@ export class PlaygroundInternalTab extends LitElement {
         new CustomEvent<{tab?: PlaygroundInternalTab}>('tabchange', {
           detail: {tab: this},
           bubbles: true,
-        })
+        }),
       );
     }
   }

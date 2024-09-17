@@ -129,7 +129,7 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
       }
       if (path === '') {
         const packageJson = JSON.parse(
-          versionData.files['package.json']?.content ?? '{}'
+          versionData.files['package.json']?.content ?? '{}',
         ) as {main?: string};
         // Only look at the "main" field, not "module", because that's how
         // unpkg.com works when it's not in ?module mode, which is how we're
@@ -146,8 +146,8 @@ export function fakeCdnPlugin(): TestRunnerPlugin {
         ctx.response.type = path.endsWith('.js')
           ? 'text/javascript'
           : path.endsWith('.json')
-          ? 'application/json'
-          : 'text/plain';
+            ? 'application/json'
+            : 'text/plain';
         return undefined;
       }
       if (path === 'package.json') {
@@ -185,7 +185,7 @@ export type CdnData = {
 };
 
 const parseNpmModuleSpecifier = (
-  specifier: string
+  specifier: string,
 ): {pkg: string; semverRangeOrTag: string; path: string} | undefined => {
   const match = specifier.match(/^((?:@[^/@]+\/)?[^/@]+)(?:@([^/]+))?\/?(.*)$/);
   if (match === null) {

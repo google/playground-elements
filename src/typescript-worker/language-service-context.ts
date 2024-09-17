@@ -31,12 +31,12 @@ export class LanguageServiceContext {
 
   readonly serviceHost = new WorkerLanguageServiceHost(
     self.origin,
-    compilerOptions
+    compilerOptions,
   );
 
   readonly service = ts.createLanguageService(
     this.serviceHost,
-    ts.createDocumentRegistry()
+    ts.createDocumentRegistry(),
   );
 }
 
@@ -82,7 +82,7 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
    * */
   sync(files: Map<string, string>) {
     files.forEach((file, fileName) =>
-      this.updateFileContentIfNeeded(fileName, file)
+      this.updateFileContentIfNeeded(fileName, file),
     );
     this._removeDeletedFiles(files);
   }

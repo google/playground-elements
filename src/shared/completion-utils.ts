@@ -16,7 +16,7 @@ import {
 
 export function sortCompletionItems(
   completions: CompletionEntryWithDetails[] | undefined,
-  searchWord: string
+  searchWord: string,
 ): EditorCompletion[] {
   if (!completions) return [];
   // If the user input a letter or a partial word, we want to offer
@@ -50,7 +50,7 @@ export function sortCompletionItems(
           get details() {
             return item.item.details;
           },
-        } as EditorCompletion)
+        }) as EditorCompletion,
     )
     // Sort the completions by how well they matched the given keyword
     .sort((a, b) => {
@@ -65,7 +65,7 @@ export function sortCompletionItems(
 
 export function completionEntriesAsEditorCompletions(
   completions: CompletionEntryWithDetails[] | undefined,
-  prefix = ''
+  prefix = '',
 ): EditorCompletion[] {
   return (
     completions?.map(
@@ -82,7 +82,7 @@ export function completionEntriesAsEditorCompletions(
           get details() {
             return comp.details;
           },
-        } as EditorCompletion)
+        }) as EditorCompletion,
     ) ?? []
   );
 }
@@ -100,8 +100,8 @@ export function populateCompletionInfoWithDetailGetters(
   getCompletionDetailsFunction: (
     filename: string,
     cursorIndex: number,
-    completionWord: string
-  ) => Promise<EditorCompletionDetails>
+    completionWord: string,
+  ) => Promise<EditorCompletionDetails>,
 ) {
   const completionInfoWithDetails = completionInfo as CompletionInfoWithDetails;
   completionInfoWithDetails.entries = completionInfo?.entries.map(
@@ -118,12 +118,12 @@ export function populateCompletionInfoWithDetailGetters(
             this._details = getCompletionDetailsFunction(
               filename,
               cursorIndex,
-              entry.name
+              entry.name,
             );
           }
           return this._details;
         },
-      } as CompletionEntryWithDetails)
+      }) as CompletionEntryWithDetails,
   );
   return completionInfoWithDetails;
 }

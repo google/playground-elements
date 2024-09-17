@@ -23,7 +23,7 @@ export class ImportMapResolver {
 
   resolve(specifier: string): string | null {
     for (const [specifierKey, resolutionResult] of Object.entries(
-      this.importMap.imports ?? {}
+      this.importMap.imports ?? {},
     )) {
       // Note that per spec we shouldn't do a lookup for the exact match case,
       // because if a trailing-slash mapping also matches and comes first, it
@@ -37,7 +37,7 @@ export class ImportMapResolver {
           console.warn(
             `Could not resolve module specifier "${specifier}"` +
               ` using import map key "${specifierKey}" because` +
-              ` address "${resolutionResult}" must end in a forward-slash.`
+              ` address "${resolutionResult}" must end in a forward-slash.`,
           );
           return null;
         }
@@ -51,7 +51,7 @@ export class ImportMapResolver {
             `Could not resolve module specifier "${specifier}"` +
               ` using import map key "${specifierKey}" because` +
               ` "${afterPrefix}" could not be parsed` +
-              ` relative to "${resolutionResult}".`
+              ` relative to "${resolutionResult}".`,
           );
           return null;
         }
@@ -61,7 +61,7 @@ export class ImportMapResolver {
           console.warn(
             `Could not resolve module specifier "${specifier}"` +
               ` using import map key "${specifierKey}" because` +
-              ` "${afterPrefix}" backtracked above "${resolutionResult}".`
+              ` "${afterPrefix}" backtracked above "${resolutionResult}".`,
           );
           return null;
         }

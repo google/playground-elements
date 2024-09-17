@@ -369,7 +369,7 @@ export class PlaygroundConfigurator extends LitElement {
           <div class="knobs">
             ${knobsBySection[section].map((knob) => this.knob(knob))}
           </div>
-        </section>`
+        </section>`,
     );
   }
 
@@ -489,7 +489,7 @@ ${props.join('\n')}
           (option) =>
             html`<option value=${option} ?selected=${option === value}>
               ${option}
-            </option>`
+            </option>`,
         )}
       </select>
     `;
@@ -570,7 +570,7 @@ ${props.join('\n')}
   }
 
   private async _onThemeDetectorApply(
-    event: CustomEvent<{properties: Map<string, string | null>}>
+    event: CustomEvent<{properties: Map<string, string | null>}>,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const values = new Map<KnobId, any>();
@@ -670,7 +670,7 @@ const githubCorner = html`<a
  */
 const toHex = (rgbStr: string): string => {
   const match = rgbStr.match(
-    /^\s*rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/
+    /^\s*rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/,
   );
   if (!match) {
     return '';

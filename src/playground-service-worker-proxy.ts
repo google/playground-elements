@@ -21,7 +21,7 @@ void (async () => {
     parent.window.console.warn(
       'Playground sandbox is executing with the same origin as its parent.',
       'This is a security risk.',
-      'https://github.com/google/playground-elements#sandbox-security'
+      'https://github.com/google/playground-elements#sandbox-security',
     );
     // eslint-disable-next-line no-empty
   } catch {}
@@ -44,7 +44,7 @@ void (async () => {
 
   const registration = await navigator.serviceWorker.register(
     new URL('playground-service-worker.js', import.meta.url).href,
-    {scope}
+    {scope},
   );
 
   /** https://www.w3.org/TR/service-workers/#get-newest-worker-algorithm */
@@ -68,7 +68,7 @@ void (async () => {
             aborter.abort();
           }
         },
-        {signal: aborter.signal}
+        {signal: aborter.signal},
       );
     });
   };
@@ -140,7 +140,7 @@ void (async () => {
         // what we must do.
         void connectToNewest(true);
       }
-    }
+    },
   );
 
   // A message from the project.
@@ -167,6 +167,6 @@ void (async () => {
           console.error('Playground service worker update failed.');
         }
       }
-    }
+    },
   );
 })();

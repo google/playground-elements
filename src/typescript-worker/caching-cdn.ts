@@ -121,7 +121,7 @@ export class CachingCdn {
   }
 
   private async _fetch(
-    location: NpmFileLocation
+    location: NpmFileLocation,
   ): Promise<{url: string; file: CdnFile}> {
     let exact = isExactSemverVersion(location.version);
     if (!exact) {
@@ -147,7 +147,7 @@ export class CachingCdn {
     const content = await res.text();
     if (res.status !== 200) {
       const err = new Error(
-        `CDN HTTP ${res.status} error (${url}): ${content}`
+        `CDN HTTP ${res.status} error (${url}): ${content}`,
       );
       deferred.reject(err);
       return deferred.promise;

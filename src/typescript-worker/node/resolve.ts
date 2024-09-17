@@ -26,7 +26,7 @@ function emitFolderMapDeprecation(
   match: string,
   pjsonUrl: URL,
   isExports: boolean,
-  base: string
+  base: string,
 ): void {
   const pjsonPath = fileURLToPath(pjsonUrl);
   console.warn(
@@ -37,19 +37,19 @@ function emitFolderMapDeprecation(
     }.\n` +
       `Update this package.json to use a subpath pattern like "${match}*".`,
     'DeprecationWarning',
-    'DEP0148'
+    'DEP0148',
   );
 }
 
 function makeExportsNotFoundError(
   subpath: string,
   packageJSONUrl: URL,
-  base: string
+  base: string,
 ): PackagePathNotExportedError {
   return new PackagePathNotExportedError(
     fileURLToPath(new URL('.', packageJSONUrl)),
     subpath,
-    base
+    base,
   );
 }
 
@@ -57,7 +57,7 @@ function makeInvalidSubpathError(
   subpath: string,
   packageJSONUrl: URL,
   internal: boolean,
-  base: string
+  base: string,
 ) {
   const reason = `request is not a valid subpath for the "${
     internal ? 'imports' : 'exports'
@@ -70,7 +70,7 @@ function makeInvalidPackageTargetError(
   target: PackageExportsTarget,
   packageJSONUrl: URL,
   internal: boolean,
-  base: string
+  base: string,
 ) {
   if (typeof target === 'object' && target !== null) {
     target = JSON.stringify(target, null, '');
@@ -82,7 +82,7 @@ function makeInvalidPackageTargetError(
     subpath,
     target,
     internal,
-    base
+    base,
   );
 }
 
@@ -98,7 +98,7 @@ function resolvePackageTargetString(
   pattern: boolean,
   internal: boolean,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _conditions: Set<string>
+  _conditions: Set<string>,
 ): URL {
   if (subpath !== '' && !pattern && target[target.length - 1] !== '/') {
     throw makeInvalidPackageTargetError(
@@ -106,7 +106,7 @@ function resolvePackageTargetString(
       target,
       packageJSONUrl,
       internal,
-      base
+      base,
     );
   }
 
@@ -117,7 +117,7 @@ function resolvePackageTargetString(
       target,
       packageJSONUrl,
       internal,
-      base
+      base,
     );
   }
 
@@ -127,7 +127,7 @@ function resolvePackageTargetString(
       target,
       packageJSONUrl,
       internal,
-      base
+      base,
     );
   }
 
@@ -141,7 +141,7 @@ function resolvePackageTargetString(
       target,
       packageJSONUrl,
       internal,
-      base
+      base,
     );
   }
 
@@ -154,7 +154,7 @@ function resolvePackageTargetString(
       match + subpath,
       packageJSONUrl,
       internal,
-      base
+      base,
     );
   }
 
@@ -180,7 +180,7 @@ function resolvePackageTarget(
   base: string,
   pattern: boolean,
   internal: boolean,
-  conditions: Set<string>
+  conditions: Set<string>,
 ): URL | null | undefined {
   if (typeof target === 'string') {
     return resolvePackageTargetString(
@@ -191,7 +191,7 @@ function resolvePackageTarget(
       base,
       pattern,
       internal,
-      conditions
+      conditions,
     );
   } else if (Array.isArray(target)) {
     if (target.length === 0) {
@@ -211,7 +211,7 @@ function resolvePackageTarget(
           base,
           pattern,
           internal,
-          conditions
+          conditions,
         );
       } catch (e) {
         lastException = e;
@@ -239,7 +239,7 @@ function resolvePackageTarget(
         throw new InvalidPackageConfigError(
           fileURLToPath(packageJSONUrl),
           base,
-          '"exports" cannot contain numeric property keys.'
+          '"exports" cannot contain numeric property keys.',
         );
       }
     }
@@ -255,7 +255,7 @@ function resolvePackageTarget(
           base,
           pattern,
           internal,
-          conditions
+          conditions,
         );
         if (resolved === undefined) continue;
         return resolved;
@@ -270,7 +270,7 @@ function resolvePackageTarget(
     target,
     packageJSONUrl,
     internal,
-    base
+    base,
   );
 }
 
@@ -280,7 +280,7 @@ function isConditionalExportsMainSugar(
   // be able to reference a global called "exports".
   _exports: PackageExports,
   packageJSONUrl: URL,
-  base: string
+  base: string,
 ): boolean {
   if (typeof _exports === 'string' || Array.isArray(_exports)) {
     return true;
@@ -303,7 +303,7 @@ function isConditionalExportsMainSugar(
         base,
         '"exports" cannot contain some keys starting with \'.\' and some not.' +
           ' The exports object must either be an object of package subpath keys' +
-          ' or an object of main entry condition name keys only.'
+          ' or an object of main entry condition name keys only.',
       );
     }
   }
@@ -315,7 +315,7 @@ export function packageExportsResolve(
   packageSubpath: string,
   packageConfig: PackageJsonWithExports,
   base: string,
-  conditions: Set<string>
+  conditions: Set<string>,
 ): URL {
   let _exports = packageConfig.exports;
   if (isConditionalExportsMainSugar(_exports, packageJSONUrl, base)) {
@@ -337,7 +337,7 @@ export function packageExportsResolve(
       base,
       false,
       false,
-      conditions
+      conditions,
     );
     if (resolved === null || resolved === undefined) {
       throw makeExportsNotFoundError(packageSubpath, packageJSONUrl, base);
@@ -363,7 +363,7 @@ export function packageExportsResolve(
         bestMatch = key;
         bestMatchSubpath = packageSubpath.slice(
           patternIndex,
-          packageSubpath.length - patternTrailer.length
+          packageSubpath.length - patternTrailer.length,
         );
       }
     } else if (
@@ -388,7 +388,7 @@ export function packageExportsResolve(
       base,
       pattern,
       false,
-      conditions
+      conditions,
     );
     if (resolved === null || resolved === undefined) {
       throw makeExportsNotFoundError(packageSubpath, packageJSONUrl, base);

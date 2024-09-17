@@ -48,25 +48,25 @@ interface SelectKnob<Id extends string, T extends string>
 }
 
 function checkbox<Id extends string>(
-  def: Omit<CheckboxKnob<Id>, 'type'>
+  def: Omit<CheckboxKnob<Id>, 'type'>,
 ): CheckboxKnob<Id> {
   return {type: 'checkbox', ...def};
 }
 
 function slider<Id extends string>(
-  def: Omit<SliderKnob<Id>, 'type'>
+  def: Omit<SliderKnob<Id>, 'type'>,
 ): SliderKnob<Id> {
   return {type: 'slider', ...def};
 }
 
 function color<Id extends string>(
-  def: Omit<ColorKnob<Id>, 'type'>
+  def: Omit<ColorKnob<Id>, 'type'>,
 ): ColorKnob<Id> {
   return {type: 'color', ...def};
 }
 
 function select<Id extends string, T extends string>(
-  def: Omit<SelectKnob<Id, T>, 'type'>
+  def: Omit<SelectKnob<Id, T>, 'type'>,
 ): SelectKnob<Id, T> {
   return {type: 'select', ...def};
 }

@@ -72,7 +72,7 @@ export class TypesFetcher {
     importMapResolver: ImportMapResolver,
     rootPackageJson: PackageJson | undefined,
     sources: string[],
-    tsLibs: string[]
+    tsLibs: string[],
   ): Promise<{
     files: Map<FilePath, FileContent>;
     layout: NodeModulesDirectory;
@@ -91,14 +91,14 @@ export class TypesFetcher {
     // especially for non-404 errors.
     await Promise.allSettled([
       ...sources.map((source) =>
-        fetcher._handleBareAndRelativeSpecifiers(source, root)
+        fetcher._handleBareAndRelativeSpecifiers(source, root),
       ),
       ...tsLibs.map((lib) => fetcher._addTypeScriptStandardLib(lib)),
       fetcher._fetchTypesPackages(),
     ]);
     const layout = new NodeModulesLayoutMaker().layout(
       fetcher._rootDependencies,
-      fetcher._dependencyGraph
+      fetcher._dependencyGraph,
     );
     const files = new Map<string, string>();
     await fetcher._materializeNodeModulesTree(layout, files, '');
@@ -117,7 +117,7 @@ export class TypesFetcher {
   private constructor(
     cdn: CachingCdn,
     importMapResolver: ImportMapResolver,
-    rootPackageJson: PackageJson | undefined
+    rootPackageJson: PackageJson | undefined,
   ) {
     this._cdn = cdn;
     this._importMapResolver = importMapResolver;
@@ -133,7 +133,7 @@ export class TypesFetcher {
     }
 
     const typesPackages = Object.keys(
-      this._rootPackageJson.dependencies
+      this._rootPackageJson.dependencies,
     ).filter((k) => k.startsWith('@types/'));
 
     if (typesPackages.length === 0) {
@@ -141,20 +141,20 @@ export class TypesFetcher {
     }
 
     await Promise.allSettled(
-      typesPackages.map((k) => this._handleBareSpecifier(k, root))
+      typesPackages.map((k) => this._handleBareSpecifier(k, root)),
     );
   }
 
   private async _addTypeScriptStandardLib(lib: string): Promise<void> {
     return this._handleBareSpecifier(
       `typescript/lib/lib.${lib.toLowerCase()}.js`,
-      root
+      root,
     );
   }
 
   private async _handleBareAndRelativeSpecifiers(
     sourceText: string,
-    referrer: NpmFileLocation | typeof root
+    referrer: NpmFileLocation | typeof root,
   ): Promise<void> {
     const fileInfo = ts.preProcessFile(sourceText, undefined, true);
     const promises = [];
@@ -177,7 +177,7 @@ export class TypesFetcher {
 
   private async _handleBareSpecifier(
     bare: string,
-    referrer: NpmFileLocation | typeof root
+    referrer: NpmFileLocation | typeof root,
   ): Promise<void> {
     let location = parseNpmStyleSpecifier(bare);
     if (location === undefined) {
@@ -191,7 +191,7 @@ export class TypesFetcher {
     if (!handledByImportMap) {
       location.version = await this._getDependencyVersion(
         referrer,
-        location.pkg
+        location.pkg,
       );
     }
     // Get the ".d.ts" path by changing extension, or looking up the "typings"
@@ -228,7 +228,7 @@ export class TypesFetcher {
 
   private async _handleRelativeSpecifier(
     relative: string,
-    referrer: NpmFileLocation
+    referrer: NpmFileLocation,
   ): Promise<void> {
     const location = {
       // We know package and version must be the same as the referrer, since
@@ -258,7 +258,7 @@ export class TypesFetcher {
 
   private async _getDependencyVersion(
     from: NpmFileLocation | typeof root,
-    to: string
+    to: string,
   ): Promise<string> {
     const packageJson =
       from === root
@@ -271,9 +271,8 @@ export class TypesFetcher {
     if (location.path !== '') {
       return changeFileExtension(location.path, 'd.ts');
     }
-    const packageJson = await this._fetchPackageJsonAndAddToOutputFiles(
-      location
-    );
+    const packageJson =
+      await this._fetchPackageJsonAndAddToOutputFiles(location);
     return (
       packageJson?.typings ??
       packageJson?.types ??
@@ -295,17 +294,17 @@ export class TypesFetcher {
     if (result.error !== undefined) {
       throw new Error(
         `Could not fetch package.json for ` +
-          `${location.pkg}@${location.version}: ${result.error}`
+          `${location.pkg}@${location.version}: ${result.error}`,
       );
     }
     return JSON.parse(result.result) as PackageJson;
   }
 
   private async _fetchAndAddToOutputFiles(
-    location: NpmFileLocation
+    location: NpmFileLocation,
   ): Promise<Result<string, number>> {
     const importMapUrl = this._importMapResolver.resolve(
-      trimTrailingSlash(`${location.pkg}/${location.path}`)
+      trimTrailingSlash(`${location.pkg}/${location.path}`),
     );
     if (importMapUrl === null) {
       location = await this._cdn.canonicalize(location);
@@ -358,7 +357,7 @@ export class TypesFetcher {
    */
   private _addEdgeToDependencyGraph(
     from: {pkg: string; version: string} | typeof root,
-    to: {pkg: string; version: string}
+    to: {pkg: string; version: string},
   ) {
     if (from === root) {
       this._rootDependencies[to.pkg] = to.version;
@@ -402,7 +401,7 @@ export class TypesFetcher {
   private async _materializeNodeModulesTree(
     layout: NodeModulesDirectory,
     fileMap: Map<FilePath, FileContent>,
-    prefix: FilePath
+    prefix: FilePath,
   ): Promise<void> {
     for (const [pkg, entry] of Object.entries(layout)) {
       const files = this._filesByPackageVersion.get(pkg)?.get(entry.version);
@@ -419,7 +418,7 @@ export class TypesFetcher {
       await this._materializeNodeModulesTree(
         entry.nodeModules,
         fileMap,
-        `${prefix}${pkg}/node_modules/`
+        `${prefix}${pkg}/node_modules/`,
       );
     }
   }

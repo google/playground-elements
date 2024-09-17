@@ -16,7 +16,7 @@ suite('NodeModulesLayoutMaker', () => {
   const checkLayout = (
     rootDeps: PackageDependencies,
     depGraph: DependencyGraph,
-    expected: NodeModulesDirectory
+    expected: NodeModulesDirectory,
   ) => {
     const layoutMaker = new NodeModulesLayoutMaker();
     const actual = layoutMaker.layout(rootDeps, depGraph);

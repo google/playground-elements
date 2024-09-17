@@ -25,7 +25,7 @@ suite('NodeModuleResolver', () => {
     const actual = resolver.resolve(
       {pkg: 'mydep', version: '1.2.3', path},
       packageJson,
-      './my-element.js'
+      './my-element.js',
     );
     assert.equal(actual, expected);
   };

@@ -39,7 +39,7 @@ const getServiceWorkerHash = async () => {
   if (matches.length !== 1) {
     throw new Error(
       'Expected exactly one version string in playground-service-worker.js. ' +
-        `Found ${matches.length}.`
+        `Found ${matches.length}.`,
     );
   }
   // We must remove the version string itself from the service worker code
@@ -79,7 +79,7 @@ const oldVersionModuleCode = await fs.readFile(versionModulePath, 'utf8');
 if (oldVersionModuleCode !== newVersionModuleCode) {
   await fs.writeFile(versionModulePath, newVersionModuleCode, 'utf8');
   console.log(
-    'Updated src/shared/version.ts, please commit this change and rebuild.'
+    'Updated src/shared/version.ts, please commit this change and rebuild.',
   );
   // Fail to help the publisher remember to commit.
   process.exit(1);

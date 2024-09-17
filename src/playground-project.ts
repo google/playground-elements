@@ -114,7 +114,7 @@ export class PlaygroundProject extends LitElement {
             ...file,
             name: undefined,
           },
-        ])
+        ]),
       ),
       importMap: this._validImportMap,
     };
@@ -221,7 +221,7 @@ export class PlaygroundProject extends LitElement {
       } else {
         this._modified = !playgroundFilesDeepEqual(
           this._files,
-          this._pristineFiles
+          this._pristineFiles,
         );
       }
     }
@@ -284,7 +284,7 @@ export class PlaygroundProject extends LitElement {
     // TODO (justinfagnani): lookup URL to show from project config
     const indexUrl = new URL(
       `${endWithSlash(this.sandboxScope)}${this._sessionId}/`,
-      this._normalizedSandboxBaseUrl
+      this._normalizedSandboxBaseUrl,
     );
     return indexUrl.href;
   }
@@ -296,7 +296,7 @@ export class PlaygroundProject extends LitElement {
     // ?queryParams.
     return new URL(
       `playground-service-worker-proxy.html#playground-session-id=${this._sessionId}`,
-      this._normalizedSandboxBaseUrl
+      this._normalizedSandboxBaseUrl,
     ).href;
   }
 
@@ -331,7 +331,7 @@ export class PlaygroundProject extends LitElement {
         {
           const {files, importMap} = await expandProjectConfig(
             source.config,
-            document.baseURI
+            document.baseURI,
           );
           // Note the source could have changed while fetching, hence the
           // double-check here.
@@ -349,7 +349,7 @@ export class PlaygroundProject extends LitElement {
       case 'url':
         {
           const {files, importMap} = await fetchProjectConfig(
-            new URL(source.url, document.baseURI).href
+            new URL(source.url, document.baseURI).href,
           );
           // Note the source could have changed while fetching, hence the
           // double-check here.
@@ -443,7 +443,7 @@ export class PlaygroundProject extends LitElement {
 
   override async firstUpdated() {
     const typescriptWorkerScriptUrl = forceSkypackRawMode(
-      new URL('./playground-typescript-worker.js', import.meta.url)
+      new URL('./playground-typescript-worker.js', import.meta.url),
     );
     let worker: Worker;
     if (typescriptWorkerScriptUrl.origin === window.location.origin) {
@@ -455,7 +455,7 @@ export class PlaygroundProject extends LitElement {
       const resp = await fetch(typescriptWorkerScriptUrl.href);
       const text = await resp.text();
       const blobUrl = URL.createObjectURL(
-        new Blob([text], {type: 'application/javascript'})
+        new Blob([text], {type: 'application/javascript'}),
       );
       worker = new Worker(blobUrl);
       URL.revokeObjectURL(blobUrl);
@@ -474,7 +474,7 @@ export class PlaygroundProject extends LitElement {
         if (event.data.type === CONNECT_PROJECT_TO_SW) {
           this._onNewServiceWorkerPort(event.data.port);
         }
-      }
+      },
     );
     port1.start();
     this._postMessageToServiceWorkerProxyIframe(
@@ -483,7 +483,7 @@ export class PlaygroundProject extends LitElement {
         scope: this.sandboxScope,
         port: port2,
       },
-      [port2]
+      [port2],
     );
   }
 
@@ -497,7 +497,7 @@ export class PlaygroundProject extends LitElement {
             proxy({
               getFile: (name: string) => this._getFile(name),
             }),
-            this._sessionId
+            this._sessionId,
           );
         } else {
           // Version mismatch. Request the service worker be updated
@@ -506,7 +506,7 @@ export class PlaygroundProject extends LitElement {
           console.info(
             `Playground service worker is outdated. ` +
               `Want ${serviceWorkerHash} but got ${e.data.version}. ` +
-              `Waiting for update.`
+              `Waiting for update.`,
           );
           this._postMessageToServiceWorkerProxyIframe({
             type: UPDATE_SERVICE_WORKER,
@@ -520,7 +520,7 @@ export class PlaygroundProject extends LitElement {
 
   private _postMessageToServiceWorkerProxyIframe(
     message: PlaygroundMessage,
-    transfer?: Transferable[]
+    transfer?: Transferable[],
   ) {
     // This iframe exists to proxy messages between this project and the service
     // worker, because the service worker may be running on a different origin
@@ -529,7 +529,7 @@ export class PlaygroundProject extends LitElement {
     if (!iframeWindow) {
       throw new Error(
         'Unexpected internal error: ' +
-          '<playground-project> service worker proxy iframe had no contentWindow'
+          '<playground-project> service worker proxy iframe had no contentWindow',
       );
     }
     // We could constrain targetOrigin to
@@ -566,7 +566,7 @@ export class PlaygroundProject extends LitElement {
     void workerApi.compileProject(
       this._files ?? [],
       {importMap: this._importMap},
-      proxy((result) => build.onOutput(result))
+      proxy((result) => build.onOutput(result)),
     );
     await build.stateChange;
     if (build.state() !== 'done') {
@@ -588,7 +588,7 @@ export class PlaygroundProject extends LitElement {
         changeData.fileContent,
         tokenUnderCursorAsString,
         changeData.cursorIndex,
-        {importMap: this._importMap}
+        {importMap: this._importMap},
       );
       if (completionInfo) {
         const getCompletionDetailsFunction =
@@ -599,7 +599,7 @@ export class PlaygroundProject extends LitElement {
           completionInfo,
           changeData.fileName,
           changeData.cursorIndex,
-          getCompletionDetailsFunction
+          getCompletionDetailsFunction,
         );
       }
     }
@@ -614,12 +614,12 @@ export class PlaygroundProject extends LitElement {
     if (skipFuzzySearch) {
       completions = completionEntriesAsEditorCompletions(
         this._completionInfo?.entries,
-        changeData.tokenUnderCursor
+        changeData.tokenUnderCursor,
       );
     } else {
       completions = sortCompletionItems(
         this._completionInfo?.entries,
-        tokenUnderCursorAsString
+        tokenUnderCursorAsString,
       );
     }
     // We want to pre-fetch the first completion item, if it's present
@@ -634,14 +634,14 @@ export class PlaygroundProject extends LitElement {
   private async _getCompletionDetails(
     filename: string,
     cursorIndex: number,
-    completionWord: string
+    completionWord: string,
   ) {
     const workerApi = await this._deferredTypeScriptWorkerApi.promise;
     const completionItemDetails = await workerApi.getCompletionItemDetails(
       filename,
       cursorIndex,
       {importMap: this._importMap},
-      completionWord
+      completionWord,
     );
 
     return completionItemDetails;
@@ -747,14 +747,14 @@ export class PlaygroundProject extends LitElement {
 const fetchProjectConfig = async (
   url: string,
   alreadyFetchedFilenames = new Set<string>(),
-  alreadyFetchedConfigUrls = new Set<string>()
+  alreadyFetchedConfigUrls = new Set<string>(),
 ): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
   if (alreadyFetchedConfigUrls.has(url)) {
     throw new Error(
       `Circular project config extends: ${[
         ...alreadyFetchedConfigUrls.values(),
         url,
-      ].join(' extends ')}`
+      ].join(' extends ')}`,
     );
   }
   alreadyFetchedConfigUrls.add(url);
@@ -763,7 +763,7 @@ const fetchProjectConfig = async (
     throw new Error(
       `Error ${
         resp.status
-      } fetching project config from ${url}: ${await resp.text()}`
+      } fetching project config from ${url}: ${await resp.text()}`,
     );
   }
   let config: Partial<ProjectManifest>;
@@ -771,14 +771,14 @@ const fetchProjectConfig = async (
     config = await resp.json();
   } catch (e) {
     throw new Error(
-      `Error parsing project config JSON from ${url}: ${(e as Error).message}`
+      `Error parsing project config JSON from ${url}: ${(e as Error).message}`,
     );
   }
   return await expandProjectConfig(
     config,
     url,
     alreadyFetchedFilenames,
-    alreadyFetchedConfigUrls
+    alreadyFetchedConfigUrls,
   );
 };
 
@@ -790,7 +790,7 @@ const expandProjectConfig = async (
   config: ProjectManifest,
   baseUrl: string,
   alreadyFetchedFilenames = new Set<string>(),
-  alreadyFetchedConfigUrls = new Set<string>()
+  alreadyFetchedConfigUrls = new Set<string>(),
 ): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
   const filePromises: Array<Promise<SampleFile>> = [];
   for (const [filename, info] of Object.entries(config.files ?? {})) {
@@ -811,7 +811,7 @@ const expandProjectConfig = async (
             contentType:
               resp.headers.get('Content-Type')?.toLowerCase() ?? 'text/plain',
           };
-        })()
+        })(),
       );
     } else {
       filePromises.push(
@@ -820,7 +820,7 @@ const expandProjectConfig = async (
           name: filename,
           content: info.content ?? '',
           contentType: typeFromFilename(filename) ?? 'text/plain',
-        })
+        }),
       );
     }
   }
@@ -830,7 +830,7 @@ const expandProjectConfig = async (
     ? fetchProjectConfig(
         new URL(config.extends, baseUrl).href,
         alreadyFetchedFilenames,
-        alreadyFetchedConfigUrls
+        alreadyFetchedConfigUrls,
       )
     : undefined;
 
@@ -919,7 +919,7 @@ const validateImportMap = (importMap: unknown): string[] => {
   if (typeof importMap !== 'object' || importMap === null) {
     errors.push(
       `Import map is invalid because it must be an object,` +
-        ` but it was ${importMap === null ? 'null' : typeof importMap}.`
+        ` but it was ${importMap === null ? 'null' : typeof importMap}.`,
     );
     return errors;
   }
@@ -928,7 +928,7 @@ const validateImportMap = (importMap: unknown): string[] => {
   if (invalidKeys.length > 0) {
     errors.push(
       `Invalid import map properties: ${[...invalidKeys].join(', ')}.` +
-        ` Only "imports" are currently supported.`
+        ` Only "imports" are currently supported.`,
     );
   }
   const imports = (importMap as {imports: unknown}).imports;
@@ -940,7 +940,7 @@ const validateImportMap = (importMap: unknown): string[] => {
     errors.push(
       `Import map "imports" property is invalid` +
         ` because it must be an object,` +
-        ` but it was ${imports === null ? 'null' : typeof imports}.`
+        ` but it was ${imports === null ? 'null' : typeof imports}.`,
     );
     return errors;
   }
@@ -950,14 +950,14 @@ const validateImportMap = (importMap: unknown): string[] => {
       errors.push(
         `Import map key "${specifierKey}" is invalid because` +
           ` address must be a string, but was` +
-          ` ${resolutionResult === null ? 'null' : typeof resolutionResult}`
+          ` ${resolutionResult === null ? 'null' : typeof resolutionResult}`,
       );
       continue;
     }
     if (specifierKey.endsWith('/') && !resolutionResult.endsWith('/')) {
       errors.push(
         `Import map key "${specifierKey}" is invalid because` +
-          ` address "${resolutionResult}" must end in a forward-slash.`
+          ` address "${resolutionResult}" must end in a forward-slash.`,
       );
     }
     try {
@@ -965,7 +965,7 @@ const validateImportMap = (importMap: unknown): string[] => {
     } catch {
       errors.push(
         `Import map key "${specifierKey}" is invalid because` +
-          ` address "${resolutionResult}" is not a valid URL.`
+          ` address "${resolutionResult}" is not a valid URL.`,
       );
     }
   }
@@ -1002,7 +1002,7 @@ const outdent = (str: string): string => {
  */
 const playgroundFilesDeepEqual = (
   filesA: SampleFile[],
-  filesB: SampleFile[]
+  filesB: SampleFile[],
 ): boolean => {
   if (filesA.length !== filesB.length) {
     return false;
