@@ -15,6 +15,28 @@ import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {PlaygroundProject} from '../playground-project.js';
 import {PlaygroundFileEditor} from '../playground-file-editor.js';
 import {PlaygroundPreview} from '../playground-preview.js';
+import {EditorView} from '@codemirror/view';
+import {undo, redo, historyField} from '@codemirror/commands';
+
+const LINE_CLASS = '.cm-line';
+const LINE_GUTTERS_CLASS = '.cm-gutters';
+const LINE_GUTTER_CLASS = '.cm-gutter:not(.cm-foldGutter)';
+const WRAP_CLASS = '.cm-lineWrapping';
+const CONTENT_CLASS = '.cm-content';
+const LINE_NUMBER_CLASS = '.cm-gutterElement';
+
+function editorSetValue(view: EditorView, value: string): void {
+  view.dispatch({
+    userEvent: 'input',
+    changes: [
+      {
+        from: 0,
+        to: view.state.doc.length,
+        insert: value,
+      },
+    ],
+  });
+}
 
 // There is browser variability with zero width spaces. This helper keeps tests
 // consistent.
@@ -61,12 +83,12 @@ suite('playground-ide', () => {
     editor: PlaygroundCodeEditor,
     newValue: string
   ) => {
-    const codemirror = (
+    const editorView = (
       editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
+        _editorView: EditorView;
       }
-    )._codemirror;
-    codemirror!.setValue(newValue);
+    )._editorView;
+    editorSetValue(editorView, newValue);
   };
 
   const waitForIframeLoad = (iframe: HTMLElement) =>
@@ -149,17 +171,17 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const editorInternals = editor as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
     // Wait for the editor to instantiate.
     await raf();
 
     assert.include(
-      editorInternals._codemirror?.getValue(),
+      editorInternals._editorView.state.doc.toString(),
       `<script>console.log('hello');</script>`
     );
     assert.include(
-      editorInternals._codemirror?.getValue(),
+      editorInternals._editorView.state.doc.toString(),
       `<script>console.log('potato');</script>`
     );
   });
@@ -448,20 +470,20 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
 
     const codemirrorContainer = editor.shadowRoot!.querySelector(
-      '.CodeMirror'
+      CONTENT_CLASS
     ) as HTMLElement;
     const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
-      '.CodeMirror-line'
+      LINE_CLASS
     )[1] as HTMLElement;
 
     assert.include(
       Array.from(codemirrorContainer?.classList),
-      'CodeMirror-wrap'
+      WRAP_CLASS.replace('.', '')
     );
 
-    assert.include(codeMirrorLongLine.style.paddingLeft, '4px');
-    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
-    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
+    const elStyles = getComputedStyle(codeMirrorLongLine);
+
+    assert.include(elStyles.paddingLeft, '4px');
   });
 
   test('line wrapping enabled with line numbers', async () => {
@@ -472,12 +494,15 @@ suite('playground-ide', () => {
     ide.config = {
       files: {
         'index.html': {
-          content: 'Foo\n    Bar that has an indent',
+          content:
+            'Foo\n    Bar that has an indent and a lot of a lot of a lot of a lot of a lot of a lot of a lot of a lot of a lot of text',
         },
       },
     };
     container.appendChild(ide);
-    await assertPreviewContains('Foo\n    Bar that has an indent');
+    await assertPreviewContains(
+      'Foo\n    Bar that has an indent and a lot of a lot of a lot of a lot of a lot of a lot of a lot of a lot of a lot of text'
+    );
 
     const editor = (await pierce(
       'playground-ide',
@@ -486,20 +511,24 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
 
     const codemirrorContainer = editor.shadowRoot!.querySelector(
-      '.CodeMirror'
+      CONTENT_CLASS
     ) as HTMLElement;
+    const codeMirrorShortLine = editor.shadowRoot!.querySelectorAll(
+      LINE_CLASS
+    )[0] as HTMLElement;
     const codeMirrorLongLine = editor.shadowRoot!.querySelectorAll(
-      '.CodeMirror-line'
+      LINE_CLASS
     )[1] as HTMLElement;
 
     assert.include(
       Array.from(codemirrorContainer?.classList),
-      'CodeMirror-wrap'
+      WRAP_CLASS.replace('.', '')
     );
 
-    assert.include(codeMirrorLongLine.style.paddingLeft, '0.7em');
-    assert.include(codeMirrorLongLine.style.paddingLeft, '4ch');
-    assert.equal(codeMirrorLongLine.style.textIndent, '-4ch');
+    const {height: smallHeight} = codeMirrorShortLine.getBoundingClientRect();
+    const {height: largeHeight} = codeMirrorLongLine.getBoundingClientRect();
+
+    assert.isAbove(largeHeight, smallHeight);
   });
 
   test('a11y: is contenteditable', async () => {
@@ -519,7 +548,7 @@ suite('playground-ide', () => {
       'playground-ide',
       'playground-file-editor',
       'playground-code-editor',
-      '.CodeMirror-code'
+      '.cm-content'
     );
 
     assert.equal(cmCode.getAttribute('contenteditable'), 'true');
@@ -545,31 +574,39 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
 
-    const queryHiddenLineNumbers = () =>
+    const queryGutters = () =>
+      editor.shadowRoot!.querySelector(LINE_GUTTERS_CLASS);
+    const queryGutter = () =>
+      editor.shadowRoot!.querySelector(LINE_GUTTER_CLASS);
+
+    const queryLineNumbers = () =>
       [
-        ...editor.shadowRoot!.querySelectorAll('.CodeMirror-gutter-wrapper'),
-      ].filter((gutter) => gutter.getAttribute('aria-hidden') === 'true');
+        ...((queryGutter()?.querySelectorAll(
+          LINE_NUMBER_CLASS
+        ) as NodeListOf<HTMLElement>) ?? []),
+      ].filter((el) => el.style.visibility !== 'hidden');
 
     // Initial render with line-numbers enabled.
-    assert.equal(queryHiddenLineNumbers().length, 2);
+    assert.equal(queryLineNumbers().length, 2, 'initial');
+    assert.equal(queryGutters()?.getAttribute('aria-hidden'), 'true');
 
     // Disable line numbers.
     ide.lineNumbers = false;
     await raf();
-    assert.equal(queryHiddenLineNumbers().length, 0);
+    assert.equal(queryLineNumbers().length, 0, 'off');
 
     // Re-enable line numbers.
     ide.lineNumbers = true;
     await raf();
-    assert.equal(queryHiddenLineNumbers().length, 2);
+    assert.equal(queryLineNumbers().length, 2, 'turned back on');
 
     // Add a line.
     const editorInternals = editor as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
-    editorInternals._codemirror!.setValue(editor.value + '\nBaz');
+    editorSetValue(editorInternals._editorView, editor.value + '\nBaz');
     await raf();
-    assert.equal(queryHiddenLineNumbers().length, 3);
+    assert.equal(queryLineNumbers().length, 3, 'added line');
   });
 
   test('a11y: focusing shows keyboard prompt', async () => {
@@ -594,7 +631,7 @@ suite('playground-ide', () => {
       '#focusContainer'
     ) as HTMLElement;
     const editableRegion = editor.shadowRoot!.querySelector(
-      '.CodeMirror-code'
+      '.cm-content'
     ) as HTMLElement;
     const keyboardHelp = 'Press Enter';
 
@@ -712,7 +749,7 @@ suite('playground-ide', () => {
     )) as PlaygroundCodeEditor;
 
     const editorInternals = editor as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
 
     // Need to defer another microtask for the config to initialize.
@@ -738,11 +775,11 @@ suite('playground-ide', () => {
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
 
-    editorInternals._codemirror!.setValue('New content');
+    editorSetValue(editorInternals._editorView, 'New content');
     assert.isTrue(ide.modified);
     assert.isTrue(ide.modified);
 
-    editorInternals._codemirror!.setValue('Old content');
+    editorSetValue(editorInternals._editorView, 'Old content');
     assert.isFalse(ide.modified);
     assert.isFalse(ide.modified);
 
@@ -1011,16 +1048,17 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const codemirrorInternals = codemirror as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
     await assertPreviewContains('Hello JS');
-    codemirrorInternals._codemirror!.setValue(
+    editorSetValue(
+      codemirrorInternals._editorView,
       "document.body.textContent = 'Hello 2'"
     );
     await assertPreviewContains('Hello 2');
-    codemirrorInternals._codemirror!.undo();
+    undo(codemirrorInternals._editorView);
     await assertPreviewContains('Hello JS');
-    codemirrorInternals._codemirror!.redo();
+    redo(codemirrorInternals._editorView);
     await assertPreviewContains('Hello 2');
   });
 
@@ -1052,20 +1090,26 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const editorInternals = editor as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
 
     await raf();
     assert.equal(fileEditor.filename, 'hello.js');
-    assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+    assert.equal(
+      editorInternals._editorView.state.doc.toString().trim(),
+      JS_CONTENT
+    );
 
     fileEditor.filename = 'index.html';
     await raf();
-    editorInternals._codemirror!.undo();
+    undo(editorInternals._editorView);
 
     await raf();
     // Expect to still be on the html page.
-    assert.notEqual(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+    assert.notEqual(
+      editorInternals._editorView.state.doc.toString().trim(),
+      JS_CONTENT
+    );
   });
 
   test('undo/redo history persists when files change', async () => {
@@ -1096,56 +1140,90 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const editorInternals = editor as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
 
     await raf();
     assert.equal(fileEditor.filename, 'hello.js');
-    assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
+    assert.equal(
+      editorInternals._editorView.state.doc.toString().trim(),
+      JS_CONTENT
+    );
 
-    editorInternals._codemirror!.setValue(
+    editorSetValue(editorInternals._editorView, '// initial text');
+
+    await raf();
+
+    editorSetValue(editorInternals._editorView, '// some more text');
+
+    await raf();
+    editorSetValue(
+      editorInternals._editorView,
       "document.body.textContent = 'Hello 2'"
     );
 
     fileEditor.filename = 'index.html';
     await raf();
     assert.include(
-      editorInternals._codemirror!.getValue().trim(),
+      editorInternals._editorView.state.doc.toString().trim(),
       `<script type="module" src="hello.js">`
     );
-    editorInternals._codemirror!.setValue(`<body>
+    editorSetValue(
+      editorInternals._editorView,
+      `<body>
     <script type="module" src="hello.js">&lt;/script>
     <p>Add this</p>
-    </body>`);
+    </body>`
+    );
     await raf();
 
     fileEditor.filename = 'hello.js';
     await raf();
-    assert.include(editorInternals._codemirror!.getValue(), `'Hello 2'`);
+    assert.include(
+      editorInternals._editorView.state.doc.toString(),
+      `'Hello 2'`
+    );
 
     for (let i = 0; i < 6; i++) {
-      editorInternals._codemirror!.undo();
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue().trim(), JS_CONTENT);
     }
-    editorInternals._codemirror!.redo();
+    assert.equal(
+      editorInternals._editorView.state.doc.toString().trim(),
+      JS_CONTENT
+    );
+
+    redo(editorInternals._editorView);
     await raf();
-    assert.include(editorInternals._codemirror!.getValue(), `'Hello 2'`);
+
+    assert.include(
+      editorInternals._editorView.state.doc.toString(),
+      `// initial text`
+    );
 
     fileEditor.filename = 'index.html';
     await raf();
 
     // index.html file still has history
-    assert.equal(editorInternals._codemirror!.getHistory()?.done.length, 3);
-    assert.include(editorInternals._codemirror!.getValue(), `<p>Add this</p>`);
+    const history = editorInternals._editorView.state.field(historyField) as {
+      done: unknown[];
+    };
 
-    editorInternals._codemirror!.undo();
+    assert.equal(history.done.length, 1);
+    assert.include(
+      editorInternals._editorView.state.doc.toString(),
+      `<p>Add this</p>`
+    );
+
+    undo(editorInternals._editorView);
     await raf();
     assert.isFalse(
-      editorInternals._codemirror!.getValue().includes(`<p>Add this</p>`)
+      editorInternals._editorView.state.doc
+        .toString()
+        .includes(`<p>Add this</p>`)
     );
     assert.include(
-      editorInternals._codemirror!.getValue(),
+      editorInternals._editorView.state.doc.toString(),
       `<script type="module" src="hello.js">`
     );
   });
@@ -1176,22 +1254,35 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const codemirrorInternals = codemirror as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
     await raf();
-    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello JS');
-    codemirrorInternals._codemirror!.setValue(
+    assert.include(
+      codemirrorInternals._editorView.state.doc.toString(),
+      'Hello JS'
+    );
+    editorSetValue(
+      codemirrorInternals._editorView,
       "document.body.textContent = 'Hello 2'"
     );
     project.renameFile('hello.js', 'potato.js');
     await raf();
-    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
-    codemirrorInternals._codemirror!.undo();
+    assert.include(
+      codemirrorInternals._editorView.state.doc.toString(),
+      'Hello 2'
+    );
+    undo(codemirrorInternals._editorView);
     await raf();
-    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello JS');
-    codemirrorInternals._codemirror!.redo();
+    assert.include(
+      codemirrorInternals._editorView.state.doc.toString(),
+      'Hello JS'
+    );
+    redo(codemirrorInternals._editorView);
     await raf();
-    assert.include(codemirrorInternals._codemirror!.getValue(), 'Hello 2');
+    assert.include(
+      codemirrorInternals._editorView.state.doc.toString(),
+      'Hello 2'
+    );
   });
 
   test('code remains folded when switching files', async () => {
@@ -1333,7 +1424,7 @@ suite('playground-ide', () => {
       'playground-code-editor'
     )) as PlaygroundCodeEditor;
     const codemirrorInternals = codemirror as unknown as {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
     await raf();
     assert.equal(
@@ -1355,7 +1446,7 @@ console.log('tomato');`;
       "…console.log('tomato');"
     );
 
-    codemirrorInternals._codemirror?.undo();
+    undo(codemirrorInternals._editorView);
     await raf();
 
     assert.equal(
