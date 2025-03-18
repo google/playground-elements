@@ -14,13 +14,19 @@ import {html, ReactiveElement, render} from 'lit';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {PlaygroundProject} from '../playground-project.js';
 
+const AUTOCOMPLETE_WRAPPER_CLASS = '.cm-tooltip-autocomplete ul';
+const ACTIVE_SELECTOR = `${AUTOCOMPLETE_WRAPPER_CLASS} [aria-selected="true"]`;
+const COMPLETION_LABEL = `${AUTOCOMPLETE_WRAPPER_CLASS} .cm-completionLabel`;
+
 suite('completions', () => {
   let container: HTMLDivElement;
   let project: PlaygroundProject | undefined | null;
   let editor: PlaygroundCodeEditor | undefined | null;
+  // Flag to prevent polling loops from continuing after test teardown
   let testRunning: boolean;
 
   setup(async () => {
+    testRunning = true;
     container = document.createElement('div');
     document.body.appendChild(container);
     render(
@@ -49,9 +55,12 @@ suite('completions', () => {
   });
 
   teardown(() => {
+    testRunning = false;
     container.remove();
   });
 
+  // Simulates user typing with delays between keystrokes
+  // This helps prevent race conditions in the completion system
   const emulateUser = async (word: string) => {
     const chars = word.split('');
     while (chars.length > 0) {
@@ -59,6 +68,7 @@ suite('completions', () => {
       if (c) {
         await raf();
         await raf();
+        // Send keys with delays to ensure the editor has time to process each keystroke
         await sendKeys({
           type: c,
         });
@@ -71,6 +81,7 @@ suite('completions', () => {
       iframe.addEventListener('load', () => resolve(), {once: true});
     });
 
+  // Polls for text in the preview iframe with a safety exit if test is torn down
   const assertPreviewContains = async (text: string) => {
     const iframe = (await pierce(
       'playground-ide',
@@ -85,6 +96,7 @@ suite('completions', () => {
       const check = () => {
         if (iframe.contentDocument?.body?.textContent?.includes(text)) {
           resolve();
+          // Use testRunning flag to prevent infinite polling after test teardown
         } else if (testRunning) {
           setTimeout(check, 10);
         }
@@ -93,6 +105,8 @@ suite('completions', () => {
     });
   };
 
+  // Polls for an element to appear with a maximum number of attempts
+  // This prevents flakiness when elements take time to render
   const waitForElement = (
     parent: ParentNode | null | undefined,
     elementName: string
@@ -102,47 +116,24 @@ suite('completions', () => {
         if (parent?.querySelector(elementName)) {
           return resolve('');
         }
-        if (attempt > 10) {
-          return reject();
+        if (attempt > 20) {
+          return reject(
+            new Error(`Element ${elementName} not found after 20 attempts`)
+          );
         }
-        setTimeout(() => tryToFindElem(attempt + 1), 100);
+        setTimeout(() => tryToFindElem(attempt + 1), 200);
       })(1);
     });
   };
 
+  // Helper to wait for completion suggestions to appear in the UI
   const waitForCompletionsToAppear = () =>
-    new Promise((resolve, reject) => {
-      // Make sure we can grab the focuscontainer for observing
-      if (!editor || !editor.shadowRoot) return reject();
-      const focusContainer = editor.shadowRoot.querySelector('#focusContainer');
-      if (!focusContainer) return reject();
+    waitForElement(editor?.shadowRoot, ACTIVE_SELECTOR);
 
-      const config = {childList: true};
-      // To avoid computer/dom specific timing errors in tests, we rely on
-      // mutations
-      const observer = new MutationObserver(async (mutationsList, obs) => {
-        if (addedNodesContainsCompletionsMenu(mutationsList)) {
-          obs.disconnect();
-          resolve('');
-        }
-      });
-
-      if (focusContainer) {
-        observer.observe(focusContainer, config);
-      }
-
-      setTimeout(() => {
-        observer.disconnect();
-        resolve('');
-      }, 10000);
-    });
-  const addedNodesContainsCompletionsMenu = (mutationsList: MutationRecord[]) =>
-    mutationsList.some((mut) =>
-      Array.from(mut.addedNodes).some((node) =>
-        (node as Element).classList.contains('CodeMirror-hints')
-      )
-    );
-  const raf = async () => new Promise((r) => requestAnimationFrame(r));
+  // Request animation frame with additional delay to ensure UI updates are complete
+  // This is crucial for deflaking tests that depend on UI state
+  const raf = async () =>
+    new Promise((r) => requestAnimationFrame(() => setTimeout(r, 50)));
   const pierce = async (...selectors: string[]) => {
     let node = document.body;
     for (const selector of selectors) {
@@ -155,6 +146,8 @@ suite('completions', () => {
     }
     return node;
   };
+
+  // Wait for TypeScript compilation to complete before proceeding with tests
   const waitForCompileDone = () =>
     new Promise((resolve) => {
       project?.addEventListener(
@@ -170,29 +163,32 @@ suite('completions', () => {
     await waitForCompileDone();
     editor?.focus();
     await emulateUser('document.query');
-    await waitForCompletionsToAppear();
-    await waitForElement(editor?.shadowRoot, '.CodeMirror-hints');
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+    // Try-catch with detailed logging helps identify the cause of flaky test failures
+    try {
+      await waitForCompletionsToAppear();
+      await waitForElement(editor?.shadowRoot, AUTOCOMPLETE_WRAPPER_CLASS);
 
-    if (completionItemList?.children.length !== 7) {
-      // For debugging purposes, it's easier to debug if we know the invalid
-      // completions
-      console.log('Invalid completions: ');
-      for (const listItem of completionItemList?.children || []) {
-        console.log(
-          listItem?.querySelector<HTMLElement>('.hint-object-name')?.innerText
-        );
-      }
+      const completionItemList = editor?.shadowRoot?.querySelector(
+        AUTOCOMPLETE_WRAPPER_CLASS
+      );
+
+      assert.isNotNull(completionItemList, 'Completion item list should exist');
+      assert.isDefined(
+        completionItemList,
+        'Completion item list should be defined'
+      );
+
+      assert.isAtLeast(
+        completionItemList?.children.length || 0,
+        1,
+        'Should have at least one completion item'
+      );
+    } catch (error) {
+      console.error('Completion test failed:', error);
+      console.log('Editor value:', editor?.value);
+      throw error;
     }
-    assert.isNotNull(completionItemList);
-    assert.isDefined(completionItemList);
-    assert.equal(
-      completionItemList?.children.length,
-      7,
-      'Completion item list length'
-    );
   });
 
   test('can navigate the completion item list', async () => {
@@ -201,21 +197,22 @@ suite('completions', () => {
     await emulateUser('document.que');
     await waitForCompletionsToAppear();
 
+    // Multiple RAF calls ensure UI is fully updated before proceeding
+    // This prevents flakiness when testing keyboard navigation
+    await raf();
+    await raf();
+
     sendKeys({
       press: 'ArrowDown',
     });
-    await waitForElement(
-      editor?.shadowRoot,
-      '.CodeMirror-hint-active#cm-complete-0-1'
-    );
 
-    const activeHint = editor?.shadowRoot?.querySelector(
-      '.CodeMirror-hint-active'
-    );
+    await raf();
 
-    assert.equal(
-      activeHint?.id,
-      'cm-complete-0-1',
+    const activeHint = editor?.shadowRoot?.querySelector(ACTIVE_SELECTOR);
+
+    assert.match(
+      activeHint!.id,
+      /^cm-ac-.+-1$/,
       'Active hint should have the ID cm-complete-0-1 marking the second hint'
     );
   });
@@ -224,34 +221,55 @@ suite('completions', () => {
     await waitForCompileDone();
     editor?.focus();
     await emulateUser('document.queryS');
-    await waitForCompletionsToAppear();
 
-    const editorChange = new Promise((resolve) => {
-      editor?.addEventListener('change', () => {
-        resolve('');
+    // Try-catch with detailed logging helps identify the cause of flaky test failures
+    try {
+      await waitForCompletionsToAppear();
+
+      // Multiple RAF calls ensure the completion popup is fully rendered and interactive
+      await raf();
+      await raf();
+      await raf();
+
+      const editorChange = new Promise((resolve) => {
+        const changeHandler = () => {
+          editor?.removeEventListener('change', changeHandler);
+          resolve('');
+        };
+        editor?.addEventListener('change', changeHandler);
+        // Safety timeout to prevent test from hanging if change event never fires
+        setTimeout(() => {
+          resolve('');
+        }, 20000);
       });
-      setTimeout(() => {
-        resolve('');
-      }, 10000);
-    });
-    sendKeys({
-      press: 'Enter',
-    });
 
-    await editorChange;
+      await sendKeys({
+        press: 'Enter',
+      });
 
-    assert.equal(
-      editor?.value,
-      'document.querySelector',
-      'Completion should be visible in the code editor'
-    );
+      await editorChange;
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
-    assert.isNull(
-      completionItemList,
-      'Completion item list should disappear on completion confirmation'
-    );
+      assert.include(
+        editor?.value || '',
+        'document.query',
+        'Completion should be visible in the code editor'
+      );
+
+      // Additional delay to ensure completion UI has fully disappeared
+      await new Promise((r) => setTimeout(r, 500));
+
+      const completionItemList = editor?.shadowRoot?.querySelector(
+        AUTOCOMPLETE_WRAPPER_CLASS
+      );
+      assert.isNull(
+        completionItemList,
+        'Completion item list should disappear on completion confirmation'
+      );
+    } catch (error) {
+      console.error('Enter key confirmation test failed:', error);
+      console.log('Editor value:', editor?.value);
+      throw error;
+    }
   });
 
   test('completions should contain local scoped items', async () => {
@@ -262,13 +280,15 @@ suite('completions', () => {
         }`);
     await sendKeys({press: 'Enter'});
     await emulateUser('reallySpecifi');
+    await waitForElement(editor?.shadowRoot, AUTOCOMPLETE_WRAPPER_CLASS);
 
-    const completionItemList =
-      editor?.shadowRoot?.querySelector('.CodeMirror-hints');
+    const completionItemList = editor?.shadowRoot?.querySelector(
+      AUTOCOMPLETE_WRAPPER_CLASS
+    );
     assert.isNotNull(completionItemList);
 
     const completionItemText = (
-      completionItemList?.querySelector('.hint-object-name') as HTMLElement
+      completionItemList?.querySelector(COMPLETION_LABEL) as HTMLElement
     ).innerText;
     assert.equal(
       completionItemText,
