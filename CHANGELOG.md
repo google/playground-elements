@@ -11,9 +11,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 -->
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
-<!-- ## [Unreleased] -->
-<!-- ### Added -->
-<!-- ### Fixed -->
+
+## [Unreleased]
+
+### Added
+
+- Upgraded CodeMirror to v6
+
+### Fixed
+
+- Safari cursor issues
+  - Cursor selection and visiblity was broken in Safari
+  - Fixed by updating to Codemirror 6
+
 <!-- ### Removed -->
 
 ## [0.20.0] - 2025-03-31

@@ -40,7 +40,6 @@ export class PlaygroundThemeDetector extends LitElement {
       position: absolute;
       visibility: hidden;
       width: 1px;
-      height: 1px;
     }
 
     #palette {
@@ -176,17 +175,6 @@ export class PlaygroundThemeDetector extends LitElement {
     `;
   }
 
-  override async firstUpdated() {
-    // CodeMirror only renders visible lines plus some margin. Force it to
-    // render everything so we can query it.
-    await this._playgroundWithUserText.updateComplete;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this._playgroundWithUserText as any)._codemirror.setOption(
-      'viewportMargin',
-      Infinity
-    );
-  }
-
   async _copySample(filetype: 'ts' | 'html' | 'css') {
     this._filetype = filetype;
     await navigator.clipboard.writeText(sampleFiles[this._filetype]);
@@ -228,6 +216,23 @@ export class PlaygroundThemeDetector extends LitElement {
       return;
     }
 
+    // Map from CM6 token names to CSS property base names
+    // This maintains backward compatibility with the CSS custom property names
+    const tokenToCssProperty: Record<string, string> = {
+      line: 'default',
+      typeName: 'type',
+      variableName: 'variable',
+      propertyName: 'property',
+      variableName2: 'variable-2',
+      string2: 'string-2',
+      namespace: 'variable-3',
+      className: 'class-name',
+      modifier: 'qualifier',
+      labelName: 'builtin',
+      tagName: 'tag',
+      attributeName: 'attribute',
+    };
+
     // Create a map from example text fragments to the CSS property for that
     // token, extracted from *our* version of the highlighted text. E.g.:
     //
@@ -247,25 +252,25 @@ export class PlaygroundThemeDetector extends LitElement {
       }
 
       let property;
-      const cmClasses = [...parent.classList].filter((c) =>
-        c.startsWith('cm-')
+      const cmClasses = [...parent.classList].filter(
+        (c) => c.startsWith('cm-') || c.startsWith('tok-')
       );
+
       if (cmClasses.length > 0) {
         // The last CodeMirror class tends to be more specific (e.g. `callee` is
         // more specific than `variable`).
         const lastClass = cmClasses[cmClasses.length - 1];
-        const cmToken = lastClass.slice('cm-'.length);
-        property = `--playground-code-${cmToken}-color`;
-      } else if (parent.getAttribute('role') === 'presentation') {
-        // Code with no special token classes.
-        property = `--playground-code-default-color`;
+        const cmToken = lastClass.replace(/^(cm-)|(tok-)/, '');
+
+        // Use the mapping to get the correct CSS property base name
+        const cssPropertyBase = tokenToCssProperty[cmToken] || cmToken;
+        property = `--playground-code-${cssPropertyBase}-color`;
       } else {
         continue;
       }
-      // Some highlighters put HTML angle brackets in their own <span>, but our
-      // CodeMirror highlighter doesn't. Trim off the brackets so we're more
-      // likely to match.
-      const text = textNode.textContent!.replace(/^<\/?/, '').replace(/>$/, '');
+
+      const text = textNode.textContent!;
+
       // The same token can appear multiple times but with different meaning. We
       // can assume they'll appear in the same order in the iframe HTML as they
       // do here, which is captured by the order of items in this array.
@@ -289,11 +294,19 @@ export class PlaygroundThemeDetector extends LitElement {
       const node = theirWalker.currentNode;
 
       if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent!.replace(/^<\/?/, '').replace(/>$/, '');
-        const property = fragmentToProperty.get(text)?.shift();
-        if (property && this._propertyValues.get(property) === null) {
-          const color = window.getComputedStyle(node.parentElement!).color;
-          this._propertyValues.set(property, color);
+        // Codemirror 6 separates #id in css into # and id, but vscode does not.
+        // so in this case we want to match #id to id so that we can get the
+        // "builtin" color token.
+        const text = node.textContent!.replace(/^#id$/, 'id');
+        const properties = fragmentToProperty.get(text);
+        if (properties) {
+          for (const property of properties) {
+            if (this._propertyValues.get(property) === null) {
+              const color = window.getComputedStyle(node.parentElement!).color;
+              this._propertyValues.set(property, color);
+              break; // Only set the first null property
+            }
+          }
         }
       } else if (!foundBackground && node.nodeType === Node.ELEMENT_NODE) {
         // Use the first non-transparent background (depth first).
