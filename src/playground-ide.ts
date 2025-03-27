@@ -218,6 +218,16 @@ export class PlaygroundIde extends LitElement {
   sandboxScope = `__playground_swfs_${serviceWorkerHash}/`;
 
   /**
+   * Base URL for the CDN used to resolve bare module specifiers.
+   *
+   * Examples:
+   * - "https://unpkg.com" (default)
+   * - "https://cdn.jsdelivr.net/npm"
+   */
+  @property({attribute: 'cdn-base-url'})
+  cdnBaseUrl = 'https://unpkg.com';
+
+  /**
    * Allow the user to add, remove, and rename files in the project's virtual
    * filesystem. Disabled by default.
    */
@@ -299,6 +309,7 @@ export class PlaygroundIde extends LitElement {
         id=${projectId}
         .sandboxBaseUrl=${this.sandboxBaseUrl}
         .sandboxScope=${this.sandboxScope}
+        .cdnBaseUrl=${this.cdnBaseUrl}
       >
         <slot></slot>
       </playground-project>

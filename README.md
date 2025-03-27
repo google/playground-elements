@@ -213,6 +213,7 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 | `files.hidden`      | If `true`, the file won't be visible in `playground-tab-bar`.                                                                                                                    |
 | `files.selected`    | If `true`, this file's tab will be selected when the project is loaded. Only one file should have this field set.                                                                |
 | `extends`           | Optional URL to another JSON config file to extend from. Configs are deeply merged. URLs are interpreted relative to the URL of each extendee config.                            |
+| `cdnBaseUrl`        | Optional URL for the underlying npm CDN base url. Confirmed tested are `htts://unpkg.com` and `https://cdn.jsdelivr.net/npm`                                                     |
 
 ```html
 <playground-ide project-src="/path/to/my/project.json"> </playground-ide>
@@ -259,7 +260,7 @@ precedence. When either are set, inline scripts are ignored.
 
 By default, bare module specifiers in JavaScript and TypeScript files are
 transformed to special `./node_modules/` URLs, and fetched behind-the-scenes
-from unpkg.com at the latest version.
+from unpkg.com by default at the latest version.
 
 ```js
 // What you write:
@@ -268,7 +269,7 @@ import {html} from 'lit';
 // What playground serves:
 import {html} from './node_modules/lit@2.0.2/index.js';
 
-// What playground fetches behind-the-scenes:
+// What playground fetches behind-the-scenes unless you set `cdnBaseUrl`:
 // https://unpkg.com/lit@latest
 ```
 
@@ -335,7 +336,7 @@ When using inline project files, you can specify your import map like so:
 ```
 
 If an import map is defined, but does not contain an entry for a bare module,
-then playground defaults to the `unpkg.com` URL.
+then playground defaults to the `unpkg.com` URL unless `cdnBaseUrl` is set.
 
 ## TypeScript
 
@@ -564,9 +565,10 @@ unprivileged and cannot modify the host window.
 You may wish to override this default sandbox base URL if you do not want a
 dependency on `unpkg.com`, e.g. for isolation from outages, or because your
 network does not have access to it. Note that Playground currently also uses
-`unpkg.com` to retrieve imported bare modules that are not otherwise handled by
-an [import map](#module-resolution), so the `unpkg.com` dependency cannot
-currently be completely eliminated.
+`unpkg.com` by default (unless you set `cdnBaseUrl`) to retrieve imported bare
+modules that are not otherwise handled by an [import map](#module-resolution),
+so to remove the dependency on unpkg, you should also set `cdnBaseUrl`. See the
+API docs for more info.
 
 ### Background
 
@@ -680,6 +682,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | -------------------- | -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                                                                                                           |
 | `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `cdnBaseUrl`         | `string`                         | `https://unpkg.com`       | Change the underlying npm CDN base url. Confirmed tested are `htts://unpkg.com` and `https://cdn.jsdelivr.net/npm`                                                                                 |
 | `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
 | `lineWrapping`       | `boolean`                        | `false`                   | If `true`, long lines are wrapped, otherwise the editor will scroll.                                                                                                                               |
 | `editableFileSystem` | `boolean`                        | `false`                   | Allow adding, removing, and renaming files                                                                                                                                                         |
@@ -710,6 +713,7 @@ project element.
 | ---------------- | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                                                                                                                |
 | `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `cdnBaseUrl`     | `string`                      | `https://unpkg.com`       | Change the underlying npm CDN base url. Confirmed tested are `htts://unpkg.com` and `https://cdn.jsdelivr.net/npm`                                                                                 |
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                                                                                                           |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
 | `diagnostics`    | `Map<string, lsp.Diagnostic>` | `undefined`               | Map from filename to array of Language Server Protocol diagnostics resulting from the latest compilation.                                                                                          |
