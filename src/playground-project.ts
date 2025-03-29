@@ -178,11 +178,12 @@ export class PlaygroundProject extends LitElement {
    * Base URL for the CDN used to resolve bare module specifiers.
    *
    * Examples:
+   * - "" (default, but resolves to "https://unpkg.com")
    * - "https://unpkg.com" (default)
    * - "https://cdn.jsdelivr.net/npm"
    */
   @property({attribute: 'cdn-base-url'})
-  cdnBaseUrl = 'https://unpkg.com';
+  cdnBaseUrl = '';
 
   /**
    * The service worker scope to register on
