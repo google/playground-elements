@@ -47,6 +47,12 @@ interface SelectKnob<Id extends string, T extends string>
   options: ReadonlyArray<T>;
 }
 
+interface InputKnob<Id extends string> extends BaseKnob<Id, string> {
+  type: 'input';
+  placeholder?: string;
+  inputType?: string;
+}
+
 function checkbox<Id extends string>(
   def: Omit<CheckboxKnob<Id>, 'type'>
 ): CheckboxKnob<Id> {
@@ -69,6 +75,12 @@ function select<Id extends string, T extends string>(
   def: Omit<SelectKnob<Id, T>, 'type'>
 ): SelectKnob<Id, T> {
   return {type: 'select', ...def};
+}
+
+function input<Id extends string>(
+  def: Omit<InputKnob<Id>, 'type'>
+): InputKnob<Id> {
+  return {type: 'input', ...def};
 }
 
 const pixels = (value: number) => value + 'px';
@@ -120,6 +132,14 @@ export const knobs = [
   }),
 
   // features
+  input({
+    id: 'cdnBaseUrl',
+    label: 'CDN Base URL',
+    section: 'features',
+    default: 'https://unpkg.com',
+    htmlAttribute: 'cdn-base-url',
+    inputType: 'text',
+  }),
   checkbox({
     id: 'resizable',
     label: 'Resizable',

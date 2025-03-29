@@ -175,6 +175,16 @@ export class PlaygroundProject extends LitElement {
   sandboxBaseUrl = `https://unpkg.com/playground-elements@${npmVersion}/`;
 
   /**
+   * Base URL for the CDN used to resolve bare module specifiers.
+   *
+   * Examples:
+   * - "https://unpkg.com" (default)
+   * - "https://cdn.jsdelivr.net/npm"
+   */
+  @property({attribute: 'cdn-base-url'})
+  cdnBaseUrl = 'https://unpkg.com';
+
+  /**
    * The service worker scope to register on
    */
   // TODO: generate this?
@@ -198,6 +208,9 @@ export class PlaygroundProject extends LitElement {
    * getter.
    */
   private _pristineFiles?: SampleFile[];
+
+  // Store config value separately to maintain proper resolution order
+  private _configCdnBaseUrl?: string;
 
   /**
    * Cached value for the `modified` getter. When undefined, the modified state
@@ -317,6 +330,16 @@ export class PlaygroundProject extends LitElement {
     ) {
       this.dispatchEvent(new CustomEvent('urlChanged'));
     }
+    if (
+      changedProperties.has('cdnBaseUrl') &&
+      // do not trigger a reload on first render
+      changedProperties.get('cdnBaseUrl') !== undefined
+    ) {
+      // needs to trigger a full reload and recompile as if we had made a file
+      // change
+      this._modified = undefined;
+      void this.saveDebounced();
+    }
     super.update(changedProperties);
   }
 
@@ -325,6 +348,7 @@ export class PlaygroundProject extends LitElement {
     switch (source.type) {
       case 'none':
         this._files = undefined;
+        this._configCdnBaseUrl = undefined;
         this._importMap = {};
         break;
       case 'direct':
@@ -340,15 +364,17 @@ export class PlaygroundProject extends LitElement {
           }
           this._files = files;
           this._importMap = importMap;
+          this._configCdnBaseUrl = source.config.cdnBaseUrl;
         }
         break;
       case 'slot':
         this._files = source.files;
         this._importMap = source.importMap;
+        this._configCdnBaseUrl = undefined;
         break;
       case 'url':
         {
-          const {files, importMap} = await fetchProjectConfig(
+          const {files, importMap, cdnBaseUrl} = await fetchProjectConfig(
             new URL(source.url, document.baseURI).href
           );
           // Note the source could have changed while fetching, hence the
@@ -358,6 +384,7 @@ export class PlaygroundProject extends LitElement {
           }
           this._files = files;
           this._importMap = importMap;
+          this._configCdnBaseUrl = cdnBaseUrl;
         }
         break;
       default:
@@ -563,9 +590,13 @@ export class PlaygroundProject extends LitElement {
     if (build.state() !== 'active') {
       return;
     }
+    const cdnBaseUrl = this._getEffectiveCdnBaseUrl();
     void workerApi.compileProject(
       this._files ?? [],
-      {importMap: this._importMap},
+      {
+        importMap: this._importMap,
+        cdnBaseUrl,
+      },
       proxy((result) => build.onOutput(result))
     );
     await build.stateChange;
@@ -588,7 +619,10 @@ export class PlaygroundProject extends LitElement {
         changeData.fileContent,
         tokenUnderCursorAsString,
         changeData.cursorIndex,
-        {importMap: this._importMap}
+        {
+          importMap: this._importMap,
+          cdnBaseUrl: this._getEffectiveCdnBaseUrl(),
+        }
       );
       if (completionInfo) {
         const getCompletionDetailsFunction =
@@ -640,7 +674,10 @@ export class PlaygroundProject extends LitElement {
     const completionItemDetails = await workerApi.getCompletionItemDetails(
       filename,
       cursorIndex,
-      {importMap: this._importMap},
+      {
+        importMap: this._importMap,
+        cdnBaseUrl: this._getEffectiveCdnBaseUrl(),
+      },
       completionWord
     );
 
@@ -739,6 +776,14 @@ export class PlaygroundProject extends LitElement {
     this.dispatchEvent(new FilesChangedEvent());
     void this.save();
   }
+
+  /**
+   * Returns the effective CDN base URL, considering all possible sources
+   * in the correct priority order.
+   */
+  private _getEffectiveCdnBaseUrl(): string {
+    return this.cdnBaseUrl || this._configCdnBaseUrl || 'https://unpkg.com';
+  }
 }
 
 /**
@@ -748,7 +793,11 @@ const fetchProjectConfig = async (
   url: string,
   alreadyFetchedFilenames = new Set<string>(),
   alreadyFetchedConfigUrls = new Set<string>()
-): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
+): Promise<{
+  files: Array<SampleFile>;
+  importMap: ModuleImportMap;
+  cdnBaseUrl?: string;
+}> => {
   if (alreadyFetchedConfigUrls.has(url)) {
     throw new Error(
       `Circular project config extends: ${[
@@ -774,12 +823,17 @@ const fetchProjectConfig = async (
       `Error parsing project config JSON from ${url}: ${(e as Error).message}`
     );
   }
-  return await expandProjectConfig(
+  const result = await expandProjectConfig(
     config,
     url,
     alreadyFetchedFilenames,
     alreadyFetchedConfigUrls
   );
+
+  return {
+    ...result,
+    cdnBaseUrl: config.cdnBaseUrl,
+  };
 };
 
 /**
@@ -791,7 +845,11 @@ const expandProjectConfig = async (
   baseUrl: string,
   alreadyFetchedFilenames = new Set<string>(),
   alreadyFetchedConfigUrls = new Set<string>()
-): Promise<{files: Array<SampleFile>; importMap: ModuleImportMap}> => {
+): Promise<{
+  files: Array<SampleFile>;
+  importMap: ModuleImportMap;
+  cdnBaseUrl?: string;
+}> => {
   const filePromises: Array<Promise<SampleFile>> = [];
   for (const [filename, info] of Object.entries(config.files ?? {})) {
     // A higher precedence config is already handling this file.
@@ -836,6 +894,7 @@ const expandProjectConfig = async (
 
   const files = await Promise.all(filePromises);
   const importMap = config.importMap ?? {};
+  let cdnBaseUrl = config.cdnBaseUrl;
 
   if (extendsConfigPromise) {
     const extendsConfig = await extendsConfigPromise;
@@ -846,9 +905,11 @@ const expandProjectConfig = async (
       // Our imports take precedence over our parents.
       ...importMap.imports,
     };
+    // Only use parent's cdn if we don't have our own
+    cdnBaseUrl = cdnBaseUrl ?? extendsConfig.cdnBaseUrl;
   }
 
-  return {files, importMap};
+  return {files, importMap, cdnBaseUrl};
 };
 
 const typeFromFilename = (filename: string) => {

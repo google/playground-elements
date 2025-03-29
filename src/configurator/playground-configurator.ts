@@ -130,7 +130,8 @@ export class PlaygroundConfigurator extends LitElement {
         flex: 1;
       }
 
-      .knobs select {
+      .knobs select,
+      .knobs input[type='text'] {
         grid-column: 2 / -1;
       }
 
@@ -163,7 +164,7 @@ export class PlaygroundConfigurator extends LitElement {
     `,
   ];
 
-  private values = new KnobValues();
+  private _values = new KnobValues();
 
   @state()
   private _themeDetectorOpen = false;
@@ -173,14 +174,14 @@ export class PlaygroundConfigurator extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.readUrlParams(new URL(document.location.href).searchParams);
+    this._readUrlParams(new URL(document.location.href).searchParams);
   }
 
-  private async setValue<T extends KnobId>(id: T, value: KnobValueType<T>) {
-    await this.setValues(new Map<KnobId, unknown>([[id, value]]));
+  private async _setValue<T extends KnobId>(id: T, value: KnobValueType<T>) {
+    await this._setValues(new Map<KnobId, unknown>([[id, value]]));
   }
 
-  private async setValues(values: Map<KnobId, unknown>) {
+  private async _setValues(values: Map<KnobId, unknown>) {
     // Apply the theme first, because it sets new defaults, and we want any
     // other values to take precedence.
     const theme = values.get('theme');
@@ -189,14 +190,14 @@ export class PlaygroundConfigurator extends LitElement {
     }
     for (const [id, value] of values) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.values.setValue(id, value as any);
+      this._values.setValue(id, value as any);
     }
-    this.setUrlParams();
+    this._setUrlParams();
     this.requestUpdate();
   }
 
   private async _applyTheme(theme: KnobValueType<'theme'>) {
-    this.values.setValue('theme', theme);
+    this._values.setValue('theme', theme);
 
     if (theme === 'default') {
       // The default theme isn't a stylesheet we can load and probe. We just
@@ -206,9 +207,9 @@ export class PlaygroundConfigurator extends LitElement {
         if (knob.originalDefault) {
           knob.default = knob.originalDefault;
         }
-        this.values.setValue(knob.id, knob.default);
+        this._values.setValue(knob.id, knob.default);
       }
-      this.setUrlParams();
+      this._setUrlParams();
       this.requestUpdate();
       return;
     }
@@ -216,7 +217,7 @@ export class PlaygroundConfigurator extends LitElement {
     // Reset each syntax highlighting knob to its default.
     for (const token of tokens) {
       const knob = knobsById[token.id];
-      this.values.setValue(knob.id, knob.default);
+      this._values.setValue(knob.id, knob.default);
     }
 
     // Update to apply the theme stylesheet.
@@ -237,12 +238,12 @@ export class PlaygroundConfigurator extends LitElement {
 
       // Change the value and the default. Change the default because the theme
       // already applies this value.
-      this.values.setValue(knob.id, hex);
+      this._values.setValue(knob.id, hex);
       knob.default = hex;
     }
   }
 
-  private readUrlParams(params: URLSearchParams) {
+  private _readUrlParams(params: URLSearchParams) {
     const values = new Map<KnobId, unknown>();
     for (const id of knobIds) {
       const urlValue = params.get(id);
@@ -263,17 +264,20 @@ export class PlaygroundConfigurator extends LitElement {
         case 'select':
           values.set(knob.id, urlValue);
           break;
+        case 'input':
+          values.set(knob.id, urlValue);
+          break;
         default:
           throwUnreachable(knob, `Unexpected knob type ${(knob as Knob).type}`);
       }
     }
-    this.setValues(values);
+    this._setValues(values);
   }
 
-  private setUrlParams() {
+  private _setUrlParams() {
     const params = new URLSearchParams();
     for (const knob of knobs) {
-      const value = this.values.getValue(knob.id);
+      const value = this._values.getValue(knob.id);
       if (value === knob.default) {
         continue;
       }
@@ -290,6 +294,9 @@ export class PlaygroundConfigurator extends LitElement {
         case 'select':
           params.set(knob.id, value as string);
           break;
+        case 'input':
+          params.set(knob.id, value as string);
+          break;
         default:
           throwUnreachable(knob, `Unexpected knob type ${(knob as Knob).type}`);
       }
@@ -300,7 +307,7 @@ export class PlaygroundConfigurator extends LitElement {
   override render() {
     return html`
       <style>
-        ${this.cssText}
+        ${this._cssText}
       </style>
 
       <mwc-dialog
@@ -317,21 +324,22 @@ export class PlaygroundConfigurator extends LitElement {
           : nothing}
       </mwc-dialog>
 
-      <div id="lhs">${this.knobs}</div>
+      <div id="lhs">${this._knobs}</div>
 
       <div id="rhs">
         <div
           id="container"
-          style="background-color:${this.values.getValue('pageBackground')}"
+          style="background-color:${this._values.getValue('pageBackground')}"
         >
           <playground-ide
             id="playground"
-            class="playground-theme-${this.values.getValue('theme')}"
-            .lineNumbers=${this.values.getValue('lineNumbers')}
-            .lineWrapping=${this.values.getValue('lineWrapping')}
-            .resizable=${this.values.getValue('resizable')}
-            .editableFileSystem=${this.values.getValue('editableFileSystem')}
-            .noCompletions=${this.values.getValue('noCompletions')}
+            class="playground-theme-${this._values.getValue('theme')}"
+            .lineNumbers=${this._values.getValue('lineNumbers')}
+            .lineWrapping=${this._values.getValue('lineWrapping')}
+            .resizable=${this._values.getValue('resizable')}
+            .editableFileSystem=${this._values.getValue('editableFileSystem')}
+            .noCompletions=${this._values.getValue('noCompletions')}
+            .cdnBaseUrl=${this._values.getValue('cdnBaseUrl')}
             project-src="./project/project.json"
             sandbox-base-url="."
           >
@@ -343,14 +351,14 @@ export class PlaygroundConfigurator extends LitElement {
         <div id="code">
           <div>
             <h3>CSS</h3>
-            <playground-code-editor .value=${this.cssText} type="css" readonly>
+            <playground-code-editor .value=${this._cssText} type="css" readonly>
             </playground-code-editor>
           </div>
 
           <div>
             <h3>HTML</h3>
             <playground-code-editor
-              .value=${this.htmlText}
+              .value=${this._htmlText}
               type="html"
               readonly
             >
@@ -361,27 +369,27 @@ export class PlaygroundConfigurator extends LitElement {
     `;
   }
 
-  private get knobs() {
+  private get _knobs() {
     return knobSectionNames.map(
       (section) =>
         html`<section>
           <h3 class="sectionLabel">${section}</h3>
           <div class="knobs">
-            ${knobsBySection[section].map((knob) => this.knob(knob))}
+            ${knobsBySection[section].map((knob) => this._knob(knob))}
           </div>
         </section>`
     );
   }
 
-  private get htmlText() {
-    return `${this.themeImport}
-<playground-ide id="playground"${this.htmlTextAttributes}>
+  private get _htmlText() {
+    return `${this._themeImport}
+<playground-ide id="playground"${this._htmlTextAttributes}>
 </playground-ide>
 `;
   }
 
-  private get themeImport() {
-    const theme = this.values.getValue('theme');
+  private get _themeImport() {
+    const theme = this._values.getValue('theme');
     if (theme === 'default') {
       return '';
     }
@@ -389,14 +397,14 @@ export class PlaygroundConfigurator extends LitElement {
         src="/node_modules/playground-elements/themes/${theme}.css">\n`;
   }
 
-  private get htmlTextAttributes() {
+  private get _htmlTextAttributes() {
     const attributes = [];
     for (const id of knobIds) {
       const knob: Knob = knobsById[id];
       if (!knob.htmlAttribute) {
         continue;
       }
-      const value = this.values.getValue(id);
+      const value = this._values.getValue(id);
       if (value === knob.default) {
         continue;
       }
@@ -411,21 +419,21 @@ export class PlaygroundConfigurator extends LitElement {
           break;
       }
     }
-    const theme = this.values.getValue('theme');
+    const theme = this._values.getValue('theme');
     if (theme !== 'default') {
       attributes.push(`\n  class="playground-theme-${theme}"`);
     }
     return attributes.join('');
   }
 
-  private get cssText() {
+  private get _cssText() {
     const props = [];
     for (const id of knobIds) {
       const knob: Knob = knobsById[id];
       if (!(knob as Knob).cssProperty) {
         continue;
       }
-      const value = this.values.getValue(id);
+      const value = this._values.getValue(id);
       let line = `${knob.cssProperty}: ${
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         knob.formatCss ? (knob as any).formatCss(value) : value
@@ -444,20 +452,23 @@ ${props.join('\n')}
     `;
   }
 
-  private knob(knob: Knob) {
+  private _knob(knob: Knob) {
     let widget;
     switch (knob.type) {
       case 'select':
-        widget = this.selectKnob(knob);
+        widget = this._selectKnob(knob);
         break;
       case 'slider':
-        widget = this.sliderKnob(knob);
+        widget = this._sliderKnob(knob);
         break;
       case 'color':
-        widget = this.colorKnob(knob);
+        widget = this._colorKnob(knob);
         break;
       case 'checkbox':
-        widget = this.checkboxKnob(knob);
+        widget = this._checkboxKnob(knob);
+        break;
+      case 'input':
+        widget = this._inputKnob(knob);
     }
     if (!widget) {
       return nothing;
@@ -475,14 +486,14 @@ ${props.join('\n')}
     return [label, widget];
   }
 
-  private selectKnob(knob: KnobsOfType<'select'>) {
-    const value = this.values.getValue(knob.id);
+  private _selectKnob(knob: KnobsOfType<'select'>) {
+    const value = this._values.getValue(knob.id);
     return html`
       <select
         id=${knob.id}
         @input=${(event: Event & {target: HTMLSelectElement}) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          this.setValue(knob.id, event.target.value as any);
+          this._setValue(knob.id, event.target.value as any);
         }}
       >
         ${(knob.options as ReadonlyArray<string>).map(
@@ -495,8 +506,8 @@ ${props.join('\n')}
     `;
   }
 
-  private sliderKnob(knob: KnobsOfType<'slider'>) {
-    const value = this.values.getValue(knob.id);
+  private _sliderKnob(knob: KnobsOfType<'slider'>) {
+    const value = this._values.getValue(knob.id);
     return html`
       <span class="sliderAndValue">
         <input
@@ -506,7 +517,7 @@ ${props.join('\n')}
           max=${knob.max}
           value=${value}
           @input=${(event: Event & {target: HTMLInputElement}) => {
-            this.setValue(knob.id, Number(event.target.value));
+            this._setValue(knob.id, Number(event.target.value));
           }}
         />
         <span class="sliderValue"
@@ -516,8 +527,8 @@ ${props.join('\n')}
     `;
   }
 
-  private colorKnob(knob: KnobsOfType<'color'>) {
-    let value = this.values.getValue(knob.id);
+  private _colorKnob(knob: KnobsOfType<'color'>) {
+    let value = this._values.getValue(knob.id);
     return html`
       ${'unsetLabel' in knob
         ? html`
@@ -528,7 +539,7 @@ ${props.join('\n')}
                 ?checked=${value === ''}
                 @input=${(event: Event & {target: HTMLInputElement}) => {
                   value = event.target.checked ? '' : '#ffffff';
-                  this.setValue(knob.id, value);
+                  this._setValue(knob.id, value);
                 }}
               />
               <label for=${knob.id + '-unset'}> ${knob.unsetLabel}</label>
@@ -541,21 +552,36 @@ ${props.join('\n')}
         type="color"
         .value=${value === '' ? '#ffffff' : String(value)}
         @input=${(event: Event & {target: HTMLInputElement}) => {
-          this.setValue(knob.id, event.target.value);
+          this._setValue(knob.id, event.target.value);
         }}
       />
     `;
   }
 
-  private checkboxKnob(knob: KnobsOfType<'checkbox'>) {
-    const value = this.values.getValue(knob.id);
+  private _checkboxKnob(knob: KnobsOfType<'checkbox'>) {
+    const value = this._values.getValue(knob.id);
     return html`
       <input
         id=${knob.id}
         type="checkbox"
         ?checked=${value}
         @change=${(event: Event & {target: HTMLInputElement}) => {
-          this.setValue(knob.id, event.target.checked);
+          this._setValue(knob.id, event.target.checked);
+        }}
+      />
+    `;
+  }
+
+  private _inputKnob(knob: KnobsOfType<'input'>) {
+    const value = this._values.getValue(knob.id);
+    return html`
+      <input
+        id=${knob.id}
+        type="text"
+        .value=${value}
+        placeholder=${knob.placeholder || ''}
+        @input=${(event: Event & {target: HTMLInputElement}) => {
+          this._setValue(knob.id, event.target.value);
         }}
       />
     `;
@@ -595,7 +621,7 @@ ${props.join('\n')}
       }
     }
 
-    this.setValues(values);
+    this._setValues(values);
 
     this._closeThemeDetector();
   }

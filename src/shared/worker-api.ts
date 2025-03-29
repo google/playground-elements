@@ -74,7 +74,7 @@ export interface ServiceWorkerAPI {
 
 export interface WorkerConfig {
   importMap: ModuleImportMap;
-  cdnBaseUrl?: string;
+  cdnBaseUrl: string;
 }
 
 export interface EditorToken {
@@ -187,6 +187,7 @@ export interface ProjectManifest {
   extends?: string;
   files?: {[filename: string]: FileOptions};
   importMap?: ModuleImportMap;
+  cdnBaseUrl?: string;
 }
 
 export interface ModuleImportMap {

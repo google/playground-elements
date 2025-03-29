@@ -24,9 +24,13 @@ export interface CdnFile {
  * An interface to unpkg.com or a similar NPM CDN service.
  */
 export class CachingCdn {
-  private readonly _urlPrefix: string;
+  private readonly _cdnBaseUrl: string;
 
-  /** A cache for all fetches. */
+  /**
+   * A cache for all fetch operations to avoid redundant network requests.
+   * Maps from package-version-path to a promise that resolves with the URL and
+   * file content.
+   */
   private readonly _fetchCache = new Map<
     string,
     Deferred<{url: string; file: CdnFile}>
@@ -41,10 +45,12 @@ export class CachingCdn {
   private readonly _versionCache = new Map<string, string>();
 
   /**
-   * @param urlPrefix E.g. https://unpkg.com/
+   * @param cdnBaseUrl Base URL for the CDN (e.g., 'https://unpkg.com')
    */
-  constructor(urlPrefix: string) {
-    this._urlPrefix = urlPrefix;
+  constructor(cdnBaseUrl: string) {
+    this._cdnBaseUrl = cdnBaseUrl.endsWith('/')
+      ? cdnBaseUrl.slice(0, -1)
+      : cdnBaseUrl;
   }
 
   /**
@@ -53,6 +59,18 @@ export class CachingCdn {
   async fetch(location: NpmFileLocation): Promise<CdnFile> {
     const {file} = await this._fetch(location);
     return file;
+  }
+
+  /**
+   * Resolve a package location to a CDN URL using the configured provider
+   */
+  private _resolveCdnUrl(location: NpmFileLocation): string {
+    // Construct the URL directly using the CDN base URL
+    const packageSpec = `${location.pkg}@${location.version}`;
+
+    const path = location.path ? `/${location.path}` : '';
+
+    return `${this._cdnBaseUrl}/${packageSpec}${path}`;
   }
 
   /**
@@ -80,7 +98,7 @@ export class CachingCdn {
     }
     if (!exact || fileExtension(location.path) === '') {
       const {url} = await this._fetch(location);
-      location = this._parseUnpkgUrl(url);
+      location = this._parseCdnUrl(url)!;
     }
     return location;
   }
@@ -139,24 +157,47 @@ export class CachingCdn {
     }
     const deferred = new Deferred<{
       url: string;
-      file: {content: string; contentType: string};
+      file: CdnFile;
     }>();
     this._fetchCache.set(pvp, deferred);
-    const url = this._urlPrefix + pvp;
-    const res = await fetch(url);
-    const content = await res.text();
-    if (res.status !== 200) {
+    const url = this._resolveCdnUrl(location);
+    let res: Response;
+    let content = '';
+    try {
+      res = await fetch(url);
+      content = await res.text();
+
+      if (res.status !== 200) {
+        const errorMessage = `CDN HTTP ${res.status} error (${url}): ${content}`;
+        console.warn(errorMessage);
+        const err = new Error(errorMessage);
+        deferred.reject(err);
+        return deferred.promise;
+      }
+    } catch (e) {
+      // Error usually happens if it's a 404 on the CDN causing the fetch to
+      // throw a cors error
+      console.warn(
+        `Network error fetching ${url}: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
       const err = new Error(
-        `CDN HTTP ${res.status} error (${url}): ${content}`
+        `Failed to fetch from CDN (${url}): ${
+          e instanceof Error ? e.message : String(e)
+        }`
       );
       deferred.reject(err);
       return deferred.promise;
     }
     if (!exact) {
-      const canonical = this._parseUnpkgUrl(res.url);
-      this._versionCache.set(pkgVersion(location), canonical.version);
-      this._fetchCache.set(pkgVersionPath(canonical), deferred);
+      const canonical = this._parseCdnUrl(res.url);
+      if (canonical) {
+        this._versionCache.set(pkgVersion(location), canonical.version);
+        this._fetchCache.set(pkgVersionPath(canonical), deferred);
+      }
     }
+
     const result = {
       url: res.url,
       file: {
@@ -168,13 +209,26 @@ export class CachingCdn {
     return deferred.promise;
   }
 
-  private _parseUnpkgUrl(url: string): NpmFileLocation {
-    if (url.startsWith(this._urlPrefix)) {
-      const parsed = parseNpmStyleSpecifier(url.slice(this._urlPrefix.length));
-      if (parsed !== undefined) {
-        return parsed;
-      }
+  private _parseCdnUrl(url: string): NpmFileLocation | undefined {
+    // Check if the URL starts with our CDN base URL
+    if (!url.startsWith(this._cdnBaseUrl)) {
+      const errorMessage = `Failed to parse CDN URL: ${url} - URL does not start with CDN base URL: ${this._cdnBaseUrl}`;
+      console.warn(errorMessage);
+      return undefined;
     }
-    throw new Error(`Unexpected CDN URL format: ${url}`);
+
+    // Extract the path after the CDN base URL
+    const path = url.slice(this._cdnBaseUrl.length + 1); // +1 for the trailing slash
+
+    // Use the utility function to parse the path as an NPM-style specifier
+    const parsed = parseNpmStyleSpecifier(path);
+
+    if (parsed) {
+      return parsed;
+    }
+
+    const errorMessage = `Failed to parse CDN URL: ${url} - could not extract package information`;
+    console.warn(errorMessage);
+    return undefined;
   }
 }
