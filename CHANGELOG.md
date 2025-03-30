@@ -12,6 +12,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 <!-- ## [Unreleased] -->
+<!-- ### Added -->
+<!-- ### Fixed -->
+<!-- ### Removed -->
+
+## [0.20.0] - 2025-03-30
+
+### Added
+
+- Implement `cdnBaseUrl` property to allow changing the underlying npm CDN base url. See [README](README.md) for more information.
+
+### Fixed
+
+- Make playground-elements more resilient to 404's from the CDN by not throwing errors when they occur. Instead, log a warning and continue to load the rest of the project.
 
 ## [0.19.1] - 2024-08-19
 
@@ -26,10 +39,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Upgraded to TypeScript 5.2 and Lit 3.0
 - **BREAKING** Use modules in workers. See [caniuse.com's support table](https://caniuse.com/mdn-api_worker_worker_ecmascript_modules) for browser support information.
 - Updated `comlink`, `fuse.js`, and `tslib` dependencies.
-
-<!-- ### Added -->
-<!-- ### Fixed -->
-<!-- ### Removed -->
 
 ## [0.18.1] - 2023-08-10
 
