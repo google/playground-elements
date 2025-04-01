@@ -221,11 +221,12 @@ export class PlaygroundIde extends LitElement {
    * Base URL for the CDN used to resolve bare module specifiers.
    *
    * Examples:
-   * - "https://unpkg.com" (default)
+   * - "" (default, but resolves to "https://unpkg.com")
+   * - "https://unpkg.com"
    * - "https://cdn.jsdelivr.net/npm"
    */
   @property({attribute: 'cdn-base-url'})
-  cdnBaseUrl = 'https://unpkg.com';
+  cdnBaseUrl = '';
 
   /**
    * Allow the user to add, remove, and rename files in the project's virtual
