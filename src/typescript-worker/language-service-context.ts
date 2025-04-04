@@ -66,12 +66,17 @@ class WorkerLanguageServiceHost implements ts.LanguageServiceHost {
    */
   updateFileContentIfNeeded(fileName: string, content: string) {
     const file = this.files.get(fileName);
-    if (file && file.content !== content) {
+    if (file) {
+      if (file.content === content) {
+        // The file hasn't changed, exit early.
+        return;
+      }
       file.content = content;
       file.version += 1;
-    } else {
-      this.files.set(fileName, {content, version: 0});
+      return;
     }
+
+    this.files.set(fileName, {content, version: 0});
   }
 
   /**
