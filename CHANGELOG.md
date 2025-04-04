@@ -77,6 +77,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   compilation, and the default value of the `type` field is modified to
   `module`.
 
+### Added
+
+- The service worker now sets the [`Cross-Origin-Embedder-Policy: require-corp`](https://html.spec.whatwg.org/multipage/origin.html#coep-require-corp)
+  heading on all responses.
+
 ## [0.16.3] - 2022-08-02
 
 ### Added
