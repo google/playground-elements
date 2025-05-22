@@ -16,6 +16,9 @@
 /playground-*.js
 /playground-*.d.ts
 /playground-*.d.ts.map
+/cm-lang-lit.js
+/cm-lang-lit.d.ts
+/cm-lang-lit.d.ts.map
 /test/
 /_codemirror/
 /themes/
@@ -25,7 +28,6 @@
 .tsbuildinfo
 /playground-service-worker.*
 /playground-service-worker-proxy.*
-/src/playground-styles.ts
 /*.tgz
 /.wireit
 /.eslintcache

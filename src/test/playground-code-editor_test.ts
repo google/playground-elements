@@ -8,8 +8,12 @@ import {assert} from '@esm-bundle/chai';
 import '../playground-code-editor.js';
 import {PlaygroundCodeEditor} from '../playground-code-editor.js';
 import {sendKeys} from '@web/test-runner-commands';
+import {EditorView} from '@codemirror/view';
+import {undo} from '@codemirror/commands';
 
 const raf = async () => new Promise((r) => requestAnimationFrame(r));
+const wait = async (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 suite('playground-code-editor', () => {
   let container: HTMLDivElement;
@@ -56,16 +60,23 @@ suite('playground-code-editor', () => {
     await new Promise<void>((resolve) => {
       editor.addEventListener('change', () => resolve());
       const editorInternals = editor as unknown as {
-        _codemirror: PlaygroundCodeEditor['_codemirror'];
+        _editorView: EditorView;
       };
-      editorInternals._codemirror!.setValue('bar');
+      // Update the text via a CodeMirror 6 transaction
+      editorInternals._editorView!.dispatch({
+        changes: {
+          from: 0,
+          to: editorInternals._editorView!.state.doc.length,
+          insert: 'bar',
+        },
+      });
     });
   });
 
   suite('history', () => {
     let editor: PlaygroundCodeEditor;
     let editorInternals: {
-      _codemirror: PlaygroundCodeEditor['_codemirror'];
+      _editorView: EditorView;
     };
 
     setup(async () => {
@@ -87,29 +98,38 @@ suite('playground-code-editor', () => {
       editor.value = 'document key 1';
       editor.documentKey = DOCUMENT_KEY1;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 1'
+      );
       editor.value = 'document key 2';
       editor.documentKey = DOCUMENT_KEY2;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 2'
+      );
       // If only the documentKey is changed, the current value is set on the
       // document cache. The `value` property drives the CodeMirror contents.
       editor.documentKey = DOCUMENT_KEY1;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 2'
+      );
 
       // Changing documentKey and unsetting the value should clear the editor.
       editor.value = undefined;
       editor.documentKey = DOCUMENT_KEY2;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), '');
+      assert.equal(editorInternals._editorView.state.doc.toString(), '');
 
       // Unset the cache should result in a
       editor.documentKey = undefined;
       editor.value = 'value with no cache';
       await raf();
       assert.equal(
-        editorInternals._codemirror!.getValue(),
+        editorInternals._editorView.state.doc.toString(),
         'value with no cache'
       );
     });
@@ -124,18 +144,30 @@ suite('playground-code-editor', () => {
       await raf();
       editor.documentKey = undefined;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      assert.equal(
+        editorInternals._editorView!.state.doc.toString(),
+        'update on cache'
+      );
       // No-op, because unsetting documentKey clears history.
-      editorInternals._codemirror!.undo();
+      undo(editorInternals._editorView!);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      assert.equal(
+        editorInternals._editorView!.state.doc.toString(),
+        'update on cache'
+      );
       await raf();
       editor.value = 'changed';
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'changed');
-      editorInternals._codemirror!.undo();
+      assert.equal(
+        editorInternals._editorView!.state.doc.toString(),
+        'changed'
+      );
+      undo(editorInternals._editorView!);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'update on cache');
+      assert.equal(
+        editorInternals._editorView!.state.doc.toString(),
+        'update on cache'
+      );
     });
 
     test('is updated if value gets changed with doc cache', async () => {
@@ -144,33 +176,42 @@ suite('playground-code-editor', () => {
       editor.value = 'document key 1';
       editor.documentKey = DOCUMENT_KEY1;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 1'
+      );
       editor.value = 'document key 2';
       editor.documentKey = DOCUMENT_KEY2;
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 2');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 2'
+      );
       editor.documentKey = DOCUMENT_KEY1;
       editor.value = 'override document key 1';
       await raf();
       assert.equal(
-        editorInternals._codemirror!.getValue(),
+        editorInternals._editorView.state.doc.toString(),
         'override document key 1'
       );
-      editorInternals._codemirror?.undo();
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'document key 1');
+      assert.equal(
+        editorInternals._editorView.state.doc.toString(),
+        'document key 1'
+      );
     });
 
     test('is maintained without using documentKey', async () => {
       editor.value = 'foo';
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'foo');
       editor.value = 'bar';
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
-      editorInternals._codemirror!.undo();
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'bar');
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'foo');
     });
 
     test('is maintained with a document key', async () => {
@@ -178,13 +219,13 @@ suite('playground-code-editor', () => {
       editor.documentKey = DOCUMENT_KEY1;
       editor.value = 'foo';
       await editor.updateComplete;
-      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'foo');
       editor.value = 'bar';
       await editor.updateComplete;
-      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
-      editorInternals._codemirror!.undo();
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'bar');
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'foo');
     });
 
     test('is associated to the documentKey property', async () => {
@@ -196,10 +237,10 @@ suite('playground-code-editor', () => {
       editor.value = 'potato';
       editor.documentKey = DOCUMENT_KEY2;
       await editor.updateComplete;
-      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
-      editorInternals._codemirror!.undo();
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'potato');
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'potato');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'potato');
     });
 
     test('can be rehydrated from a saved document instance', async () => {
@@ -220,10 +261,10 @@ suite('playground-code-editor', () => {
       editor.value = 'bar';
       await raf();
 
-      assert.equal(editorInternals._codemirror!.getValue(), 'bar');
-      editorInternals._codemirror!.undo();
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'bar');
+      undo(editorInternals._editorView);
       await raf();
-      assert.equal(editorInternals._codemirror!.getValue(), 'foo');
+      assert.equal(editorInternals._editorView.state.doc.toString(), 'foo');
     });
   });
 
@@ -262,46 +303,54 @@ suite('playground-code-editor', () => {
       assert.equal(style.color, color);
     };
 
-    const tagColor = 'rgb(17, 119, 0)';
     const typeColor = 'rgb(0, 136, 85)';
-    const atomColor = 'rgb(34, 17, 153)';
+    const boolColor = 'rgb(34, 17, 153)';
     const keywordColor = 'rgb(119, 0, 136)';
+    const literalColor = 'rgb(34, 17, 153)';
     const stringColor = 'rgb(170, 17, 17)';
 
     test('html', async () =>
-      assertHighlight('html', '<p>foo</p>', '<p>', tagColor));
+      assertHighlight('html', '<p>foo</p>', 'p', typeColor));
 
     test('css', async () =>
-      assertHighlight('css', 'p { color: blue; }', 'blue', keywordColor));
+      assertHighlight('css', 'p { color: blue; }', 'blue', literalColor));
 
     test('js', async () =>
-      assertHighlight('js', 'if (true) {}', 'true', atomColor));
+      assertHighlight('js', 'if (true) {}', 'true', boolColor));
+
+    test('html-in-js', async () =>
+      assertHighlight(
+        'js',
+        'import {LitElement, html} from "lit";',
+        'import',
+        keywordColor
+      ));
 
     test('ts', async () =>
       assertHighlight('ts', 'const x: string;', 'string', typeColor));
 
     test('jsx', async () =>
-      assertHighlight('jsx', 'const foo = () => <p>foo</p>;', 'p', tagColor));
+      assertHighlight('jsx', 'const foo = () => <p>foo</p>;', 'p', typeColor));
 
     test('tsx', async () =>
       assertHighlight(
         'tsx',
         'const x: () => unknown = () => <p>foo</p>;',
         'p',
-        tagColor
+        typeColor
       ));
 
     test('html-in-js', async () =>
-      assertHighlight('js', 'html`<p>foo</p>`', '<p>', tagColor));
+      assertHighlight('js', 'html`<p>foo</p>`', 'p', typeColor));
 
     test('html-in-ts', async () =>
-      assertHighlight('ts', 'html`<p>foo</p>`', '<p>', tagColor));
+      assertHighlight('ts', 'html`<p>foo</p>`', 'p', typeColor));
 
     test('css-in-js', async () =>
-      assertHighlight('js', 'css`p { color: blue; }`', 'blue', keywordColor));
+      assertHighlight('js', 'css`p { color: blue; }`', 'blue', literalColor));
 
     test('css-in-ts', async () =>
-      assertHighlight('ts', 'css`p { color: blue; }`', 'blue', keywordColor));
+      assertHighlight('ts', 'css`p { color: blue; }`', 'blue', literalColor));
 
     test('json', async () =>
       assertHighlight('json', '{"foo": 123}', '"foo"', stringColor));
@@ -318,19 +367,30 @@ suite('playground-code-editor', () => {
       editor.value = value;
       container.appendChild(editor);
       await editor.updateComplete;
+
+      await raf();
+      await raf();
+
       const focusContainer =
         editor.shadowRoot!.querySelector<HTMLDivElement>('#focusContainer')!;
 
       editor.focus();
+
+      await wait(100);
+
       await sendKeys({
-        down: 'Control',
+        down: 'Meta',
       });
       await sendKeys({
         press: 'Slash',
       });
       await sendKeys({
-        up: 'Control',
+        up: 'Meta',
       });
+
+      await wait(100);
+      await raf();
+      await editor.updateComplete;
 
       assert.include(focusContainer.innerText, expect);
 
@@ -343,6 +403,10 @@ suite('playground-code-editor', () => {
       await sendKeys({
         up: 'Control',
       });
+
+      await wait(100);
+      await raf();
+      await editor.updateComplete;
 
       assert.include(focusContainer.innerText, value);
     }
@@ -387,6 +451,98 @@ suite('playground-code-editor', () => {
         editor.shadowRoot!.querySelector<HTMLDivElement>('div')!.innerText,
         'const g = 3;'
       );
+    });
+  });
+
+  suite('tokenUnderCursor', () => {
+    let editor: PlaygroundCodeEditor;
+    let editorInternals: {
+      _editorView: EditorView;
+    };
+
+    setup(async () => {
+      editor = document.createElement('playground-code-editor');
+      container.appendChild(editor);
+      await raf();
+      editorInternals = editor as unknown as typeof editorInternals;
+    });
+
+    teardown(() => {
+      editor.remove();
+    });
+
+    test('returns token for JavaScript identifier', async () => {
+      editor.type = 'js';
+      editor.value = 'const myVariable = 42;';
+      await raf();
+
+      // Position cursor inside 'myVariable'
+      const pos = 'const my'.length;
+      editorInternals._editorView.dispatch({
+        selection: {anchor: pos, head: pos},
+      });
+      await raf();
+
+      const token = editor.tokenUnderCursor;
+      assert.equal(token.string, 'myVariable');
+      assert.equal(token.start, 6); // After 'const '
+      assert.equal(token.end, 16); // Before ' = 42'
+    });
+
+    test('returns token for HTML tag', async () => {
+      editor.type = 'html';
+      editor.value = '<div class="container"></div>';
+      await raf();
+
+      const pos = '<d'.length;
+      editorInternals._editorView.dispatch({
+        selection: {anchor: pos, head: pos},
+      });
+      await raf();
+
+      const token = editor.tokenUnderCursor;
+      assert.equal(token.string, 'div');
+    });
+
+    test('returns token for CSS property', async () => {
+      editor.type = 'css';
+      editor.value = 'body { color: red; }';
+      await raf();
+
+      const pos = 'body { co'.length;
+      editorInternals._editorView.dispatch({
+        selection: {anchor: pos, head: pos},
+      });
+      await raf();
+
+      const token = editor.tokenUnderCursor;
+      assert.equal(token.string, 'color');
+    });
+
+    test('handles empty document', async () => {
+      editor.type = 'js';
+      editor.value = '';
+      await raf();
+
+      const token = editor.tokenUnderCursor;
+      assert.equal(token.string, '');
+      assert.equal(token.start, 0);
+      assert.equal(token.end, 0);
+    });
+
+    test('handles cursor at punctuation', async () => {
+      editor.type = 'js';
+      editor.value = 'obj.property';
+      await raf();
+
+      const pos = 'obj'.length;
+      editorInternals._editorView.dispatch({
+        selection: {anchor: pos, head: pos},
+      });
+      await raf();
+
+      const token = editor.tokenUnderCursor;
+      assert.isTrue(token.string.length > 0);
     });
   });
 });
