@@ -21,6 +21,7 @@
     • <a href="#typescript">TypeScript</a>
     • <a href="#hiding--folding">Hiding & Folding</a>
     • <a href="#custom-layouts">Custom layouts</a>
+    • <a href="#extending-the-editor">Extending the editor</a>
     • <a href="#bundling">Bundling</a>
     • <a href="#sandbox-security">Sandbox security</a>
     • <a href="#components">Components</a>
@@ -517,6 +518,60 @@ Finally, add a little style:
 </style>
 ```
 
+## Extending the editor
+
+Playground's code editor is built on [CodeMirror 6](https://codemirror.net/), and can be extended with any CodeMirror extension. This allows for deep customization of the editor's behavior, such as adding new themes, keymaps, autocompletion sources, and more.
+
+There are two ways to apply extensions: programmatically and declaratively.
+
+### Programmatic extensions
+
+The `<playground-ide>`, `<playground-file-editor>`, and `<playground-code-editor>` components all have an `extensions` property which accepts a CodeMirror `Extension` object (or an array of them).
+
+```js
+import {EditorView} from '@codemirror/view';
+
+const ide = document.querySelector('playground-ide');
+const myTheme = EditorView.theme({
+  '&': {
+    backgroundColor: 'lightpink',
+  },
+});
+ide.extensions = myTheme;
+```
+
+### Declarative extensions
+
+For simpler use-cases, or for when you want to package an extension as a reusable HTML element, you can use declarative extensions.
+
+A declarative extension is a custom element that provides one or more CodeMirror extensions. Playground elements will automatically find any declarative extension elements placed in their `extensions` slot and apply them.
+
+Here's an example of a custom theme packaged as a declarative extension:
+
+```html
+<playground-ide>
+  <my-theme-extension slot="extensions"></my-theme-extension>
+</playground-ide>
+
+<script type="module">
+  import {codemirrorExtensionMixin} from 'playground-elements';
+  import {EditorView} from '@codemirror/view';
+
+  class MyTheme extends codemirrorExtensionMixin(HTMLElement) {
+    getExtensions() {
+      return EditorView.theme({
+        '&': {
+          backgroundColor: 'lightpink',
+        },
+      });
+    }
+  }
+  customElements.define('my-theme-extension', MyTheme);
+</script>
+```
+
+The `codemirrorExtensionMixin` handles the communication with the playground editor. Your class just needs to implement the `getExtensions()` method.
+
 ## Bundling
 
 Playground uses a [Web
@@ -692,12 +747,14 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `modified`           | `boolean`                        | `false`                   | Whether the user has modified, added, or removed any project files. Resets whenever a new project is loaded.                                                                                       |
 | `htmlFile`           | `string`                         | `"index.html"`            | The HTML file used in the preview.                                                                                                                                                                 |
 | `noCompletions`      | `boolean`                        | `false`                   | If interactive code completions should be shown. This setting only applies to TypeScript files.                                                                                                    |
+| `extensions`         | `Extension \| Extension[]`       | `undefined`               | A CodeMirror extension to apply to the editor ([details](#extending-the-editor)).                                                                                                                  |
 
 ### Slots
 
-| Name      | Description                               |
-| --------- | ----------------------------------------- |
-| `default` | Inline files ([details](#inline-scripts)) |
+| Name         | Description                                                           |
+| ------------ | --------------------------------------------------------------------- |
+| `default`    | Inline files ([details](#inline-scripts)).                            |
+| `extensions` | Declarative CodeMirror extensions ([details](#extending-the-editor)). |
 
 ---
 
@@ -769,6 +826,13 @@ project element.
 | `pragmas`       | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).                                  |
 | `readonly`      | `boolean`                         | `false`     | Do not allow edits                                                                                                             |
 | `noCompletions` | `boolean`                         | `false`     | If interactive code completions should be shown. This setting only applies to TypeScript files.                                |
+| `extensions`    | `Extension \| Extension[]`        | `undefined` | A CodeMirror extension to apply to the editor ([details](#extending-the-editor)).                                              |
+
+### Slots
+
+| Name         | Description                                                           |
+| ------------ | --------------------------------------------------------------------- |
+| `extensions` | Declarative CodeMirror extensions ([details](#extending-the-editor)). |
 
 ---
 
@@ -787,6 +851,13 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 | `pragmas`       | `"on" \| "off" \| "off-visible"`  | `"on"`      | How to handle `playground-hide` and `playground-fold` comments ([details](#hiding--folding)).      |
 | `documentKey`   | `object`                          | `undefined` | Editor history for undo/redo is isolated per `documentKey`. Default behavior is a single instance. |
 | `noCompletions` | `boolean`                         | `false`     | If interactive code completions should be shown. This setting only applies to TypeScript files.    |
+| `extensions`    | `Extension \| Extension[]`        | `undefined` | A CodeMirror extension to apply to the editor ([details](#extending-the-editor)).                  |
+
+### Slots
+
+| Name         | Description                                                           |
+| ------------ | --------------------------------------------------------------------- |
+| `extensions` | Declarative CodeMirror extensions ([details](#extending-the-editor)). |
 
 ### Events
 

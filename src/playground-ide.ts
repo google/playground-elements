@@ -6,6 +6,7 @@
 
 import {LitElement, html, css, PropertyValues, nothing} from 'lit';
 import {customElement, query, property} from 'lit/decorators.js';
+import {Extension} from '@codemirror/state';
 
 import './playground-project.js';
 import './playground-tab-bar.js';
@@ -78,12 +79,11 @@ export class PlaygroundIde extends LitElement {
       flex: 1;
       min-width: 100px;
       border-radius: inherit;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
       border-right: var(--playground-border, solid 1px #ddd);
     }
 
     playground-tab-bar {
+      border-start-start-radius: inherit;
       flex-shrink: 0;
     }
 
@@ -283,6 +283,12 @@ export class PlaygroundIde extends LitElement {
   noCompletions = false;
 
   /**
+   * A CodeMirror extension or extensions to apply to the editor.
+   */
+  @property({attribute: false})
+  extensions?: Extension | Extension[];
+
+  /**
    * Indicates whether the user has modified, added, or removed any project
    * files. Resets whenever a new project is loaded.
    */
@@ -332,7 +338,9 @@ export class PlaygroundIde extends LitElement {
           .project=${projectId}
           .pragmas=${this.pragmas}
           .noCompletions=${this.noCompletions}
+          .extensions=${this.extensions}
         >
+          <slot name="extensions" slot="extensions"></slot>
         </playground-file-editor>
       </div>
 

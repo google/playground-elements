@@ -5,3 +5,4 @@
  */
 
 export * from './playground-ide.js';
+export * from './codemirror-extension-mixin.js';
