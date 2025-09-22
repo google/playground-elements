@@ -5,7 +5,13 @@
  */
 
 import {LitElement, css, PropertyValues, html, nothing, render} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
+import {
+  customElement,
+  property,
+  query,
+  state,
+  queryAssignedElements,
+} from 'lit/decorators.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {
   EditorState,
@@ -65,7 +71,12 @@ import {
 } from './shared/worker-api.js';
 import {highlightSelectionMatches, searchKeymap} from '@codemirror/search';
 import {lintKeymap} from '@codemirror/lint';
-import {styles as playgroundStyles} from './playground-styles.js';
+import {playgroundTheme} from './playground-styles.js';
+import {
+  CodemirrorExtensionRegisteredEvent,
+  PlaygroundEditorReadyEvent,
+  RegisterCodemirrorExtensionEvent,
+} from './codemirror-extension-mixin.js';
 
 // TODO(aomarks) Could we upstream this to lit-element? It adds much stricter
 // types to the ChangedProperties type.
@@ -89,6 +100,11 @@ export class PlaygroundCodeEditor extends LitElement {
     css`
       :host {
         display: block;
+      }
+
+      :host,
+      #focusContainer {
+        border-end-start-radius: inherit;
       }
 
       #focusContainer {
@@ -156,9 +172,18 @@ export class PlaygroundCodeEditor extends LitElement {
       [contenteditable='true'] {
         outline: none;
       }
+
+      slot[name='extensions'] {
+        display: none;
+      }
     `,
-    playgroundStyles,
   ];
+
+  /**
+   * A CodeMirror extension or extensions to apply to the editor.
+   */
+  @property({attribute: false})
+  extensions?: Extension | Extension[];
 
   protected _editorView?: EditorView;
 
@@ -311,10 +336,15 @@ export class PlaygroundCodeEditor extends LitElement {
   @query('.cm-content')
   private _editorContent?: HTMLDivElement;
 
+  @queryAssignedElements({slot: 'extensions', flatten: true})
+  private _extensionElements!: HTMLElement[];
+
   private _valueChangingFromOutside = false;
   private _diagnosticDecorations: DecorationSet = Decoration.none;
   private _diagnosticsMouseoverListenerActive = false;
   private _lastTransactions: Transaction[] = [];
+  private _declarativeExtensions = new Set<Extension>();
+  private _hasNotifiedExtensionsReady = false;
 
   // Compartments for dynamic configuration
   private readonly _lineNumbersCompartment = new Compartment();
@@ -322,6 +352,8 @@ export class PlaygroundCodeEditor extends LitElement {
   private readonly _languageCompartment = new Compartment();
   private readonly _readOnlyCompartment = new Compartment();
   private readonly _autocompletionCompartment = new Compartment();
+  private readonly _declarativeExtensionsCompartment = new Compartment();
+  private readonly _programmaticExtensionsCompartment = new Compartment();
 
   autocompleteDelay = 1250;
   private _lastAutocompleteRequest = 0;
@@ -339,8 +371,8 @@ export class PlaygroundCodeEditor extends LitElement {
     const root = this.attachShadow({mode: 'open'});
     this._editorView?.setRoot(root);
     root.adoptedStyleSheets = [
-      ...root.adoptedStyleSheets,
       ...PlaygroundCodeEditor.styles.map((s) => s.styleSheet!),
+      ...root.adoptedStyleSheets,
     ];
     return root;
   }
@@ -350,7 +382,7 @@ export class PlaygroundCodeEditor extends LitElement {
       Omit<
         PlaygroundCodeEditor,
         keyof LitElement | 'render' | 'update' | 'createRenderRoot'
-      >
+      > & {extensions: Extension | Extension[]}
     >;
 
     const view = this._editorView;
@@ -361,6 +393,13 @@ export class PlaygroundCodeEditor extends LitElement {
 
     for (const prop of changedTyped.keys()) {
       switch (prop) {
+        case 'extensions':
+          effects.push(
+            this._programmaticExtensionsCompartment.reconfigure(
+              [this.extensions ?? []].flat()
+            )
+          );
+          break;
         case 'documentKey': {
           const docKey = this.documentKey ?? {};
           let docState = this._docCache.get(docKey);
@@ -560,6 +599,11 @@ export class PlaygroundCodeEditor extends LitElement {
         @blur=${this._onBlur}
         @keydown=${this._onKeyDown}
       >
+        <slot
+          name="extensions"
+          @register-codemirror-extension=${this._onRegisterExtension}
+          @slotchange=${this._onSlotChange}
+        ></slot>
         ${this._showKeyboardHelp
           ? html`<playground-internal-overlay>
               <p id="keyboardHelp" part="dialog">
@@ -589,8 +633,16 @@ export class PlaygroundCodeEditor extends LitElement {
         root: this.shadowRoot ?? undefined,
       });
     }
-
     super.connectedCallback();
+  }
+
+  private _onSlotChange() {
+    if (this._hasNotifiedExtensionsReady) {
+      return;
+    }
+
+    this._hasNotifiedExtensionsReady = true;
+    this._notifyExtensionsReady();
   }
 
   override disconnectedCallback() {
@@ -644,6 +696,15 @@ export class PlaygroundCodeEditor extends LitElement {
       this._autocompletionCompartment.of(
         this.noCompletions ? [] : [this._getAutocompletions()]
       ),
+
+      this._declarativeExtensionsCompartment.of([
+        ...this._declarativeExtensions,
+      ]),
+
+      this._programmaticExtensionsCompartment.of(
+        [this.extensions ?? []].flat()
+      ),
+      playgroundTheme,
     ];
 
     // Listen for changes
@@ -679,6 +740,44 @@ export class PlaygroundCodeEditor extends LitElement {
     return EditorState.create({
       doc: content,
       extensions: baseExtensions,
+    });
+  }
+
+  private _notifyExtensionsReady() {
+    for (const el of this._extensionElements) {
+      el.dispatchEvent(new PlaygroundEditorReadyEvent());
+    }
+  }
+
+  private _onRegisterExtension(e: RegisterCodemirrorExtensionEvent) {
+    e.stopPropagation();
+    const newExtensions = e.getExtensions();
+    const newExtArr = Array.isArray(newExtensions)
+      ? [...newExtensions]
+      : [newExtensions];
+
+    for (const ext of newExtArr) {
+      this._declarativeExtensions.add(ext);
+    }
+
+    const unregister = () => {
+      for (const ext of newExtArr) {
+        this._declarativeExtensions.delete(ext);
+      }
+      this._reconfigureDeclarativeExtensions();
+    };
+
+    e.composedPath()[0].dispatchEvent(
+      new CodemirrorExtensionRegisteredEvent(unregister)
+    );
+    this._reconfigureDeclarativeExtensions();
+  }
+
+  private _reconfigureDeclarativeExtensions() {
+    this._editorView?.dispatch({
+      effects: this._declarativeExtensionsCompartment.reconfigure([
+        ...this._declarativeExtensions,
+      ]),
     });
   }
 

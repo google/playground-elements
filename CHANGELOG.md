@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Added `extensions` property to `<playground-ide>`,
+  `<playground-file-editor>`, and `<playground-code-editor>` for applying
+  programmatic CodeMirror extensions.
+- Added an `extensions` slot to `<playground-ide>`,
+  `<playground-file-editor>`, and `<playground-code-editor>` for applying
+  declarative CodeMirror extensions.
+- Exported `codemirrorExtensionMixin` for creating declarative CodeMirror
+  extensions.
 - Upgraded CodeMirror to v6
 
 ### Fixed
