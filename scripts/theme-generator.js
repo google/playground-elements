@@ -121,14 +121,14 @@ const main = async () => {
   ]);
   const themeFilenames = fs
     .readdirSync(
-      pathlib.resolve(rootDir, 'node_modules', 'codemirror', 'theme')
+      pathlib.resolve(rootDir, 'node_modules', 'codemirror-5', 'theme')
     )
     .filter((name) => !excludeThemes.has(name));
   const themeNames = [];
   for (const filename of themeFilenames) {
     const themeName = filename.replace(/\.css$/, '');
     themeNames.push(themeName);
-    const styleUrl = `/node_modules/codemirror/theme/${filename}`;
+    const styleUrl = `/node_modules/codemirror-5/theme/${filename}`;
     const results = await page.evaluate(
       ([themeName, styleUrl]) => window.probe(themeName, styleUrl),
       [themeName, styleUrl]

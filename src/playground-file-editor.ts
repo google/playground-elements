@@ -10,6 +10,7 @@ import {live} from 'lit/directives/live.js';
 
 import './playground-code-editor.js';
 import {PlaygroundConnectedElement} from './playground-connected-element.js';
+import {Extension} from '@codemirror/state';
 
 import {PlaygroundProject} from './playground-project.js';
 import {PlaygroundCodeEditor} from './playground-code-editor.js';
@@ -29,10 +30,19 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       height: 350px;
     }
 
+    :host,
+    playground-code-editor {
+      border-end-start-radius: inherit;
+    }
+
     slot {
       height: 100%;
       display: block;
       background: var(--playground-code-background, unset);
+    }
+
+    slot[name='extensions'] {
+      display: none;
     }
 
     playground-code-editor {
@@ -91,6 +101,12 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
    */
   @property({type: Boolean, attribute: 'no-completions'})
   noCompletions = false;
+
+  /**
+   * A CodeMirror extension or extensions to apply to the editor.
+   */
+  @property({attribute: false})
+  extensions?: Extension | Extension[];
 
   private get _files() {
     return this._project?.files ?? [];
@@ -154,10 +170,12 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               .diagnostics=${this._project?.diagnostics?.get(
                 this._currentFile?.name ?? ''
               )}
+              .extensions=${this.extensions}
               .noCompletions=${this.noCompletions}
               @change=${this._onEdit}
               @request-completions=${this._onRequestCompletions}
             >
+              <slot name="extensions" slot="extensions"></slot>
             </playground-code-editor>
           `
         : html`<slot></slot>`}
