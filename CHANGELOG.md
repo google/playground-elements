@@ -12,7 +12,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## [0.21.0] - 2025-09-23
+
+### Changed
+
+- **POTENTIALLY BREAKING** Upgraded CodeMirror to v6
 
 ### Added
 
@@ -24,7 +30,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   declarative CodeMirror extensions.
 - Exported `codemirrorExtensionMixin` for creating declarative CodeMirror
   extensions.
-- Upgraded CodeMirror to v6
 
 ### Fixed
 
