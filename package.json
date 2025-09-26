@@ -224,6 +224,7 @@
     "images/",
     "index.{js,d.ts,d.ts.map}",
     "cm-lang-lit.{js,d.ts,d.ts.map}",
+    "codemirror-extension-mixin.{js,d.ts,d.ts.map}",
     "playground-code-editor.{js,d.ts,d.ts.map}",
     "playground-connected-element.{js,d.ts,d.ts.map}",
     "playground-file-editor.{js,d.ts,d.ts.map}",
