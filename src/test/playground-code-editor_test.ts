@@ -73,6 +73,129 @@ suite('playground-code-editor', () => {
     });
   });
 
+  test('does NOT dispatch change event when switching documentKey and value together', async () => {
+    const editor = document.createElement('playground-code-editor');
+    const DOCUMENT_KEY1 = {doc: 1};
+    const DOCUMENT_KEY2 = {doc: 2};
+
+    editor.value = 'document 1';
+    editor.documentKey = DOCUMENT_KEY1;
+    container.appendChild(editor);
+    await editor.updateComplete;
+    await raf();
+
+    let changeCount = 0;
+    editor.addEventListener('change', () => {
+      changeCount++;
+    });
+
+    // This simulates what playground-file-editor does when switching files
+    // Both value AND documentKey change together in a single update
+    editor.value = 'document 2';
+    editor.documentKey = DOCUMENT_KEY2;
+
+    // Wait for Lit's update cycle
+    await editor.updateComplete;
+    await raf();
+
+    // Wait for any potential async change events
+    await wait(100);
+
+    // Switch back - this is where the bug manifests in lit.dev
+    editor.value = 'document 1 modified';
+    editor.documentKey = DOCUMENT_KEY1;
+    await editor.updateComplete;
+    await raf();
+    await wait(100);
+
+    assert.equal(
+      changeCount,
+      0,
+      'Switching documentKey and value together should not fire change event'
+    );
+  });
+
+  test('does NOT dispatch change event when switching documentKey', async () => {
+    const editor = document.createElement('playground-code-editor');
+    const DOCUMENT_KEY1 = {dockey: 1};
+    const DOCUMENT_KEY2 = {dockey: 2};
+
+    editor.value = 'document 1';
+    editor.documentKey = DOCUMENT_KEY1;
+    container.appendChild(editor);
+    await editor.updateComplete;
+    await raf();
+
+    let changeCount = 0;
+    editor.addEventListener('change', () => changeCount++);
+
+    // Switch to a different document - should NOT fire change event
+    editor.value = 'document 2';
+    editor.documentKey = DOCUMENT_KEY2;
+    await editor.updateComplete;
+    await raf();
+
+    assert.equal(
+      changeCount,
+      0,
+      'Switching documentKey should not fire change event'
+    );
+
+    // Switch back to first document - should NOT fire change event
+    editor.value = 'document 1';
+    editor.documentKey = DOCUMENT_KEY1;
+    await editor.updateComplete;
+    await raf();
+
+    assert.equal(
+      changeCount,
+      0,
+      'Switching back to original documentKey should not fire change event'
+    );
+  });
+
+  test('dispatches change event only for user edits, not programmatic changes', async () => {
+    const editor = document.createElement('playground-code-editor');
+    editor.value = 'foo';
+    container.appendChild(editor);
+    await editor.updateComplete;
+    await raf();
+
+    const editorInternals = editor as unknown as {
+      _editorView: EditorView;
+    };
+
+    let changeCount = 0;
+    editor.addEventListener('change', () => changeCount++);
+
+    // Programmatic change - should NOT fire
+    editor.value = 'bar';
+    await editor.updateComplete;
+    await raf();
+    assert.equal(changeCount, 0, 'No change event after programmatic update');
+
+    // User edit via CodeMirror - SHOULD fire
+    editorInternals._editorView.dispatch({
+      changes: {
+        from: 0,
+        to: editorInternals._editorView.state.doc.length,
+        insert: 'baz',
+      },
+    });
+    await raf();
+    assert.equal(changeCount, 1, 'Change event fired after user edit');
+
+    // Another programmatic change - should NOT fire
+    editor.value = 'qux';
+    await editor.updateComplete;
+    await raf();
+    assert.equal(
+      changeCount,
+      1,
+      'No additional change event after another programmatic update'
+    );
+  });
+
   suite('history', () => {
     let editor: PlaygroundCodeEditor;
     let editorInternals: {

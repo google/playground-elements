@@ -91,6 +91,9 @@ interface TypedMap<T> extends Map<keyof T, unknown> {
 
 const unreachable = (n: never) => n;
 
+// Annotation to mark programmatic changes (not user edits)
+const programmaticChangeAnnotation = Annotation.define<boolean>();
+
 /**
  * A basic text editor with syntax highlighting for HTML, CSS, and JavaScript.
  */
@@ -339,7 +342,6 @@ export class PlaygroundCodeEditor extends LitElement {
   @queryAssignedElements({slot: 'extensions', flatten: true})
   private _extensionElements!: HTMLElement[];
 
-  private _valueChangingFromOutside = false;
   private _diagnosticDecorations: DecorationSet = Decoration.none;
   private _diagnosticsMouseoverListenerActive = false;
   private _lastTransactions: Transaction[] = [];
@@ -424,6 +426,7 @@ export class PlaygroundCodeEditor extends LitElement {
                     insert: this.value ?? '',
                   },
                 ],
+                annotations: programmaticChangeAnnotation.of(true),
               });
             }
           }
@@ -447,13 +450,12 @@ export class PlaygroundCodeEditor extends LitElement {
                   insert: this.value ?? '',
                 },
               ],
+              annotations: programmaticChangeAnnotation.of(true),
             });
             docState = tempView.state;
             this._docCache.set(docKey, docState);
             tempView.destroy();
           }
-
-          this._valueChangingFromOutside = true;
 
           // Replace the entire view with the new editor state. Unlike CM5, CM6
           // is modular, and the history stays on the state object rather than
@@ -465,8 +467,6 @@ export class PlaygroundCodeEditor extends LitElement {
           if (needsHideAndFold) {
             void this._applyHideAndFoldRegions();
           }
-
-          this._valueChangingFromOutside = false;
           break;
         }
         case 'value':
@@ -476,8 +476,6 @@ export class PlaygroundCodeEditor extends LitElement {
           }
 
           if (this.value !== view?.state.doc.toString()) {
-            this._valueChangingFromOutside = true;
-
             // The 'value' property was changed externally and it differs from
             // the editor's current document content, so we need to update the
             // view model to match.
@@ -492,9 +490,8 @@ export class PlaygroundCodeEditor extends LitElement {
                   insert: this.value ?? '',
                 },
               ],
+              annotations: programmaticChangeAnnotation.of(true),
             });
-
-            this._valueChangingFromOutside = false;
           }
           break;
         case 'lineNumbers':
@@ -720,9 +717,16 @@ export class PlaygroundCodeEditor extends LitElement {
               tr.annotation(Transaction.userEvent) === 'redo'
           );
 
+          // Check if ALL transactions are programmatic (not user edits).
+          // We fire the change event if ANY transaction is a user edit, even if
+          // there are also programmatic transactions in the same update.
+          const allProgrammatic = update.transactions.every(
+            (tr) => tr.annotation(programmaticChangeAnnotation) === true
+          );
+
           // External changes are usually things like the editor switching which
           // file it is displaying.
-          if (this._valueChangingFromOutside) {
+          if (allProgrammatic) {
             // Apply hide/fold regions when value changes from outside
             void this._applyHideAndFoldRegions();
             this._showDiagnostics();
@@ -731,6 +735,7 @@ export class PlaygroundCodeEditor extends LitElement {
               // Always reapply hide/fold regions after undo/redo
               void this._applyHideAndFoldRegions();
             }
+            // Only fire change event for user-initiated edits
             this.dispatchEvent(new Event('change'));
           }
         }

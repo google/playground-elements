@@ -861,9 +861,9 @@ A pure text editor based on CodeMirror with syntax highlighting for HTML, CSS, J
 
 ### Events
 
-| Event    | Description                          |
-| -------- | ------------------------------------ |
-| `change` | User made an edit to the active file |
+| Event    | Description                                                                                                                                        |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `change` | User made an edit to the active file (note: this event is not fired for programmatic changes to the value property nor for the user changing tabs) |
 
 ### Keyboard shortcuts
 
