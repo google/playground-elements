@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [Unreleased] -->
 
+## [0.21.2] - 2025-10-02
+
+### Fixed
+
+- Only fire change event on non-programmatic changes
+
+### Changed
+
+- Make `tabchange` event bubble.
+
 ## [0.21.1] - 2025-09-26
 
 ### Fixed
@@ -1203,7 +1213,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Initial release.
 
-[unreleased]: https://github.com/google/playground-elements/compare/v0.21.1...HEAD
+[unreleased]: https://github.com/google/playground-elements/compare/v0.21.2...HEAD
+[0.21.2]: https://github.com/google/playground-elements/compare/v0.21.1...v0.21.2
 [0.21.1]: https://github.com/google/playground-elements/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/google/playground-elements/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/google/playground-elements/compare/v0.19.1...v0.20.0
