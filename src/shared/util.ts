@@ -28,3 +28,23 @@ export const forceSkypackRawMode = (url: URL): URL => {
 export type Result<V, E> =
   | {result: V; error?: undefined}
   | {result?: undefined; error: E};
+
+/**
+ * Re-fires an event on the given element, without bubbles or composed flags.
+ * This is useful for re-firing internal events on public component boundaries
+ * to avoid them crossing shadow DOM boundaries while still making them available
+ * to external consumers.
+ */
+export const refireEvent = (
+  element: EventTarget,
+  event: Event | CustomEvent
+): void => {
+  const detail = (event as CustomEvent).detail;
+  element.dispatchEvent(
+    new CustomEvent(event.type, {
+      detail,
+      bubbles: false,
+      composed: false,
+    })
+  );
+};

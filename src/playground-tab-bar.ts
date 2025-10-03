@@ -18,6 +18,7 @@ import {PlaygroundConnectedElement} from './playground-connected-element.js';
 import {PlaygroundFileEditor} from './playground-file-editor.js';
 import {PlaygroundFileSystemControls} from './playground-file-system-controls.js';
 import {FilesChangedEvent, PlaygroundProject} from './playground-project.js';
+import {refireEvent} from './shared/util.js';
 import {PlaygroundInternalTab} from './internal/tab.js';
 
 /**
@@ -257,6 +258,13 @@ export class PlaygroundTabBar extends PlaygroundConnectedElement {
     if (name !== this._activeFileName) {
       this._activeFileName = name;
       this._activeFileIndex = index;
+      // Re-fire the tabchange event on the host element for external consumers
+      refireEvent(
+        this,
+        new CustomEvent('tabchange', {
+          detail: {filename: name},
+        })
+      );
     }
   }
 

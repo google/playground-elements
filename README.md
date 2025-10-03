@@ -756,6 +756,13 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | `default`    | Inline files ([details](#inline-scripts)).                            |
 | `extensions` | Declarative CodeMirror extensions ([details](#extending-the-editor)). |
 
+### Events
+
+| Event       | Description                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tabchange` | A tab has been activated.                                                                                                                          |
+| `change`    | User made an edit to the active file (note: this event is not fired for programmatic changes to the value property nor for the user changing tabs) |
+
 ---
 
 ## `<playground-project>`
@@ -813,6 +820,12 @@ project element.
 
 ---
 
+### Events
+
+| Event       | Description               |
+| ----------- | ------------------------- |
+| `tabchange` | A tab has been activated. |
+
 ## `<playground-file-editor>`
 
 ### Properties
@@ -833,6 +846,12 @@ project element.
 | Name         | Description                                                           |
 | ------------ | --------------------------------------------------------------------- |
 | `extensions` | Declarative CodeMirror extensions ([details](#extending-the-editor)). |
+
+### Events
+
+| Event    | Description                                                                                                                                        |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `change` | User made an edit to the active file (note: this event is not fired for programmatic changes to the value property nor for the user changing tabs) |
 
 ---
 
