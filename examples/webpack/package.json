@@ -9,7 +9,7 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
-    "@webpack-cli/generators": "^2.0.0",
+    "@webpack-cli/generators": "^3.0.2",
     "html-webpack-plugin": "^5.3.1",
     "webpack-cli": "^4.6.0",
     "webpack-dev-server": "^3.11.2"
