@@ -12,7 +12,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 
-<!-- ## [Unreleased] -->
+## [Unreleased]
+
+### Fixed
+
+- TypeScript standard library typings (e.g. `lib.dom.d.ts`) are now fetched at
+  the version of the TypeScript compiler bundled with Playground, instead of at
+  `typescript@latest`. They could no longer be found since TypeScript 7 was
+  published, which broke type checking and completions that rely on them. A
+  `typescript` version in the project's `package.json` still takes precedence.
 
 ## [0.21.2] - 2025-10-02
 

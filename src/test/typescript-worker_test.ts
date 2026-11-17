@@ -5,6 +5,7 @@
  */
 
 import {checkTransform} from './worker-test-util.js';
+import ts from '../internal/typescript.js';
 
 import {BuildOutput, SampleFile} from '../shared/worker-api.js';
 import {CdnData} from './fake-cdn-plugin.js';
@@ -529,7 +530,8 @@ suite('typescript builder', () => {
       },
       typescript: {
         versions: {
-          '4.3.5': {
+          // Standard libs are fetched at the version of the bundled compiler.
+          [ts.version]: {
             files: {
               'lib/lib.dom.d.ts': {
                 content: '',
