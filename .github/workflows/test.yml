@@ -4,7 +4,9 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned because our Playwright version cannot install its system
+    # dependencies on newer Ubuntu releases. Upgrade Playwright to unpin.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v3
