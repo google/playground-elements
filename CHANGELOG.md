@@ -12,7 +12,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 
-<!-- ## [Unreleased] -->
+## [Unreleased]
+
+### Changed
+
+- **BREAKING** (security) Setting the `config` property on `<playground-ide>`
+  or `<playground-project>` no longer fetches anything to load the config.
+  Files without inline `content`, `extends`, and `cdnBaseUrl` are now ignored
+  with a console warning. Previously, a config from an untrusted source (e.g. a
+  shared URL) could make the host page fetch arbitrary URLs with the user's
+  credentials and expose the responses to code running in the preview.
+
+  To migrate, load manifests that rely on fetched files or `extends` with
+  `project-src`, and set the CDN with the `cdnBaseUrl` property or
+  `cdn-base-url` attribute. Manifests loaded with `project-src` are unchanged.
 
 ## [0.21.3] - 2026-11-17
 

@@ -240,19 +240,36 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 ### Option 3: Config property
 
 In JavaScript, directly set the `config` property to an object. The format is
-identical to the JSON config file.
+the same as the JSON config file, except that nothing is fetched to load it:
+
+- Every file must have inline `content`. Files without `content` are ignored.
+- `extends` is ignored.
+- `cdnBaseUrl` is ignored. Set the `cdnBaseUrl` property or `cdn-base-url`
+  attribute on the element instead.
+
+A warning is logged to the console when something is ignored. Use
+[`project-src`](#option-2-json-configuration) for a manifest that needs any of
+these.
 
 ```js
 const ide = document.querySelector('playground-ide');
 ide.config = {
   files: {
-    'index.html': {},
+    'index.html': {
+      content: '<script type="module" src="./typescript.js"></script>',
+    },
     'typescript.ts': {
       content: "console.log('hello');",
     },
   },
 };
 ```
+
+> The `config` property is restricted in this way because it is the usual way
+> to load a project from untrusted input, such as a [shared
+> URL](#how-do-i-save-and-share-a-project). If it fetched files, then whoever
+> wrote the config could make your page request any URL with your user's
+> credentials, and read the response from the preview.
 
 If both `project-src` and `config` are set, then the one set most recently has
 precedence. When either are set, inline scripts are ignored.
@@ -1072,6 +1089,13 @@ npm run serve --watch
 Use the `config` property of a `<playground-ide>` or `<playground-project>` to
 get or set the current state of the project
 ([details](#option-3-config-property)).
+
+The value returned by `config` contains every file's content inline, so it can
+be serialized and set again later. Setting `config` does not fetch project
+files or other manifests, so a config from an untrusted source cannot have your
+page fetch a URL and expose the response to the preview. The code in the
+project is still untrusted, so see [sandbox security](#sandbox-security) if you
+change the sandbox base URL.
 
 How you persist and retrieve serialized project state is up to you. Here are a
 few ideas:
