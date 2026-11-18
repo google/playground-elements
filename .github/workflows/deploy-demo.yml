@@ -5,14 +5,23 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   deploy-demo:
     # Pinned because our Playwright version cannot install its system
     # dependencies on newer Ubuntu releases. Upgrade Playwright to unpin.
     runs-on: ubuntu-24.04
 
+    permissions:
+      contents: write # Needed to push the built demo to the gh-pages branch.
+
     steps:
       - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          # zizmor: ignore[artipacked] - credentials are used to push to gh-pages in the deploy step
+          persist-credentials: true
       - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: 20
