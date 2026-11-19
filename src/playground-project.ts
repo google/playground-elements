@@ -567,6 +567,13 @@ export class PlaygroundProject extends LitElement {
     iframeWindow.postMessage(message, '*', transfer);
   }
 
+  /**
+   * Transforms HTML on each preview request without modifying the project
+   * source files. Use this to insert monitoring or debug scripts into the
+   * preview HTML.
+   */
+  previewHtmlTransform?: (html: string) => string;
+
   private async _getFile(name: string): Promise<SampleFile | HttpError> {
     if (this._build === undefined) {
       return {
@@ -574,7 +581,15 @@ export class PlaygroundProject extends LitElement {
         body: 'Playground build not started',
       };
     }
-    return this._build.getFile(name);
+    const file = await this._build.getFile(name);
+    if (
+      this.previewHtmlTransform &&
+      'content' in file &&
+      file.contentType?.split(';')[0] === 'text/html'
+    ) {
+      return {...file, content: this.previewHtmlTransform(file.content)};
+    }
+    return file;
   }
 
   /**
