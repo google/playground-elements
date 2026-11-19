@@ -5,6 +5,7 @@
  */
 
 import {TypesFetcher} from '../typescript-worker/types-fetcher.js';
+import ts from '../internal/typescript.js';
 import {ImportMapResolver} from '../typescript-worker/import-map-resolver.js';
 import {configureFakeCdn} from './worker-test-util.js';
 import {assert} from '@esm-bundle/chai';
@@ -571,10 +572,78 @@ suite('types fetcher', () => {
     });
   });
 
-  test('tslibs', async () => {
+  test('tslibs default to the bundled TypeScript version', async () => {
     const sourceTexts: string[] = [];
     const tsLibs = ['es2020', 'DOM'];
     const packageJson: PackageJson = {};
+    const cdnData: CdnData = {
+      typescript: {
+        versions: {
+          [ts.version]: {
+            files: {
+              'lib/lib.es2020.d.ts': {
+                // References are the same as imports from our perspective.
+                content: `/// <reference lib="es2020.promise" />`,
+              },
+              'lib/lib.es2020.promise.d.ts': {
+                content: `interface PromiseConstructor { }`,
+              },
+              // Note standard lib files are always lower-case.
+              'lib/lib.dom.d.ts': {
+                content: `interface HTMLElement { }`,
+              },
+            },
+          },
+          // TypeScript 7 doesn't have the lib files. We must not try to load
+          // the libs from here just because it is the latest version.
+          '7.0.0': {
+            files: {},
+          },
+        },
+      },
+    };
+    const expectedDependencyGraph: ExpectedDependencyGraph = {
+      root: {
+        typescript: ts.version,
+      },
+      deps: {},
+    };
+    const expectedLayout: NodeModulesDirectory = {
+      typescript: {
+        version: ts.version,
+        nodeModules: {},
+      },
+    };
+    const expectedFiles = new Map([
+      [
+        'typescript/lib/lib.es2020.d.ts',
+        `/// <reference lib="es2020.promise" />`,
+      ],
+      [
+        'typescript/lib/lib.es2020.promise.d.ts',
+        `interface PromiseConstructor { }`,
+      ],
+      ['typescript/lib/lib.dom.d.ts', `interface HTMLElement { }`],
+    ]);
+    await checkTypesFetcher({
+      sourceTexts,
+      tsLibs,
+      packageJson,
+      cdnData,
+      expectedFiles,
+      expectedDependencyGraph,
+      expectedLayout,
+    });
+  });
+
+  test('tslibs use the TypeScript version from package.json', async () => {
+    const sourceTexts: string[] = [];
+    const tsLibs = ['es2020', 'DOM'];
+    const packageJson: PackageJson = {
+      dependencies: {
+        typescript: '4.3.5',
+      },
+    };
     const cdnData: CdnData = {
       typescript: {
         versions: {

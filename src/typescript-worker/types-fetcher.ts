@@ -264,7 +264,20 @@ export class TypesFetcher {
       from === root
         ? this._rootPackageJson
         : await this._fetchPackageJsonAndAddToOutputFiles(from);
-    return packageJson?.dependencies?.[to] ?? 'latest';
+    const version = packageJson?.dependencies?.[to];
+    if (version !== undefined) {
+      return version;
+    }
+    if (from === root && to === 'typescript') {
+      // The project didn't pick a TypeScript version, so use the version of
+      // the compiler we are running. This is what the standard lib typings
+      // (lib.dom.d.ts etc.) are fetched at, and they need to match our
+      // compiler. We can't use "latest", because newer major versions of the
+      // "typescript" package might not be compatible, or might not contain
+      // these files at all (TypeScript 7 does not).
+      return ts.version;
+    }
+    return 'latest';
   }
 
   private async _getDtsPath(location: NpmFileLocation): Promise<string> {

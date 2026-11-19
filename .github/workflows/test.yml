@@ -2,17 +2,24 @@ name: test
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned because our Playwright version cannot install its system
+    # dependencies on newer Ubuntu releases. Upgrade Playwright to unpin.
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: 20
           cache: npm
-      - uses: google/wireit@setup-github-actions-caching/v2
+      - uses: google/wireit@9d7c2e5346f8ef1b1ab6014c4e96c74e234f7ed5 # setup-github-actions-caching/v2.0.4
 
       - run: npm ci
       - run: npx playwright install-deps
