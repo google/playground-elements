@@ -10,6 +10,7 @@ import {wrap, Remote, proxy} from 'comlink';
 
 import {
   SampleFile,
+  FileOptions,
   ServiceWorkerAPI,
   ProjectManifest,
   PlaygroundMessage,
@@ -96,6 +97,13 @@ export class PlaygroundProject extends LitElement {
 
   /**
    * Get or set the project config.
+   *
+   * Setting this property does not fetch project files or other manifests,
+   * because it is commonly populated from untrusted input (e.g. a shared
+   * URL). Only files with inline string `content` and the `importMap` are
+   * used. Files without `content`, `extends`, and `cdnBaseUrl` are ignored
+   * with a console warning; use `projectSrc` for manifests that need those,
+   * and the `cdnBaseUrl` property to change the CDN.
    *
    * When both `projectSrc` and `config` are set, the one set most recently
    * wins. Slotted children win only if both `projectSrc` and `config` are
@@ -354,18 +362,13 @@ export class PlaygroundProject extends LitElement {
         break;
       case 'direct':
         {
-          const {files, importMap} = await expandProjectConfig(
-            source.config,
-            document.baseURI
-          );
-          // Note the source could have changed while fetching, hence the
-          // double-check here.
-          if (source !== this._source) {
-            return;
-          }
+          // A config set directly is treated as untrusted, so unlike the
+          // 'url' case below, it must never cause this page to make network
+          // requests or change where the worker fetches from.
+          const {files, importMap} = readDirectProjectConfig(source.config);
           this._files = files;
           this._importMap = importMap;
-          this._configCdnBaseUrl = source.config.cdnBaseUrl;
+          this._configCdnBaseUrl = undefined;
         }
         break;
       case 'slot':
@@ -835,6 +838,61 @@ const fetchProjectConfig = async (
     ...result,
     cdnBaseUrl: config.cdnBaseUrl,
   };
+};
+
+/**
+ * Reads a project config that was set directly through the `config` property.
+ *
+ * Such configs often come from untrusted input (e.g. decoded from a shared
+ * URL), so unlike `expandProjectConfig` this never makes network requests.
+ * Otherwise, whoever controls the config could have this page fetch any URL
+ * with the user's credentials and then read the response from the preview.
+ *
+ * Only files with inline string content and the import map are used.
+ * Everything that would be fetched or that changes where we fetch from is
+ * ignored with a warning: files without content, `extends`, and `cdnBaseUrl`.
+ */
+const readDirectProjectConfig = (
+  config: ProjectManifest
+): {
+  files: Array<SampleFile>;
+  importMap: ModuleImportMap;
+} => {
+  const ignored: string[] = [];
+  if (config.extends !== undefined) {
+    ignored.push('"extends"');
+  }
+  if (config.cdnBaseUrl !== undefined) {
+    ignored.push('"cdnBaseUrl" (set the cdnBaseUrl property instead)');
+  }
+  const files: Array<SampleFile> = [];
+  // Note the values here are not guaranteed to match our types, because the
+  // config may have been parsed from arbitrary JSON.
+  const entries: Array<[string, Partial<FileOptions> | null | undefined]> =
+    typeof config.files === 'object' && config.files !== null
+      ? Object.entries(config.files)
+      : [];
+  for (const [filename, info] of entries) {
+    const content = info?.content;
+    if (typeof content !== 'string') {
+      ignored.push(`file "${filename}" (no inline string "content")`);
+      continue;
+    }
+    files.push({
+      ...info,
+      name: filename,
+      content,
+      contentType: typeFromFilename(filename) ?? 'text/plain',
+    });
+  }
+  if (ignored.length > 0) {
+    console.warn(
+      `[playground-project] The config property does not fetch, so these ` +
+        `were ignored: ${ignored.join(', ')}. ` +
+        `Load the manifest with project-src if it needs them.`
+    );
+  }
+  return {files, importMap: config.importMap ?? {}};
 };
 
 /**

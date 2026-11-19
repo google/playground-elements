@@ -170,6 +170,13 @@ export class PlaygroundIde extends LitElement {
   /**
    * Get or set the project config.
    *
+   * Setting this property does not fetch project files or other manifests,
+   * because it is commonly populated from untrusted input (e.g. a shared
+   * URL). Only files with inline string `content` and the `importMap` are
+   * used. Files without `content`, `extends`, and `cdnBaseUrl` are ignored
+   * with a console warning; use `projectSrc` for manifests that need those,
+   * and the `cdnBaseUrl` property to change the CDN.
+   *
    * When both `projectSrc` and `config` are set, the one set most recently
    * wins. Slotted children win only if both `projectSrc` and `config` are
    * undefined.

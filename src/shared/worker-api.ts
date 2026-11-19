@@ -167,7 +167,11 @@ export interface SampleFile {
 }
 
 export interface FileOptions {
-  /** Optional file content. If omitted, files are fetched by name. */
+  /**
+   * Optional file content. If omitted, files are fetched by name when the
+   * manifest is loaded with `project-src`. Required for files in a config set
+   * through the `config` property, which never fetches files.
+   */
   content?: string;
   /**
    * Optional content MIME type. If omitted, type is taken from fetch
@@ -183,10 +187,18 @@ export interface FileOptions {
 }
 
 export interface ProjectManifest {
-  /** Optional project manifest URL to extend from */
+  /**
+   * Optional project manifest URL to extend from. Only applies to manifests
+   * loaded with `project-src`; ignored in the `config` property.
+   */
   extends?: string;
   files?: {[filename: string]: FileOptions};
   importMap?: ModuleImportMap;
+  /**
+   * Optional npm CDN base URL. Only applies to manifests loaded with
+   * `project-src`; ignored in the `config` property (set the `cdnBaseUrl`
+   * property on the element instead).
+   */
   cdnBaseUrl?: string;
 }
 
