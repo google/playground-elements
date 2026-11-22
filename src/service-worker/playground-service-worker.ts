@@ -28,6 +28,12 @@ type SessionID = string;
 const fileAPIs = new Map<string, Deferred<FileAPI>>();
 
 /**
+ * The parsed URL object for the service worker's scope.
+ * The scope never changes for the lifetime of a service worker.
+ */
+const scopeUrl = new URL(self.registration.scope);
+
+/**
  * API exposed to the UI thread via Comlink. The static methods on this class
  * become instance methods on SwControllerAPI.
  */
@@ -128,16 +134,17 @@ const onFetch = (e: FetchEvent) => {
   }
 };
 
-const parseScopedUrl = (url: string) => {
-  const scope = self.registration.scope;
+const parseScopedUrl = (urlString: string) => {
   // URLs in scope will be of the form: {scope}{sessionId}/{filePath}. Scope is
-  // always a full URL prefix, including a trailing slash. Strip query params or
-  // else the filename won't match.
-  const sessionAndPath = url.substring(scope.length).split('?')[0];
+  // always a full URL prefix, including a trailing slash. Strip query params
+  // and fragments or else the filename won't match.
+  const url = new URL(urlString);
+  const sessionAndPath = url.pathname.substring(scopeUrl.pathname.length);
+
   const slashIndex = sessionAndPath.indexOf('/');
   let sessionId, filePath: string | undefined;
   if (slashIndex === -1) {
-    console.warn(`Invalid sample file URL: ${url}`);
+    console.warn(`Invalid sample file URL: ${urlString}`);
   } else {
     sessionId = sessionAndPath.slice(0, slashIndex);
     filePath = sessionAndPath.slice(slashIndex + 1);
