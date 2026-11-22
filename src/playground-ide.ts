@@ -15,6 +15,7 @@ import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
 import {ProjectManifest} from './shared/worker-api.js';
 import {npmVersion, serviceWorkerHash} from './shared/version.js';
+import {refireEvent} from './shared/util.js';
 
 /**
  * A multi-file code editor component with live preview that works without a
@@ -327,6 +328,7 @@ export class PlaygroundIde extends LitElement {
           .project=${projectId}
           .editor=${editorId}
           .editableFileSystem=${this.editableFileSystem}
+          @tabchange=${this._onTabChange}
         >
         </playground-tab-bar>
 
@@ -339,6 +341,7 @@ export class PlaygroundIde extends LitElement {
           .pragmas=${this.pragmas}
           .noCompletions=${this.noCompletions}
           .extensions=${this.extensions}
+          @change=${this._onChange}
         >
           <slot name="extensions" slot="extensions"></slot>
         </playground-file-editor>
@@ -386,6 +389,16 @@ export class PlaygroundIde extends LitElement {
       this._rhs?.style.removeProperty('--playground-preview-width');
     }
     super.update(changedProperties);
+  }
+
+  private _onTabChange(event: Event) {
+    // Re-fire the tabchange event on the host element for external consumers
+    refireEvent(this, event);
+  }
+
+  private _onChange(event: Event) {
+    // Re-fire the change event on the host element for external consumers
+    refireEvent(this, event);
   }
 
   private _onResizeBarPointerdown({pointerId}: PointerEvent) {

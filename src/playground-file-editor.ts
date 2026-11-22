@@ -15,6 +15,7 @@ import {Extension} from '@codemirror/state';
 import {PlaygroundProject} from './playground-project.js';
 import {PlaygroundCodeEditor} from './playground-code-editor.js';
 import {CodeEditorChangeData} from './shared/worker-api.js';
+import {refireEvent} from './shared/util.js';
 
 /**
  * A text editor associated with a <playground-project>.
@@ -172,7 +173,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
               )}
               .extensions=${this.extensions}
               .noCompletions=${this.noCompletions}
-              @change=${this._onEdit}
+              @change=${this._onChange}
               @request-completions=${this._onRequestCompletions}
             >
               <slot name="extensions" slot="extensions"></slot>
@@ -197,7 +198,7 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
     this.requestUpdate();
   };
 
-  private _onEdit() {
+  private _onChange(event: Event) {
     if (
       this._project === undefined ||
       this._currentFile === undefined ||
@@ -206,6 +207,8 @@ export class PlaygroundFileEditor extends PlaygroundConnectedElement {
       return;
     }
     this._project.editFile(this._currentFile, this._editor.value);
+    // Re-fire the change event on the host element for external consumers
+    refireEvent(this, event);
   }
 
   private async _onRequestCompletions(e: CustomEvent) {
