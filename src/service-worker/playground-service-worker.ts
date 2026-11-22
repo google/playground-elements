@@ -112,6 +112,7 @@ const getFile = async (_e: FetchEvent, path: string, sessionId: SessionID) => {
   // https://web.dev/origin-agent-cluster/
   // https://html.spec.whatwg.org/multipage/origin.html#origin-keyed-agent-clusters
   headers.set('Origin-Agent-Cluster', '?1');
+  headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
   if (contentType) {
     headers.set('Content-Type', contentType);
   }
