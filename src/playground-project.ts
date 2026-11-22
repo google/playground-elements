@@ -833,7 +833,6 @@ const fetchProjectConfig = async (
 
   return {
     ...result,
-    cdnBaseUrl: config.cdnBaseUrl,
   };
 };
 
@@ -1090,3 +1089,5 @@ const playgroundFilesDeepEqual = (
   }
   return true;
 };
+
+export { fetchProjectConfig, expandProjectConfig };
