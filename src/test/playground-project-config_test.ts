@@ -7,7 +7,7 @@
 import {assert} from '@esm-bundle/chai';
 import {PlaygroundProject} from '../playground-project.js';
 import '../playground-project.js';
-import {ProjectManifest} from '../shared/worker-api.js';
+import {ProjectConfig, ProjectManifest} from '../shared/worker-api.js';
 
 /**
  * The `config` property is commonly set from untrusted input (e.g. a shared
@@ -93,7 +93,7 @@ suite('playground-project config property', () => {
 
   const loadConfig = (config: unknown) =>
     loadProject((project) => {
-      project.config = config as ProjectManifest;
+      project.config = config as ProjectConfig;
     });
 
   const filenames = (project: PlaygroundProject) =>
@@ -155,6 +155,21 @@ suite('playground-project config property', () => {
     assert.deepEqual(second.files, first.files);
     assert.deepEqual(second.config, first.config);
     assert.deepEqual(warnings, []);
+  });
+
+  test('type does not allow what the setter ignores', () => {
+    // These are compile-time checks: each @ts-expect-error fails the build if
+    // the type starts to allow the line below it.
+    const check = (config: ProjectConfig) => config;
+    // @ts-expect-error Files must have inline content.
+    check({files: {'index.html': {}}});
+    // @ts-expect-error "extends" is not allowed.
+    check({extends: '/base.json'});
+    // @ts-expect-error "cdnBaseUrl" is not allowed.
+    check({cdnBaseUrl: 'https://cdn.example.com/npm'});
+    const manifest: ProjectManifest = {};
+    // @ts-expect-error A manifest is not a config.
+    check(manifest);
   });
 
   test('does not fetch files that have no content', async () => {

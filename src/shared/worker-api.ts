@@ -167,11 +167,7 @@ export interface SampleFile {
 }
 
 export interface FileOptions {
-  /**
-   * Optional file content. If omitted, files are fetched by name when the
-   * manifest is loaded with `project-src`. Required for files in a config set
-   * through the `config` property, which never fetches files.
-   */
+  /** Optional file content. If omitted, files are fetched by name. */
   content?: string;
   /**
    * Optional content MIME type. If omitted, type is taken from fetch
@@ -186,20 +182,39 @@ export interface FileOptions {
   selected?: boolean;
 }
 
+/**
+ * A file in a `ProjectConfig`. The same as `FileOptions`, except that
+ * `content` is required, because the `config` property never fetches files.
+ */
+export interface ProjectConfigFile extends FileOptions {
+  /** File content. */
+  content: string;
+}
+
+/**
+ * A project manifest, as loaded from a JSON file with `project-src`. See
+ * `ProjectConfig` for the narrower type of the `config` property.
+ */
 export interface ProjectManifest {
-  /**
-   * Optional project manifest URL to extend from. Only applies to manifests
-   * loaded with `project-src`; ignored in the `config` property.
-   */
+  /** Optional project manifest URL to extend from */
   extends?: string;
   files?: {[filename: string]: FileOptions};
   importMap?: ModuleImportMap;
-  /**
-   * Optional npm CDN base URL. Only applies to manifests loaded with
-   * `project-src`; ignored in the `config` property (set the `cdnBaseUrl`
-   * property on the element instead).
-   */
   cdnBaseUrl?: string;
+}
+
+/**
+ * The type of the `config` property.
+ *
+ * Setting `config` does not fetch project files or other manifests, and a
+ * config cannot change the CDN. So unlike in a `ProjectManifest`, every file
+ * must have inline `content`, and there is no `extends` or `cdnBaseUrl`. Load
+ * a manifest that needs those with `project-src`, and set the CDN with the
+ * element's `cdnBaseUrl` property.
+ */
+export interface ProjectConfig {
+  files?: {[filename: string]: ProjectConfigFile};
+  importMap?: ModuleImportMap;
 }
 
 export interface ModuleImportMap {

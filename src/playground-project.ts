@@ -13,6 +13,7 @@ import {
   FileOptions,
   ServiceWorkerAPI,
   ProjectManifest,
+  ProjectConfig,
   PlaygroundMessage,
   WorkerAPI,
   CONFIGURE_PROXY,
@@ -101,16 +102,17 @@ export class PlaygroundProject extends LitElement {
    * Setting this property does not fetch project files or other manifests,
    * because it is commonly populated from untrusted input (e.g. a shared
    * URL). Only files with inline string `content` and the `importMap` are
-   * used. Files without `content`, `extends`, and `cdnBaseUrl` are ignored
-   * with a console warning; use `projectSrc` for manifests that need those,
-   * and the `cdnBaseUrl` property to change the CDN.
+   * used. Files without `content`, `extends`, and `cdnBaseUrl` are not
+   * allowed by the `ProjectConfig` type. If they are present anyway, they are
+   * ignored with a console warning. Use `projectSrc` for manifests that need
+   * those, and the `cdnBaseUrl` property to change the CDN.
    *
    * When both `projectSrc` and `config` are set, the one set most recently
    * wins. Slotted children win only if both `projectSrc` and `config` are
    * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  get config(): ProjectManifest | undefined {
+  get config(): ProjectConfig | undefined {
     // Note this is declared a @property only to capture properties set before
     // upgrade. Attribute reflection and update lifecycle disabled because they
     // are not needed in this case.
@@ -127,7 +129,7 @@ export class PlaygroundProject extends LitElement {
       importMap: this._validImportMap,
     };
   }
-  set config(config: ProjectManifest | undefined) {
+  set config(config: ProjectConfig | undefined) {
     if (config) {
       this._source = {type: 'direct', config};
     } else if (this._source.type === 'direct') {
@@ -150,7 +152,7 @@ export class PlaygroundProject extends LitElement {
       }
     | {
         type: 'direct';
-        config: ProjectManifest;
+        config: ProjectConfig;
       }
     | {
         type: 'url';
@@ -851,6 +853,10 @@ const fetchProjectConfig = async (
  * Only files with inline string content and the import map are used.
  * Everything that would be fetched or that changes where we fetch from is
  * ignored with a warning: files without content, `extends`, and `cdnBaseUrl`.
+ *
+ * The parameter is the wider `ProjectManifest` type rather than
+ * `ProjectConfig`, because the config may have come from untyped JSON, so we
+ * also have to handle the fields that `ProjectConfig` does not allow.
  */
 const readDirectProjectConfig = (
   config: ProjectManifest
