@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   `project-src`, and set the CDN with the `cdnBaseUrl` property or
   `cdn-base-url` attribute. Manifests loaded with `project-src` are unchanged.
 
+- **POTENTIALLY BREAKING** (security) Typings for modules in an import map are
+  now fetched without credentials (e.g. cookies). Otherwise an import map from
+  an untrusted config could make the host page send authenticated requests to
+  URLs of its choosing. Typings that can only be fetched with credentials will
+  no longer load.
+
 ## [0.21.3] - 2026-11-17
 
 ### Fixed

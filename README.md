@@ -1095,10 +1095,10 @@ get or set the current state of the project
 
 The value returned by `config` contains every file's content inline, so it can
 be serialized and set again later. Setting `config` does not fetch project
-files or other manifests, so a config from an untrusted source cannot have your
-page fetch a URL and expose the response to the preview. The code in the
-project is still untrusted, so see [sandbox security](#sandbox-security) if you
-change the sandbox base URL.
+files or other manifests, and a config cannot change the CDN, so it can be used
+with a config from an untrusted source. Modules that the project imports are
+still fetched from the CDN. The code in the project is still untrusted, so see
+[sandbox security](#sandbox-security) if you change the sandbox base URL.
 
 How you persist and retrieve serialized project state is up to you. Here are a
 few ideas:

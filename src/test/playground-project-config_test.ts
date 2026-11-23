@@ -11,8 +11,11 @@ import {ProjectConfig, ProjectManifest} from '../shared/worker-api.js';
 
 /**
  * The `config` property is commonly set from untrusted input (e.g. a shared
- * URL), so it must never make this page fetch something on behalf of the
- * config. These tests check that, and that `project-src` still does fetch.
+ * URL), so loading a config must not fetch project files or other manifests,
+ * and a config must not be able to change the CDN. These tests check that, and
+ * that `project-src` still does fetch.
+ *
+ * Note they only see fetches made by the page, not by the TypeScript worker.
  */
 suite('playground-project config property', () => {
   let container: HTMLDivElement;
@@ -208,7 +211,7 @@ suite('playground-project config property', () => {
 
   test('does not use cdnBaseUrl from the config', async () => {
     const project = await loadConfig({
-      cdnBaseUrl: absolute('/no-fetch-marker/api#'),
+      cdnBaseUrl: 'https://cdn.example.com/npm',
       files: {'index.html': {content: 'hello'}},
     });
     assert.equal(effectiveCdnBaseUrl(project), 'https://unpkg.com');

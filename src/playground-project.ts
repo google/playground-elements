@@ -364,9 +364,10 @@ export class PlaygroundProject extends LitElement {
         break;
       case 'direct':
         {
-          // A config set directly is treated as untrusted, so unlike the
-          // 'url' case below, it must never cause this page to make network
-          // requests or change where the worker fetches from.
+          // A config set directly is treated as untrusted. Unlike the 'url'
+          // case below, loading it must not make this page fetch anything
+          // the config names (files or other manifests), and the config must
+          // not be able to change which CDN the worker fetches from.
           const {files, importMap} = readDirectProjectConfig(source.config);
           this._files = files;
           this._importMap = importMap;
@@ -893,8 +894,8 @@ const readDirectProjectConfig = (
   }
   if (ignored.length > 0) {
     console.warn(
-      `[playground-project] The config property does not fetch, so these ` +
-        `were ignored: ${ignored.join(', ')}. ` +
+      `[playground-project] Setting config does not fetch project files or ` +
+        `other manifests, so these were ignored: ${ignored.join(', ')}. ` +
         `Load the manifest with project-src if it needs them.`
     );
   }

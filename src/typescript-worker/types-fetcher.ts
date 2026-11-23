@@ -344,7 +344,11 @@ export class TypesFetcher {
 
     let content;
     if (importMapUrl !== null) {
-      const r = await fetch(importMapUrl);
+      // The import map can come from an untrusted project, so this URL could
+      // point anywhere, including at the origin we are running on. Never send
+      // credentials, so that it can't be used to make authenticated requests
+      // on behalf of the user.
+      const r = await fetch(importMapUrl, {credentials: 'omit'});
       if (r.status !== 200) {
         const err = {error: r.status};
         deferred.resolve(err);
