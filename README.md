@@ -239,20 +239,40 @@ Set the `project-src` attribute or `projectSrc` property to a JSON file with for
 
 ### Option 3: Config property
 
-In JavaScript, directly set the `config` property to an object. The format is
-identical to the JSON config file.
+In JavaScript, directly set the `config` property to an object with format
+(`ProjectConfig` in TypeScript, exported from
+`playground-elements/shared/worker-api.js`):
+
+| Property         | Description                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `files`          | An object mapping filenames to file data.                                                                         |
+| `files.content`  | Required text content of the file.                                                                                |
+| `files.label`    | Optional label for display in `playground-tab-bar`. If omitted, the filename is displayed.                        |
+| `files.hidden`   | If `true`, the file won't be visible in `playground-tab-bar`.                                                     |
+| `files.selected` | If `true`, this file's tab will be selected when the project is loaded. Only one file should have this field set. |
+| `importMap`      | Optional [import map](#import-maps).                                                                              |
 
 ```js
 const ide = document.querySelector('playground-ide');
 ide.config = {
   files: {
-    'index.html': {},
+    'index.html': {
+      content: '<script type="module" src="./typescript.js"></script>',
+    },
     'typescript.ts': {
       content: "console.log('hello');",
     },
   },
 };
 ```
+
+Setting `config` does not fetch project files or other manifests, and a config
+cannot change the CDN, which makes it suitable for loading a project from
+untrusted input, such as a [shared URL](#how-do-i-save-and-share-a-project). A
+project that needs fetched files or `extends` must be loaded with
+[`project-src`](#option-2-json-configuration) instead, and the CDN is set with
+the `cdnBaseUrl` property or `cdn-base-url` attribute. Files without `content`,
+`extends` and `cdnBaseUrl` in a config are ignored with a console warning.
 
 If both `project-src` and `config` are set, then the one set most recently has
 precedence. When either are set, inline scripts are ignored.
@@ -736,7 +756,7 @@ All-in-one project, editor, file switcher, and preview with a horizontal side-by
 | Name                 | Type                             | Default                   | Description                                                                                                                                                                                        |
 | -------------------- | -------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`         | `string`                         | `undefined`               | URL of the [project manifest](#project-manifest) to load                                                                                                                                           |
-| `config`             | `ProjectManifest`                | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `config`             | `ProjectConfig`                  | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
 | `cdnBaseUrl`         | `string`                         | `""`                      | Change the underlying npm CDN base url. Confirmed tested are `htts://unpkg.com` and `https://cdn.jsdelivr.net/npm`. Note: Default `""` resolves to `https://unpkg.com`                             |
 | `lineNumbers`        | `boolean`                        | `false`                   | Render a gutter with line numbers in the editor                                                                                                                                                    |
 | `lineWrapping`       | `boolean`                        | `false`                   | If `true`, long lines are wrapped, otherwise the editor will scroll.                                                                                                                               |
@@ -769,7 +789,7 @@ project element.
 | Name             | Type                          | Default                   | Description                                                                                                                                                                                        |
 | ---------------- | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `projectSrc`     | `string`                      | `undefined`               | URL of a [project files manifest](#option-2-json-manifest) to load.                                                                                                                                |
-| `config`         | `ProjectManifest`             | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
+| `config`         | `ProjectConfig`               | `undefined`               | Get or set the project configuration and files, ([details](#option-3-config-property)).                                                                                                            |
 | `cdnBaseUrl`     | `string`                      | `""`                      | Change the underlying npm CDN base url. Confirmed tested are `htts://unpkg.com` and `https://cdn.jsdelivr.net/npm`. Note: Default `""` resolves to `https://unpkg.com`                             |
 | `sandboxScope`   | `string`                      | `"playground-elements"`   | The service worker scope to register on.                                                                                                                                                           |
 | `sandboxBaseUrl` | `string`                      | _module parent directory_ | Base URL for untrusted JavaScript execution (⚠️ use with caution, see [sandbox security](#sandbox-security)). Resolved relative to the module containing the definition of `<playground-project>`. |
@@ -1072,6 +1092,13 @@ npm run serve --watch
 Use the `config` property of a `<playground-ide>` or `<playground-project>` to
 get or set the current state of the project
 ([details](#option-3-config-property)).
+
+The value returned by `config` contains every file's content inline, so it can
+be serialized and set again later. Setting `config` does not fetch project
+files or other manifests, and a config cannot change the CDN, so it can be used
+with a config from an untrusted source. Modules that the project imports are
+still fetched from the CDN. The code in the project is still untrusted, so see
+[sandbox security](#sandbox-security) if you change the sandbox base URL.
 
 How you persist and retrieve serialized project state is up to you. Here are a
 few ideas:

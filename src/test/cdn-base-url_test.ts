@@ -11,7 +11,7 @@ import {PlaygroundIde} from '../playground-ide.js';
 import {
   SampleFile,
   BuildOutput,
-  ProjectManifest,
+  ProjectConfig,
   DiagnosticBuildOutput,
 } from '../shared/worker-api.js';
 import {CdnData} from './fake-cdn-plugin.js';
@@ -308,7 +308,7 @@ suite('CDN Base URL Configuration', () => {
       ide.cdnBaseUrl = customCdnBaseUrl;
 
       // Add a simple project that imports from a bare module
-      const projectConfig: ProjectManifest = {
+      const projectConfig: ProjectConfig = {
         files: {
           'index.ts': {
             content: 'import {html} from "lit";\nconsole.log(html`Hello`);',

@@ -12,7 +12,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- ## [X.Y.Z] - YYYY-MM-DD -->
 
-<!-- ## [Unreleased] -->
+## [Unreleased]
+
+### Changed
+
+- **BREAKING** (security) Files without inline `content`, `extends`, and
+  `cdnBaseUrl` are no longer allowed in the `config` property of
+  `<playground-ide>` and `<playground-project>`, so that setting `config` does
+  not fetch project files or other manifests, or change the CDN. The type of
+  the property is now `ProjectConfig`, which does not have them. If they are
+  set anyway, they are dropped with a console warning: such files and any
+  files inherited through `extends` will be missing from the project, and the
+  CDN falls back to the element's `cdnBaseUrl`, or to unpkg.com.
+
+  Previously, a config from an untrusted source (e.g. a shared URL) could make
+  the host page fetch arbitrary URLs with the user's credentials and expose the
+  responses to code running in the preview.
+
+  To migrate, load manifests that rely on fetched files or `extends` with
+  `project-src`, and set the CDN with the `cdnBaseUrl` property or
+  `cdn-base-url` attribute. Manifests loaded with `project-src` are unchanged.
+
+- **POTENTIALLY BREAKING** (security) Typings for modules in an import map are
+  now fetched without credentials (e.g. cookies). Otherwise an import map from
+  an untrusted config could make the host page send authenticated requests to
+  URLs of its choosing. Typings that can only be fetched with credentials will
+  no longer load.
 
 ## [0.21.3] - 2026-11-17
 

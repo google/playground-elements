@@ -1008,6 +1008,59 @@ suite('types fetcher', () => {
     }
   });
 
+  test('import map: typings are fetched without credentials', async () => {
+    const sourceTexts: string[] = [`import {foo} from 'foo/foo.js';`];
+    const packageJson: PackageJson = {};
+    const cdnData: CdnData = {
+      foo: {
+        versions: {
+          '1.2.3': {
+            files: {
+              'foo.d.ts': {
+                content: 'declare export const foo: string;',
+              },
+            },
+          },
+        },
+      },
+    };
+    const {cdnBaseUrl, deleteCdnData} = await configureFakeCdn(cdnData);
+    const importMap: ModuleImportMap = {
+      imports: {
+        'foo/': `${cdnBaseUrl}foo@1.2.3/`,
+      },
+    };
+    const expectedFiles = new Map([
+      ['foo/foo.d.ts', 'declare export const foo: string;'],
+    ]);
+    // An import map can come from an untrusted project, so its URLs must never
+    // be fetched with the user's credentials.
+    const credentialsByUrl = new Map<string, RequestCredentials | undefined>();
+    const realFetch = window.fetch;
+    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+      credentialsByUrl.set(String(input), init?.credentials);
+      return realFetch(input, init);
+    };
+    try {
+      await checkTypesFetcherImpl(
+        {
+          sourceTexts,
+          packageJson,
+          cdnData,
+          importMap,
+          expectedFiles,
+        },
+        cdnBaseUrl
+      );
+    } finally {
+      window.fetch = realFetch;
+      await deleteCdnData();
+    }
+    const typingsUrl = `${cdnBaseUrl}foo@1.2.3/foo.d.ts`;
+    assert.isTrue(credentialsByUrl.has(typingsUrl), 'typings were not fetched');
+    assert.equal(credentialsByUrl.get(typingsUrl), 'omit');
+  });
+
   test('import map: dependency has relative import', async () => {
     const sourceTexts: string[] = [`import {foo} from 'foo/foo.js';`];
     const packageJson: PackageJson = {};

@@ -13,7 +13,7 @@ import './playground-tab-bar.js';
 import './playground-file-editor.js';
 import './playground-preview.js';
 import {PlaygroundProject} from './playground-project.js';
-import {ProjectManifest} from './shared/worker-api.js';
+import {ProjectConfig} from './shared/worker-api.js';
 import {npmVersion, serviceWorkerHash} from './shared/version.js';
 
 /**
@@ -170,18 +170,26 @@ export class PlaygroundIde extends LitElement {
   /**
    * Get or set the project config.
    *
+   * Setting this property does not fetch project files or other manifests,
+   * because it is commonly populated from untrusted input (e.g. a shared
+   * URL). Only files with inline string `content` and the `importMap` are
+   * used. Files without `content`, `extends`, and `cdnBaseUrl` are not
+   * allowed by the `ProjectConfig` type. If they are present anyway, they are
+   * ignored with a console warning. Use `projectSrc` for manifests that need
+   * those, and the `cdnBaseUrl` property to change the CDN.
+   *
    * When both `projectSrc` and `config` are set, the one set most recently
    * wins. Slotted children win only if both `projectSrc` and `config` are
    * undefined.
    */
   @property({attribute: false, hasChanged: () => false})
-  get config(): ProjectManifest | undefined {
+  get config(): ProjectConfig | undefined {
     // Note this is declared a @property only to capture properties set before
     // upgrade. Attribute reflection and update lifecycle disabled because they
     // are not needed in this case.
     return this._project?.config ?? this._configSetBeforeRender;
   }
-  set config(config: ProjectManifest | undefined) {
+  set config(config: ProjectConfig | undefined) {
     const project = this._project;
     if (project) {
       project.config = config;
@@ -305,7 +313,7 @@ export class PlaygroundIde extends LitElement {
   @query('#rhs')
   private _rhs!: HTMLDivElement;
 
-  private _configSetBeforeRender?: ProjectManifest;
+  private _configSetBeforeRender?: ProjectConfig;
   private _projectSrcSetBeforeRender?: string;
 
   override render() {
