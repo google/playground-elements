@@ -5,6 +5,7 @@
  */
 
 import {assert} from '@esm-bundle/chai';
+import {waitUntil} from '@open-wc/testing';
 import {html, render} from 'lit';
 import {PlaygroundIde} from '../playground-ide.js';
 import '../playground-ide.js';
@@ -150,6 +151,27 @@ suite('playground-ide', () => {
       container
     );
     await assertPreviewContains('Hello HTML');
+  });
+
+  test('transforms served HTML without changing source files', async () => {
+    const project = document.createElement('playground-project');
+    project.sandboxBaseUrl = '/';
+    project.previewHtmlTransform = (source) => `<meta name="instrumented">${source}`;
+    const compiled = new Promise<void>((resolve) => {
+      project.addEventListener('compileDone', () => resolve(), {once: true});
+    });
+    project.config = {files: {'index.html': {content: '<p>Original</p>'}}};
+    container.appendChild(project);
+    await compiled;
+    await waitUntil(() => project.baseUrl !== undefined);
+    const iframe = document.createElement('iframe');
+    iframe.src = new URL('index.html', project.baseUrl).href;
+    container.appendChild(iframe);
+    await waitUntil(() => Boolean(
+      iframe.contentDocument?.querySelector('meta[name="instrumented"]')
+    ));
+    assert.equal(project.files![0].content, '<p>Original</p>');
+    assert.isFalse(project.modified);
   });
 
   test('handles multiple script tags', async () => {
