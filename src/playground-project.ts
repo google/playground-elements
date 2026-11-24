@@ -220,8 +220,9 @@ export class PlaygroundProject extends LitElement {
    */
   private _pristineFiles?: SampleFile[];
 
-  // Store config value separately to maintain proper resolution order
-  private _configCdnBaseUrl?: string;
+  // The CDN base URL from the manifest loaded with projectSrc, if it has one.
+  // Kept separate from the cdnBaseUrl property, which takes precedence.
+  private _manifestCdnBaseUrl?: string;
 
   /**
    * Cached value for the `modified` getter. When undefined, the modified state
@@ -359,7 +360,7 @@ export class PlaygroundProject extends LitElement {
     switch (source.type) {
       case 'none':
         this._files = undefined;
-        this._configCdnBaseUrl = undefined;
+        this._manifestCdnBaseUrl = undefined;
         this._importMap = {};
         break;
       case 'direct':
@@ -371,13 +372,13 @@ export class PlaygroundProject extends LitElement {
           const {files, importMap} = readDirectProjectConfig(source.config);
           this._files = files;
           this._importMap = importMap;
-          this._configCdnBaseUrl = undefined;
+          this._manifestCdnBaseUrl = undefined;
         }
         break;
       case 'slot':
         this._files = source.files;
         this._importMap = source.importMap;
-        this._configCdnBaseUrl = undefined;
+        this._manifestCdnBaseUrl = undefined;
         break;
       case 'url':
         {
@@ -391,7 +392,7 @@ export class PlaygroundProject extends LitElement {
           }
           this._files = files;
           this._importMap = importMap;
-          this._configCdnBaseUrl = cdnBaseUrl;
+          this._manifestCdnBaseUrl = cdnBaseUrl;
         }
         break;
       default:
@@ -789,7 +790,7 @@ export class PlaygroundProject extends LitElement {
    * in the correct priority order.
    */
   private _getEffectiveCdnBaseUrl(): string {
-    return this.cdnBaseUrl || this._configCdnBaseUrl || 'https://unpkg.com';
+    return this.cdnBaseUrl || this._manifestCdnBaseUrl || 'https://unpkg.com';
   }
 }
 

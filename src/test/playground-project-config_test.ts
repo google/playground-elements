@@ -5,7 +5,7 @@
  */
 
 import {assert} from '@esm-bundle/chai';
-import {PlaygroundProject} from '../playground-project.js';
+import {FilesChangedEvent, PlaygroundProject} from '../playground-project.js';
 import '../playground-project.js';
 import {ProjectConfig, ProjectManifest} from '../shared/worker-api.js';
 
@@ -73,6 +73,20 @@ suite('playground-project config property', () => {
   });
 
   /**
+   * Resolves the next time the given project has loaded its files.
+   */
+  const nextLoad = (project: PlaygroundProject) =>
+    new Promise<void>((resolve) => {
+      const onFilesChanged = (event: FilesChangedEvent) => {
+        if (event.projectLoaded) {
+          project.removeEventListener('filesChanged', onFilesChanged);
+          resolve();
+        }
+      };
+      project.addEventListener('filesChanged', onFilesChanged);
+    });
+
+  /**
    * Create a project, apply the given source to it, and wait until its files
    * have loaded.
    */
@@ -81,13 +95,7 @@ suite('playground-project config property', () => {
   ): Promise<PlaygroundProject> => {
     const project = document.createElement('playground-project');
     project.sandboxBaseUrl = '/';
-    const loaded = new Promise<void>((resolve) => {
-      project.addEventListener('filesChanged', (event) => {
-        if (event.projectLoaded) {
-          resolve();
-        }
-      });
-    });
+    const loaded = nextLoad(project);
     setSource(project);
     container.appendChild(project);
     await loaded;
@@ -217,6 +225,29 @@ suite('playground-project config property', () => {
     assert.equal(effectiveCdnBaseUrl(project), 'https://unpkg.com');
     assert.equal(warnings.length, 1);
     assert.include(warnings[0], '"cdnBaseUrl"');
+  });
+
+  test('cdnBaseUrl from project-src does not carry over to a config', async () => {
+    responses.set(absolute('/fetch-marker/project.json'), {
+      body: JSON.stringify({
+        cdnBaseUrl: 'https://cdn.example.com/npm',
+        files: {'index.html': {content: 'from manifest'}},
+      }),
+      contentType: 'application/json',
+    });
+    const project = await loadProject((p) => {
+      p.projectSrc = '/fetch-marker/project.json';
+    });
+    assert.equal(effectiveCdnBaseUrl(project), 'https://cdn.example.com/npm');
+    const loaded = nextLoad(project);
+    project.config = {files: {'index.html': {content: 'from config'}}};
+    await loaded;
+    assert.deepEqual(
+      (project.files ?? []).map(({name, content}) => ({name, content})),
+      [{name: 'index.html', content: 'from config'}]
+    );
+    assert.equal(effectiveCdnBaseUrl(project), 'https://unpkg.com');
+    assert.deepEqual(warnings, []);
   });
 
   test('cdnBaseUrl property still applies with a config', async () => {
